@@ -1,0 +1,8 @@
+vibeyastudio.com, www.vibeyastudio.com {
+  encode zstd gzip
+  reverse_proxy storefront:8000
+}
+
+api.vibeyastudio.com {
+  reverse_proxy backend:9000
+}

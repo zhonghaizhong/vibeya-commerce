@@ -43,6 +43,9 @@ importers:
       '@medusajs/admin-shared':
         specifier: 2.22.3
         version: 2.22.3
+      '@medusajs/cache-redis':
+        specifier: 2.22.3
+        version: 2.22.3(@medusajs/framework@2.22.3(@medusajs/cli@2.22.3(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@20.19.43)(jiti@2.7.0)(terser@5.51.0)(yaml@2.9.0))(zod@4.2.0))(supports-color@8.1.1)
       '@medusajs/caching':
         specifier: 2.22.3
         version: 2.22.3(@medusajs/framework@2.22.3(@medusajs/cli@2.22.3(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@20.19.43)(jiti@2.7.0)(terser@5.51.0)(yaml@2.9.0))(zod@4.2.0))(awilix@13.0.5)
@@ -55,15 +58,24 @@ importers:
       '@medusajs/draft-order':
         specifier: 2.22.3
         version: 2.22.3(e6f7ac55f16991c201b8abf84c369cc9)
+      '@medusajs/event-bus-redis':
+        specifier: 2.22.3
+        version: 2.22.3(@medusajs/framework@2.22.3(@medusajs/cli@2.22.3(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@20.19.43)(jiti@2.7.0)(terser@5.51.0)(yaml@2.9.0))(zod@4.2.0))(supports-color@8.1.1)
       '@medusajs/framework':
         specifier: 2.22.3
         version: 2.22.3(@medusajs/cli@2.22.3(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@20.19.43)(jiti@2.7.0)(terser@5.51.0)(yaml@2.9.0))(zod@4.2.0)
+      '@medusajs/locking-redis':
+        specifier: 2.22.3
+        version: 2.22.3(@medusajs/framework@2.22.3(@medusajs/cli@2.22.3(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@20.19.43)(jiti@2.7.0)(terser@5.51.0)(yaml@2.9.0))(zod@4.2.0))(supports-color@8.1.1)
       '@medusajs/medusa':
         specifier: 2.22.3
         version: 2.22.3(c6120aaf6d252ba69f625e017ecfdebe)
       '@medusajs/ui':
         specifier: 4.2.9
         version: 4.2.9(@types/react-dom@19.0.5(@types/react@19.0.5))(@types/react@19.0.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
+      '@medusajs/workflow-engine-redis':
+        specifier: 2.22.3
+        version: 2.22.3(@medusajs/framework@2.22.3(@medusajs/cli@2.22.3(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@20.19.43)(jiti@2.7.0)(terser@5.51.0)(yaml@2.9.0))(zod@4.2.0))(supports-color@8.1.1)
       '@paypal/paypal-server-sdk':
         specifier: 2.1.0
         version: 2.1.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)

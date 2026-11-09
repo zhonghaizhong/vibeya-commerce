@@ -1,0 +1,15 @@
+.git
+.turbo
+node_modules
+**/node_modules
+**/.next
+**/.medusa
+**/dist
+**/build
+**/.env
+**/.env.*
+**/.env.local
+**/.env.production
+**/.admin-local-credential
+coverage
+artifacts

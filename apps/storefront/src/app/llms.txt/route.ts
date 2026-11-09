@@ -9,6 +9,8 @@ import {
   STORE_NAME,
 } from "@lib/util/site"
 
+export const dynamic = "force-dynamic"
+
 export async function GET(request: Request) {
   const origin = getRequestOrigin(request)
 

@@ -1,0 +1,10 @@
+[Unit]
+Description=Deploy the latest VIBEYA production revision
+Wants=network-online.target docker.service
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/vibeya
+ExecStart=/bin/bash /opt/vibeya/deploy/production/deploy.sh
+TimeoutStartSec=900

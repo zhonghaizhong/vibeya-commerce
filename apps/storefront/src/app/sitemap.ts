@@ -3,6 +3,8 @@ import { listRegions } from "@lib/data/regions"
 import { getSiteOrigin, listCountryCodes } from "@lib/util/site"
 import type { MetadataRoute } from "next"
 
+export const dynamic = "force-dynamic"
+
 const STATIC_PATHS = [
   "",
   "/shipping",

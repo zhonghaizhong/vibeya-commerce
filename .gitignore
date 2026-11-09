@@ -39,6 +39,7 @@ yarn-error.log*
 **/.env.test.local
 **/.env.production.local
 **/.admin-local-credential
+deploy/production/.env.production
 
 # Turbo
 .turbo
