@@ -8,6 +8,8 @@ export const DEFAULT_COUNTRY_CODE = (
 ).toLowerCase()
 
 const configuredUrl = () => process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "")
+const configuredSiteUrl = () =>
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "")
 
 const originFromHeaders = (get: (name: string) => string | null) => {
   const host = (get("x-forwarded-host") ?? get("host"))?.split(",")[0].trim()
@@ -25,7 +27,7 @@ export const getRequestOrigin = (request: Request): string =>
 
 /** Origin for absolute URLs in server components (canonical, JSON-LD, OpenGraph). */
 export const getSiteOrigin = async (): Promise<string> => {
-  const configured = configuredUrl()
+  const configured = configuredSiteUrl() || configuredUrl()
   if (configured) {
     return configured
   }
