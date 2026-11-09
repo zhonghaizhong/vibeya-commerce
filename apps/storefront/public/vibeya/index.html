@@ -1282,7 +1282,6 @@
       const result=await response.json();if(!response.ok)throw new Error(result.error||'Could not load your designs.');
       renderDesignCreditBalance(result.credits);
       const jobs=Array.isArray(result.jobs)?result.jobs:[];
-      if(['queued','processing'].includes(jobs[0]?.status))startGenerationRun(jobs[0].id);
       const signature=jobs.map(job=>`${job.id}:${job.status}:${job.updated_at||''}`).join('|');
       if(grid.dataset.loaded==='1'&&grid.dataset.signature===signature)return;
       grid.dataset.loaded='1';grid.dataset.signature=signature;
@@ -1362,7 +1361,6 @@
       if(response.status===401){container.innerHTML='<div class="studio-saved-empty"><strong>Sign in to see your designs</strong><p>Designs saved to your account will appear here.</p><a class="btn primary" href="/us/account" target="_top">Sign in</a></div>';return;}
       const result=await response.json();if(!response.ok)throw new Error(result.error||'Could not load your designs.');
       const jobs=Array.isArray(result.jobs)?result.jobs:[];
-      if(['queued','processing'].includes(jobs[0]?.status))startGenerationRun(jobs[0].id);
       if(!jobs.length){container.innerHTML='<div class="studio-saved-empty"><strong>No designs yet</strong><p>Every design you create will be collected here.</p></div>';return;}
       const designs=await Promise.all(jobs.map(async job=>{
         if(job.status!=='completed')return {job,image:''};
@@ -1430,7 +1428,7 @@
   }
   async function waitForDesignJob(id,timeoutMs=150000){
     const started=Date.now();while(Date.now()-started<timeoutMs){
-      await new Promise(resolve=>setTimeout(resolve,3000));
+      await new Promise(resolve=>setTimeout(resolve,10000));
       const response=await fetch(`/api/vibeya/ai/jobs/${encodeURIComponent(id)}`,{credentials:'same-origin',cache:'no-store'});
       const result=await response.json();if(!response.ok)throw new Error(result.error||'Could not check the design status.');
       const job=result.job;if(job.status==='completed'&&job.image)return job;
@@ -2054,7 +2052,6 @@ const blanket=chosen.id==='sds-97226';
       currentDesignJobId=jobId;button.disabled=true;button.textContent='ADDED TO MY DESIGNS';
       $('#studioPreviewStatus').textContent='Task saved. It is generating in the background. You can start another design now; results appear in My Designs.';
       designGenerationInProgress=false;$('#nextDesignBtn').disabled=false;
-      startGenerationRun(jobId);
       void waitForDesignJob(jobId).then(async job=>{
         if(!job||String(currentDesignJobId)!==jobId)return;
         generatedArtworkDataUrl=job.image;chosenArt=detectArtwork(taskPrompt);hasPreview=true;studioViewMode='designs';studioPreviewSide=taskPlacement==='back'?'back':'front';drawPreview();
