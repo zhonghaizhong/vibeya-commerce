@@ -5,7 +5,7 @@ import { ExclamationCircleSolid } from "@medusajs/icons"
 import { StoreCart, StoreCustomer } from "@medusajs/types"
 import { Button } from "@modules/common/components/ui"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 function CartMismatchBanner(props: {
   customer: StoreCustomer
   cart: StoreCart
@@ -14,24 +14,45 @@ function CartMismatchBanner(props: {
   const router = useRouter()
   const [isPending, setIsPending] = useState(false)
   const [actionText, setActionText] = useState("Run transfer again")
+  const [hasError, setHasError] = useState(false)
+  const hasAttemptedTransfer = useRef(false)
 
-  if (!customer || !!cart.customer_id) {
-    return
-  }
-
-  const handleSubmit = async () => {
+  const runTransfer = useCallback(async () => {
     try {
       setIsPending(true)
-      setActionText("Transferring..")
+      setActionText("Transferring...")
+      setHasError(false)
 
       await transferCart(cart.id)
       setActionText("Run transfer again")
       setIsPending(false)
       router.refresh()
     } catch {
+      setHasError(true)
       setActionText("Run transfer again")
       setIsPending(false)
     }
+  }, [cart.id, router])
+
+  useEffect(() => {
+    if (!customer || cart.customer_id) {
+      return
+    }
+
+    if (hasAttemptedTransfer.current) {
+      return
+    }
+
+    hasAttemptedTransfer.current = true
+    void runTransfer()
+  }, [customer, cart.customer_id, runTransfer])
+
+  if (!customer || !!cart.customer_id) {
+    return
+  }
+
+  const handleSubmit = async () => {
+    await runTransfer()
   }
 
   return (
@@ -39,7 +60,9 @@ function CartMismatchBanner(props: {
       <div className="flex flex-col small:flex-row small:gap-2 gap-1 items-center">
         <span className="flex items-center gap-1">
           <ExclamationCircleSolid className="inline" />
-          Something went wrong when we tried to transfer your cart
+          {hasError
+            ? "We couldn't sync your cart. Please try again."
+            : "Your cart is being synced with your account."}
         </span>
 
         <span>·</span>
