@@ -140,7 +140,7 @@ const Payment = ({
       </div>
       <div>
         <div className={isOpen ? "block" : "hidden"}>
-          {!paidByGiftcard && availablePaymentMethods?.length && (
+          {!paidByGiftcard && availablePaymentMethods?.length > 0 && (
             <>
               <RadioGroup
                 value={selectedPaymentMethod}
@@ -181,6 +181,15 @@ const Payment = ({
             </div>
           )}
 
+          {!paidByGiftcard && availablePaymentMethods?.length === 0 && (
+            <div
+              role="alert"
+              className="rounded-xl border border-[#f2d5a8] bg-[#fff8eb] px-4 py-3 text-sm text-[#7a4a12]"
+            >
+              Online payment is temporarily unavailable. Please try again later.
+            </div>
+          )}
+
           <ErrorMessage
             error={error}
             data-testid="payment-method-error-message"
@@ -193,7 +202,8 @@ const Payment = ({
             isLoading={isLoading}
             disabled={
               (isStripeLike(selectedPaymentMethod) && !paymentComplete) ||
-              (!selectedPaymentMethod && !paidByGiftcard)
+              (!selectedPaymentMethod && !paidByGiftcard) ||
+              (!availablePaymentMethods?.length && !paidByGiftcard)
             }
             data-testid="submit-payment-button"
           >
