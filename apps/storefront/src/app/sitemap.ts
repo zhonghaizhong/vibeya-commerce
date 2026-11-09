@@ -1,6 +1,10 @@
 import { sdk } from "@lib/config"
 import { listRegions } from "@lib/data/regions"
-import { getSiteOrigin, listCountryCodes } from "@lib/util/site"
+import {
+  DEFAULT_COUNTRY_CODE,
+  getSiteOrigin,
+  listCountryCodes,
+} from "@lib/util/site"
 import type { MetadataRoute } from "next"
 
 export const dynamic = "force-dynamic"
@@ -35,6 +39,14 @@ async function listAll<T>(fetchPage: (offset: number) => Promise<Page<T>>) {
   }
 }
 
+async function safelyListAll<T>(fetchPage: (offset: number) => Promise<Page<T>>) {
+  try {
+    return await listAll(fetchPage)
+  } catch {
+    return [] as T[]
+  }
+}
+
 type Entry = {
   handle?: string | null
   updated_at?: string | Date | null
@@ -48,18 +60,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [origin, regions, products, categories, collections] =
     await Promise.all([
       getSiteOrigin(),
-      listRegions(),
-      listAll<Entry>((offset) =>
+      listRegions().catch(() => []),
+      safelyListAll<Entry>((offset) =>
         sdk.store.product
           .list({ ...query, offset })
           .then((res) => ({ items: res.products, count: res.count }))
       ),
-      listAll<Entry>((offset) =>
+      safelyListAll<Entry>((offset) =>
         sdk.store.category
           .list({ ...query, fields: "handle,updated_at,*products,*category_children", offset })
           .then((res) => ({ items: res.product_categories, count: res.count }))
       ),
-      listAll<Entry>((offset) =>
+      safelyListAll<Entry>((offset) =>
         sdk.store.collection
           .list({ ...query, fields: "handle,updated_at,*products", offset })
           .then((res) => ({ items: res.collections, count: res.count }))
@@ -74,7 +86,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: item.updated_at ? new Date(item.updated_at) : undefined,
       }))
 
-  const localizedEntries = listCountryCodes(regions).flatMap((countryCode) => {
+  const countryCodes = listCountryCodes(regions)
+  const localizedEntries = (countryCodes.length ? countryCodes : [DEFAULT_COUNTRY_CODE]).flatMap((countryCode) => {
     const base = `${origin}/${countryCode}`
     return [
       ...STATIC_PATHS.map((path) => ({ url: `${base}${path}` })),
