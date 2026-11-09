@@ -16,4 +16,4 @@ ENV NODE_ENV=production
 EXPOSE 9000
 
 WORKDIR /workspace/apps/backend
-CMD ["pnpm", "start"]
+CMD ["sh", "-c", "cd /workspace/apps/backend/.medusa/server && pnpm start"]
