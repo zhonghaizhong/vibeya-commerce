@@ -23,8 +23,11 @@ fi
 
 git checkout --detach "$target_revision"
 compose=(docker compose --project-name vibeya --env-file "$ENV_FILE" -f "$COMPOSE_FILE")
+if [[ -f "$APP_DIR/deploy/production/.public-enabled" ]]; then
+  compose+=(--profile public)
+fi
 
-"${compose[@]}" build backend storefront
+COMPOSE_PARALLEL_LIMIT=1 "${compose[@]}" build backend storefront
 "${compose[@]}" run --rm backend pnpm exec medusa db:migrate
 "${compose[@]}" up -d --remove-orphans
 

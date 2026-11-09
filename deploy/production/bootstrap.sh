@@ -36,11 +36,24 @@ if [[ -z "$publishable_key" ]]; then
   exit 1
 fi
 
-if grep -q '^NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=' "$ENV_FILE"; then
-  sed -i "s|^NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=.*|NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${publishable_key}|" "$ENV_FILE"
-else
-  printf '\nNEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=%s\n' "$publishable_key" >> "$ENV_FILE"
-fi
+python3 - "$ENV_FILE" "$publishable_key" <<'PY'
+from pathlib import Path
+import sys
+
+env_path = Path(sys.argv[1])
+publishable_key = sys.argv[2]
+lines = env_path.read_text().splitlines()
+prefix = "NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY="
+updated = False
+for index, line in enumerate(lines):
+    if line.startswith(prefix):
+        lines[index] = prefix + publishable_key
+        updated = True
+        break
+if not updated:
+    lines.append(prefix + publishable_key)
+env_path.write_text("\n".join(lines) + "\n")
+PY
 chmod 600 "$ENV_FILE"
 "${compose[@]}" up -d --build backend storefront
 
