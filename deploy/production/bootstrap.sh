@@ -61,8 +61,12 @@ if not updated:
 env_path.write_text("\n".join(lines) + "\n")
 PY
 chmod 600 "$ENV_FILE"
-"${compose[@]}" up -d --build backend storefront
+COMPOSE_PARALLEL_LIMIT=1 "${compose[@]}" up -d --build backend storefront
 
 install -d -m 0755 /var/lib/vibeya
 git rev-parse HEAD > /var/lib/vibeya/deployed-revision
+install -m 0644 "$APP_DIR/deploy/production/vibeya-deploy.service" /etc/systemd/system/vibeya-deploy.service
+install -m 0644 "$APP_DIR/deploy/production/vibeya-deploy.timer" /etc/systemd/system/vibeya-deploy.timer
+systemctl daemon-reload
+systemctl enable --now vibeya-deploy.timer
 echo "Initial VIBEYA deployment is running. Add DNS and configure Caddy after reviewing the site."
