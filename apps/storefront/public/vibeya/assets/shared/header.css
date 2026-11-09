@@ -1,0 +1,102 @@
+/* VIBEYA shared global announcement and navigation — homepage is the design source.
+   Applied AFTER page-specific styles to prevent nav drift on Inspiration/Articles. */
+:root { --v-nav-ink:#160d24; --v-nav-lime:#dcfc60; --v-nav-accent:#8f60ed; }
+:is(.announcement,.site-announcement) {
+  background:var(--v-nav-ink); color:#fff; text-align:center;
+  font-family:'DM Sans',Arial,system-ui,sans-serif; font-size:12px;
+  font-weight:400; line-height:normal; padding:8px 18px;
+  letter-spacing:.03em; position:relative; z-index:21;
+}
+:is(.announcement,.site-announcement) strong{color:var(--v-nav-lime);font-weight:700}
+body > header, body > header.market-header {
+  position:sticky; top:0; z-index:50;
+  background:rgba(255,253,250,.94);
+  backdrop-filter:blur(18px);
+  border:0; border-bottom:1px solid rgba(35,17,56,.075);
+  padding:0; height:auto;
+}
+body > header > :is(.topnav,.market-topnav) {
+  box-sizing:border-box;width:min(100% - 88px,1440px);max-width:1440px;margin-inline:auto;
+  height:75px;padding:0;display:flex;align-items:center;
+  justify-content:space-between;gap:25px;
+}
+body > header :is(.logo,.market-logo) {
+  font:900 27px/.9 'Outfit','Arial Black',system-ui,sans-serif;
+  letter-spacing:-2.6px;color:var(--v-nav-ink);
+  flex:0 0 auto; text-decoration:none; white-space:nowrap;
+}
+body > header :is(.logo,.market-logo) span{color:var(--v-nav-accent)}
+body > header :is(.navigation,.market-navigation){
+  display:flex;align-items:center;gap:34px;
+  font:800 14px 'DM Sans',Arial,system-ui,sans-serif;
+}
+body > header :is(.navigation,.market-navigation) a {
+  text-decoration:none;white-space:nowrap;color:var(--v-nav-ink);
+  font:inherit; transition:opacity .2s;
+}
+body > header :is(.navigation,.market-navigation) a:hover{opacity:.55}
+body > header :is(.navigation,.market-navigation) a[aria-current]{
+  color:var(--v-nav-ink);font:inherit;border-radius:0;padding:0;
+  background:transparent;
+}
+body > header :is(.navigation,.market-navigation) :is(.nav-ai,.nav-create),
+body > header :is(.navigation,.market-navigation) a.nav-create[aria-current]{
+  display:inline-flex;align-items:center;gap:9px;
+  background:var(--v-nav-lime);padding:13px 18px;border-radius:40px;
+  font:800 14px 'DM Sans',Arial,system-ui,sans-serif;
+}
+body > header :is(.nav-right,.market-nav-right){display:flex;align-items:center;gap:8px;flex:0 0 auto}
+body > header :is(.icon-btn,.market-icon-btn){
+  width:42px;height:42px;background:transparent;border:0;
+  border-radius:50%;display:grid;place-items:center;
+  position:relative;color:var(--v-nav-ink);text-decoration:none;
+  cursor:pointer;padding:0;
+}
+body > header :is(.icon-btn,.market-icon-btn):hover{background:#f1e5ff}
+body > header :is(.icon-btn,.market-icon-btn) svg{
+  width:22px;height:22px;stroke:currentColor;stroke-width:1.8;
+  fill:none;stroke-linecap:round;stroke-linejoin:round;
+}
+body > header :is(.count,.market-cart-count){
+  position:absolute;top:1px;right:0;background:var(--v-nav-lime);
+  font-weight:900;font-size:11px;min-width:18px;height:18px;
+  border-radius:18px;display:grid;place-items:center;
+}
+body > header .account-link{
+  display:none;color:var(--v-nav-ink);text-decoration:none;white-space:nowrap;
+  font:700 13px 'DM Sans',Arial,system-ui,sans-serif;transition:opacity .2s;
+}
+body[data-vibeya-auth="authenticated"] > header .account-link{display:inline-flex}
+body > header .account-link:hover{opacity:.6}
+body > header .sign-in-link{
+  display:inline-flex;margin-left:10px;color:var(--v-nav-ink);text-decoration:none;
+  white-space:nowrap;font:700 13px 'DM Sans',Arial,system-ui,sans-serif;transition:opacity .2s;
+}
+body[data-vibeya-auth="authenticated"] > header .sign-in-link{display:none}
+body > header .sign-in-link:hover{opacity:.6}
+body > header .account-menu-link{display:none;text-decoration:none;color:var(--v-nav-ink)}
+body > header :is(.mobile-menu,.market-menu-btn){display:none}
+body > header .mobile-menu-glyph{font-size:20px;line-height:1}
+@media (max-width:860px){
+  body > header > :is(.topnav,.market-topnav){width:min(100% - 36px,1440px);height:66px;gap:8px}
+  body > header :is(.nav-right,.market-nav-right) > :is(.sign-in-link,.account-link){display:none}
+  body > header :is(.navigation,.market-navigation){
+    display:none;position:absolute;top:66px;left:0;right:0;
+    background:#fffdfa;padding:20px;border-bottom:1px solid #e9e3ea;
+    box-shadow:0 20px 30px #0001;flex-direction:column;
+    align-items:stretch;gap:18px;
+  }
+  body > header :is(.navigation,.market-navigation).open{display:flex}
+  body > header :is(.navigation,.market-navigation).open .account-menu-link{
+    display:block;border-radius:12px;padding:12px;font-weight:800;
+  }
+  body > header :is(.mobile-menu,.market-menu-btn){display:grid}
+  body > header :is(.navigation,.market-navigation).open a:not(.nav-ai):not(.nav-create){border-radius:12px;padding:12px}
+}
+@media (max-width:570px){
+  :is(.announcement,.site-announcement){font-size:10px}
+  body > header > :is(.topnav,.market-topnav){width:min(100% - 30px,1440px)}
+  body > header :is(.logo,.market-logo){font-size:27px}
+  body > header :is(.nav-right,.market-nav-right){gap:0}
+  body > header :is(.icon-btn,.market-icon-btn){width:36px;height:40px}
+}

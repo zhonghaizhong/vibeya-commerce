@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: medusa
+      POSTGRES_PASSWORD: medusa_local
+      POSTGRES_DB: medusa_backend
+    ports:
+      - "5432:5432"
+    volumes:
+      - medusa_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medusa -d medusa_backend"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - medusa_redis_data:/data
+
+volumes:
+  medusa_postgres_data:
+  medusa_redis_data:

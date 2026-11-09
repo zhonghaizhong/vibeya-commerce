@@ -1,0 +1,228 @@
+.announcement {
+  position: relative;
+  z-index: 51;
+  padding: 8px 18px;
+  background: #160d24;
+  color: #fff;
+  text-align: center;
+  font-family: "DM Sans", Arial, system-ui, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+}
+
+.announcement strong {
+  color: #dcfc60;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid rgba(35, 17, 56, 0.075);
+  background: rgba(255, 253, 250, 0.94);
+  color: #160d24;
+  backdrop-filter: blur(18px);
+}
+
+.topnav {
+  position: relative;
+  display: flex;
+  width: min(100% - 88px, 1440px);
+  height: 75px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+  margin-inline: auto;
+}
+
+.logo {
+  flex: 0 0 auto;
+  color: #160d24;
+  font-family: "Outfit", "Arial Black", system-ui, sans-serif;
+  font-size: 27px;
+  font-weight: 900;
+  letter-spacing: -2.6px;
+  line-height: 0.9;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.logo span {
+  color: #8f60ed;
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  font-family: "DM Sans", Arial, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.link,
+.featured {
+  color: #160d24;
+  text-decoration: none;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.link:hover {
+  opacity: 0.55;
+}
+
+.featured {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 18px;
+  border-radius: 40px;
+  background: #dcfc60;
+}
+
+.accountMenuLink {
+  display: none;
+}
+
+.actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.iconButton,
+.menuButton {
+  position: relative;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #160d24;
+  cursor: pointer;
+}
+
+.iconButton:hover,
+.menuButton:hover {
+  background: #f1e5ff;
+}
+
+.iconButton svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.accountLink {
+  margin-left: 2px;
+  color: #160d24;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.accountLink:hover {
+  opacity: 0.6;
+}
+
+.menuButton {
+  display: none;
+  font-size: 20px;
+}
+
+@media (max-width: 1100px) {
+  .topnav {
+    width: min(100% - 48px, 1440px);
+    gap: 16px;
+  }
+
+  .navigation {
+    gap: 16px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 860px) {
+  .topnav {
+    width: min(100% - 36px, 1440px);
+    height: 66px;
+    gap: 8px;
+  }
+
+  .navigation {
+    position: absolute;
+    top: 66px;
+    right: -18px;
+    left: -18px;
+    display: none;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    border-bottom: 1px solid #e9e3ea;
+    background: #fffdfa;
+    box-shadow: 0 20px 30px #0001;
+  }
+
+  .navigation.open {
+    display: flex;
+  }
+
+  .link,
+  .featured {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .link:hover {
+    background: #f1e5ff;
+    opacity: 1;
+  }
+
+  .featured {
+    padding: 13px 18px;
+    border-radius: 40px;
+  }
+
+  .accountMenuLink {
+    display: block;
+  }
+
+  .accountLink {
+    display: none;
+  }
+
+  .menuButton {
+    display: grid;
+  }
+}
+
+@media (max-width: 570px) {
+  .announcement {
+    font-size: 10px;
+  }
+
+  .topnav {
+    width: min(100% - 30px, 1440px);
+  }
+
+  .actions {
+    gap: 0;
+  }
+
+  .iconButton,
+  .menuButton {
+    width: 36px;
+    height: 40px;
+  }
+}

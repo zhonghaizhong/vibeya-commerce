@@ -1,0 +1,17 @@
+import { Metadata } from "next"
+
+import LoginTemplate from "@modules/account/templates/login-template"
+
+export const metadata: Metadata = {
+  title: "Sign in",
+  description: "Sign in to your VIBEYA account.",
+}
+
+export default async function Login({
+  params,
+}: {
+  params: Promise<{ countryCode: string }>
+}) {
+  const { countryCode } = await params
+  return <LoginTemplate countryCode={countryCode} />
+}
