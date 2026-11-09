@@ -29,7 +29,13 @@ for script in \
 done
 
 key_output="$("${compose[@]}" run --rm backend pnpm exec medusa exec ./src/scripts/create-production-publishable-key.ts 2>&1)"
-publishable_key="$(printf '%s\n' "$key_output" | sed -n 's/.*PRODUCTION_PUBLISHABLE_KEY=\([^[:space:]]*\).*/\1/p' | tail -n 1)"
+publishable_key="$(printf '%s\n' "$key_output" | python3 -c 'import json,sys
+for line in sys.stdin:
+  try: message=json.loads(line).get("message", "")
+  except (json.JSONDecodeError, AttributeError): continue
+  prefix="PRODUCTION_PUBLISHABLE_KEY="
+  if message.startswith(prefix):
+    print(message[len(prefix):]); break')"
 if [[ -z "$publishable_key" ]]; then
   echo "Could not obtain a publishable key. Medusa output follows:" >&2
   printf '%s\n' "$key_output" >&2
