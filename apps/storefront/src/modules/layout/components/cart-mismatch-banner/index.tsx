@@ -4,12 +4,14 @@ import { transferCart } from "@lib/data/customer"
 import { ExclamationCircleSolid } from "@medusajs/icons"
 import { StoreCart, StoreCustomer } from "@medusajs/types"
 import { Button } from "@modules/common/components/ui"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 function CartMismatchBanner(props: {
   customer: StoreCustomer
   cart: StoreCart
 }) {
   const { customer, cart } = props
+  const router = useRouter()
   const [isPending, setIsPending] = useState(false)
   const [actionText, setActionText] = useState("Run transfer again")
 
@@ -22,7 +24,10 @@ function CartMismatchBanner(props: {
       setIsPending(true)
       setActionText("Transferring..")
 
-      await transferCart()
+      await transferCart(cart.id)
+      setActionText("Run transfer again")
+      setIsPending(false)
+      router.refresh()
     } catch {
       setActionText("Run transfer again")
       setIsPending(false)

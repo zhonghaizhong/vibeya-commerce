@@ -277,11 +277,11 @@ export async function signout(countryCode: string) {
   redirect(`/${countryCode}/account`)
 }
 
-export async function transferCart() {
-  const cartId = await getCartId()
+export async function transferCart(cartIdOverride?: string) {
+  const cartId = cartIdOverride || (await getCartId())
 
   if (!cartId) {
-    return
+    throw new Error("No cart is available to transfer")
   }
 
   const headers = await getAuthHeaders()

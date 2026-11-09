@@ -12,6 +12,7 @@ import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Spinner from "@modules/common/icons/spinner"
 import Thumbnail from "@modules/products/components/thumbnail"
+import Image from "next/image"
 import { useState } from "react"
 
 type ItemProps = {
@@ -28,6 +29,11 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
   const printPlacement = item.metadata?.vibeya_print_placement
   const referencesNotAttached = item.metadata?.vibeya_reference_images_not_attached
   const generatedArtwork = item.metadata?.vibeya_generated_artwork
+  const generatedArtworkUrl =
+    typeof generatedArtwork === "string" &&
+    generatedArtwork.startsWith("data:image/webp;base64,")
+      ? generatedArtwork
+      : null
   const printPlacementLabel =
     printPlacement === "both"
       ? "Front + Back"
@@ -44,18 +50,31 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
         data-testid="product-row"
       >
         <div className="flex min-w-0 items-start gap-3">
-          <LocalizedClientLink
-            href={`/products/${item.product_handle}`}
-            className="block h-[68px] w-[68px] shrink-0 overflow-hidden rounded-xl border border-[#eee8f0] bg-white"
-          >
-            <Thumbnail
-              thumbnail={item.thumbnail}
-              images={item.variant?.product?.images}
-              size="square"
-              alt={item.product_title}
-              className="!h-full !w-full !rounded-xl !p-0 !shadow-none"
-            />
-          </LocalizedClientLink>
+          {generatedArtworkUrl ? (
+            <div className="relative block h-[68px] w-[68px] shrink-0 overflow-hidden rounded-xl border border-[#eee8f0] bg-white">
+              <Image
+                src={generatedArtworkUrl}
+                alt={`${item.product_title} custom design`}
+                fill
+                unoptimized
+                className="object-contain"
+                sizes="68px"
+              />
+            </div>
+          ) : (
+            <LocalizedClientLink
+              href={`/products/${item.product_handle}`}
+              className="block h-[68px] w-[68px] shrink-0 overflow-hidden rounded-xl border border-[#eee8f0] bg-white"
+            >
+              <Thumbnail
+                thumbnail={item.thumbnail}
+                images={item.variant?.product?.images}
+                size="square"
+                alt={item.product_title}
+                className="!h-full !w-full !rounded-xl !p-0 !shadow-none"
+              />
+            </LocalizedClientLink>
+          )}
 
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 items-start justify-between gap-2">
@@ -84,7 +103,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
 
         {typeof designName === "string" && (
           <div className="mt-3 flex min-w-0 items-center gap-2.5 rounded-xl border border-[#eee8f2] bg-white/80 p-2.5">
-            {typeof generatedArtwork === "string" && generatedArtwork.startsWith("data:image/webp;base64,") && (
+            {generatedArtworkUrl && (
               <Thumbnail
                 thumbnail={generatedArtwork}
                 alt="Generated design preview"
@@ -139,16 +158,29 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
   return (
     <Table.Row className="w-full" data-testid="product-row">
       <Table.Cell className="!pl-0 p-4 w-24">
-        <LocalizedClientLink
-          href={`/products/${item.product_handle}`}
-          className="flex small:w-24 w-12"
-        >
-          <Thumbnail
-            thumbnail={item.thumbnail}
-            images={item.variant?.product?.images}
-            size="square"
-          />
-        </LocalizedClientLink>
+        {generatedArtworkUrl ? (
+          <div className="relative flex small:w-24 w-12 aspect-square overflow-hidden rounded-lg border border-ui-border-base bg-white">
+            <Image
+              src={generatedArtworkUrl}
+              alt={`${item.product_title} custom design`}
+              fill
+              unoptimized
+              className="object-contain"
+              sizes="96px"
+            />
+          </div>
+        ) : (
+          <LocalizedClientLink
+            href={`/products/${item.product_handle}`}
+            className="flex small:w-24 w-12"
+          >
+            <Thumbnail
+              thumbnail={item.thumbnail}
+              images={item.variant?.product?.images}
+              size="square"
+            />
+          </LocalizedClientLink>
+        )}
       </Table.Cell>
 
       <Table.Cell className="text-left">
@@ -161,7 +193,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
         <LineItemOptions variant={item.variant} data-testid="product-variant" />
         {typeof designName === "string" && (
           <div className="mt-2 max-w-xl text-xs leading-relaxed text-ui-fg-subtle">
-            {typeof generatedArtwork === "string" && generatedArtwork.startsWith("data:image/webp;base64,") && (
+            {generatedArtworkUrl && (
               <Thumbnail
                 thumbnail={generatedArtwork}
                 alt="AI generated artwork preview"
