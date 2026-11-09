@@ -1,9 +1,4 @@
-vibeyastudio.com {
-  encode zstd gzip
-  reverse_proxy storefront:8000
-}
-
-www.vibeyastudio.com {
+vibeyastudio.com, www.vibeyastudio.com {
   tls /etc/caddy/certs/www.vibeyastudio.com.pem /etc/caddy/certs/www.vibeyastudio.com.key
   encode zstd gzip
   reverse_proxy storefront:8000
