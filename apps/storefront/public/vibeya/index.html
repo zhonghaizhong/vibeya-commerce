@@ -1614,8 +1614,16 @@
     if(isDesigns){$('#studioPreviewStatus').textContent='Your saved designs';renderStudioSavedDesigns();return;}
     $('#previewTitle').textContent=`${colorLabel(selectedColor)} · ${chosen.short}`;
     if(isProduct){
-      $('#previewProduct').innerHTML=`<div class="supplier-reference"><img src="${gallerySrc(studioImageIndex)}" alt="${esc(colorLabel(selectedColor))}, product gallery ${studioImageIndex+1} of ${galleryCount()}" /></div>`;
-      $('#previewGallery').innerHTML=Array.from({length:galleryCount()},(_,i)=>`<button type="button" data-studio-image="${i}" aria-pressed="${studioImageIndex===i}" aria-label="Product image ${i+1}: ${esc(galleryTitleAt(i))}" title="${esc(galleryTitleAt(i))}"><img src="${gallerySrc(i)}" alt="" loading="lazy"></button>`).join('');
+      const previewColor=selectedColor;
+      $('#previewProduct').innerHTML=`<div class="supplier-reference"><img data-studio-gallery-hero src="${gallerySrc(studioImageIndex)}" alt="${esc(colorLabel(selectedColor))}, product gallery ${studioImageIndex+1} of ${galleryCount()}" /></div>`;
+      $('#previewGallery').innerHTML=Array.from({length:galleryCount()},(_,i)=>`<button type="button" data-studio-image="${i}" aria-pressed="${studioImageIndex===i}" aria-label="Product image ${i+1}: ${esc(galleryTitleAt(i))}" title="${esc(galleryTitleAt(i))}"><img ${i===studioImageIndex?`src="${gallerySrc(i)}"`:`data-src="${gallerySrc(i)}"`} alt="" loading="lazy"></button>`).join('');
+      const previewHero=$('#previewProduct [data-studio-gallery-hero]');
+      const loadPreviewThumbnails=()=>{
+        if(previewColor!==selectedColor||!$('#studioOverlay').classList.contains('open'))return;
+        document.querySelectorAll('#previewGallery [data-src]').forEach(image=>{image.src=image.dataset.src;image.removeAttribute('data-src');});
+      };
+      if(previewHero.complete)loadPreviewThumbnails();
+      else{previewHero.addEventListener('load',loadPreviewThumbnails,{once:true});previewHero.addEventListener('error',loadPreviewThumbnails,{once:true});}
        $('#studioPreviewStatus').textContent=chosen.id==='sds-128646'?`The ${galleryCount()} gallery images are product samples. Upload a reference or describe your own wrap design.`:`Choose any of the ${galleryCount()} main images. Color, size and print placement stay linked to your product.`;
       $('#previewCaption').textContent=`Product photo ${studioImageIndex+1} / ${galleryCount()} · ${selectedSize||'Size not selected'} · ${printNames[selectedPrint]}. These are example promotional images.`;
     }else if(!hasPreview&&selectedPrint==='none'&&blankPreviewPath){
@@ -1789,7 +1797,24 @@
    const blankProductReferenceSource=()=>cleanProductReferences[chosen.id]?.[selectedColor]||null;
    const productReferenceSources=()=>{if(chosen.id==='sds-128646'||chosen.id==='sds-97226'||chosen.id==='sds-138708'||chosen.id==='sds-172647')return [];const refs=blankProductReferenceSource();if(!refs)return null;const zones=selectedPrint==='both'?[refs.zoneFront,refs.zoneBack]:[selectedPrint==='back'?refs.zoneBack:refs.zoneFront];return [refs.front,refs.back,...zones];};
    const blankProductPreviewSource=()=>blankProductReferenceSource()?.composite||null;
-  const gallerySrc=i=>{if(chosen.id==='sds-128646')return 'assets/products/sds-128646/'+tumblerGalleryFiles[i];if(chosen.id==='sds-138708')return 'assets/products/sds-138708/'+bathMatGalleryFiles[i];if(chosen.id==='sds-97226')return 'assets/products/sds-97226/'+blanketGalleryFiles[i];if(chosen.id==='sds-172647'){const files=selectedColor==='Black'?[beanieGalleryFiles[1],beanieGalleryFiles[0],...beanieGalleryFiles.slice(2)]:beanieGalleryFiles;const file=files[i];return 'assets/products/sds-172647/'+({Black:'black',Red:'red',Gray:'gray'}[selectedColor]||'black')+'/'+file+(selectedColor==='Black'&&i<2?'?rev=2':'');}if(chosen.id==='vibeya-washed-hoodie'){const folders={Black:'black',Gray:'light-gray',Khaki:'brown',Green:'muted-green',Pink:'pink',Purple:'lavender'};const files=['01-brand-lifestyle.png','02-make-it-personal.png','03-400g-washed-comfort.png','04-wear-it-your-way.png','05-attention-to-detail.png','06-idea-to-outfit.png','07-make-it-yours.png'];return 'assets/products/mg8003077/'+(folders[selectedColor]||'black')+'/'+files[i];}const k='assets/products/sds-167256/'+colorGalleries[selectedColor][i];return extraGalleryAssets[k]||embeddedGalleryAssets[k]||k;};
+  const gallerySrc=(i,color=selectedColor)=>{
+    let src;
+    if(chosen.id==='sds-128646')src='assets/products/sds-128646/'+tumblerGalleryFiles[i];
+    else if(chosen.id==='sds-138708')src='assets/products/sds-138708/'+bathMatGalleryFiles[i];
+    else if(chosen.id==='sds-97226')src='assets/products/sds-97226/'+blanketGalleryFiles[i];
+    else if(chosen.id==='sds-172647'){
+      const files=color==='Black'?[beanieGalleryFiles[1],beanieGalleryFiles[0],...beanieGalleryFiles.slice(2)]:beanieGalleryFiles;
+      src='assets/products/sds-172647/'+({Black:'black',Red:'red',Gray:'gray'}[color]||'black')+'/'+files[i]+(color==='Black'&&i<2?'?rev=2':'');
+    }else if(chosen.id==='vibeya-washed-hoodie'){
+      const folders={Black:'black',Gray:'light-gray',Khaki:'brown',Green:'muted-green',Pink:'pink',Purple:'lavender'};
+      const files=['01-brand-lifestyle.png','02-make-it-personal.png','03-400g-washed-comfort.png','04-wear-it-your-way.png','05-attention-to-detail.png','06-idea-to-outfit.png','07-make-it-yours.png'];
+      src='assets/products/mg8003077/'+(folders[color]||'black')+'/'+files[i];
+    }else{
+      const k='assets/products/sds-167256/'+colorGalleries[color][i];
+      src=extraGalleryAssets[k]||embeddedGalleryAssets[k]||k;
+    }
+    return src+(src.includes('?')?'&':'?')+'v=20261110-1';
+  };
   function renderProductDetails(){
     const {colors,details:config,colorOptionLabel,sizeOptionLabel}=productVariants[chosen.id];
     $('#detailBreadcrumbTitle').textContent=config.title;
@@ -1834,20 +1859,30 @@ const blanket=chosen.id==='sds-97226';
     $('#detailThumbnails').style.gridTemplateColumns='repeat('+galleryCount()+',minmax(0,1fr))';
     document.title='VIBEYA | '+config.title;
   }
-  function setGallery(i){
+  function setGallery(i,deferThumbnails=false){
     galleryIndex=(i+galleryCount())%galleryCount();
-    $('#detailHeroImage').src=gallerySrc(galleryIndex);
-    $('#detailHeroImage').style.objectFit='cover';
+    const hero=$('#detailHeroImage');
+    const activeColor=selectedColor;
+    hero.fetchPriority='high';
+    hero.src=gallerySrc(galleryIndex);
+    hero.style.objectFit='cover';
     const garment=chosen.id==='sds-128646'?'20 oz tumbler':chosen.id==='sds-138708'?'custom bath mat':chosen.id==='sds-97226'?'custom flannel throw blanket':chosen.id==='sds-172647'?'custom knitted beanie':chosen.id==='vibeya-washed-hoodie'?'washed hoodie':'custom cotton long sleeve';
     $('#detailHeroImage').alt=`${galleryTitleAt(galleryIndex)} — ${colorLabel(selectedColor)} VIBEYA ${garment}, example artwork`;
     $('#detailImageCount').textContent=String(galleryIndex+1).padStart(2,'0')+' / '+String(galleryCount()).padStart(2,'0');
-    document.querySelectorAll('[data-gallery-index]').forEach(b=>{
-      const index=Number(b.dataset.galleryIndex);
-      b.setAttribute('aria-pressed',String(index===galleryIndex));
-      b.setAttribute('aria-label',`View ${colorLabel(selectedColor).toLowerCase()} image ${index+1}: ${galleryTitleAt(index)}`);
-      const image=b.querySelector('img');
-      if(image){image.src=gallerySrc(index);image.alt=`${colorLabel(selectedColor)} · ${galleryTitleAt(index)}`;}
-    });
+    const updateThumbnails=()=>{
+      if(activeColor!==selectedColor)return;
+      document.querySelectorAll('#detailThumbnails [data-gallery-index]').forEach(b=>{
+        const index=Number(b.dataset.galleryIndex);
+        b.setAttribute('aria-pressed',String(index===galleryIndex));
+        b.setAttribute('aria-label',`View ${colorLabel(selectedColor).toLowerCase()} image ${index+1}: ${galleryTitleAt(index)}`);
+        const image=b.querySelector('img');
+        if(image){image.src=gallerySrc(index);image.alt=`${colorLabel(selectedColor)} · ${galleryTitleAt(index)}`;}
+      });
+    };
+    if(deferThumbnails&&!hero.complete){
+      hero.addEventListener('load',updateThumbnails,{once:true});
+      hero.addEventListener('error',updateThumbnails,{once:true});
+    }else updateThumbnails();
   }
   function syncVariants(){
     $('#currentColorLabel').textContent=colorLabel(selectedColor);
@@ -1948,6 +1983,15 @@ const blanket=chosen.id==='sds-97226';
   $('#ideaSort').addEventListener('change',paintIdeas);
   $('#moreProducts').addEventListener('click',()=>{productVisible+=8;paintProducts();});
   $('#moreIdeas').addEventListener('click',()=>{ideaVisible+=9;paintIdeas();});
+  const preloadedColorImages=new Set();
+  document.addEventListener('pointerover',e=>{
+    const swatch=e.target.closest('[data-select-color]');
+    if(!swatch||swatch.dataset.selectColor===selectedColor)return;
+    const src=gallerySrc(0,swatch.dataset.selectColor);
+    if(preloadedColorImages.has(src))return;
+    preloadedColorImages.add(src);
+    const image=new Image();image.fetchPriority='high';image.src=src;
+  },{passive:true});
   document.addEventListener('click',e=>{
     let b=e.target.closest('[data-zoom-generated]');if(b){lastZoomTrigger=b;openImageZoom();return;}
     let tag=e.target.closest('[data-product-tag]');if(tag){productTag=tag.dataset.productTag;productVisible=8;paintProducts();return;}
@@ -1974,7 +2018,8 @@ const blanket=chosen.id==='sds-97226';
       selectedColorConfirmed=true;
       studioImageIndex=0;studioViewMode='product';
       if(chosen.id==='sds-167256')products[0].asset=gallerySrc(0);
-      syncVariants();setGallery(0);hasPreview=false;drawPreview();
+      syncVariants();setGallery(0,true);hasPreview=false;
+      if($('#studioOverlay').classList.contains('open'))drawPreview();
       if(chosen.id==='sds-167256'){renderProductCards();paintProducts();}
       return;
     }
