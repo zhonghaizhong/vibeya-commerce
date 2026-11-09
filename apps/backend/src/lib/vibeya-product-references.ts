@@ -19,6 +19,9 @@ export async function getVibeyaProductReference(productId: string, color?: strin
   const candidates = [
     path.resolve(process.cwd(), "../storefront/public", referencePath),
     path.resolve(process.cwd(), "apps/storefront/public", referencePath),
+    // Medusa production runs from apps/backend/.medusa/server, where the
+    // storefront asset directory is three levels up and beside backend.
+    path.resolve(process.cwd(), "../../../storefront/public", referencePath),
   ]
 
   for (const filePath of candidates) {
