@@ -7,6 +7,7 @@ import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { signup } from "@lib/data/customer"
+import TurnstileField from "@modules/account/components/turnstile"
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
@@ -75,6 +76,7 @@ const Register = ({ setCurrentView }: Props) => {
             data-testid="password-input"
           />
         </div>
+        <TurnstileField resetKey={message?.state === "error" ? message.error : ""} />
         <ErrorMessage
           error={message?.state === "error" ? message.error : null}
           data-testid="register-error"

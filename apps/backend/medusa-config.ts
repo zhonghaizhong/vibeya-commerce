@@ -48,6 +48,41 @@ const googleAuthModules = hasGoogleCredentials
     }]
   : undefined
 
+const hasBrevoSmtpCredentials = Boolean(
+  process.env.BREVO_SMTP_LOGIN &&
+    process.env.BREVO_SMTP_KEY &&
+    process.env.BREVO_FROM_EMAIL
+)
+
+const notificationModules = hasBrevoSmtpCredentials
+  ? [{
+      resolve: "@medusajs/medusa/notification",
+      options: {
+        providers: [
+          {
+            resolve: "./src/modules/brevo-notification",
+            id: "brevo",
+            options: {
+              channels: ["email"],
+              host: process.env.BREVO_SMTP_HOST || "smtp-relay.brevo.com",
+              port: Number(process.env.BREVO_SMTP_PORT || 587),
+              login: process.env.BREVO_SMTP_LOGIN,
+              key: process.env.BREVO_SMTP_KEY,
+              fromEmail: process.env.BREVO_FROM_EMAIL,
+              fromName: process.env.BREVO_FROM_NAME || "VIBEYA",
+            },
+          },
+        ],
+      },
+    }]
+  : undefined
+
+const emailVerificationConfig = hasBrevoSmtpCredentials
+  ? {
+      customer: [{ entity_type: "email", auth_provider: "emailpass" }],
+    }
+  : undefined
+
 const modules = [
   ...(process.env.REDIS_URL
     ? [
@@ -80,10 +115,14 @@ const modules = [
     : []),
   ...(paymentModules ?? []),
   ...(googleAuthModules ?? []),
+  ...(notificationModules ?? []),
   { resolve: "./src/modules/vibeya-ai-jobs" },
 ]
 
 module.exports = defineConfig({
+  admin: {
+    storefrontUrl: process.env.STOREFRONT_URL || "http://localhost:8000",
+  },
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
     redisUrl: process.env.REDIS_URL,
@@ -94,6 +133,7 @@ module.exports = defineConfig({
       jwtSecret: process.env.JWT_SECRET,
       jwtExpiresIn: process.env.JWT_EXPIRES_IN || "30d",
       cookieSecret: process.env.COOKIE_SECRET,
+      authVerificationsPerActor: emailVerificationConfig,
       authMethodsPerActor: hasGoogleCredentials
         ? { user: ["emailpass"], customer: ["emailpass", "google"] }
         : undefined,

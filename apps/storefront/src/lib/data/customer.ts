@@ -24,6 +24,34 @@ export type CustomerAuthState =
   | { state: "success" }
   | null
 
+async function verifyTurnstileToken(token: FormDataEntryValue | null) {
+  const secret = process.env.TURNSTILE_SECRET_KEY
+  if (!secret) {
+    return "Human verification is not configured yet. Please try again later."
+  }
+
+  if (typeof token !== "string" || !token.trim()) {
+    return "Please complete the human verification before creating your account."
+  }
+
+  const body = new FormData()
+  body.set("secret", secret)
+  body.set("response", token)
+
+  try {
+    const response = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      { method: "POST", body, cache: "no-store" }
+    )
+    const result = (await response.json()) as { success?: boolean }
+    return result.success
+      ? null
+      : "Human verification failed. Please try again."
+  } catch {
+    return "Human verification could not be checked. Please try again."
+  }
+}
+
 // Requests a verification email for the given customer. The request must be
 // authenticated with a token tied to the auth identity (the token returned by
 // register or by a login that requires verification).
@@ -82,6 +110,13 @@ export async function signup(
   _currentState: unknown,
   formData: FormData
 ): Promise<CustomerAuthState> {
+  const verificationError = await verifyTurnstileToken(
+    formData.get("turnstile_token")
+  )
+  if (verificationError) {
+    return { state: "error", error: verificationError }
+  }
+
   const password = formData.get("password") as string
   const customerForm = {
     email: formData.get("email") as string,
