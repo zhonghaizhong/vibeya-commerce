@@ -35,6 +35,11 @@ import type {
   WebhookActionResult,
 } from "@medusajs/framework/types"
 import type { OrderRequest } from "@paypal/paypal-server-sdk"
+import { decryptIntegrationSecret, readVibeyaIntegrationsConfig, VIBEYA_INTEGRATIONS_METADATA_KEY } from "../../lib/vibeya-integrations"
+
+type StoreQuery = {
+  graph: (query: { entity: string; fields: string[] }) => Promise<{ data: Array<{ metadata?: Record<string, unknown> | null }> }>
+}
 
 type Options = {
   client_id: string
@@ -46,6 +51,7 @@ type Options = {
 
 type InjectedDependencies = {
   logger: Logger
+  query: StoreQuery
 }
 
 class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
@@ -56,11 +62,13 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
   protected client_: Client
   protected ordersController_: OrdersController
   protected paymentsController_: PaymentsController
+  protected query_: StoreQuery
 
   constructor(container: InjectedDependencies, options: Options) {
     super(container, options)
 
     this.logger_ = container.logger
+    this.query_ = container.query
     this.options_ = {
       environment: "sandbox",
       autoCapture: false,
@@ -68,34 +76,44 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
     }
 
     // Initialize PayPal client
+    this.client_ = new Client({ environment: Environment.Sandbox, clientCredentialsAuthCredentials: { oAuthClientId: "unconfigured", oAuthClientSecret: "unconfigured" } })
+    this.ordersController_ = new OrdersController(this.client_)
+    this.paymentsController_ = new PaymentsController(this.client_)
+  }
+
+  static validateOptions(_options: Record<any, any>): void | never {
+    return
+  }
+
+  private async refreshRuntimeClient() {
+    const { data } = await this.query_.graph({ entity: "store", fields: ["metadata"] })
+    const rawConfig = data[0]?.metadata?.[VIBEYA_INTEGRATIONS_METADATA_KEY]
+    const hasSavedConfig = Boolean(rawConfig && typeof rawConfig === "object")
+    const config = readVibeyaIntegrationsConfig(rawConfig)
+    const runtime = config.paypal.enabled
+      ? {
+          client_id: config.paypal.clientId,
+          client_secret: config.paypal.encryptedSecret ? decryptIntegrationSecret(config.paypal.encryptedSecret) : "",
+          environment: config.paypal.environment,
+          autoCapture: config.paypal.autoCapture,
+          webhook_id: config.paypal.webhookId,
+        }
+      : !hasSavedConfig
+        ? this.options_
+        : null
+    if (!runtime?.client_id || !runtime.client_secret) {
+      throw new MedusaError(MedusaError.Types.INVALID_DATA, "PayPal 尚未在后台启用或配置完整。")
+    }
+    this.options_ = { ...this.options_, ...runtime }
     this.client_ = new Client({
-      environment:
-        this.options_.environment === "production"
-          ? Environment.Production
-          : Environment.Sandbox,
+      environment: this.options_.environment === "production" ? Environment.Production : Environment.Sandbox,
       clientCredentialsAuthCredentials: {
         oAuthClientId: this.options_.client_id,
         oAuthClientSecret: this.options_.client_secret,
       },
     })
-
     this.ordersController_ = new OrdersController(this.client_)
     this.paymentsController_ = new PaymentsController(this.client_)
-  }
-
-  static validateOptions(options: Record<any, any>): void | never {
-    if (!options.client_id) {
-      throw new MedusaError(
-        MedusaError.Types.INVALID_DATA, 
-        "Client ID is required"
-      )
-    }
-    if (!options.client_secret) {
-      throw new MedusaError(
-        MedusaError.Types.INVALID_DATA, 
-        "Client secret is required"
-      )
-    }
   }
 
   async initiatePayment(

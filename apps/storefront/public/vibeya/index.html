@@ -462,7 +462,9 @@
   
     /* Customization Studio v2: placement-specific instructions & split preview */
     .dialog:has(.studio-body){width:min(100%,1240px);}
-    .studio-body{grid-template-columns:minmax(0,1fr) minmax(0,1.03fr);}
+    .studio-body{grid-template-columns:minmax(0,1.03fr) minmax(0,1fr);grid-template-areas:"preview controls";}
+    .studio-controls{grid-area:controls;}
+    .studio-preview{grid-area:preview;}
     .studio-controls{padding:24px 27px 28px;}
     .studio-step-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;margin:0 0 6px;}
     .studio-step-heading label{margin:0!important;}
@@ -551,7 +553,8 @@
     .studio-saved-empty strong{font-size:17px;color:#30203f;}
     .studio-saved-empty p{margin:0;font-size:14px;line-height:1.5;}
     .demo-shirt-svg{width:min(100%,340px)!important;height:100%!important;filter:drop-shadow(0 14px 14px #3015442c)!important;}
-    @media(max-width:900px){.studio-body{grid-template-columns:1fr;}.studio-preview{min-height:480px;}.studio-preview .preview-product{height:400px;min-height:350px;}.studio-controls{padding:20px;}}
+    @media(max-width:900px){.studio-body{grid-template-columns:1fr;grid-template-areas:"preview" "controls";}.studio-preview{min-height:480px;}.studio-preview .preview-product{height:400px;min-height:350px;}.studio-controls{padding:20px;}}
+    @media(max-width:900px){.studio-preview .preview-product.studio-designs-view:has(.studio-saved-empty){position:static;top:auto;left:auto;transform:none;display:flex!important;align-items:center;justify-content:center;width:100%;min-height:220px;margin:12px 0 0;}}
     @media(max-width:570px){.studio-step-heading{align-items:start;}.studio-controls{padding:20px;}.studio-preview{padding:14px 12px 18px;}.upload-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;}.upload-slot{min-height:40px;}.studio-preview .preview-product{height:min(54vh,430px);min-height:330px;}.studio-preview .preview-product .supplier-reference img{height:min(50vh,400px);}.preview-gallery{gap:6px;padding-bottom:9px;}.preview-gallery button{flex-basis:54px;height:68px;}.preview-view-tabs button{font-size:12px;padding:10px 5px;}}
     [hidden]{display:none!important;}
 
@@ -565,7 +568,7 @@
     }
     @media (max-width:900px){
       .dialog:has(.studio-body){display:block;height:auto;overflow-y:auto;max-height:92vh;}
-      .dialog:has(.studio-body) .studio-body{display:block;min-height:0;overflow:visible;}
+      .dialog:has(.studio-body) .studio-body{display:flex;flex-direction:column-reverse;min-height:0;overflow:visible;}
       .dialog:has(.studio-body) .studio-controls,.dialog:has(.studio-body) .studio-preview{overflow:visible;}
     }
 
@@ -844,7 +847,7 @@
   <!-- AI artwork generation is connected through the server; checkout remains handled by Medusa. -->
   <div class="overlay" id="studioOverlay" role="presentation">
     <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="studioTitle">
-      <div class="dialog-head"><div><h2 id="studioTitle">Let's make something yours ✳</h2><p>Choose a product and describe its print.</p></div><button class="close-btn" data-close-studio aria-label="Close">×</button></div>
+      <div class="dialog-head"><div><h2 id="studioTitle">Let's make something yours ✳</h2><p>Choose a product and describe its print.</p></div><button class="close-btn" type="button" data-close-studio aria-label="Close">×</button></div>
       <div class="studio-body">
         <div class="studio-controls"><label>01 / Pick your product</label><div class="studio-products" id="studioProducts"></div>
     <div class="studio-variant-panel">
@@ -1508,6 +1511,7 @@
       }
     }
   }
+  $('#studioOverlay [data-close-studio]').addEventListener('click',event=>{event.preventDefault();event.stopPropagation();hideStudio();});
   let lastZoomTrigger=null;
   function openImageZoom(){if(!generatedArtworkDataUrl)return;$('#imageZoomFull').src=generatedArtworkDataUrl;$('#imageZoomOverlay').classList.add('open');syncLock();$('#closeImageZoom').focus();}
   function closeImageZoom(){const overlay=$('#imageZoomOverlay');if(!overlay.classList.contains('open'))return;overlay.classList.remove('open');$('#imageZoomFull').removeAttribute('src');syncLock();if(lastZoomTrigger?.isConnected)lastZoomTrigger.focus();}

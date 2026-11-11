@@ -16,6 +16,53 @@ type Props = {
 const Register = ({ setCurrentView }: Props) => {
   const [message, formAction] = useActionState(signup, null)
 
+  if (message?.state === "verification_required") {
+    return (
+      <div
+        className="max-w-sm flex flex-col items-center"
+        data-testid="register-page"
+      >
+        <div
+          className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-2xl font-semibold text-green-700"
+          aria-hidden="true"
+        >
+          ✓
+        </div>
+        <h1 className="text-large-semi uppercase mb-3 text-center">
+          Check your email
+        </h1>
+        <p className="text-center text-base-regular text-ui-fg-base mb-5">
+          Your account is almost ready. We sent a verification link to:
+        </p>
+        <div
+          className="w-full rounded-rounded border border-green-200 bg-green-50 p-4 text-center"
+          data-testid="register-verification-message"
+          role="status"
+          aria-live="polite"
+        >
+          <p className="break-all font-semibold text-ui-fg-base">
+            {message.email}
+          </p>
+          <p className="mt-2 text-sm text-ui-fg-subtle">
+            Open the email and click its verification link. You can sign in after
+            your email is verified.
+          </p>
+        </div>
+        <p className="mt-4 text-center text-sm text-ui-fg-subtle">
+          Didn’t receive it? Check your spam folder and make sure the address is
+          correct.
+        </p>
+        <button
+          type="button"
+          onClick={() => setCurrentView(LOGIN_VIEW.SIGN_IN)}
+          className="mt-6 w-full rounded-md bg-ui-button-inverted px-4 py-3 text-sm font-medium text-ui-fg-on-color"
+        >
+          Go to sign in
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div
       className="max-w-sm flex flex-col items-center"
@@ -27,15 +74,6 @@ const Register = ({ setCurrentView }: Props) => {
       <p className="text-center text-base-regular text-ui-fg-base mb-4">
         Save your details to make future orders easier to track and manage.
       </p>
-      {message?.state === "verification_required" && (
-        <div
-          className="w-full mb-4 text-center text-base-regular text-ui-fg-base bg-ui-bg-subtle border border-ui-border-base rounded-rounded p-4"
-          data-testid="register-verification-message"
-        >
-          We sent a verification link to <strong>{message.email}</strong>.
-          Please check your inbox to verify your email, then sign in.
-        </div>
-      )}
       <form className="w-full flex flex-col" action={formAction}>
         <div className="flex flex-col w-full gap-y-2">
           <Input

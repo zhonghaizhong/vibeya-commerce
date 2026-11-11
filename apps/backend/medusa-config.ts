@@ -2,16 +2,16 @@ import { ContainerRegistrationKeys, Modules, loadEnv, defineConfig } from '@medu
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 
-const paymentModules = process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET
-  ? [{
+const paymentModules = [{
       resolve: "@medusajs/medusa/payment",
+      dependencies: [ContainerRegistrationKeys.QUERY],
       options: {
         providers: [{
           resolve: "./src/modules/paypal",
           id: "paypal",
           options: {
-            client_id: process.env.PAYPAL_CLIENT_ID,
-            client_secret: process.env.PAYPAL_CLIENT_SECRET,
+            client_id: process.env.PAYPAL_CLIENT_ID || "",
+            client_secret: process.env.PAYPAL_CLIENT_SECRET || "",
             environment: process.env.PAYPAL_ENVIRONMENT || "sandbox",
             autoCapture: process.env.PAYPAL_AUTO_CAPTURE !== "false",
             webhook_id: process.env.PAYPAL_WEBHOOK_ID,
@@ -19,44 +19,29 @@ const paymentModules = process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT
         }],
       },
     }]
-  : undefined
 
-const hasGoogleCredentials = Boolean(
-  process.env.GOOGLE_CLIENT_ID &&
-    process.env.GOOGLE_CLIENT_SECRET &&
-    process.env.GOOGLE_CALLBACK_URL
-)
-
-const googleAuthModules = hasGoogleCredentials
-  ? [{
+const googleAuthModules = [{
       resolve: "@medusajs/medusa/auth",
-      dependencies: [Modules.CACHE, ContainerRegistrationKeys.LOGGER],
+      dependencies: [Modules.CACHE, ContainerRegistrationKeys.LOGGER, ContainerRegistrationKeys.QUERY],
       options: {
         providers: [
           { resolve: "@medusajs/medusa/auth-emailpass", id: "emailpass" },
           {
-            resolve: "@medusajs/medusa/auth-google",
+            resolve: "./src/modules/vibeya-google-auth",
             id: "google",
             options: {
-              clientId: process.env.GOOGLE_CLIENT_ID,
-              clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-              callbackUrl: process.env.GOOGLE_CALLBACK_URL,
+              clientId: process.env.GOOGLE_CLIENT_ID || "",
+              clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+              callbackUrl: process.env.GOOGLE_CALLBACK_URL || "",
             },
           },
         ],
       },
     }]
-  : undefined
 
-const hasBrevoSmtpCredentials = Boolean(
-  process.env.BREVO_SMTP_LOGIN &&
-    process.env.BREVO_SMTP_KEY &&
-    process.env.BREVO_FROM_EMAIL
-)
-
-const notificationModules = hasBrevoSmtpCredentials
-  ? [{
+const notificationModules = [{
       resolve: "@medusajs/medusa/notification",
+      dependencies: [ContainerRegistrationKeys.QUERY],
       options: {
         providers: [
           {
@@ -66,22 +51,19 @@ const notificationModules = hasBrevoSmtpCredentials
               channels: ["email"],
               host: process.env.BREVO_SMTP_HOST || "smtp-relay.brevo.com",
               port: Number(process.env.BREVO_SMTP_PORT || 587),
-              login: process.env.BREVO_SMTP_LOGIN,
-              key: process.env.BREVO_SMTP_KEY,
-              fromEmail: process.env.BREVO_FROM_EMAIL,
+              login: process.env.BREVO_SMTP_LOGIN || "",
+              key: process.env.BREVO_SMTP_KEY || "",
+              fromEmail: process.env.BREVO_FROM_EMAIL || "",
               fromName: process.env.BREVO_FROM_NAME || "VIBEYA",
             },
           },
         ],
       },
     }]
-  : undefined
 
-const emailVerificationConfig = hasBrevoSmtpCredentials
-  ? {
-      customer: [{ entity_type: "email", auth_provider: "emailpass" }],
-    }
-  : undefined
+const emailVerificationConfig = {
+  customer: [{ entity_type: "email", auth_provider: "emailpass" }],
+}
 
 const modules = [
   ...(process.env.REDIS_URL
@@ -113,9 +95,9 @@ const modules = [
         },
       ]
     : []),
-  ...(paymentModules ?? []),
-  ...(googleAuthModules ?? []),
-  ...(notificationModules ?? []),
+  ...paymentModules,
+  ...googleAuthModules,
+  ...notificationModules,
   { resolve: "./src/modules/vibeya-ai-jobs" },
 ]
 
@@ -134,9 +116,7 @@ module.exports = defineConfig({
       jwtExpiresIn: process.env.JWT_EXPIRES_IN || "30d",
       cookieSecret: process.env.COOKIE_SECRET,
       authVerificationsPerActor: emailVerificationConfig,
-      authMethodsPerActor: hasGoogleCredentials
-        ? { user: ["emailpass"], customer: ["emailpass", "google"] }
-        : undefined,
+      authMethodsPerActor: { user: ["emailpass"], customer: ["emailpass", "google"] },
     }
   },
   modules,

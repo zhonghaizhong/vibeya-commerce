@@ -4,6 +4,7 @@ import {
 } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { isVibeyaAIConfig, VIBEYA_AI_METADATA_KEY } from "../../../../lib/vibeya-ai"
+import { readVibeyaIntegrationsConfig, VIBEYA_INTEGRATIONS_METADATA_KEY } from "../../../../lib/vibeya-integrations"
 
 const PRODUCT_HANDLES = [
   "vibeya-custom-cotton-long-sleeve-tee",
@@ -39,15 +40,17 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     ])
   const { data: stores } = await query.graph({ entity: "store", fields: ["metadata"] })
   const aiConfig = stores[0]?.metadata?.[VIBEYA_AI_METADATA_KEY]
+  const integrationsRaw = stores[0]?.metadata?.[VIBEYA_INTEGRATIONS_METADATA_KEY]
+  const integrations = readVibeyaIntegrationsConfig(integrationsRaw)
 
   const usRegion = regions.find((region: any) =>
     region.countries?.some((country: any) => country.iso_2?.toLowerCase() === "us")
   )
-  const paypalConfigured = Boolean(
-    process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET
-  )
+  const paypalConfigured = integrationsRaw && typeof integrationsRaw === "object"
+    ? integrations.paypal.enabled && Boolean(integrations.paypal.clientId && integrations.paypal.encryptedSecret)
+    : Boolean(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET)
   const paypalMode = paypalConfigured
-    ? (process.env.PAYPAL_ENVIRONMENT || "sandbox").toLowerCase()
+    ? (integrationsRaw && typeof integrationsRaw === "object" ? integrations.paypal.environment : process.env.PAYPAL_ENVIRONMENT || "sandbox").toLowerCase()
     : "not_configured"
 
   return res.json({

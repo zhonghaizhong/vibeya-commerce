@@ -24,6 +24,7 @@
   "dependencies": {
     "@medusajs/admin-sdk": "2.22.3",
     "@medusajs/admin-shared": "2.22.3",
+    "@medusajs/auth-google": "2.22.3",
     "@medusajs/cache-redis": "2.22.3",
     "@medusajs/caching": "2.22.3",
     "@medusajs/cli": "2.22.3",

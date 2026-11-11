@@ -25,11 +25,27 @@ type TurnstileFieldProps = {
 }
 
 const TurnstileField = ({ resetKey = "" }: TurnstileFieldProps) => {
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
+  const [siteKey, setSiteKey] = useState("")
+  const [configLoaded, setConfigLoaded] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const widgetIdRef = useRef<string | null>(null)
   const [scriptReady, setScriptReady] = useState(false)
   const [token, setToken] = useState("")
+
+  useEffect(() => {
+    const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+    const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
+    fetch(`${backendUrl.replace(/\/$/, "")}/store/vibeya/integrations`, {
+      headers: publishableKey ? { "x-publishable-api-key": publishableKey } : {},
+      cache: "no-store",
+    })
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then((data: { turnstile?: { enabled?: boolean; siteKey?: string } }) => {
+        if (data.turnstile?.enabled && data.turnstile.siteKey) setSiteKey(data.turnstile.siteKey)
+      })
+      .catch(() => setSiteKey(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""))
+      .finally(() => setConfigLoaded(true))
+  }, [])
 
   useEffect(() => {
     if (!scriptReady || !siteKey || !window.turnstile || !containerRef.current) {
@@ -70,11 +86,11 @@ const TurnstileField = ({ resetKey = "" }: TurnstileFieldProps) => {
           <div ref={containerRef} aria-label="Human verification" />
           <input type="hidden" name="turnstile_token" value={token} readOnly />
         </>
-      ) : (
+      ) : configLoaded ? (
         <p className="text-sm text-red-700" role="status">
           Human verification is not configured yet. Please try again later.
         </p>
-      )}
+      ) : <p className="text-sm text-ui-fg-subtle" role="status">Loading verification…</p>}
     </div>
   )
 }

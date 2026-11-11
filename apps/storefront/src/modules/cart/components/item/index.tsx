@@ -192,25 +192,28 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
         </Text>
         <LineItemOptions variant={item.variant} data-testid="product-variant" />
         {typeof designName === "string" && (
-          <div className="mt-2 max-w-xl text-xs leading-relaxed text-ui-fg-subtle">
+          <div className="cart-design-meta mt-2 max-w-xl text-xs leading-relaxed text-ui-fg-subtle">
             {generatedArtworkUrl && (
               <Thumbnail
                 thumbnail={generatedArtwork}
                 alt="AI generated artwork preview"
                 size="square"
-                className="mb-2 !h-20 !w-20 !rounded-md !border !border-ui-border-base !p-0 !shadow-none"
+                className="cart-design-preview !h-14 !w-14 !shrink-0 !rounded-lg !border !border-[#eee8f2] !bg-white !p-0 !shadow-none"
               />
             )}
-            <p>
-              <span className="font-medium text-ui-fg-base">Design:</span> {designName}
-              {printPlacementLabel && <> · {printPlacementLabel}</>}
-            </p>
-            {typeof designPrompt === "string" && designPrompt && (
-              <p className="mt-1 line-clamp-3 whitespace-pre-wrap">{designPrompt}</p>
-            )}
-            {referencesNotAttached === true && (
-              <p className="mt-1">Original reference images stay on your device; the generated artwork preview is attached to this order.</p>
-            )}
+            <div className="cart-design-copy">
+              <span className="cart-design-eyebrow">Your custom design</span>
+              <p className="cart-design-title">
+                {designName}
+                {printPlacementLabel && <span className="cart-design-placement">{printPlacementLabel}</span>}
+              </p>
+              {typeof designPrompt === "string" && designPrompt && (
+                <p className="cart-design-prompt line-clamp-3 whitespace-pre-wrap">{designPrompt}</p>
+              )}
+              {referencesNotAttached === true && (
+                <p className="mt-1">Original references stay on your device; the generated preview is included.</p>
+              )}
+            </div>
           </div>
         )}
       </Table.Cell>
