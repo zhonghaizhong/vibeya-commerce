@@ -24,6 +24,24 @@ export type CustomerAuthState =
   | { state: "success" }
   | null
 
+async function verifyTurnstileToken(token: FormDataEntryValue | null) {
+  if (typeof token !== "string" || !token.trim()) {
+    return "Please complete the human verification before creating your account."
+  }
+
+  try {
+    const result = await sdk.client.fetch<{ valid?: boolean }>(
+      "/store/vibeya/integrations/turnstile",
+      { method: "POST", body: { token }, cache: "no-store" }
+    )
+    return result.valid
+      ? null
+      : "Human verification failed. Please try again."
+  } catch {
+    return "Human verification could not be checked. Please try again."
+  }
+}
+
 // Requests a verification email for the given customer. The request must be
 // authenticated with a token tied to the auth identity (the token returned by
 // register or by a login that requires verification).
@@ -82,6 +100,13 @@ export async function signup(
   _currentState: unknown,
   formData: FormData
 ): Promise<CustomerAuthState> {
+  const verificationError = await verifyTurnstileToken(
+    formData.get("turnstile_token")
+  )
+  if (verificationError) {
+    return { state: "error", error: verificationError }
+  }
+
   const password = formData.get("password") as string
   const customerForm = {
     email: formData.get("email") as string,
@@ -139,13 +164,8 @@ export async function setGoogleCustomerToken(
   const customerCacheTag = await getCacheTag("customers")
   revalidateTag(customerCacheTag, { expire: 0 })
 
-  try {
-    await transferCart()
-    return { success: true }
-  } catch (error) {
-    await removeAuthToken()
-    return { success: false, error: String(error) }
-  }
+  await transferCartAfterAuthentication()
+  return { success: true }
 }
 
 // Logs the customer in and reconciles the customer record. The behavior is
@@ -237,13 +257,21 @@ async function completeLogin(
   const customerCacheTag = await getCacheTag("customers")
   revalidateTag(customerCacheTag, { expire: 0 })
 
-  try {
-    await transferCart()
-  } catch (error) {
-    return { state: "error", error: String(error) }
-  }
+  await transferCartAfterAuthentication()
 
   return { state: "success" }
+}
+
+// Cart migration is best-effort. Authentication has already succeeded, and a
+// customer may sign in before creating a cart, so a missing cart must not make
+// the sign-in action appear to fail or invalidate the authenticated session.
+async function transferCartAfterAuthentication() {
+  try {
+    const cartId = await getCartId()
+    if (cartId) await transferCart(cartId)
+  } catch {
+    // Keep the customer signed in if cart migration is unavailable.
+  }
 }
 
 // Confirms a customer's email using the token from the verification link.

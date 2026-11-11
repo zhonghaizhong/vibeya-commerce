@@ -2,10 +2,7 @@
 
 import { setGoogleCustomerToken } from "@lib/data/customer"
 import { sdk } from "@lib/config"
-import { useState } from "react"
-
-const googleLoginEnabled =
-  process.env.NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED === "true"
+import { useEffect, useState } from "react"
 
 type GoogleSignInButtonProps = {
   countryCode: string
@@ -18,6 +15,25 @@ const GoogleSignInButton = ({
 }: GoogleSignInButtonProps) => {
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [googleLoginEnabled, setGoogleLoginEnabled] = useState(false)
+  const [callbackUrl, setCallbackUrl] = useState("")
+  const [settingsLoaded, setSettingsLoaded] = useState(false)
+
+  useEffect(() => {
+    const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+    const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
+    fetch(`${backendUrl.replace(/\/$/, "")}/store/vibeya/integrations`, {
+      headers: publishableKey ? { "x-publishable-api-key": publishableKey } : {},
+      cache: "no-store",
+    })
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then((data: { google?: { enabled?: boolean; callbackUrl?: string } }) => {
+        setGoogleLoginEnabled(data.google?.enabled === true)
+        setCallbackUrl(data.google?.callbackUrl || "")
+      })
+      .catch(() => setGoogleLoginEnabled(process.env.NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED === "true"))
+      .finally(() => setSettingsLoaded(true))
+  }, [])
 
   const continueWithGoogle = async () => {
     if (!googleLoginEnabled || pending) return
@@ -26,9 +42,8 @@ const GoogleSignInButton = ({
     setError(null)
 
     try {
-      const callbackUrl = `${window.location.origin}/${countryCode}/auth/google/callback`
       const result = await sdk.auth.login("customer", "google", {
-        callback_url: callbackUrl,
+        callback_url: callbackUrl || `${window.location.origin}/${countryCode}/auth/google/callback`,
       })
 
       if (typeof result === "string") {
@@ -61,7 +76,7 @@ const GoogleSignInButton = ({
       <button
         type="button"
         onClick={continueWithGoogle}
-        disabled={!googleLoginEnabled || pending}
+        disabled={!settingsLoaded || !googleLoginEnabled || pending}
         title={!googleLoginEnabled ? "Google sign-in needs Google OAuth setup." : undefined}
         className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#e9e3ea] bg-white px-4 font-bold text-[#160d24] transition hover:border-[#8f60ed] hover:bg-[#f1e5ff]/40 disabled:cursor-not-allowed disabled:opacity-55"
       >

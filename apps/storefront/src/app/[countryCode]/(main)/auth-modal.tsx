@@ -2,6 +2,7 @@
 
 import { login, signup } from "@lib/data/customer"
 import GoogleSignInButton from "@modules/account/components/google-sign-in-button"
+import TurnstileField from "@modules/account/components/turnstile"
 import { useActionState, useCallback, useEffect, useState } from "react"
 
 type AuthModalProps = {
@@ -130,6 +131,7 @@ function RegisterForm({
         </div>
         <Field label="Email" name="email" type="email" autoComplete="email" />
         <Field label="Password" name="password" type="password" autoComplete="new-password" />
+        <TurnstileField resetKey={state?.state === "error" ? state.error : ""} />
         {state?.state === "verification_required" && (
           <p className="rounded-xl bg-[#f1e5ff] p-3 text-sm text-[#160d24]">
             Check your inbox for a verification link sent to {state.email}.

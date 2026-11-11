@@ -13,10 +13,11 @@ const ItemsTemplate = ({ cart }: ItemsTemplateProps) => {
   const items = cart?.items
   return (
     <div>
-      <div className="pb-3 flex items-center">
+      <div className="vibeya-cart-heading pb-3">
         <Heading className="text-[2rem] leading-[2.75rem]">Cart</Heading>
+        <p className="mt-1 text-sm text-ui-fg-subtle">Review your custom pieces before checkout.</p>
       </div>
-      <Table>
+      <Table className="vibeya-cart-table">
         <Table.Header className="border-t-0">
           <Table.Row className="text-ui-fg-subtle txt-medium-plus">
             <Table.HeaderCell className="!pl-0">Item</Table.HeaderCell>
