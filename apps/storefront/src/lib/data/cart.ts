@@ -387,48 +387,6 @@ export async function placeOrder(cartId?: string) {
     const countryCode =
       cartRes.order.shipping_address?.country_code?.toLowerCase()
 
-    // Save the address only after checkout succeeds, so abandoned checkouts do
-    // not add incomplete addresses to the customer's address book.
-    const orderAddress = cartRes.order.shipping_address
-    const customerHeaders = await getAuthHeaders()
-    if (orderAddress?.address_1 && "authorization" in customerHeaders) {
-      try {
-        const { customer } = await sdk.store.customer.retrieve({}, customerHeaders)
-        const savedAddress = {
-          first_name: orderAddress.first_name,
-          last_name: orderAddress.last_name,
-          address_1: orderAddress.address_1,
-          address_2: orderAddress.address_2 || "",
-          company: orderAddress.company,
-          postal_code: orderAddress.postal_code,
-          city: orderAddress.city,
-          country_code: orderAddress.country_code,
-          province: orderAddress.province,
-          phone: orderAddress.phone,
-        }
-        const normalize = (value?: string | null) => (value || "").trim().toLowerCase()
-        const duplicate = customer.addresses?.find((address) =>
-          normalize(address.address_1) === normalize(savedAddress.address_1) &&
-          normalize(address.address_2) === normalize(savedAddress.address_2) &&
-          normalize(address.city) === normalize(savedAddress.city) &&
-          normalize(address.province) === normalize(savedAddress.province) &&
-          normalize(address.postal_code) === normalize(savedAddress.postal_code) &&
-          normalize(address.country_code) === normalize(savedAddress.country_code)
-        )
-
-        if (!duplicate) {
-          await sdk.store.customer.createAddress({
-            ...savedAddress,
-            is_default_shipping: !(customer.addresses ?? []).some((address) => address.is_default_shipping),
-          }, {}, customerHeaders)
-          const customerCacheTag = await getCacheTag("customers")
-          revalidateTag(customerCacheTag, { expire: 0 })
-        }
-      } catch (error) {
-        console.error("Could not save completed order shipping address to customer address book", error)
-      }
-    }
-
     const orderCacheTag = await getCacheTag("orders")
     revalidateTag(orderCacheTag, { expire: 0 })
 

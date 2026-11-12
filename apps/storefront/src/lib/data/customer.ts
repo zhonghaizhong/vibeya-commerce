@@ -70,6 +70,9 @@ export const retrieveCustomer =
     return await sdk.client
       .fetch<{ customer: HttpTypes.StoreCustomer }>(`/store/customers/me`, {
         method: "GET",
+      query: {
+        fields: "id,email,first_name,last_name,phone,company_name,metadata,has_account,*addresses",
+      },
         headers,
         cache: "no-store",
       })
