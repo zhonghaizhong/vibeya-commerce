@@ -97,16 +97,20 @@ const GoogleSignInButton = ({
           Google sign-in will be available after OAuth setup.
         </p>
       )}
-      {paypalLoginEnabled && (
-        <button
-          type="button"
-          onClick={() => continueWithProvider("paypal")}
-          disabled={!settingsLoaded || pending !== null}
-          className="mt-3 flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#e9e3ea] bg-white px-4 font-bold text-[#160d24] transition hover:border-[#0070ba] hover:bg-[#f4f9ff] disabled:cursor-not-allowed disabled:opacity-55"
-        >
-          <span aria-hidden="true" className="text-xl font-black italic text-[#0070ba]">P</span>
-          {pending === "paypal" ? "Connecting to PayPal…" : "Continue with PayPal"}
-        </button>
+      <button
+        type="button"
+        onClick={() => continueWithProvider("paypal")}
+        disabled={!settingsLoaded || !paypalLoginEnabled || pending !== null}
+        title={!paypalLoginEnabled ? "PayPal sign-in needs to be enabled in admin settings." : undefined}
+        className="mt-3 flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#e9e3ea] bg-white px-4 font-bold text-[#160d24] transition hover:border-[#0070ba] hover:bg-[#f4f9ff] disabled:cursor-not-allowed disabled:opacity-55"
+      >
+        <span aria-hidden="true" className="text-xl font-black italic text-[#0070ba]">P</span>
+        {pending === "paypal" ? "Connecting to PayPal…" : "Continue with PayPal"}
+      </button>
+      {settingsLoaded && !paypalLoginEnabled && (
+        <p className="mt-2 text-center text-xs text-[#625c69]">
+          PayPal sign-in is not set up yet. Enable it in admin settings.
+        </p>
       )}
       {error && (
         <p role="alert" className="mt-2 text-left text-sm font-medium text-red-700">
