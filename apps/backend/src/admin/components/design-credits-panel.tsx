@@ -1,4 +1,3 @@
-import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text } from "@medusajs/ui"
 import { useCallback, useEffect, useState } from "react"
 
@@ -114,7 +113,5 @@ const DesignCreditsPage = () => {
     </div>
   )
 }
-
-export const config = defineRouteConfig({ label: "设计次数", rank: 3 })
 
 export default DesignCreditsPage

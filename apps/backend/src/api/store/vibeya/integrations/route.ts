@@ -27,6 +27,10 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       environment: hasSavedConfig ? config.paypal.environment : process.env.PAYPAL_ENVIRONMENT || "sandbox",
       autoCapture: hasSavedConfig ? config.paypal.autoCapture : process.env.PAYPAL_AUTO_CAPTURE !== "false",
     },
+    paypalLogin: {
+      enabled: hasSavedConfig ? config.paypal.loginEnabled : process.env.PAYPAL_LOGIN_ENABLED === "true",
+      callbackUrl: hasSavedConfig ? config.paypal.loginCallbackUrl : process.env.PAYPAL_LOGIN_CALLBACK_URL || "",
+    },
     google: {
       enabled: hasSavedConfig ? config.google.enabled : Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_CALLBACK_URL),
       callbackUrl: hasSavedConfig ? config.google.callbackUrl : process.env.GOOGLE_CALLBACK_URL || "",

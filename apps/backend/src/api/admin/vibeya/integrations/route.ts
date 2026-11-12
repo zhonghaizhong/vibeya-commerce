@@ -32,6 +32,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const port = Number(body?.brevo?.port)
   const environment = body?.paypal?.environment
   const callbackUrl = typeof body?.google?.callbackUrl === "string" ? body.google.callbackUrl.trim() : current.google.callbackUrl
+  const paypalLoginCallbackUrl = typeof body?.paypal?.loginCallbackUrl === "string" ? body.paypal.loginCallbackUrl.trim() : current.paypal.loginCallbackUrl
+  let validPaypalLoginCallback = false
+  try {
+    const parsed = new URL(paypalLoginCallbackUrl)
+    validPaypalLoginCallback = parsed.protocol === "https:" || (parsed.protocol === "http:" && ["localhost", "127.0.0.1"].includes(parsed.hostname))
+  } catch {}
   let validCallback = false
   try {
     const parsed = new URL(callbackUrl)
@@ -54,6 +60,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   }
   if (body?.google?.enabled && (!(body?.google?.clientId || current.google.clientId) || !(googleSecret || current.google.encryptedSecret) || !validCallback)) {
     return res.status(400).json({ error: "启用 Google 登录前，请填写 Client ID、Client Secret 和有效的 HTTPS 回调地址（本地测试可用 localhost）。" })
+  }
+  if (body?.paypal?.loginEnabled && (!(body?.paypal?.clientId || current.paypal.clientId) || !(paypalSecret || current.paypal.encryptedSecret) || !validPaypalLoginCallback)) {
+    return res.status(400).json({ error: "启用 PayPal 登录前，请填写 PayPal Client ID、Secret 和有效回调地址。" })
   }
 
   const next = {
@@ -81,6 +90,8 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       environment,
       webhookId: typeof body?.paypal?.webhookId === "string" ? body.paypal.webhookId.trim() : current.paypal.webhookId,
       autoCapture: body?.paypal?.autoCapture !== false,
+      loginEnabled: body?.paypal?.loginEnabled === true,
+      loginCallbackUrl: paypalLoginCallbackUrl,
     },
     google: {
       enabled: body?.google?.enabled === true,

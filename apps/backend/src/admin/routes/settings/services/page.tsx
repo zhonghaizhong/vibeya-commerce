@@ -5,14 +5,14 @@ import { useCallback, useEffect, useState } from "react"
 type Config = {
   brevo: { enabled: boolean; host: string; port: number; login: string; keyHint: string; hasKey: boolean; fromEmail: string; fromName: string }
   turnstile: { enabled: boolean; siteKey: string; secretHint: string; hasSecret: boolean }
-  paypal: { enabled: boolean; clientId: string; secretHint: string; hasSecret: boolean; environment: "sandbox" | "production"; webhookId: string; autoCapture: boolean }
+  paypal: { enabled: boolean; clientId: string; secretHint: string; hasSecret: boolean; environment: "sandbox" | "production"; webhookId: string; autoCapture: boolean; loginEnabled: boolean; loginCallbackUrl: string }
   google: { enabled: boolean; clientId: string; secretHint: string; hasSecret: boolean; callbackUrl: string }
 }
 
 const initialConfig: Config = {
   brevo: { enabled: false, host: "smtp-relay.brevo.com", port: 587, login: "", keyHint: "", hasKey: false, fromEmail: "", fromName: "VIBEYA" },
   turnstile: { enabled: false, siteKey: "", secretHint: "", hasSecret: false },
-  paypal: { enabled: false, clientId: "", secretHint: "", hasSecret: false, environment: "sandbox", webhookId: "", autoCapture: true },
+  paypal: { enabled: false, clientId: "", secretHint: "", hasSecret: false, environment: "sandbox", webhookId: "", autoCapture: true, loginEnabled: false, loginCallbackUrl: "http://localhost:8000/us/auth/paypal/callback" },
   google: { enabled: false, clientId: "", secretHint: "", hasSecret: false, callbackUrl: "http://localhost:8000/us/auth/google/callback" },
 }
 
@@ -36,6 +36,16 @@ const IntegrationsPage = () => {
     try {
       await navigator.clipboard.writeText(config.google.callbackUrl)
       setMessage("Google 回调地址已复制。请把它粘贴到 Google Cloud 的“已获授权的重定向 URI”中。")
+      setError("")
+    } catch {
+      setError("无法自动复制，请手动选中并复制回调地址。")
+    }
+  }
+
+  const copyPaypalCallbackUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(config.paypal.loginCallbackUrl)
+      setMessage("PayPal 登录回调地址已复制。请添加到 PayPal 应用的 Return URL。")
       setError("")
     } catch {
       setError("无法自动复制，请手动选中并复制回调地址。")
@@ -153,6 +163,7 @@ const IntegrationsPage = () => {
         <Container className="flex flex-col gap-y-5 p-5">
           <div><Heading level="h2">PayPal 收款</Heading><Text className="mt-1 text-ui-fg-subtle">填写 PayPal 应用的 Client ID 和 Secret。正式收款前请切换到正式环境。</Text></div>
           {toggle("启用 PayPal", config.paypal.enabled, (enabled) => setConfig({ ...config, paypal: { ...config.paypal, enabled } }), "启用后会提供 PayPal 收款方式。")}
+          {toggle("启用 PayPal 登录", config.paypal.loginEnabled, (loginEnabled) => setConfig({ ...config, paypal: { ...config.paypal, loginEnabled } }), "允许顾客使用 PayPal 账号登录；需要在 PayPal 应用中开启 Log in with PayPal。")}
           <Container className="bg-ui-bg-subtle p-4">
             <Text className="font-medium">去哪里找这些信息</Text>
             <Text size="small" className="mt-1 text-ui-fg-subtle">登录 PayPal Developer → Apps & Credentials，创建应用后复制 Client ID 和 Secret。先用 Sandbox 测试；确认收款流程正常后，再切换到 Live 并填入正式应用的资料。Webhook ID 暂时没有时可留空。</Text>
@@ -170,6 +181,10 @@ const IntegrationsPage = () => {
             </label>
             {field("Webhook ID（可选）", config.paypal.webhookId, (webhookId) => setConfig({ ...config, paypal: { ...config.paypal, webhookId } }), "PayPal Webhook 设置中的 ID")}
           </div>
+          <Container className="flex flex-wrap items-center justify-between gap-3 bg-ui-bg-subtle p-3">
+            <div className="w-full"><Text className="font-medium">PayPal 登录回调地址</Text><Text size="small" className="mb-2 text-ui-fg-subtle">线上请改为店铺正式网址；再把保存后的地址添加到 PayPal Developer → Apps & Credentials → Log in with PayPal → Return URL。</Text>{field("Return URL", config.paypal.loginCallbackUrl, (loginCallbackUrl) => setConfig({ ...config, paypal: { ...config.paypal, loginCallbackUrl } }), "例如 https://vibeyastudio.com/us/auth/paypal/callback", "url")}</div>
+            <button type="button" onClick={copyPaypalCallbackUrl} className="shrink-0 rounded-md border border-ui-border-base bg-ui-bg-base px-3 py-1.5 text-sm font-medium text-ui-fg-base">复制回调地址</button>
+          </Container>
           {toggle("下单后自动扣款", config.paypal.autoCapture, (autoCapture) => setConfig({ ...config, paypal: { ...config.paypal, autoCapture } }), "关闭时先授权，之后再由后台捕获款项。")}
         </Container>
 
@@ -199,6 +214,6 @@ const IntegrationsPage = () => {
   )
 }
 
-export const config = defineRouteConfig({ label: "服务配置", rank: 3 })
+export const config = defineRouteConfig({ label: "登录与收款", rank: 2 })
 
 export default IntegrationsPage

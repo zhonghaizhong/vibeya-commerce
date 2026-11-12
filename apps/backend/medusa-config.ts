@@ -35,6 +35,16 @@ const googleAuthModules = [{
               callbackUrl: process.env.GOOGLE_CALLBACK_URL || "",
             },
           },
+          {
+            resolve: "./src/modules/vibeya-paypal-auth",
+            id: "paypal",
+            options: {
+              clientId: process.env.PAYPAL_CLIENT_ID || "",
+              clientSecret: process.env.PAYPAL_CLIENT_SECRET || "",
+              callbackUrl: process.env.PAYPAL_LOGIN_CALLBACK_URL || "",
+              environment: process.env.PAYPAL_ENVIRONMENT || "sandbox",
+            },
+          },
         ],
       },
     }]
@@ -116,7 +126,7 @@ module.exports = defineConfig({
       jwtExpiresIn: process.env.JWT_EXPIRES_IN || "30d",
       cookieSecret: process.env.COOKIE_SECRET,
       authVerificationsPerActor: emailVerificationConfig,
-      authMethodsPerActor: { user: ["emailpass"], customer: ["emailpass", "google"] },
+      authMethodsPerActor: { user: ["emailpass"], customer: ["emailpass", "google", "paypal"] },
     }
   },
   modules,

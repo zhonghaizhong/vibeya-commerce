@@ -1,4 +1,3 @@
-import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text } from "@medusajs/ui"
 import { useCallback, useEffect, useState } from "react"
 
@@ -191,7 +190,5 @@ const AIConfigPage = () => {
     </div>
   )
 }
-
-export const config = defineRouteConfig({ label: "AI 配置", rank: 2 })
 
 export default AIConfigPage

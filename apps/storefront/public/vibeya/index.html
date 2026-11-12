@@ -646,7 +646,7 @@
   </style>
 <link rel="stylesheet" href="assets/shared/header.css?v=nav-match-5">
 <script src="assets/shared/catalog-price.js" defer></script>
-<script src="assets/inspiration/catalog.js?v=home-inspiration-page-sync-v3"></script>
+<script src="assets/inspiration/catalog.js?v=gallery-cover-1"></script>
 </head>
 <body>
   <div class="announcement">YOUR IDEA, YOUR VIBE, YOURS TO KEEP. <strong>✳ MADE JUST FOR YOU</strong></div>
@@ -1557,7 +1557,8 @@
   function hideCart(){$('#drawerOverlay').classList.remove('open');$('#cartDrawer').classList.remove('open');syncLock();}
   function renderProductCards(){if(document.body.dataset.reactProductCards==='true')return;const featured=[...catalogProducts.filter(p=>p.catalogOnly),...catalogProducts.filter(p=>!p.catalogOnly)].slice(0,6);const blanket=catalogProducts.find(p=>p.id==='sds-97226');if(blanket&&!featured.some(p=>p.id===blanket.id))featured[featured.length-1]=blanket;$('#productCards').innerHTML=featured.map(productHTML).join('');}
   async function renderInspo(){
-    const catalog=Array.isArray(window.VIBEYA_INSPIRATION_CATALOG)?window.VIBEYA_INSPIRATION_CATALOG:[];
+    let catalog=Array.isArray(window.VIBEYA_INSPIRATION_CATALOG)?window.VIBEYA_INSPIRATION_CATALOG:[];
+    try{const response=await fetch('/api/vibeya/inspirations',{credentials:'same-origin',cache:'no-store'});if(response.ok){const data=await response.json();if(Array.isArray(data.inspirations))catalog=data.inspirations;}}catch(error){console.warn('Using bundled inspiration catalog',error);}
     const inspirationUrl=new URL('/vibeya/inspiration/index.html',location.origin);
     const cards=[];
     try{
@@ -1567,24 +1568,16 @@
         page.querySelectorAll('[data-inspiration-feature]').forEach(section=>{
           const image=section.querySelector('.art-card img');
           const link=section.querySelector('.actions a[href]');
-          const heading=section.querySelector('h2');
           if(!image||!link)return;
           const href=new URL(link.getAttribute('href'),inspirationUrl);
           const articleFile=href.pathname.split('/').pop()||'';
           const entry=catalog.find(item=>item.slug===articleFile);
-          const title=heading?.textContent?.replace(/\s+/g,' ').trim()||entry?.title||'VIBEYA inspiration';
-          cards.push({id:entry?.id||articleFile.replace(/\.html$/,''),title,alt:image.getAttribute('alt')||`${title} inspiration card`,image:new URL(image.getAttribute('src')||'',inspirationUrl).href,href:href.href,articleFile});
+          if(entry&&!entry.published)return;
+          const title=entry?.title||section.querySelector('.featured-text h2')?.textContent?.replace(/\s+/g,' ').trim()||'VIBEYA inspiration';
+          cards.push({id:entry?.id||articleFile.replace(/\.html$/,''),title,alt:image.getAttribute('alt')||`${title} inspiration card`,image:new URL(image.getAttribute('src')||'',inspirationUrl).href,href:href.href});
         });
       }
-    }catch(error){console.warn('Inspiration cards could not be synced from the Inspiration page',error);}
-
-    const assetBase=new URL('/vibeya/assets/inspiration/',location.origin);
-    for(const entry of catalog){
-      if(!entry.published||!entry.slug||cards.some(card=>card.articleFile===entry.slug))continue;
-      const image=entry.cardImage||entry.image;
-      if(!image)continue;
-      cards.push({id:entry.id,title:entry.title,alt:`${entry.title} inspiration card`,image:new URL(image,assetBase).href,href:new URL(entry.slug,inspirationUrl).href,articleFile:entry.slug});
-    }
+    }catch(error){console.warn('Could not load inspiration-list feature cards',error);}
 
     for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
     $('#inspoCards').innerHTML=cards.slice(0,4).map(card=>{

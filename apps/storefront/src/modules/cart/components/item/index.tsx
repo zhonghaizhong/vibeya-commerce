@@ -105,7 +105,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
           <div className="mt-3 flex min-w-0 items-center gap-2.5 rounded-xl border border-[#eee8f2] bg-white/80 p-2.5">
             {generatedArtworkUrl && (
               <Thumbnail
-                thumbnail={generatedArtwork}
+                thumbnail={generatedArtworkUrl}
                 alt="Generated design preview"
                 size="square"
                 className="!h-12 !w-12 !shrink-0 !rounded-lg !border !border-[#eee8f0] !bg-white !p-0 !shadow-none"
@@ -195,7 +195,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
           <div className="cart-design-meta mt-2 max-w-xl text-xs leading-relaxed text-ui-fg-subtle">
             {generatedArtworkUrl && (
               <Thumbnail
-                thumbnail={generatedArtwork}
+                thumbnail={generatedArtworkUrl}
                 alt="AI generated artwork preview"
                 size="square"
                 className="cart-design-preview !h-14 !w-14 !shrink-0 !rounded-lg !border !border-[#eee8f2] !bg-white !p-0 !shadow-none"

@@ -143,7 +143,7 @@ const CustomerSegmentsPage = () => {
     <div className="flex flex-col gap-y-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Heading level="h1">客户分组</Heading>
+          <Heading level="h1">客户概览</Heading>
           <Text className="mt-1 text-ui-fg-subtle">按注册、购物车、下单、支付和设计额度汇总客户。新订单会自动同步（页面打开时每 20 秒更新一次）；已用次数按真实任务统计，剩余设计次数可单独修改。</Text>
         </div>
         <button type="button" onClick={() => void load()} disabled={loading} className="rounded-md border border-ui-border-base px-3 py-2 text-sm font-medium text-ui-fg-base disabled:opacity-50">
@@ -273,6 +273,6 @@ const CustomerSegmentsPage = () => {
   )
 }
 
-export const config = defineRouteConfig({ label: "客户分组", rank: 4 })
+export const config = defineRouteConfig({ label: "客户概览", nested: "/customers", rank: 1 })
 
 export default CustomerSegmentsPage
