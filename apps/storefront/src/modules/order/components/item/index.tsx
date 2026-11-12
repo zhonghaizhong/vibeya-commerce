@@ -12,12 +12,18 @@ type ItemProps = {
 }
 
 const Item = ({ item, currencyCode }: ItemProps) => {
+  const generatedArtwork = item.metadata?.vibeya_generated_artwork
+  const orderImage =
+    typeof generatedArtwork === "string" && generatedArtwork.startsWith("data:image/")
+      ? generatedArtwork
+      : item.thumbnail || item.product?.thumbnail || item.variant?.product?.thumbnail
+
   return (
     <Table.Row className="w-full" data-testid="product-row">
       <Table.Cell className="!pl-0 p-4 w-24">
         <div className="flex w-16">
           <Thumbnail
-            thumbnail={item.thumbnail || item.product?.thumbnail || item.variant?.product?.thumbnail}
+            thumbnail={orderImage}
             images={item.product?.images ?? []}
             size="square"
           />

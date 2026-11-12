@@ -37,7 +37,12 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
           title: item.product_title || item.title,
           variant_title: item.variant_title,
           quantity: item.quantity,
-          thumbnail: item.thumbnail || item.product?.thumbnail || item.product?.images?.[0]?.url || null,
+          thumbnail:
+            (typeof item.metadata?.vibeya_generated_artwork === "string" &&
+            item.metadata.vibeya_generated_artwork.startsWith("data:image/")
+              ? item.metadata.vibeya_generated_artwork
+              : null) ||
+            item.thumbnail || item.product?.thumbnail || item.product?.images?.[0]?.url || null,
           metadata: item.metadata,
         })),
       },

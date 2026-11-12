@@ -64,6 +64,12 @@ const OrderCard = ({ order }: OrderCardProps) => {
       </div>
       <div className="my-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
         {order.items?.slice(0, 3).map((i) => {
+          const generatedArtwork = i.metadata?.vibeya_generated_artwork
+          const orderImage =
+            typeof generatedArtwork === "string" && generatedArtwork.startsWith("data:image/")
+              ? generatedArtwork
+              : i.thumbnail || i.product?.thumbnail || i.variant?.product?.thumbnail
+
           return (
             <div
               key={i.id}
@@ -72,7 +78,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
             >
               <div className="overflow-hidden rounded-xl bg-[#f8f5fa]">
                 <Thumbnail
-                  thumbnail={i.thumbnail || i.product?.thumbnail || i.variant?.product?.thumbnail}
+                  thumbnail={orderImage}
                   images={i.product?.images ?? []}
                   size="full"
                 />
