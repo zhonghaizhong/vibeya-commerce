@@ -415,6 +415,6 @@ const OrderCenterPage = () => {
   )
 }
 
-export const config = defineRouteConfig({ label: "订单工作台", nested: "/orders", rank: 1 })
+export const config = defineRouteConfig({ label: "订单工作台", rank: 1 })
 
 export default OrderCenterPage
