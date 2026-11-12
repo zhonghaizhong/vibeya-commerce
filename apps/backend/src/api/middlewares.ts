@@ -32,6 +32,11 @@ export default defineMiddlewares({
       middlewares: [authenticate("customer", "bearer", { allowUnregistered: true })],
     },
     {
+      method: ["GET"],
+      matcher: "/store/vibeya/orders/:id/tracking",
+      middlewares: [authenticate("customer", ["session", "bearer"])],
+    },
+    {
       method: ["POST"],
       matcher: "/store/vibeya/cart/line-items",
       bodyParser: { sizeLimit: "2mb" },

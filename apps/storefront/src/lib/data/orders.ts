@@ -5,6 +5,21 @@ import medusaError from "@lib/util/medusa-error"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { HttpTypes } from "@medusajs/types"
 
+export type OrderTrackingEvent = {
+  description: string
+  location: string
+  time: string
+  carrier: string
+}
+
+export type OrderTrackingShipment = {
+  trackingNumber: string
+  trackingUrl?: string
+  status: string
+  statusCode?: string
+  events: OrderTrackingEvent[]
+}
+
 export const retrieveOrder = async (id: string) => {
   const headers = {
     ...(await getAuthHeaders()),
@@ -27,6 +42,14 @@ export const retrieveOrder = async (id: string) => {
     })
     .then(({ order }) => order)
     .catch((err) => medusaError(err))
+}
+
+export const retrieveOrderTracking = async (id: string) => {
+  const headers = { ...(await getAuthHeaders()) }
+  return sdk.client.fetch<{ shipments: OrderTrackingShipment[] }>(
+    `/store/vibeya/orders/${encodeURIComponent(id)}/tracking`,
+    { method: "GET", headers, cache: "no-store" }
+  ).catch((err) => medusaError(err))
 }
 
 export const listOrders = async (

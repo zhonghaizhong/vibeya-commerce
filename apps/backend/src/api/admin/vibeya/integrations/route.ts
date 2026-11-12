@@ -29,6 +29,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const turnstileSecret = typeof body?.turnstile?.secret === "string" ? body.turnstile.secret.trim() : ""
   const paypalSecret = typeof body?.paypal?.secret === "string" ? body.paypal.secret.trim() : ""
   const googleSecret = typeof body?.google?.secret === "string" ? body.google.secret.trim() : ""
+  const trackingApiKey = typeof body?.tracking?.apiKey === "string" ? body.tracking.apiKey.trim() : ""
   const port = Number(body?.brevo?.port)
   const environment = body?.paypal?.environment
   const callbackUrl = typeof body?.google?.callbackUrl === "string" ? body.google.callbackUrl.trim() : current.google.callbackUrl
@@ -44,7 +45,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     validCallback = parsed.protocol === "https:" || (parsed.protocol === "http:" && ["localhost", "127.0.0.1"].includes(parsed.hostname))
   } catch {}
 
-  if (brevoKey.length > 1000 || turnstileSecret.length > 1000 || paypalSecret.length > 2000 || googleSecret.length > 2000) return res.status(400).json({ error: "密钥长度不正确。" })
+  if (brevoKey.length > 1000 || turnstileSecret.length > 1000 || paypalSecret.length > 2000 || googleSecret.length > 2000 || trackingApiKey.length > 2000) return res.status(400).json({ error: "密钥长度不正确。" })
   if (!Number.isInteger(port) || port < 1 || port > 65535) return res.status(400).json({ error: "Brevo SMTP 端口必须是 1 到 65535 之间的数字。" })
   if (environment !== "sandbox" && environment !== "production") return res.status(400).json({ error: "请选择 PayPal 测试环境或正式环境。" })
 
@@ -60,6 +61,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   }
   if (body?.google?.enabled && (!(body?.google?.clientId || current.google.clientId) || !(googleSecret || current.google.encryptedSecret) || !validCallback)) {
     return res.status(400).json({ error: "启用 Google 登录前，请填写 Client ID、Client Secret 和有效的 HTTPS 回调地址（本地测试可用 localhost）。" })
+  }
+  if (body?.tracking?.enabled && !(trackingApiKey || current.tracking.encryptedApiKey)) {
+    return res.status(400).json({ error: "启用 17TRACK 前，请先填写 API Key。" })
   }
   if (body?.paypal?.loginEnabled && (!(body?.paypal?.clientId || current.paypal.clientId) || !(paypalSecret || current.paypal.encryptedSecret) || !validPaypalLoginCallback)) {
     return res.status(400).json({ error: "启用 PayPal 登录前，请填写 PayPal Client ID、Secret 和有效回调地址。" })
@@ -99,6 +103,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       encryptedSecret: googleSecret ? encryptIntegrationSecret(googleSecret) : current.google.encryptedSecret,
       secretHint: googleSecret ? googleSecret.slice(-4) : current.google.secretHint,
       callbackUrl,
+    },
+    tracking: {
+      enabled: body?.tracking?.enabled === true,
+      encryptedApiKey: trackingApiKey ? encryptIntegrationSecret(trackingApiKey) : current.tracking.encryptedApiKey,
+      apiKeyHint: trackingApiKey ? trackingApiKey.slice(-4) : current.tracking.apiKeyHint,
     },
   }
 

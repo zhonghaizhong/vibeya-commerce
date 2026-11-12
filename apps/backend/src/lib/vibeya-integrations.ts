@@ -38,6 +38,11 @@ export type VibeyaIntegrationsConfig = {
     secretHint: string
     callbackUrl: string
   }
+  tracking: {
+    enabled: boolean
+    encryptedApiKey: string
+    apiKeyHint: string
+  }
 }
 
 export type PublicVibeyaIntegrationsConfig = {
@@ -45,6 +50,7 @@ export type PublicVibeyaIntegrationsConfig = {
   turnstile: Omit<VibeyaIntegrationsConfig["turnstile"], "encryptedSecret"> & { hasSecret: boolean }
   paypal: Omit<VibeyaIntegrationsConfig["paypal"], "encryptedSecret"> & { hasSecret: boolean }
   google: Omit<VibeyaIntegrationsConfig["google"], "encryptedSecret"> & { hasSecret: boolean }
+  tracking: Omit<VibeyaIntegrationsConfig["tracking"], "encryptedApiKey"> & { hasApiKey: boolean }
 }
 
 function encryptionKey(): Buffer {
@@ -74,6 +80,7 @@ export function emptyVibeyaIntegrationsConfig(): VibeyaIntegrationsConfig {
     turnstile: { enabled: false, siteKey: "", encryptedSecret: "", secretHint: "" },
     paypal: { enabled: false, clientId: "", encryptedSecret: "", secretHint: "", environment: "sandbox", webhookId: "", autoCapture: true, loginEnabled: false, loginCallbackUrl: "http://localhost:8000/us/auth/paypal/callback" },
     google: { enabled: false, clientId: "", encryptedSecret: "", secretHint: "", callbackUrl: "" },
+    tracking: { enabled: false, encryptedApiKey: "", apiKeyHint: "" },
   }
 }
 
@@ -86,6 +93,7 @@ export function readVibeyaIntegrationsConfig(value: unknown): VibeyaIntegrations
     turnstile: { ...defaults.turnstile, ...(saved.turnstile ?? {}) },
     paypal: { ...defaults.paypal, ...(saved.paypal ?? {}) },
     google: { ...defaults.google, ...(saved.google ?? {}) },
+    tracking: { ...defaults.tracking, ...(saved.tracking ?? {}) },
   }
 }
 
@@ -94,11 +102,13 @@ export function toPublicVibeyaIntegrationsConfig(config: VibeyaIntegrationsConfi
   const { encryptedSecret: turnstileSecret, ...turnstile } = config.turnstile
   const { encryptedSecret: paypalSecret, ...paypal } = config.paypal
   const { encryptedSecret: googleSecret, ...google } = config.google
+  const { encryptedApiKey, ...tracking } = config.tracking
   return {
     brevo: { ...brevo, hasKey: Boolean(encryptedKey) },
     turnstile: { ...turnstile, hasSecret: Boolean(turnstileSecret) },
     paypal: { ...paypal, hasSecret: Boolean(paypalSecret) },
     google: { ...google, hasSecret: Boolean(googleSecret) },
+    tracking: { ...tracking, hasApiKey: Boolean(encryptedApiKey) },
   }
 }
 
