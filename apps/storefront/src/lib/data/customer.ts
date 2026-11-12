@@ -168,6 +168,92 @@ export async function setGoogleCustomerToken(
   return { success: true }
 }
 
+export type PaypalShippingAddress = {
+  first_name?: string
+  last_name?: string
+  address_1: string
+  city: string
+  province?: string
+  postal_code: string
+  country_code: string
+}
+
+export async function savePaypalShippingAddress(
+  input: PaypalShippingAddress
+): Promise<{ success: boolean; error?: string }> {
+  const address = {
+    first_name: input.first_name?.trim().slice(0, 100) || "",
+    last_name: input.last_name?.trim().slice(0, 100) || "",
+    address_1: input.address_1.trim().slice(0, 255),
+    address_2: "",
+    city: input.city.trim().slice(0, 100),
+    province: input.province?.trim().slice(0, 100) || "",
+    postal_code: input.postal_code.trim().slice(0, 30),
+    country_code: input.country_code.trim().toLowerCase(),
+  }
+
+  // VIBEYA currently ships to U.S. addresses only. Keep sign-in available if
+  // PayPal returns an incomplete or unsupported address; checkout stays editable.
+  if (
+    address.country_code !== "us" ||
+    !address.address_1 ||
+    !address.city ||
+    !address.postal_code
+  ) {
+    return { success: false, error: "PayPal did not return a complete U.S. shipping address." }
+  }
+
+  const headers = await getAuthHeaders()
+
+  try {
+    const { customer } = await sdk.store.customer.retrieve({}, headers)
+    const normalize = (value?: string | null) => (value || "").trim().toLowerCase()
+    const existingAddress = customer.addresses?.find(
+      (savedAddress) =>
+        normalize(savedAddress.address_1) === normalize(address.address_1) &&
+        normalize(savedAddress.city) === normalize(address.city) &&
+        normalize(savedAddress.postal_code) === normalize(address.postal_code) &&
+        normalize(savedAddress.country_code) === "us"
+    )
+
+    if (existingAddress) {
+      await sdk.store.customer.updateAddress(
+        existingAddress.id,
+        { ...address, is_default_shipping: true },
+        {},
+        headers
+      )
+    } else {
+      await sdk.store.customer.createAddress(
+        { ...address, is_default_shipping: true },
+        {},
+        headers
+      )
+    }
+
+    const cartId = await getCartId()
+    if (cartId) {
+      await sdk.store.cart.update(
+        cartId,
+        { shipping_address: { ...address, phone: "" } },
+        {},
+        headers
+      )
+      const cartCacheTag = await getCacheTag("carts")
+      revalidateTag(cartCacheTag, { expire: 0 })
+    }
+
+    const customerCacheTag = await getCacheTag("customers")
+    revalidateTag(customerCacheTag, { expire: 0 })
+    return { success: true }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Could not save the PayPal shipping address.",
+    }
+  }
+}
+
 // Logs the customer in and reconciles the customer record. The behavior is
 // driven entirely by the backend's login response, so it works whether or not
 // email verification is enabled.

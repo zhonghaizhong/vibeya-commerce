@@ -1,7 +1,11 @@
 "use client"
 
 import { sdk } from "@lib/config"
-import { setGoogleCustomerToken } from "@lib/data/customer"
+import {
+  savePaypalShippingAddress,
+  setGoogleCustomerToken,
+  type PaypalShippingAddress,
+} from "@lib/data/customer"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
@@ -12,7 +16,12 @@ function decodeToken(token: string) {
   const bytes = Uint8Array.from(atob(normalized), (character) => character.charCodeAt(0))
   return JSON.parse(new TextDecoder().decode(bytes)) as {
     actor_id?: string
-    user_metadata?: { email?: string; first_name?: string; last_name?: string }
+    user_metadata?: {
+      email?: string
+      first_name?: string
+      last_name?: string
+      paypal_shipping_address?: PaypalShippingAddress | null
+    }
   }
 }
 
@@ -69,6 +78,14 @@ export default function PayPalCallback({
 
         const saved = await setGoogleCustomerToken(token)
         if (!saved.success) throw new Error(saved.error || "Could not sign in.")
+        const paypalAddress = claims.user_metadata?.paypal_shipping_address
+        if (paypalAddress) {
+          await savePaypalShippingAddress({
+            ...paypalAddress,
+            first_name: claims.user_metadata?.first_name,
+            last_name: claims.user_metadata?.last_name,
+          })
+        }
         router.replace(`/${countryCode}/account`)
         router.refresh()
       } catch (callbackError) {

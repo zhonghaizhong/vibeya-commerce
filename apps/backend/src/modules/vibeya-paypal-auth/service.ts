@@ -85,7 +85,7 @@ class VibeyaPayPalAuthService extends AbstractAuthModuleProvider {
     authorizationUrl.searchParams.set("flowEntry", "static")
     authorizationUrl.searchParams.set("client_id", this.config_.clientId)
     authorizationUrl.searchParams.set("response_type", "code")
-    authorizationUrl.searchParams.set("scope", "openid email profile https://uri.paypal.com/services/paypalattributes")
+    authorizationUrl.searchParams.set("scope", "openid email profile address https://uri.paypal.com/services/paypalattributes")
     authorizationUrl.searchParams.set("redirect_uri", callbackUrl)
     authorizationUrl.searchParams.set("state", stateKey)
     return { success: true, location: authorizationUrl.toString() }
@@ -131,6 +131,13 @@ class VibeyaPayPalAuthService extends AbstractAuthModuleProvider {
         name?: string
         given_name?: string
         family_name?: string
+        address?: {
+          street_address?: string
+          locality?: string
+          region?: string
+          postal_code?: string
+          country?: string
+        }
       }
       if (!userInfoResponse.ok) throw new Error("PayPal did not return account information. Check that Log in with PayPal is enabled for this app.")
       if (!userInfo.email || userInfo.verified_account !== true) {
@@ -140,19 +147,36 @@ class VibeyaPayPalAuthService extends AbstractAuthModuleProvider {
       const entity_id = userInfo.user_id || userInfo.sub
       if (!entity_id) throw new Error("PayPal did not return a stable account identifier.")
 
+      const paypalAddress = userInfo.address
+      const country = paypalAddress?.country?.trim().toLowerCase()
+      const shippingAddress = paypalAddress && ["us", "usa", "united states", "united states of america"].includes(country || "")
+        ? {
+            address_1: paypalAddress.street_address?.trim().slice(0, 255) || "",
+            city: paypalAddress.locality?.trim().slice(0, 100) || "",
+            province: paypalAddress.region?.trim().slice(0, 100) || "",
+            postal_code: paypalAddress.postal_code?.trim().slice(0, 30) || "",
+            country_code: "us",
+          }
+        : null
+      const userMetadata = {
+        email: userInfo.email,
+        name: userInfo.name,
+        first_name: userInfo.given_name,
+        last_name: userInfo.family_name,
+        paypal_shipping_address: shippingAddress,
+      }
+
       let authIdentity
       try {
         authIdentity = await authIdentityService.retrieve({ entity_id })
+        authIdentity = await authIdentityService.update(entity_id, {
+          user_metadata: { ...authIdentity.user_metadata, ...userMetadata },
+        })
       } catch (error) {
         if (error instanceof MedusaError && error.type !== MedusaError.Types.NOT_FOUND) throw error
         authIdentity = await authIdentityService.create({
           entity_id,
-          user_metadata: {
-            email: userInfo.email,
-            name: userInfo.name,
-            first_name: userInfo.given_name,
-            last_name: userInfo.family_name,
-          },
+          user_metadata: userMetadata,
         })
       }
       return { success: true, authIdentity }
