@@ -5,7 +5,7 @@ import AccountPageHeading from "@modules/account/components/account-page-heading
 import AddressBook from "@modules/account/components/address-book"
 
 import { getRegion } from "@lib/data/regions"
-import { retrieveCustomer } from "@lib/data/customer"
+import { retrieveCustomer, syncOrderAddressesToAddressBook } from "@lib/data/customer"
 
 export const metadata: Metadata = {
   title: "Addresses",
@@ -21,6 +21,9 @@ export default async function Addresses(props: {
     props.searchParams,
   ])
   const { countryCode } = params
+  // Backfill addresses from existing orders before loading the address book.
+  // If syncing is unavailable, keep the account page usable as usual.
+  await syncOrderAddressesToAddressBook().catch(() => undefined)
   const customer = await retrieveCustomer()
 
   if (!customer) {

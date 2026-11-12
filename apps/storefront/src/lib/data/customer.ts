@@ -80,6 +80,16 @@ export const retrieveCustomer =
       .catch(() => null)
   }
 
+export async function syncOrderAddressesToAddressBook(): Promise<void> {
+  const headers = await getAuthHeaders()
+  if (!("authorization" in headers)) return
+
+  await sdk.client.fetch<{ saved: number; alreadySaved: number }>(
+    "/store/vibeya/customer/sync-order-addresses",
+    { method: "POST", headers, cache: "no-store" }
+  )
+}
+
 export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
   const headers = {
     ...(await getAuthHeaders()),
