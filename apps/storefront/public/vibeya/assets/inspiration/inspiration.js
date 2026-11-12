@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   const articleId=document.body.dataset.inspirationId||'funny-skeleton';
   const current=catalog.find(x=>x.id===articleId)||catalog[0];
   const storyLabels={
-    product:{'long-sleeve':'Custom Long Sleeve Tee',hoodie:'Washed Vintage Hoodie',tumbler:'20 oz Stainless Steel Tumbler','bath-mat':'Custom 3D Bath Mat'},
-    pattern:{skeleton:'Humorous Skeleton','botanical-celestial':'Botanical & Celestial',animal:'Midnight Cat Café','rubber-duck':'Duck Bubble Trouble'},
-    style:{'street-graffiti':'Street Graffiti / Chill Mood','nature-streetwear':'Nature-Inspired Streetwear','retro-whimsical':'Retro Whimsical','playful-whimsy':'Playful Bathroom Decor'}
+    product:{'long-sleeve':'Custom Long Sleeve Tee',hoodie:'Washed Vintage Hoodie',tumbler:'20 oz Stainless Steel Tumbler','bath-mat':'Custom 3D Bath Mat',beanie:'Custom Knitted Beanie'},
+    pattern:{skeleton:'Humorous Skeleton','botanical-celestial':'Botanical & Celestial',animal:'Midnight Cat Café','rubber-duck':'Duck Bubble Trouble',typography:'Sleepy Cat & Bold Typography'},
+    style:{'street-graffiti':'Street Graffiti / Chill Mood','nature-streetwear':'Nature-Inspired Streetwear','retro-whimsical':'Retro Whimsical','playful-whimsy':'Playful Bathroom Decor',streetwear:'Retro Varsity Streetwear'}
   };
   const storyMeta=document.querySelector('.story-meta');
   if(storyMeta&&current){

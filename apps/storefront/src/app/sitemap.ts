@@ -23,6 +23,8 @@ const INDEXABLE_CONTENT_PATHS = [
   "/vibeya/inspiration/hoodie-orbit-bloom.html",
   "/vibeya/inspiration/funny-skeleton-lazy-mood.html",
   "/vibeya/inspiration/duck-bubble-trouble-custom-bath-mat.html",
+  "/vibeya/inspiration/no-nightmares-jesus-blanket.html",
+  "/vibeya/inspiration/low-battery-club-custom-beanie.html",
 ]
 const PAGE_SIZE = 200
 
