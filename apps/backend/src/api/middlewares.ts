@@ -33,7 +33,7 @@ export default defineMiddlewares({
     },
     {
       method: ["POST"],
-      matcher: "/store/vibeya/tracking/webhook",
+      matcher: "/webhooks/17track",
       bodyParser: { preserveRawBody: true, sizeLimit: "1mb" },
     },
     {

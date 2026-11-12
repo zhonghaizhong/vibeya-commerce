@@ -5,8 +5,8 @@ import {
   decryptIntegrationSecret,
   readVibeyaIntegrationsConfig,
   VIBEYA_INTEGRATIONS_METADATA_KEY,
-} from "../../../../../lib/vibeya-integrations"
-import { verifyTrack17Signature } from "../../../../../lib/vibeya-tracking"
+} from "../../../lib/vibeya-integrations"
+import { verifyTrack17Signature } from "../../../lib/vibeya-tracking"
 
 const TRACKING_METADATA_KEY = "vibeya_tracking"
 

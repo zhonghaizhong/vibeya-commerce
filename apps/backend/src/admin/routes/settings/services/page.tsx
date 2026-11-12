@@ -72,7 +72,7 @@ const IntegrationsPage = () => {
   useEffect(() => { load() }, [load])
 
   useEffect(() => {
-    setTrackingWebhookUrl(`${window.location.origin}/store/vibeya/tracking/webhook`)
+    setTrackingWebhookUrl(`${window.location.origin}/webhooks/17track`)
   }, [])
 
   const copyTrackingWebhookUrl = async () => {
