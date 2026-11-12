@@ -12,9 +12,14 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
   let shippingOptions: StoreCartShippingOption[] = []
 
   if (cart) {
-    const { shipping_options } = await listCartOptions()
-
-    shippingOptions = shipping_options
+    try {
+      const { shipping_options } = await listCartOptions()
+      shippingOptions = shipping_options
+    } catch (error) {
+      // Shipping nudges are optional UI; a shipping-options failure must not
+      // prevent account, cart, or product pages from rendering.
+      console.error("Could not load cart shipping options", error)
+    }
   }
 
   return (
