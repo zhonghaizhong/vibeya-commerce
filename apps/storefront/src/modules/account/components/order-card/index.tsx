@@ -11,9 +11,9 @@ type OrderCardProps = {
   order: HttpTypes.StoreOrder
 }
 
-const formatOrderDate = (value?: string | null) => {
+const formatOrderDate = (value?: string | Date | null) => {
   if (!value) return "Date unavailable"
-  const date = new Date(value)
+  const date = value instanceof Date ? value : new Date(value)
   if (Number.isNaN(date.getTime())) return "Date unavailable"
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
 }
