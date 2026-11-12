@@ -32,6 +32,11 @@ export default defineMiddlewares({
       middlewares: [authenticate("customer", "bearer", { allowUnregistered: true })],
     },
     {
+      method: ["POST"],
+      matcher: "/store/vibeya/tracking/webhook",
+      bodyParser: { preserveRawBody: true, sizeLimit: "1mb" },
+    },
+    {
       method: ["GET"],
       matcher: "/store/vibeya/orders/:id/tracking",
       middlewares: [authenticate("customer", ["session", "bearer"])],

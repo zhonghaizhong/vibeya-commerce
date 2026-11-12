@@ -33,6 +33,7 @@ const IntegrationsPage = () => {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
+  const [trackingWebhookUrl, setTrackingWebhookUrl] = useState("")
 
   const copyCallbackUrl = async () => {
     try {
@@ -69,6 +70,20 @@ const IntegrationsPage = () => {
   }, [])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    setTrackingWebhookUrl(`${window.location.origin}/store/vibeya/tracking/webhook`)
+  }, [])
+
+  const copyTrackingWebhookUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(trackingWebhookUrl)
+      setMessage("17TRACK Webhook 地址已复制。请粘贴到 17TRACK API 控制台的 Settings 中并保存。")
+      setError("")
+    } catch {
+      setError("无法自动复制，请手动选中并复制 Webhook 地址。")
+    }
+  }
 
   const save = async () => {
     setSaving(true)
@@ -211,14 +226,22 @@ const IntegrationsPage = () => {
         </Container>
 
         <Container className="flex flex-col gap-y-5 p-5">
-          <div><Heading level="h2">17TRACK 物流追踪</Heading><Text className="mt-1 text-ui-fg-subtle">发货时自动登记运单，客户可在订单详情中查看承运商返回的最新物流节点。</Text></div>
-          {toggle("启用 17TRACK 查询", config.tracking.enabled, (enabled) => setConfig({ ...config, tracking: { ...config.tracking, enabled } }), "启用后，新发货会登记物流单号；订单详情页会读取最新物流状态。")}
+          <div><Heading level="h2">17TRACK 物流追踪</Heading><Text className="mt-1 text-ui-fg-subtle">17TRACK 有物流变化时会主动推送到 VIBEYA，客户订单页读取已保存的物流节点。</Text></div>
+          {toggle("启用 17TRACK 主动推送", config.tracking.enabled, (enabled) => setConfig({ ...config, tracking: { ...config.tracking, enabled } }), "启用后，新录入运单会登记到 17TRACK；请同时把下方 Webhook 地址填入 17TRACK。")}
           <Container className="bg-ui-bg-subtle p-4">
             <Text className="font-medium">去哪里获取 API 密钥</Text>
-            <Text size="small" className="mt-1 text-ui-fg-subtle">登录 17TRACK API 控制台，创建 API Key 后粘贴到下方。密钥会加密保存在后台，不会发送到顾客浏览器。开启后只处理新录入的运单。</Text>
+            <Text size="small" className="mt-1 text-ui-fg-subtle">登录 17TRACK API 控制台，创建 API Key 后粘贴到下方。密钥会加密保存在后台，仅用于登记运单和验证推送签名，不会发送到顾客浏览器。开启后，新录入的运单会关联订单并接收物流推送。</Text>
             <a className="mt-2 inline-block text-sm text-ui-fg-interactive underline" href="https://api.17track.net/" target="_blank" rel="noreferrer">打开 17TRACK API</a>
           </Container>
           {field("17TRACK API Key", secrets.trackingApiKey, (apiKey) => setSecrets({ ...secrets, trackingApiKey: apiKey }), config.tracking.hasApiKey ? `已保存（末尾 ${config.tracking.apiKeyHint}），留空不更换` : "粘贴 17TRACK API Key", "password")}
+          <Container className="flex flex-wrap items-end justify-between gap-3 bg-ui-bg-subtle p-4">
+            <div className="min-w-0 flex-1">
+              <Text className="font-medium">17TRACK Webhook 地址</Text>
+              <Text size="small" className="mt-1 text-ui-fg-subtle">复制此地址，到 17TRACK API 控制台 → Settings → Webhook URL 粘贴并保存。线上请从线上管理后台复制线上地址。</Text>
+              <div className="mt-2 break-all rounded-md border border-ui-border-base bg-ui-bg-field px-3 py-2 text-sm">{trackingWebhookUrl || "正在生成地址…"}</div>
+            </div>
+            <button type="button" disabled={!trackingWebhookUrl} onClick={copyTrackingWebhookUrl} className="shrink-0 rounded-md border border-ui-border-base bg-ui-bg-base px-3 py-1.5 text-sm font-medium text-ui-fg-base disabled:opacity-50">复制 Webhook 地址</button>
+          </Container>
         </Container>
 
         <Container className="p-4"><Text size="small" className="text-ui-fg-subtle">安全提示：这里不会显示或导出完整密钥。请只在可信的管理后台录入服务商密钥。</Text></Container>

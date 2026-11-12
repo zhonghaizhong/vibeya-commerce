@@ -159,7 +159,7 @@ async function registerTrackingWith17Track(
 
   await registerTrackingNumbers(
     decryptIntegrationSecret(config.tracking.encryptedApiKey),
-    trackingNumbers
+    trackingNumbers.map((number) => ({ number, tag: orderId }))
   )
   const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER)
   logger.info(`Registered ${trackingNumbers.length} tracking number(s) with 17TRACK for order ${orderId}`)
