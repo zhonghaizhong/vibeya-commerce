@@ -103,6 +103,6 @@ const ThemeManagementPage = () => {
   )
 }
 
-export const config = defineRouteConfig({ label: "主题管理", rank: 10 })
+export const config = defineRouteConfig({ label: "店铺外观", rank: 10 })
 
 export default ThemeManagementPage

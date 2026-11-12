@@ -28,6 +28,8 @@ export type VibeyaIntegrationsConfig = {
     environment: "sandbox" | "production"
     webhookId: string
     autoCapture: boolean
+    loginEnabled: boolean
+    loginCallbackUrl: string
   }
   google: {
     enabled: boolean
@@ -70,7 +72,7 @@ export function emptyVibeyaIntegrationsConfig(): VibeyaIntegrationsConfig {
   return {
     brevo: { enabled: false, host: "smtp-relay.brevo.com", port: 587, login: "", encryptedKey: "", keyHint: "", fromEmail: "", fromName: "VIBEYA" },
     turnstile: { enabled: false, siteKey: "", encryptedSecret: "", secretHint: "" },
-    paypal: { enabled: false, clientId: "", encryptedSecret: "", secretHint: "", environment: "sandbox", webhookId: "", autoCapture: true },
+    paypal: { enabled: false, clientId: "", encryptedSecret: "", secretHint: "", environment: "sandbox", webhookId: "", autoCapture: true, loginEnabled: false, loginCallbackUrl: "http://localhost:8000/us/auth/paypal/callback" },
     google: { enabled: false, clientId: "", encryptedSecret: "", secretHint: "", callbackUrl: "" },
   }
 }

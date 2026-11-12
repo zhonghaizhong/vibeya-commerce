@@ -217,39 +217,56 @@ async function completeLogin(
   let token = result
 
   // The token may not be tied to a customer record yet — right after
-  // registration, or after verifying a brand-new account. Ask the backend:
-  // `/store/customers/me` rejects tokens without a registered actor, so a
-  // failed retrieve means we still need to create the customer, then log in
-  // again to obtain a customer-bound token.
+  // registration, or after verifying a brand-new account. Ask the backend to
+  // link an existing customer with the same verified email before creating a
+  // new record, then log in again to get a customer-bound token.
   const customerExists = await sdk.store.customer
     .retrieve({}, { authorization: `Bearer ${token}` })
     .then(() => true)
     .catch(() => false)
 
   if (!customerExists) {
-    const pending = await getPendingCustomer()
+    const association = await sdk.client.fetch<{ linked: boolean }>(
+      "/store/vibeya/auth/associate-customer",
+      {
+        method: "POST",
+        headers: { authorization: `Bearer ${token}` },
+        body: {},
+        cache: "no-store",
+      }
+    )
 
-    try {
-      await sdk.store.customer.create(
-        {
+    if (association.linked) {
+      try {
+        token = await sdk.auth.login("customer", "emailpass", { email, password }) as string
+      } catch (error) {
+        return { state: "error", error: String(error) }
+      }
+    } else {
+      const pending = await getPendingCustomer()
+
+      try {
+        await sdk.store.customer.create(
+          {
+            email,
+            first_name: pending?.first_name,
+            last_name: pending?.last_name,
+            phone: pending?.phone,
+          },
+          {},
+          { authorization: `Bearer ${token}` }
+        )
+
+        token = (await sdk.auth.login("customer", "emailpass", {
           email,
-          first_name: pending?.first_name,
-          last_name: pending?.last_name,
-          phone: pending?.phone,
-        },
-        {},
-        { authorization: `Bearer ${token}` }
-      )
+          password,
+        })) as string
+      } catch (error) {
+        return { state: "error", error: String(error) }
+      }
 
-      token = (await sdk.auth.login("customer", "emailpass", {
-        email,
-        password,
-      })) as string
-    } catch (error) {
-      return { state: "error", error: String(error) }
+      await removePendingCustomer()
     }
-
-    await removePendingCustomer()
   }
 
   await setAuthToken(token)

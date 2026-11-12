@@ -47,11 +47,23 @@ export default function GoogleCallback({
           const email = claims.user_metadata?.email
           if (!email) throw new Error("Google did not return an email address.")
 
-          await sdk.store.customer.create({
-            email,
-            first_name: claims.user_metadata?.first_name,
-            last_name: claims.user_metadata?.last_name,
-          })
+          const association = await sdk.client.fetch<{ linked: boolean }>(
+            "/store/vibeya/auth/associate-customer",
+            {
+              method: "POST",
+              headers: { authorization: `Bearer ${token}` },
+              body: {},
+              cache: "no-store",
+            }
+          )
+
+          if (!association.linked) {
+            await sdk.store.customer.create({
+              email,
+              first_name: claims.user_metadata?.first_name,
+              last_name: claims.user_metadata?.last_name,
+            })
+          }
 
           const refreshed = await sdk.auth.refresh()
           if (!("token" in refreshed)) {

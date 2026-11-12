@@ -1,13 +1,40 @@
-document.addEventListener('DOMContentLoaded',()=>{
-  const catalog=Array.isArray(window.VIBEYA_INSPIRATION_CATALOG)?window.VIBEYA_INSPIRATION_CATALOG:[];
-  const articleId=document.body.dataset.inspirationId||'funny-skeleton';
-  const current=catalog.find(x=>x.id===articleId)||catalog[0];
+document.addEventListener('DOMContentLoaded',async()=>{
+  const safe=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let catalog=Array.isArray(window.VIBEYA_INSPIRATION_CATALOG)?window.VIBEYA_INSPIRATION_CATALOG:[];
+  try{const response=await fetch('/api/vibeya/inspirations',{credentials:'same-origin',cache:'no-store'});if(response.ok){const data=await response.json();if(Array.isArray(data.inspirations))catalog=data.inspirations;}}catch(error){console.warn('Using bundled inspiration catalog',error);}
+  document.querySelectorAll('[data-inspiration-feature]').forEach(section=>{
+    const link=section.querySelector('.actions a[href]');
+    if(!link)return;
+    const slug=new URL(link.href,location.href).pathname.split('/').pop();
+    const entry=catalog.find(item=>item.slug===slug);
+    if(!entry)return;
+    if(entry.summary){const description=section.querySelector('.featured-text > p');if(description)description.textContent=entry.summary;}
+    if(entry.useManagedImage&&entry.image){const image=section.querySelector('.art-card img');if(image){image.src=/^(https?:)?\//.test(entry.image)?new URL(entry.image,location.origin).href:`../assets/inspiration/${encodeURIComponent(entry.image)}`;image.alt=`${entry.title} inspiration`;}}
+  });
+  const isGenericStory=document.body.dataset.inspirationTemplate==='true';
+  const articleId=new URLSearchParams(location.search).get('inspiration')||document.body.dataset.inspirationId||'funny-skeleton';
+  const current=catalog.find(x=>x.id===articleId)||(isGenericStory?undefined:catalog[0]);
   const storyLabels={
-    product:{'long-sleeve':'Custom Long Sleeve Tee',hoodie:'Washed Vintage Hoodie',tumbler:'20 oz Stainless Steel Tumbler','bath-mat':'Custom 3D Bath Mat'},
-    pattern:{skeleton:'Humorous Skeleton','botanical-celestial':'Botanical & Celestial',animal:'Midnight Cat Café','rubber-duck':'Duck Bubble Trouble'},
-    style:{'street-graffiti':'Street Graffiti / Chill Mood','nature-streetwear':'Nature-Inspired Streetwear','retro-whimsical':'Retro Whimsical','playful-whimsy':'Playful Bathroom Decor'}
+    product:{'long-sleeve':'Custom Long Sleeve Tee',hoodie:'Washed Vintage Hoodie',tumbler:'20 oz Stainless Steel Tumbler','bath-mat':'Custom 3D Bath Mat',beanie:'Custom Knitted Beanie'},
+    pattern:{skeleton:'Humorous Skeleton','botanical-celestial':'Botanical & Celestial',animal:'Midnight Cat Café','rubber-duck':'Duck Bubble Trouble',typography:'Sleepy Cat & Bold Typography'},
+    style:{'street-graffiti':'Street Graffiti / Chill Mood','nature-streetwear':'Nature-Inspired Streetwear','retro-whimsical':'Retro Whimsical','playful-whimsy':'Playful Bathroom Decor',streetwear:'Retro Varsity Streetwear'}
   };
   const storyMeta=document.querySelector('.story-meta');
+  if(isGenericStory&&current){
+    document.title=`${current.title} | VIBEYA Design Story`;
+    const title=document.getElementById('storyTitle');if(title)title.textContent=current.title;
+    const summary=document.getElementById('storySummary');if(summary)summary.textContent=current.summary||'Explore the idea behind this design, then make a version that feels like you.';
+    const image=document.getElementById('storyHeroImage');
+    if(image){const source=current.image||current.cardImage||'';image.src=/^(https?:)?\//.test(source)?new URL(source,location.origin).href:`../assets/inspiration/${encodeURIComponent(source)}`;image.alt=`${current.title} design inspiration`;}
+    const tags=document.getElementById('storyTags');if(tags)tags.innerHTML=(current.tags||[]).map(tag=>`<span class="chip">${safe(tag)}</span>`).join('');
+    for(const [key,id] of [['product','storyProduct'],['pattern','storyPattern'],['style','storyStyle']]){const node=document.getElementById(id);if(node)node.textContent=storyLabels[key]?.[current[key]]||current[key]||'';}
+    const body=document.getElementById('storyBody');if(body){body.replaceChildren(...String(current.articleBody||'').split(/\n\s*\n/).map(text=>text.trim()).filter(Boolean).map(text=>{const p=document.createElement('p');p.textContent=text;return p;}));body.hidden=!current.articleBody;}
+    window.VIBEYA_CUSTOMIZE_URL=`../index.html?openStudio=1&embeddedStudio=1&inspiration=${encodeURIComponent(current.id)}`;
+  }else if(isGenericStory){
+    document.title='Design story unavailable | VIBEYA';
+    const spotlight=document.querySelector('.story-spotlight');if(spotlight)spotlight.hidden=true;
+    const body=document.getElementById('storyBody');if(body){body.hidden=false;const message=document.createElement('p');message.textContent='This design story is not available right now.';body.replaceChildren(message);}
+  }
   if(storyMeta&&current){
     ['product','pattern','style'].forEach(key=>{const value=storyMeta.querySelector(`[data-story-value="${key}"]`);if(value)value.textContent=storyLabels[key]?.[current[key]]||current[key]||'';});
     storyMeta.hidden=false;
@@ -15,7 +42,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   const moreSection=document.getElementById('moreInspirationSection');
   const moreCards=document.getElementById('moreInspirationCards');
   const isInspirationListing=!!document.getElementById('inspirationFilters');
-  const safe=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   fetch('/api/vibeya/session',{credentials:'same-origin',cache:'no-store'}).then(response=>response.ok?response.json():null).then(session=>{
     const authenticated=!!session?.authenticated;
     document.body.dataset.vibeyaAuth=authenticated?'authenticated':'guest';
@@ -23,9 +49,28 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.querySelectorAll('.account-link,.account-menu-link').forEach(link=>{link.textContent=label;link.setAttribute('aria-label',session?.authenticated?'Account':'Sign in or register');});
   }).catch(()=>{document.body.dataset.vibeyaAuth='guest';document.querySelectorAll('.account-link,.account-menu-link').forEach(link=>{link.textContent='Sign in';link.setAttribute('aria-label','Sign in or register');});});
   if(moreSection&&moreCards&&current&&!isInspirationListing){
-    const related=catalog.filter(x=>x.published&&x.id!==current.id&&x.slug&&x.image).map(x=>({x,score:Number(x.product===current.product)*4+Number(x.pattern===current.pattern)*3+Number(x.style===current.style)*2+(x.tags||[]).filter(tag=>(current.tags||[]).includes(tag)).length})).filter(r=>r.score>0).sort((a,b)=>b.score-a.score).slice(0,6);
-    moreCards.innerHTML=related.map(({x})=>`<a class="related-card home-featured-inspo" data-inspiration="${safe(x.id)}" data-product="${safe(x.product)}" data-pattern="${safe(x.pattern)}" data-style="${safe(x.style)}" href="${encodeURIComponent(x.slug)}" aria-label="Open ${safe(x.title)}"><img loading="lazy" src="../assets/inspiration/${encodeURIComponent(x.cardImage||x.image)}" alt="${safe(x.title)}"></a>`).join('');
-    moreSection.hidden=related.length===0;
+    let related=[];
+    try{
+      const inspirationUrl=new URL('/vibeya/inspiration/index.html',location.origin);
+      const response=await fetch(inspirationUrl,{credentials:'same-origin',cache:'no-store'});
+      if(response.ok){
+        const page=new DOMParser().parseFromString(await response.text(),'text/html');
+        related=Array.from(page.querySelectorAll('[data-inspiration-feature]')).flatMap(section=>{
+          const image=section.querySelector('.art-card img');
+          const link=section.querySelector('.actions a[href]');
+          if(!image||!link)return [];
+          const href=new URL(link.getAttribute('href'),inspirationUrl);
+          const slug=href.pathname.split('/').pop()||'';
+          const entry=catalog.find(item=>item.slug===slug);
+          if((entry&&!entry.published)||entry?.id===current.id)return [];
+          return [{id:entry?.id||slug.replace(/\.html$/,''),title:entry?.title||section.querySelector('.featured-text h2')?.textContent?.replace(/\s+/g,' ').trim()||'VIBEYA inspiration',product:entry?.product,pattern:entry?.pattern,style:entry?.style,slug:href.href,image:new URL(image.getAttribute('src')||'',inspirationUrl).href,alt:image.getAttribute('alt')||entry?.title||'VIBEYA inspiration'}];
+        });
+      }
+    }catch(error){console.warn('Could not load inspiration-list feature cards',error);}
+    for(let i=related.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[related[i],related[j]]=[related[j],related[i]];}
+    const selected=related.slice(0,4);
+    moreCards.innerHTML=selected.map(x=>`<a class="related-card home-featured-inspo" data-inspiration="${safe(x.id)}" data-product="${safe(x.product)}" data-pattern="${safe(x.pattern)}" data-style="${safe(x.style)}" href="${safe(x.slug)}" aria-label="Open ${safe(x.title)}"><img loading="lazy" src="${safe(x.image)}" alt="${safe(x.alt)}"></a>`).join('');
+    moreSection.hidden=selected.length===0;
   }
   const countBadge=document.getElementById('marketCartCount');
   const refreshCartCount=async()=>{

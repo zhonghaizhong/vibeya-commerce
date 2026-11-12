@@ -28,6 +28,11 @@ export default defineMiddlewares({
     },
     {
       method: ["POST"],
+      matcher: "/store/vibeya/auth/associate-customer",
+      middlewares: [authenticate("customer", "bearer", { allowUnregistered: true })],
+    },
+    {
+      method: ["POST"],
       matcher: "/store/vibeya/cart/line-items",
       bodyParser: { sizeLimit: "2mb" },
     },
