@@ -33,6 +33,8 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         "shipping_methods.name",
         "fulfillments.id",
         "fulfillments.created_at",
+        "fulfillments.items.id",
+        "fulfillments.items.quantity",
         "fulfillments.labels.tracking_number",
         "fulfillments.labels.tracking_url",
         "items.id",

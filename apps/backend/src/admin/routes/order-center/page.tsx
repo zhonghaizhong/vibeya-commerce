@@ -36,6 +36,7 @@ type Order = {
   fulfillments?: Array<{
     id: string
     created_at?: string
+    items?: Array<{ id: string; quantity: number }>
     labels?: Array<{ tracking_number?: string | null; tracking_url?: string | null }>
   }>
   items?: OrderItem[]
@@ -95,6 +96,9 @@ const OrderCenterPage = () => {
   const [error, setError] = useState("")
   const [notice, setNotice] = useState("")
   const [preview, setPreview] = useState<{ src: string; title: string } | null>(null)
+  const [trackingFulfillment, setTrackingFulfillment] = useState<string | null>(null)
+  const [trackingNumber, setTrackingNumber] = useState("")
+  const [savingTracking, setSavingTracking] = useState(false)
 
   const copyText = useCallback(async (value: string, label: string) => {
     try {
@@ -178,6 +182,40 @@ const OrderCenterPage = () => {
   }, [selected?.id, selectedId])
   const needsShipping = orders.filter((order) => !["fulfilled", "shipped", "delivered", "canceled"].includes(order.fulfillment_status || "not_fulfilled")).length
   const unpaid = orders.filter((order) => !["captured", "partially_captured", "refunded", "partially_refunded"].includes(order.payment_status || "not_paid")).length
+
+  const saveTracking = useCallback(async () => {
+    const fulfillment = detail?.fulfillments?.find((item) => item.id === trackingFulfillment)
+    const number = trackingNumber.trim()
+    if (!selected || !fulfillment || !number || !fulfillment.items?.length) return
+    setSavingTracking(true)
+    setDetailsError("")
+    try {
+      const response = await fetch(`/admin/orders/${encodeURIComponent(selected.id)}/fulfillments/${encodeURIComponent(fulfillment.id)}/shipments`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: fulfillment.items,
+          labels: [{ tracking_number: number, tracking_url: "", label_url: "" }],
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data.message || data.error || "保存运单失败，请稍后重试。")
+      setTrackingFulfillment(null)
+      setTrackingNumber("")
+      setNotice("运单已登记，17TRACK 链接已生成")
+      window.setTimeout(() => setNotice(""), 3000)
+      await load()
+      const refreshed = await fetch(`/admin/vibeya/orders/${encodeURIComponent(selected.id)}/images`, { credentials: "same-origin", cache: "no-store" })
+      const refreshedData = await refreshed.json()
+      if (!refreshed.ok) throw new Error(refreshedData.error || "运单已保存，但订单详情刷新失败。")
+      setOrderDetails(refreshedData.order)
+    } catch (caught) {
+      setDetailsError(caught instanceof Error ? caught.message : "保存运单失败，请稍后重试。")
+    } finally {
+      setSavingTracking(false)
+    }
+  }, [detail, load, selected, trackingFulfillment, trackingNumber])
 
   return (
     <div className="flex flex-col gap-5">
@@ -277,13 +315,13 @@ const OrderCenterPage = () => {
                   <div className="mt-2 rounded-lg border border-ui-border-base p-3 text-sm">
                     {detail?.fulfillments?.length ? detail.fulfillments.map((fulfillment) => (
                       <div key={fulfillment.id} className="border-t border-ui-border-base py-2 first:border-0">
-                        {(fulfillment.labels ?? []).length ? fulfillment.labels?.map((label, index) => <div key={`${label.tracking_number}-${index}`} className="flex flex-wrap items-center justify-between gap-2"><span className="break-all font-medium">{label.tracking_number || "暂无运单号"}</span><span className="flex gap-3">{label.tracking_number && <button type="button" onClick={() => void copyText(label.tracking_number!, "运单号")} className="text-ui-fg-interactive">复制</button>}{label.tracking_url && <a className="text-ui-fg-interactive" href={label.tracking_url} target="_blank" rel="noreferrer">17TRACK 追踪</a>}</span></div>) : <div className="text-ui-fg-subtle">已创建发货单，暂无运单号。</div>}
+                        {(fulfillment.labels ?? []).length ? fulfillment.labels?.map((label, index) => <div key={`${label.tracking_number}-${index}`} className="flex flex-wrap items-center justify-between gap-2"><span className="break-all font-medium">{label.tracking_number || "暂无运单号"}</span><span className="flex gap-3">{label.tracking_number && <button type="button" onClick={() => void copyText(label.tracking_number!, "运单号")} className="text-ui-fg-interactive">复制</button>}{label.tracking_url && <a className="text-ui-fg-interactive" href={label.tracking_url} target="_blank" rel="noreferrer">17TRACK 追踪</a>}</span></div>) : <div className="flex flex-wrap items-center justify-between gap-2"><span className="text-ui-fg-subtle">已创建发货单，暂无运单号。</span>{fulfillment.items?.length ? <button type="button" onClick={() => { setTrackingFulfillment(fulfillment.id); setDetailsError("") }} className="font-medium text-ui-fg-interactive">登记运单</button> : null}</div>}
                       </div>
                     )) : <div className="text-ui-fg-subtle">{detailsLoading ? "正在读取物流信息…" : detailsError || "尚未创建发货单。"}</div>}
                   </div>
                 </section>
 
-                <a href={`/app/orders/${encodeURIComponent(selected.id)}`} className="mt-auto inline-flex min-h-10 items-center justify-center rounded-md bg-ui-bg-interactive px-4 py-2 text-sm font-medium text-ui-fg-on-color hover:opacity-90">发货 / 退款</a>
+                <a href={`/app/orders/${encodeURIComponent(selected.id)}`} className="mt-auto inline-flex min-h-10 items-center justify-center rounded-md border border-ui-border-base px-4 py-2 text-sm font-medium hover:bg-ui-bg-subtle">{detail?.fulfillments?.length ? "退款等其他操作" : "选择仓库并创建发货单"}</a>
               </aside>
             )}
           </div>
@@ -291,6 +329,7 @@ const OrderCenterPage = () => {
       </Container>
 
       {preview && <div role="dialog" aria-modal="true" aria-label="商品图片预览" className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4" onClick={() => setPreview(null)}><button type="button" aria-label="关闭图片预览" className="absolute right-5 top-5 rounded-full bg-white px-3 py-2 text-sm font-medium text-black">关闭</button><img src={preview.src} alt={preview.title} className="max-h-[90vh] max-w-[92vw] rounded-lg bg-white object-contain" onClick={(event) => event.stopPropagation()} /></div>}
+      {trackingFulfillment && <div role="dialog" aria-modal="true" aria-labelledby="tracking-dialog-title" className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4" onClick={() => { if (!savingTracking) setTrackingFulfillment(null) }}><div className="w-full max-w-md rounded-xl bg-ui-bg-base p-5 shadow-xl" onClick={(event) => event.stopPropagation()}><Heading level="h2" id="tracking-dialog-title">登记发货运单</Heading><Text size="small" className="mt-2 text-ui-fg-subtle">保存后会自动创建 17TRACK 追踪链接。</Text><label className="mt-4 block text-sm font-medium" htmlFor="order-tracking-number">运单号</label><input id="order-tracking-number" autoFocus value={trackingNumber} onChange={(event) => setTrackingNumber(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void saveTracking() }} placeholder="输入承运商提供的运单号" className="mt-1 w-full rounded-md border border-ui-border-base bg-ui-bg-field px-3 py-2 text-sm outline-none focus:border-ui-border-interactive" />{detailsError && <Text className="mt-2 text-ui-fg-error">{detailsError}</Text>}<div className="mt-5 flex justify-end gap-2"><button type="button" disabled={savingTracking} onClick={() => setTrackingFulfillment(null)} className="rounded-md border border-ui-border-base px-3 py-2 text-sm">取消</button><button type="button" disabled={savingTracking || !trackingNumber.trim()} onClick={() => void saveTracking()} className="rounded-md bg-ui-bg-interactive px-3 py-2 text-sm font-medium text-ui-fg-on-color disabled:opacity-50">{savingTracking ? "保存中…" : "保存运单"}</button></div></div></div>}
     </div>
   )
 }
