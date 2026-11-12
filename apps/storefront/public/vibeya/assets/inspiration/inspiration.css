@@ -151,4 +151,6 @@ body.customize-open{overflow:hidden;}
 [data-inspiration-feature][hidden]{display:none!important}
 
 .related-card.home-featured-inspo[data-inspiration="midnight-cat-cafe"]>img{object-fit:cover;object-position:center;background:#fceded}
-
+.image-only-feature{display:block;margin:0 0 40px}
+.image-only-feature .spotlight-image-link{display:block;width:100%;min-height:0;aspect-ratio:4/3;color:inherit;text-decoration:none}
+.image-only-feature .spotlight-image-link img{object-fit:cover;object-position:center}
