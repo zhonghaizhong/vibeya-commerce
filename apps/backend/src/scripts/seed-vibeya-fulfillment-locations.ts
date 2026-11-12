@@ -70,11 +70,15 @@ export default async function seedVibeyaFulfillmentLocations({ container }: Exec
     query.graph({ entity: "shipping_option", fields: ["id", "name", "service_zone_id"] }),
   ])
 
-  const productIds = new Map(Object.entries(PRODUCT_HANDLES).map(([key, handle]) => {
+  const productIds = new Map<string, string>()
+  for (const [key, handle] of Object.entries(PRODUCT_HANDLES)) {
     const product = products.find((item: any) => item.handle === handle)
-    if (!product) throw new Error(`Required product is missing: ${handle}`)
-    return [key, product.id]
-  }))
+    if (!product) {
+      logger.warn(`Skipping fulfillment assignment for missing product: ${handle}`)
+      continue
+    }
+    productIds.set(key, product.id)
+  }
   const usRegion = regions.find((region: any) => region.countries?.some((country: any) => country.iso_2?.toLowerCase() === "us"))
   if (!usRegion) throw new Error("Configure the U.S. region before seeding VIBEYA fulfillment locations.")
   const shippingProfile = shippingProfiles[0]
@@ -85,7 +89,14 @@ export default async function seedVibeyaFulfillmentLocations({ container }: Exec
   let updated = 0
 
   for (const definition of locations) {
-    const assignedProductIds = definition.products.map((key) => productIds.get(key)!)
+    const assignedProductIds = definition.products.flatMap((key) => {
+      const productId = productIds.get(key)
+      return productId ? [productId] : []
+    })
+    if (!assignedProductIds.length) {
+      logger.warn(`Skipping fulfillment location with no available products: ${definition.name}`)
+      continue
+    }
     const current = stockLocations.find((location: any) =>
       location.address?.address_1?.trim().toLowerCase() === definition.address.address_1.toLowerCase() &&
       location.address?.city?.trim().toLowerCase() === definition.address.city.toLowerCase() &&
