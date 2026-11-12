@@ -76,6 +76,14 @@ export const retrieveOrderTracking = async (id: string) => {
   ).catch((err) => medusaError(err))
 }
 
+export const saveOrderAddressToAddressBook = async (id: string) => {
+  const headers = { ...(await getAuthHeaders()) }
+  return sdk.client.fetch<{ saved: boolean; alreadySaved: boolean }>(
+    `/store/vibeya/orders/${encodeURIComponent(id)}/save-address`,
+    { method: "POST", headers, cache: "no-store" }
+  )
+}
+
 export const listOrders = async (
   limit: number = 10,
   offset: number = 0,
@@ -97,7 +105,7 @@ export const listOrders = async (
         offset,
         order: "-created_at",
         fields:
-          "total,currency_code,*items,+items.metadata,*items.variant,*items.product,items.thumbnail,items.product.thumbnail",
+          "id,display_id,custom_display_id,created_at,email,total,currency_code,fulfillment_status,payment_status,shipping_address,*items,+items.metadata,*items.variant,*items.product,items.thumbnail,items.product.thumbnail",
         ...filters,
       },
       headers,

@@ -21,13 +21,13 @@ const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
   order,
   shipments = [],
 }) => {
-  const orderReference = order.custom_display_id || order.display_id || order.id.slice(-8).toUpperCase()
+  const orderReference = order.custom_display_id || order.display_id
 
   return (
     <div className="flex flex-col gap-5" data-testid="order-details-container">
       <AccountPageHeading
         eyebrow="ORDER DETAILS"
-        title={`Order #${orderReference}`}
+        title={`Order #${orderReference ?? "—"}`}
         description="Review your items, delivery details, and payment summary."
         trailing={
           <AccountActionLink

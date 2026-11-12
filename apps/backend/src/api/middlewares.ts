@@ -43,6 +43,11 @@ export default defineMiddlewares({
     },
     {
       method: ["POST"],
+      matcher: "/store/vibeya/orders/:id/save-address",
+      middlewares: [authenticate("customer", ["session", "bearer"])],
+    },
+    {
+      method: ["POST"],
       matcher: "/store/vibeya/cart/line-items",
       bodyParser: { sizeLimit: "2mb" },
     },

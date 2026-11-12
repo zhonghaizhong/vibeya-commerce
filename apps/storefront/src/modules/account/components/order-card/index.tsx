@@ -25,6 +25,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
   const fulfillmentStatus = (order.fulfillment_status || "processing")
     .replaceAll("_", " ")
     .replace(/^./, (letter) => letter.toUpperCase())
+  const orderReference = order.custom_display_id || order.display_id
 
   useEffect(() => {
     if (!zoomedImage) return
@@ -52,7 +53,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
               <p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#8f60ed]">Order</p>
               <span className="text-xs text-[#aaa2b1]" aria-hidden="true">/</span>
               <h2 className="font-display text-base font-extrabold tracking-[-.025em] text-[#160d24]">
-                #<span data-testid="order-display-id">{order.display_id}</span>
+                #<span data-testid="order-display-id">{orderReference ?? "—"}</span>
               </h2>
             </div>
             <p className="mt-1 text-xs text-[#77717d]" data-testid="order-created-at">
