@@ -4,8 +4,9 @@ import React, { useContext } from "react"
 
 import Radio from "@modules/common/components/radio"
 
-import { getPaymentInfo, isManual } from "@lib/constants"
+import { getPaymentInfo, isManual, isPaypal } from "@lib/constants"
 import { getPaymentErrorMessage } from "@lib/util/payment-error"
+import PayPal from "@modules/common/icons/paypal"
 import SkeletonCardDetails from "@modules/skeletons/components/skeleton-card-details"
 import { PaymentElement } from "@stripe/react-stripe-js"
 import PaymentTest from "../payment-test"
@@ -26,6 +27,7 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
 }) => {
   const isDevelopment = process.env.NODE_ENV === "development"
   const paymentInfo = getPaymentInfo(paymentProviderId)
+  const isPayPalOption = isPaypal(paymentProviderId)
 
   return (
     <RadioGroupOption
@@ -43,16 +45,28 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
       <div className="flex items-center justify-between ">
         <div className="flex items-center gap-x-4">
           <Radio checked={selectedPaymentOptionId === paymentProviderId} />
-          <Text className="text-base-regular">
-            {paymentInfo?.title || paymentProviderId}
-          </Text>
+          {!isPayPalOption && (
+            <Text className="text-base-regular">
+              {paymentInfo?.title || paymentProviderId}
+            </Text>
+          )}
           {isManual(paymentProviderId) && isDevelopment && (
             <PaymentTest className="hidden small:block" />
           )}
         </div>
-        <span className="justify-self-end text-ui-fg-base">
-          {paymentInfo?.icon}
-        </span>
+        {isPayPalOption ? (
+          <span
+            className="flex items-center gap-x-1.5 text-[#003087]"
+            aria-label="PayPal"
+          >
+            {paymentInfo?.icon || <PayPal />}
+            <span className="font-semibold">PayPal</span>
+          </span>
+        ) : (
+          <span className="justify-self-end text-ui-fg-base">
+            {paymentInfo?.icon}
+          </span>
+        )}
       </div>
       {isManual(paymentProviderId) && isDevelopment && (
         <PaymentTest className="small:hidden text-[10px]" />

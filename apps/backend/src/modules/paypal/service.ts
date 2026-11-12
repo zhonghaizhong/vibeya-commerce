@@ -120,6 +120,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
     input: InitiatePaymentInput
   ): Promise<InitiatePaymentOutput> {
     try {
+      await this.refreshRuntimeClient()
       const { amount, currency_code } = input
 
       // Determine intent based on capture option
@@ -190,6 +191,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
     input: AuthorizePaymentInput
   ): Promise<AuthorizePaymentOutput> {
     try {
+      await this.refreshRuntimeClient()
       const orderId = input.data?.order_id as string | undefined
 
       if (!orderId || typeof orderId !== "string") {
@@ -269,6 +271,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
     input: CapturePaymentInput
   ): Promise<CapturePaymentOutput> {
     try {
+      await this.refreshRuntimeClient()
       const authorizationId = input.data?.authorization_id as string | undefined
 
       if (!authorizationId || typeof authorizationId !== "string") {
@@ -308,6 +311,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
 
   async refundPayment(input: RefundPaymentInput): Promise<RefundPaymentOutput> {
     try {
+      await this.refreshRuntimeClient()
       const captureId = input.data?.capture_id as string | undefined
 
       if (!captureId || typeof captureId !== "string") {
@@ -359,6 +363,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
     input: UpdatePaymentInput
   ): Promise<UpdatePaymentOutput> {
     try {
+      await this.refreshRuntimeClient()
       const orderId = input.data?.order_id as string | undefined
 
       if (!orderId) {
@@ -409,6 +414,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
     input: RetrievePaymentInput
   ): Promise<RetrievePaymentOutput> {
     try {
+      await this.refreshRuntimeClient()
       const orderId = input.data?.order_id as string | undefined
 
       if (!orderId || typeof orderId !== "string") {
@@ -450,6 +456,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
     input: CancelPaymentInput
   ): Promise<CancelPaymentOutput> {
     try {
+      await this.refreshRuntimeClient()
       const authorizationId = input.data?.authorization_id as string | undefined
 
       if (!authorizationId || typeof authorizationId !== "string") {
@@ -478,6 +485,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
     input: GetPaymentStatusInput
   ): Promise<GetPaymentStatusOutput> {
     try {
+      await this.refreshRuntimeClient()
       const orderId = input.data?.order_id as string | undefined
 
       if (!orderId || typeof orderId !== "string") {
@@ -654,6 +662,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
     payload: ProviderWebhookPayload["payload"]
   ): Promise<WebhookActionResult> {
     try {
+      await this.refreshRuntimeClient()
       const { data, rawData, headers } = payload
 
       // Verify webhook signature

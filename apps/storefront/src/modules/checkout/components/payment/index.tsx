@@ -34,7 +34,9 @@ const Payment = ({
   const [error, setError] = useState<string | null>(null)
   const [paymentComplete, setPaymentComplete] = useState(false)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
-    activeSession?.provider_id ?? ""
+    activeSession?.provider_id ??
+      availablePaymentMethods?.find((method) => isPaypal(method.id))?.id ??
+      ""
   )
 
   const searchParams = useSearchParams()
@@ -109,6 +111,14 @@ const Payment = ({
   useEffect(() => {
     setError(null)
   }, [isOpen])
+
+  useEffect(() => {
+    if (selectedPaymentMethod) return
+    const paypalProvider = availablePaymentMethods?.find((method) =>
+      isPaypal(method.id)
+    )
+    if (paypalProvider) setSelectedPaymentMethod(paypalProvider.id)
+  }, [availablePaymentMethods, selectedPaymentMethod])
 
   return (
     <div className="bg-white">

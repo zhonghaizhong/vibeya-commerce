@@ -34,7 +34,7 @@ export default async function configureVibeyaUsMarket({ container }: ExecArgs) {
 
   const { data: regions } = await query.graph({
     entity: "region",
-    fields: ["id", "name", "currency_code", "countries.iso_2", "metadata"],
+    fields: ["id", "name", "currency_code", "countries.iso_2", "metadata", "payment_providers"],
   })
   let usRegion: any = regions.find((region: any) =>
     region.countries?.some((country: any) => country.iso_2?.toLowerCase() === "us")
@@ -47,6 +47,7 @@ export default async function configureVibeyaUsMarket({ container }: ExecArgs) {
           name: "United States",
           currency_code: "usd",
           countries: ["us"],
+          payment_providers: ["pp_paypal_paypal"],
           metadata: US_STORE_POLICIES,
         }],
       },
@@ -59,7 +60,17 @@ export default async function configureVibeyaUsMarket({ container }: ExecArgs) {
   await updateRegionsWorkflow(container).run({
     input: {
       selector: { id: usRegion.id },
-      update: { metadata: { ...(usRegion.metadata ?? {}), ...US_STORE_POLICIES } },
+      update: {
+        metadata: { ...(usRegion.metadata ?? {}), ...US_STORE_POLICIES },
+        payment_providers: [
+          ...new Set([
+            ...(usRegion.payment_providers ?? [])
+              .map((provider: any) => provider?.id)
+              .filter((providerId: unknown): providerId is string => typeof providerId === "string"),
+            "pp_paypal_paypal",
+          ]),
+        ],
+      },
     },
   })
 

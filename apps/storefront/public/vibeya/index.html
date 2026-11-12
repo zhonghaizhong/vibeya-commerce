@@ -571,6 +571,10 @@
       .dialog:has(.studio-body) .studio-body{display:flex;flex-direction:column-reverse;min-height:0;overflow:visible;}
       .dialog:has(.studio-body) .studio-controls,.dialog:has(.studio-body) .studio-preview{overflow:visible;}
     }
+    @media (max-width:900px){
+      #studioOverlay .dialog:has(.studio-body)>.dialog-head{position:sticky;top:0;z-index:20;background:#fffdfa;}
+      #studioOverlay .dialog-head .close-btn{position:relative;z-index:21;pointer-events:auto;touch-action:manipulation;}
+    }
 
   .insp-grid.home-inspiration-grid{grid-template-columns:repeat(4,minmax(0,1fr));align-items:start;gap:16px}
   .home-featured-inspo{display:block;min-width:0;aspect-ratio:7/5;text-decoration:none;background:#eadcf8;border:0;border-radius:20px;overflow:hidden;box-shadow:0 10px 28px #3b1c6e12;transition:transform .2s,box-shadow .2s}
