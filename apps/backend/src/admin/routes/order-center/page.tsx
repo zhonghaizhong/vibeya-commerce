@@ -184,7 +184,6 @@ const OrderCenterPage = () => {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <Heading level="h1">订单工作台</Heading>
-          <Text className="mt-1 text-ui-fg-subtle">快速查看订单、客户、商品和物流。</Text>
         </div>
         <button type="button" onClick={() => void load()} disabled={loading} className="rounded-md border border-ui-border-base px-3 py-2 text-sm font-medium disabled:opacity-50">
           {loading ? "同步中…" : "刷新订单"}
@@ -230,7 +229,6 @@ const OrderCenterPage = () => {
                   ))}
                 </tbody>
               </table>
-              <div className="border-t border-ui-border-base px-4 py-3 text-xs text-ui-fg-subtle">最近订单 · 最多显示 250 笔</div>
             </div>
 
             {selected && (
@@ -246,18 +244,15 @@ const OrderCenterPage = () => {
                 </div>
 
                 <section>
-                  <div className="flex items-start justify-between gap-2"><div><Text className="font-semibold">客户</Text><div className="mt-1 text-sm">{getCustomerName(selected)}</div><div className="mt-1 break-all text-sm text-ui-fg-subtle">{detail?.email || selected.email || "未提供邮箱"}</div></div>{detail?.customer?.phone && <div className="text-right text-sm text-ui-fg-subtle">{detail.customer.phone}</div>}</div>
-                </section>
-
-                <section>
-                  <div className="flex items-center justify-between gap-2"><Text className="font-semibold">收货地址</Text>{detail?.shipping_address && <button type="button" onClick={() => void copyText([detail.shipping_address?.first_name, detail.shipping_address?.last_name, detail.shipping_address?.address_1, detail.shipping_address?.address_2, [detail.shipping_address?.city, detail.shipping_address?.province, detail.shipping_address?.postal_code].filter(Boolean).join(", "), detail.shipping_address?.country_code?.toUpperCase(), detail.shipping_address?.phone || detail.customer?.phone].filter(Boolean).join("\n"), "收货地址")} className="text-xs font-medium text-ui-fg-interactive">复制地址</button>}</div>
+                  <div className="flex items-center justify-between gap-2"><Text className="font-semibold">客户与收货</Text>{detail?.shipping_address && <button type="button" onClick={() => void copyText([detail.shipping_address?.first_name, detail.shipping_address?.last_name, detail.shipping_address?.address_1, detail.shipping_address?.address_2, [detail.shipping_address?.city, detail.shipping_address?.province, detail.shipping_address?.postal_code].filter(Boolean).join(", "), detail.shipping_address?.country_code?.toUpperCase(), detail.shipping_address?.phone || detail.customer?.phone].filter(Boolean).join("\n"), "收货地址")} className="text-xs font-medium text-ui-fg-interactive">复制地址</button>}</div>
                   <div className="mt-2 rounded-lg bg-ui-bg-subtle p-3 text-sm">
-                    {detail?.shipping_address ? (
-                      <div className="leading-6 text-ui-fg-subtle">
-                        {[detail.shipping_address.first_name, detail.shipping_address.last_name, detail.shipping_address.address_1, detail.shipping_address.address_2, [detail.shipping_address.city, detail.shipping_address.province, detail.shipping_address.postal_code].filter(Boolean).join(", "), detail.shipping_address.country_code?.toUpperCase()].filter(Boolean).map((line, index) => <div key={`${line}-${index}`}>{line}</div>)}
-                        {(detail.shipping_address.phone || detail.customer?.phone) && <div>{detail.shipping_address.phone || detail.customer?.phone}</div>}
-                      </div>
-                    ) : detailsLoading ? <div className="mt-2 text-ui-fg-subtle">正在读取地址…</div> : <div className="mt-2 text-ui-fg-subtle">{detailsError || "订单没有收货地址。"}</div>}
+                    <div className="font-medium">{getCustomerName(selected)}</div>
+                    <div className="mt-1 break-all text-ui-fg-subtle">{detail?.email || selected.email || "未提供邮箱"}</div>
+                    {(detail?.shipping_address?.phone || detail?.customer?.phone) && <div className="mt-1 text-ui-fg-subtle">{detail.shipping_address?.phone || detail.customer?.phone}</div>}
+                    {detail?.shipping_address && <div className="mt-3 border-t border-ui-border-base pt-2 leading-6 text-ui-fg-subtle">
+                      {[detail.shipping_address.address_1, detail.shipping_address.address_2, [detail.shipping_address.city, detail.shipping_address.province, detail.shipping_address.postal_code].filter(Boolean).join(", "), detail.shipping_address.country_code?.toUpperCase()].filter(Boolean).map((line, index) => <div key={`${line}-${index}`}>{line}</div>)}
+                    </div>}
+                    {!detail?.shipping_address && (detailsLoading ? <div className="mt-2 text-ui-fg-subtle">正在读取收货地址…</div> : <div className="mt-2 text-ui-fg-subtle">{detailsError || "订单没有收货地址。"}</div>)}
                   </div>
                 </section>
 
@@ -280,7 +275,6 @@ const OrderCenterPage = () => {
                 <section>
                   <Text className="font-semibold">物流</Text>
                   <div className="mt-2 rounded-lg border border-ui-border-base p-3 text-sm">
-                    {(detail?.shipping_methods ?? []).map((method, index) => <div key={`${method.name}-${index}`} className="mb-2 text-ui-fg-subtle">配送方式：{method.name || "未记录"}</div>)}
                     {detail?.fulfillments?.length ? detail.fulfillments.map((fulfillment) => (
                       <div key={fulfillment.id} className="border-t border-ui-border-base py-2 first:border-0">
                         {(fulfillment.labels ?? []).length ? fulfillment.labels?.map((label, index) => <div key={`${label.tracking_number}-${index}`} className="flex flex-wrap items-center justify-between gap-2"><span className="break-all font-medium">{label.tracking_number || "暂无运单号"}</span><span className="flex gap-3">{label.tracking_number && <button type="button" onClick={() => void copyText(label.tracking_number!, "运单号")} className="text-ui-fg-interactive">复制</button>}{label.tracking_url && <a className="text-ui-fg-interactive" href={label.tracking_url} target="_blank" rel="noreferrer">17TRACK 追踪</a>}</span></div>) : <div className="text-ui-fg-subtle">已创建发货单，暂无运单号。</div>}
@@ -289,7 +283,7 @@ const OrderCenterPage = () => {
                   </div>
                 </section>
 
-                <a href={`/app/orders/${encodeURIComponent(selected.id)}`} className="mt-auto inline-flex min-h-10 items-center justify-center rounded-md bg-ui-bg-interactive px-4 py-2 text-sm font-medium text-ui-fg-on-color hover:opacity-90">打开订单处理（发货 / 退款）</a>
+                <a href={`/app/orders/${encodeURIComponent(selected.id)}`} className="mt-auto inline-flex min-h-10 items-center justify-center rounded-md bg-ui-bg-interactive px-4 py-2 text-sm font-medium text-ui-fg-on-color hover:opacity-90">发货 / 退款</a>
               </aside>
             )}
           </div>
