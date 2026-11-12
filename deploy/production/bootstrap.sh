@@ -22,6 +22,7 @@ for script in \
   seed-vibeya-washed-hoodie \
   seed-vibeya-moonlit-tumbler \
   configure-vibeya-us-market \
+  seed-vibeya-fulfillment-locations \
   publish-vibeya-long-sleeve \
   publish-vibeya-washed-hoodie \
   publish-vibeya-moonlit-tumbler; do

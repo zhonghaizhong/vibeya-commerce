@@ -71,7 +71,11 @@ const OrderCard = ({ order }: OrderCardProps) => {
               data-testid="order-item"
             >
               <div className="overflow-hidden rounded-xl bg-[#f8f5fa]">
-                <Thumbnail thumbnail={i.thumbnail} images={[]} size="full" />
+                <Thumbnail
+                  thumbnail={i.thumbnail || i.product?.thumbnail || i.variant?.product?.thumbnail}
+                  images={i.product?.images ?? []}
+                  size="full"
+                />
               </div>
               <div className="flex items-center text-xs text-[#625c69]">
                 <span
