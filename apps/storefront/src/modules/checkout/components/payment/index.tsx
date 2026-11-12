@@ -87,7 +87,9 @@ const Payment = ({
       const checkActiveSession =
         activeSession?.provider_id === selectedPaymentMethod
 
-      if (!checkActiveSession) {
+      // PayPal orders are environment-specific. Recreate the session before
+      // entering review so a previously cached sandbox/live order cannot be reused.
+      if (!checkActiveSession || isPaypal(selectedPaymentMethod)) {
         await initiatePaymentSession(cart, {
           provider_id: selectedPaymentMethod,
         })
