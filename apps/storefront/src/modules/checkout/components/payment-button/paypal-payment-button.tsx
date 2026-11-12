@@ -1,6 +1,6 @@
 "use client"
 
-import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js"
+import { FUNDING, PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import React, { useState } from "react"
@@ -46,6 +46,7 @@ const PayPalPaymentButton = ({
     <>
       <div className="mb-4">
         <PayPalButtons
+          fundingSource={FUNDING.PAYPAL}
           createOrder={createOrder}
           onApprove={onApprove}
           onError={(error) => {

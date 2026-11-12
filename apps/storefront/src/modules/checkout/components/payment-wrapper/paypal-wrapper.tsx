@@ -39,6 +39,7 @@ const PayPalWrapper = ({
         clientId,
         currency: paymentSession.currency_code.toUpperCase() || "USD",
         intent: paymentSession.data?.intent === "CAPTURE" ? "capture" : "authorize",
+        locale: "en_US",
       }}
     >
       {children}
