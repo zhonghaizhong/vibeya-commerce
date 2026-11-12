@@ -48,6 +48,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     return {
       trackingNumber: label.tracking_number,
       trackingUrl: label.tracking_url,
+      carrier: snapshot?.carrier,
       status: statusLabels[statusCode] ?? (snapshot ? statusCode : "Awaiting carrier updates"),
       statusCode: snapshot?.statusCode,
       updatedAt: snapshot?.updatedAt,

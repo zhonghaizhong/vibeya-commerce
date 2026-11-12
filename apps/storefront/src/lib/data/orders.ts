@@ -15,8 +15,10 @@ export type OrderTrackingEvent = {
 export type OrderTrackingShipment = {
   trackingNumber: string
   trackingUrl?: string
+  carrier?: string
   status: string
   statusCode?: string
+  updatedAt?: string
   events: OrderTrackingEvent[]
 }
 

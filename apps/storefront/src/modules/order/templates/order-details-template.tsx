@@ -51,20 +51,33 @@ const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
         </p>
         <Items order={order} />
       </AccountCard>
-      {shipments.length > 0 && (
-        <AccountCard as="section" className="rounded-[22px] p-5 sm:p-6">
+      <AccountCard as="section" className="rounded-[22px] p-5 sm:p-6">
           <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[.16em] text-[#8f60ed]">DELIVERY UPDATES</p>
               <h2 className="mt-1 text-lg font-bold text-[#1a1028]">Shipment tracking</h2>
             </div>
-            <span className="rounded-full bg-[#efffc0] px-3 py-1 text-xs font-semibold text-[#1a1028]">
-              {shipments[0].status}
+            <span className="rounded-full bg-[#f1e5ff] px-3 py-1 text-xs font-semibold text-[#6c3fc0]">
+              {shipments[0]?.status ||
+                (order.fulfillment_status === "not_fulfilled"
+                  ? "Preparing shipment"
+                  : "Tracking details pending")}
             </span>
           </div>
-          <div className="flex flex-col gap-5">
-            {shipments.map((shipment) => (
+          <div className="mb-4 border-t border-[#eee6f2] pt-4">
+            <p className="text-xs font-semibold text-[#77717d]">Order number</p>
+            <p className="mt-1 break-all text-sm font-semibold text-[#1a1028]">#{orderReference ?? "—"}</p>
+          </div>
+          {shipments.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              {shipments.map((shipment) => (
               <div key={shipment.trackingNumber} className="rounded-2xl border border-[#eadcf7] bg-[#fcf9ff] p-4">
+                {shipment.carrier && (
+                  <div className="mb-3 text-sm">
+                    <span className="font-semibold text-[#1a1028]">Carrier: </span>
+                    <span className="text-[#514665]">{shipment.carrier}</span>
+                  </div>
+                )}
                 <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
                   <span className="font-semibold text-[#1a1028]">Tracking number</span>
                   <span className="break-all text-[#514665]">{shipment.trackingNumber}</span>
@@ -91,9 +104,15 @@ const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
                 )}
               </div>
             ))}
-          </div>
-        </AccountCard>
-      )}
+            </div>
+          ) : (
+            <p className="text-sm leading-6 text-[#746b80]">
+              {order.fulfillment_status === "not_fulfilled"
+                ? "Your order is being prepared. The carrier and tracking number will appear here once the package ships."
+                : "The tracking number has not been added yet. Carrier details and delivery updates will appear here when available."}
+            </p>
+          )}
+      </AccountCard>
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(260px,.8fr)]">
         <AccountCard as="section" className="rounded-[22px] p-5 sm:p-6">
           <ShippingDetails order={order} />
