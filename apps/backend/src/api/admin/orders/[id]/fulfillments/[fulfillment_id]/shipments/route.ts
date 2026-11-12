@@ -22,6 +22,9 @@ type ShipmentLabel = {
   label_url: string
 }
 
+const get17TrackUrl = (trackingNumber: string) =>
+  `https://t.17track.net/en?nums=${encodeURIComponent(trackingNumber.trim())}`
+
 const getCarrier = (name: string) => {
   const normalized = name.trim().toLowerCase()
   if (normalized.includes("usps")) return { carrier: "USPS" }
@@ -177,7 +180,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     ...body,
     order_id: orderId,
     fulfillment_id: fulfillmentId,
-    labels: body.labels ?? [],
+    // VIBEYA uses 17TRACK for every shipment. Generate the customer tracking
+    // link from the number so staff never need to enter or update it manually.
+    labels: (body.labels ?? []).map((label) => ({
+      ...label,
+      tracking_url: label.tracking_number?.trim()
+        ? get17TrackUrl(label.tracking_number)
+        : "",
+    })),
     items: body.items,
   }
 
