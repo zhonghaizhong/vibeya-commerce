@@ -56,6 +56,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       description:
         "Design your own full-wrap print for VIBEYA’s 20 oz stainless steel tumbler. Clear sliding lid, separate straw, and U.S. shipping available.",
     },
+    "vibeya-custom-womens-tankini-swimsuit-set": {
+      title: "Custom Women’s Tankini Swimsuit Set | Design Your Own | VIBEYA",
+      description:
+        "Design your own women’s tankini swimsuit with a custom print. Choose a halter swim top and separate side-tie shorts in five colors, sizes S–XL.",
+    },
   }
   const productSeo = seoContent[product.handle]
   const title = productSeo?.title ?? `${product.title} | ${STORE_NAME}`

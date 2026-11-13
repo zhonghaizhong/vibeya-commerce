@@ -1034,6 +1034,20 @@
        sizes:['36x70.8in','60x70.8in','70.8x70.8in','70.8x84in'],
        sizeLabels:{'36x70.8in':'36 × 70.8 in (90 × 180 cm)','60x70.8in':'60 × 70.8 in (152 × 180 cm)','70.8x70.8in':'70.8 × 70.8 in (180 × 180 cm)','70.8x84in':'70.8 × 84 in (180 × 213 cm)'},
        variantSummary:'Single-sided full-bleed print · 4 sizes'
+     },{
+       id:'sds-137892',
+       handle:'vibeya-custom-womens-tankini-swimsuit-set',
+       name:'VIBEYA Custom Women’s Tankini Swimsuit Set',
+       short:'Custom women’s tankini swimsuit',
+       price:'$29.99 USD',
+       category:'Apparel',
+       supplier:'SDSDIY',
+       supplierId:'137892',
+       supplierUrl:'https://www.sdsdiy.com/portal/detail/137892',
+       asset:'assets/products/mg8011024/black/01-main-image.jpg',
+       colors:['Black','Red','Pink','Blue','Cyan'],
+       sizes:['S','M','L','XL'],
+       variantSummary:'Design or upload artwork · 5 colors · Sizes S–XL'
      }
    ];
   const inspirations=[{title:'Funny Skeleton — Lazy Mood',tags:['Funny','Skull','Streetwear'],prompt:'Front: A laid-back cartoon skeleton lounging in headphones and a purple hoodie with a coffee cup, cheeky expression, street graffiti lettering PROFESSIONAL PROCRASTINATOR. Back: ZERO TASKS TODAY in bold typography, with matching lime-and-purple doodles. Keep the designs connected in color and attitude.'}];
@@ -1052,11 +1066,13 @@
   function productColorName(product,color){
     if(product?.id==='vibeya-washed-hoodie')return ({Black:'Washed Black',Gray:'Light Gray',Khaki:'Brown',Green:'Muted Green',Pink:'Pink',Purple:'Lavender'}[color]||color);
     if(product?.id==='sds-172647')return ({Black:'Black',Red:'Red',Gray:'Medium Gray'}[color]||color);
+    if(product?.id==='sds-137892')return ({Black:'Black',Red:'Red',Pink:'Pink',Blue:'Blue',Cyan:'Cyan'}[color]||color);
     return ({Black:'Black',White:'White',Red:'Red',Gray:'Heather Gray',LightGray:'Light Heather Gray',Cream:'Cream',Navy:'Navy'}[color]||color);
   }
   function designColorHex(product,color){
     if(product?.id==='vibeya-washed-hoodie')return ({Khaki:'#79675a',Gray:'#c9c8c8',Black:'#28282a',Green:'#747d71',Pink:'#c95178',Purple:'#776b86'}[color]||'#ccc');
     if(product?.id==='sds-172647')return ({Black:'#17171b',Red:'#cf273b',Gray:'#77777b'}[color]||'#ccc');
+    if(product?.id==='sds-137892')return ({Black:'#17171b',Red:'#ec4329',Pink:'#ec4c91',Blue:'#3859d7',Cyan:'#22c3d7'}[color]||'#ccc');
     return ({Black:'#17171b',White:'#fff',Red:'#e52537',Gray:'#64666c',LightGray:'#d7d7d9',Cream:'#f2e4cf',Navy:'#283456'}[color]||'#ccc');
   }
   function designColorPicker(job,product,currentColor,attribute){
@@ -1202,7 +1218,7 @@
   const sizeLabel=(product,size)=>product?.sizeLabels?.[size]||size||'Select a size';
   const selectedProductPrice=(product,size)=>product?.sizePrices?.[size]??itemPrice(product);
   const usdPrice=value=>value===null||value===undefined?'':new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(value)+' USD';
-  const cardColorHex={Black:'#17171b',White:'#ffffff',Red:'#e52537',Gray:'#64666c',LightGray:'#d7d7d9',Cream:'#f2e4cf',Navy:'#283456'};
+  const cardColorHex={Black:'#17171b',White:'#ffffff',Red:'#e52537',Pink:'#ec4c91',Blue:'#3859d7',Cyan:'#22c3d7',Gray:'#64666c',LightGray:'#d7d7d9',Cream:'#f2e4cf',Navy:'#283456'};
   const cardColorNames={Black:'Black',White:'White',Red:'Red',Gray:'Heather Gray',LightGray:'Light Heather Gray',Cream:'Cream',Navy:'Navy'};
   const productVariants={
     'sds-167256':{
@@ -1315,6 +1331,22 @@
         services:[['Single-sided full print','One continuous design covers the visible curtain face edge to edge.'],['Natural hanging preview','Shown hanging from a rod with realistic folds and drape.'],['U.S. delivery','Delivery availability is confirmed at checkout.']],
         productDetails:'Custom shower curtain available in 36 × 70.8 in, 60 × 70.8 in, 70.8 × 70.8 in, and 70.8 × 84 in.',
         productionDetails:'Single-sided, full-bleed print across the curtain face. The finished image shows the full curtain hanging against a pure white background.'
+      }
+    },
+    'sds-137892':{
+      colors:{Black:['Black','#17171b'],Red:['Red','#ec4329'],Pink:['Pink','#ec4c91'],Blue:['Blue','#3859d7'],Cyan:['Cyan','#22c3d7']},
+      image:(color)=>'assets/products/mg8011024/'+({Black:'black',Red:'red',Pink:'pink',Blue:'blue',Cyan:'cyan'}[color]||'black')+'/01-main-image.jpg',
+      sizesLabel:'Sizes S–XL',
+      colorOptionLabel:'Base color',
+      details:{
+        title:'Custom Women’s Tankini Swimsuit Set',eyebrow:'VIBEYA / CUSTOM SWIMWEAR',
+        intro:'Design a swimsuit that feels like yours. Describe a print or upload your artwork, preview it on this two-piece tankini, then choose your color and size. Each gallery print is only a sample.',
+        highlights:['Two-piece tankini set','Halter swim top + side-tie shorts','80% nylon · 20% spandex','Custom front print'],
+        measurementRows:[['S','18.3 in length · 14.2 in half chest · 32.3 in hip'],['M','18.7 in length · 15.0 in half chest · 33.9 in hip'],['L','19.3 in length · 15.9 in half chest · 35.8 in hip'],['XL','19.9 in length · 16.9 in half chest · 37.8 in hip']],
+        guide:'View size guide (in)',note:'Supplier garment measurements; manual measurement may vary by 1–2 cm. See the gallery size chart before ordering.',
+        services:[['Make it yours','Create a print from a prompt or upload your own artwork.'],['Two-piece tankini','Includes a halter-style swim top and separate side-tie shorts.'],['U.S. shipping','Shipping options and delivery estimates appear at checkout.']],
+        productDetails:'Women’s two-piece tankini swimsuit set with a halter-neck swim top and matching separate side-tie shorts. Fabric: 80% nylon and 20% spandex. Available in Black, Red, Pink, Blue, and Cyan, sizes S–XL.',
+        productionDetails:'Create a design with a written prompt or upload your artwork, then preview the result before ordering. The sample prints shown in the gallery are examples only. Your custom print is applied to the front panel of the tankini top; the shorts remain in the selected solid color.'
       }
     }
   };
@@ -1915,9 +1947,12 @@
    const beanieGalleryTitles=['Make It Yours','Your Design, Your Beanie','Made for Everyday','Front and Back','Knit and Print Details','Wear It Your Way','Choose Your Color','One Size, Easy Fit'];
    const showerCurtainGalleryFiles=['01-main-image.png','02-print-detail.png','03-size-guide.png','04-design-your-own.png','05-lifestyle-model.png','06-product-details.png'];
    const showerCurtainGalleryTitles=['Meet Your Custom Shower Curtain','Your Art, Your Curtain','Choose Your Shower Curtain Size','Create or Upload a Print','A Little Cat Style for Your Bathroom','Polyester, Print, and C-Hook Details'];
+   const tankiniGalleryFiles=['01-main-image.jpg','02-prompt-preview.jpg','03-fabric-fit.jpg','04-two-piece.jpg','05-sizes.jpg','06-care.jpg','07-customize.jpg'];
+   const tankiniGalleryTitles=['Design Your Tankini','Preview a Prompt-Based Print','Nylon-Spandex Stretch Fabric','Separate Swim Top and Shorts','Find Your Size','Care for Your Custom Swimwear','Start Your One-of-a-Kind Design'];
+   const tankiniColorFolders={Black:'black',Red:'red',Pink:'pink',Blue:'blue',Cyan:'cyan'};
    const showerCurtainReferenceFiles={'36x70.8in':'36x70.8in.webp','60x70.8in':'60x70.8in.webp','70.8x70.8in':'70.8x70.8in.png','70.8x84in':'70.8x84in.webp'};
-   const galleryCount=()=>chosen.id==='sds-128646'?tumblerGalleryFiles.length:chosen.id==='sds-138708'?bathMatGalleryFiles.length:chosen.id==='sds-97226'?blanketGalleryFiles.length:chosen.id==='sds-172647'?beanieGalleryFiles.length:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryFiles.length:galleryTitles.length;
-   const galleryTitleAt=i=>chosen.id==='sds-128646'?tumblerGalleryTitles[i]:chosen.id==='sds-138708'?bathMatGalleryTitles[i]:chosen.id==='sds-97226'?blanketGalleryTitles[i]:chosen.id==='sds-172647'?selectedColor==='Black'?(i===0?beanieGalleryTitles[1]:i===1?beanieGalleryTitles[0]:beanieGalleryTitles[i]):beanieGalleryTitles[i]:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryTitles[i]:chosen.id==='vibeya-washed-hoodie'?hoodieGalleryTitles[i]:galleryTitles[i];
+   const galleryCount=()=>chosen.id==='sds-128646'?tumblerGalleryFiles.length:chosen.id==='sds-138708'?bathMatGalleryFiles.length:chosen.id==='sds-97226'?blanketGalleryFiles.length:chosen.id==='sds-172647'?beanieGalleryFiles.length:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryFiles.length:chosen.id==='sds-137892'?tankiniGalleryFiles.length:galleryTitles.length;
+   const galleryTitleAt=i=>chosen.id==='sds-128646'?tumblerGalleryTitles[i]:chosen.id==='sds-138708'?bathMatGalleryTitles[i]:chosen.id==='sds-97226'?blanketGalleryTitles[i]:chosen.id==='sds-172647'?selectedColor==='Black'?(i===0?beanieGalleryTitles[1]:i===1?beanieGalleryTitles[0]:beanieGalleryTitles[i]):beanieGalleryTitles[i]:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryTitles[i]:chosen.id==='sds-137892'?tankiniGalleryTitles[i]:chosen.id==='vibeya-washed-hoodie'?hoodieGalleryTitles[i]:galleryTitles[i];
   const galleryFiles=['01-brand-lifestyle.webp','02-make-it-personal.webp','03-cotton-comfort.webp','04-wear-it-your-way.webp','05-attention-to-detail.webp','06-idea-to-outfit.webp','07-make-it-yours.webp'];
   const colorGalleries={Black:galleryFiles,White:galleryFiles.map(f=>'white/'+f),Red:galleryFiles.map(f=>'red/'+f),Gray:galleryFiles.map(f=>'gray/'+f),LightGray:galleryFiles.map(f=>'light-gray/'+f),Cream:galleryFiles.map(f=>'cream/'+f),Navy:galleryFiles.map(f=>'navy/'+f)};
   const colorDisplayNames={Black:'Black',White:'White',Red:'Red',Gray:'Heather Gray',LightGray:'Light Heather Gray',Cream:'Cream',Navy:'Navy'};
@@ -1939,7 +1974,7 @@
    }));
    const cleanProductReferences={'sds-167256':teeReferences,'vibeya-washed-hoodie':hoodieReferences};
    const blankProductReferenceSource=()=>cleanProductReferences[chosen.id]?.[selectedColor]||null;
-   const productReferenceSources=()=>{if(chosen.id==='sds-128646'||chosen.id==='sds-97226'||chosen.id==='sds-138708'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain')return [];const refs=blankProductReferenceSource();if(!refs)return null;const zones=selectedPrint==='both'?[refs.zoneFront,refs.zoneBack]:[selectedPrint==='back'?refs.zoneBack:refs.zoneFront];return [refs.front,refs.back,...zones];};
+   const productReferenceSources=()=>{if(chosen.id==='sds-128646'||chosen.id==='sds-97226'||chosen.id==='sds-138708'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892')return [];const refs=blankProductReferenceSource();if(!refs)return null;const zones=selectedPrint==='both'?[refs.zoneFront,refs.zoneBack]:[selectedPrint==='back'?refs.zoneBack:refs.zoneFront];return [refs.front,refs.back,...zones];};
    const blankProductPreviewSource=()=>blankProductReferenceSource()?.composite||null;
   const gallerySrc=(i,color=selectedColor)=>{
     let src;
@@ -1947,6 +1982,7 @@
     else if(chosen.id==='sds-138708')src='assets/products/sds-138708/'+bathMatGalleryFiles[i];
     else if(chosen.id==='sds-97226')src='assets/products/sds-97226/'+blanketGalleryFiles[i];
     else if(chosen.id==='vibeya-shower-curtain')src='assets/products/mg8014087/'+showerCurtainGalleryFiles[i];
+    else if(chosen.id==='sds-137892')src='assets/products/mg8011024/'+(tankiniColorFolders[color]||'black')+'/'+tankiniGalleryFiles[i];
     else if(chosen.id==='sds-172647'){
       const files=color==='Black'?[beanieGalleryFiles[1],beanieGalleryFiles[0],...beanieGalleryFiles.slice(2)]:beanieGalleryFiles;
       src='assets/products/sds-172647/'+({Black:'black',Red:'red',Gray:'gray'}[color]||'black')+'/'+files[i]+(color==='Black'&&i<2?'?rev=2':'');
@@ -1993,12 +2029,13 @@
 const blanket=chosen.id==='sds-97226';
     const showerCurtain=chosen.id==='vibeya-shower-curtain';
     const beanie=chosen.id==='sds-172647';
+    const tankini=chosen.id==='sds-137892';
     $('#detailPrintSection .variant-label strong').textContent=chosen.id==='sds-138708'||blanket||showerCurtain?'Print coverage':'Print placement';
-    $('#detailPrints').innerHTML=fullSurface?`<button type="button" class="variant-side" data-select-print="wrap" aria-pressed="${selectedPrint==='wrap'}">${chosen.id==='sds-138708'?'Full Surface':'Full Wrap'}</button>`:blanket?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Surface · Front Only</button>`:showerCurtain?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Surface · Single Sided</button>`:beanie?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Folded Front Cuff Only</button>`:`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Front Only</button><button type="button" class="variant-side" data-select-print="back" aria-pressed="${selectedPrint==='back'}">Back Only</button><button type="button" class="variant-side" data-select-print="both" aria-pressed="${selectedPrint==='both'}">Front + Back</button>`;
-    $('#detailPrintSection .option-helper').textContent=chosen.id==='sds-128646'?'Create a continuous design for the printable area around the cup, or upload your own artwork in AI Studio. The gallery art is only an example.':chosen.id==='sds-138708'?'The custom print covers the entire mat, including its rounded edges. Upload artwork or create a design in AI Studio.':blanket?'Upload or create your artwork. It prints across the blanket front to the edges; the reverse remains white.':showerCurtain?'One continuous print covers the full curtain face edge to edge. Choose a size, then create or upload your artwork in AI Studio.':beanie?'Upload your artwork or describe a new design. Printing is limited to the front of the folded cuff; the rest of the beanie stays plain.':'Choose one side or both. The gallery shows example prints for each color. Your own design can be added to either side in AI Studio.';
+    $('#detailPrints').innerHTML=fullSurface?`<button type="button" class="variant-side" data-select-print="wrap" aria-pressed="${selectedPrint==='wrap'}">${chosen.id==='sds-138708'?'Full Surface':'Full Wrap'}</button>`:blanket?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Surface · Front Only</button>`:showerCurtain?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Surface · Single Sided</button>`:beanie?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Folded Front Cuff Only</button>`:tankini?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Tankini Top · Front Only</button>`:`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Front Only</button><button type="button" class="variant-side" data-select-print="back" aria-pressed="${selectedPrint==='back'}">Back Only</button><button type="button" class="variant-side" data-select-print="both" aria-pressed="${selectedPrint==='both'}">Front + Back</button>`;
+    $('#detailPrintSection .option-helper').textContent=tankini?'Describe or upload your print in AI Studio. The design is previewed on the front of the tankini top; the separate shorts stay in the selected solid color.':chosen.id==='sds-128646'?'Create a continuous design for the printable area around the cup, or upload your own artwork in AI Studio. The gallery art is only an example.':chosen.id==='sds-138708'?'The custom print covers the entire mat, including its rounded edges. Upload artwork or create a design in AI Studio.':blanket?'Upload or create your artwork. It prints across the blanket front to the edges; the reverse remains white.':showerCurtain?'One continuous print covers the full curtain face edge to edge. Choose a size, then create or upload your artwork in AI Studio.':beanie?'Upload your artwork or describe a new design. Printing is limited to the front of the folded cuff; the rest of the beanie stays plain.':'Choose one side or both. The gallery shows example prints for each color. Your own design can be added to either side in AI Studio.';
     $('#detailCustomize').innerHTML='✦&nbsp; START CUSTOMIZING <span>↗</span>';
     $('#detailSalesNotice').textContent=showerCurtain?'Price and ordering will be available after product setup is complete.': 'Create a design in AI Studio, then add the finished artwork to your bag. Free U.S. shipping.';
-    $('#detailGalleryNote').textContent=chosen.id==='sds-128646'?'The cat-and-moon print is a sample. Create a new full-wrap design or upload your own artwork in AI Studio.':chosen.id==='sds-138708'?'The 3D Bubble Duck print is an example. Create or upload your own full-surface design in AI Studio.':blanket?'The artwork shown is a sample. Create or upload your own design for a full-front print that reaches the edges; the reverse stays white.':showerCurtain?'Choose a size to view its matching white curtain reference. The finished design will be a single-sided, full-bleed hanging product image.':beanie?'All displayed prints are examples. Create or upload your design for the folded front cuff; no other part of the beanie is printed.':'Example artwork shown. Create your own print on the front, back, or both sides.';
+    $('#detailGalleryNote').textContent=tankini?'Every print shown is a sample. Create your own print or upload artwork; the top is customized while the separate shorts stay plain.':chosen.id==='sds-128646'?'The cat-and-moon print is a sample. Create a new full-wrap design or upload your own artwork in AI Studio.':chosen.id==='sds-138708'?'The 3D Bubble Duck print is an example. Create or upload your own full-surface design in AI Studio.':blanket?'The artwork shown is a sample. Create or upload your own design for a full-front print that reaches the edges; the reverse stays white.':showerCurtain?'Choose a size to view its matching white curtain reference. The finished design will be a single-sided, full-bleed hanging product image.':beanie?'All displayed prints are examples. Create or upload your design for the folded front cuff; no other part of the beanie is printed.':'Example artwork shown. Create your own print on the front, back, or both sides.';
     $('#detailProductDetails').textContent=config.productDetails||'100% cotton, relaxed fit, crew neckline, long sleeves and custom artwork placement. Available in Black, White and Red, sizes XS–3XL.';
     $('#detailProductionDetails').textContent=config.productionDetails||'Made in the USA. Ships from the USA within 24 hours of order confirmation, according to current store fulfillment information. Delivery time depends on carrier and destination.';
     $('#detailThumbnails').innerHTML=Array.from({length:galleryCount()},(_,index)=>'<button type="button" class="detail-thumb" data-gallery-index="'+index+'" aria-label="View product image '+(index+1)+': '+esc(galleryTitleAt(index))+'" aria-pressed="'+(index===galleryIndex)+'"><img src="'+gallerySrc(index)+'" alt="" loading="lazy"></button>').join('');
@@ -2012,7 +2049,7 @@ const blanket=chosen.id==='sds-97226';
     hero.fetchPriority='high';
     hero.src=gallerySrc(galleryIndex);
     hero.style.objectFit='cover';
-    const garment=chosen.id==='sds-128646'?'20 oz tumbler':chosen.id==='sds-138708'?'custom bath mat':chosen.id==='sds-97226'?'custom flannel throw blanket':chosen.id==='vibeya-shower-curtain'?'custom shower curtain':chosen.id==='sds-172647'?'custom knitted beanie':chosen.id==='vibeya-washed-hoodie'?'washed hoodie':'custom cotton long sleeve';
+    const garment=chosen.id==='sds-128646'?'20 oz tumbler':chosen.id==='sds-138708'?'custom bath mat':chosen.id==='sds-97226'?'custom flannel throw blanket':chosen.id==='vibeya-shower-curtain'?'custom shower curtain':chosen.id==='sds-137892'?'custom women’s tankini swimsuit set':chosen.id==='sds-172647'?'custom knitted beanie':chosen.id==='vibeya-washed-hoodie'?'washed hoodie':'custom cotton long sleeve';
     $('#detailHeroImage').alt=`${galleryTitleAt(galleryIndex)} — ${colorLabel(selectedColor)} VIBEYA ${garment}, example artwork`;
     $('#detailImageCount').textContent=String(galleryIndex+1).padStart(2,'0')+' / '+String(galleryCount()).padStart(2,'0');
     const updateThumbnails=()=>{
@@ -2038,7 +2075,7 @@ const blanket=chosen.id==='sds-97226';
     $('#currentPrintLabel').textContent=printNames[selectedPrint];
     $('#studioSizeLabel').textContent=sizeLabel(chosen,selectedSize);
     if(chosen.sizePrices)$('#detailPrice').textContent=usdPrice(selectedProductPrice(chosen,selectedSize));
-    $('#studioPrintLabel').textContent=chosen.id==='sds-172647'?'Folded Front Cuff Only':printNames[selectedPrint];
+    $('#studioPrintLabel').textContent=chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':printNames[selectedPrint];
     document.querySelectorAll('[data-select-color]').forEach(b=>{
       b.setAttribute('aria-pressed',String(b.dataset.selectColor===selectedColor));
       b.classList.toggle('chosen',b.dataset.selectColor===selectedColor);
@@ -2057,13 +2094,13 @@ const blanket=chosen.id==='sds-97226';
     }).join('');
     const sizes=chosen.sizes||['XS','S','M','L','XL','2XL','3XL'];
     $('#studioSizes').innerHTML=sizes.map(s=>`<button type="button" class="studio-size" data-select-size="${s}">${esc(sizeLabel(chosen,s))}</button>`).join('');
-     const placements=chosen.id==='sds-128646'||chosen.id==='sds-138708'?['wrap']:chosen.id==='sds-97226'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'?['front']:['front','back','both'];
-     $('#studioPrints').innerHTML=placements.map(k=>`<button type="button" class="studio-print" data-select-print="${k}">${chosen.id==='sds-97226'?'Full Surface · Front Only':chosen.id==='sds-138708'||chosen.id==='vibeya-shower-curtain'?'Full Surface · Single Sided':chosen.id==='sds-172647'?'Folded Front Cuff Only':printNames[k]}</button>`).join('');
+     const placements=chosen.id==='sds-128646'||chosen.id==='sds-138708'?['wrap']:chosen.id==='sds-97226'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'?['front']:['front','back','both'];
+     $('#studioPrints').innerHTML=placements.map(k=>`<button type="button" class="studio-print" data-select-print="${k}">${chosen.id==='sds-97226'?'Full Surface · Front Only':chosen.id==='sds-138708'||chosen.id==='vibeya-shower-curtain'?'Full Surface · Single Sided':chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':printNames[k]}</button>`).join('');
     syncVariants();
   }
   function openProductById(id,color){
     const p=products.find(x=>x.id===id);if(!p)return;
-      chosen=p;const requestedColor=id==='sds-128646'&&color==='NightGarden'?'White':color;selectedColor=p.colors?.includes(requestedColor)?requestedColor:(p.colors?.[0]||'Black');selectedColorConfirmed=p.colors?.length===1||p.colors?.includes(requestedColor);selectedSize=p.sizes?.length===1?p.sizes[0]:p.id==='sds-138708'||p.id==='vibeya-shower-curtain'||p.sizePrices?p.sizes[0]:'';selectedPrint=(id==='sds-128646'||id==='sds-138708')?'wrap':'front';$('#preserveOriginalDesign').checked=false;
+      chosen=p;const requestedColor=id==='sds-128646'&&color==='NightGarden'?'White':color;selectedColor=p.colors?.includes(requestedColor)?requestedColor:(p.colors?.[0]||'Black');selectedColorConfirmed=p.colors?.length===1||p.colors?.includes(requestedColor);selectedSize=p.sizes?.length===1?p.sizes[0]:p.id==='sds-138708'||p.id==='vibeya-shower-curtain'||p.id==='sds-137892'||p.sizePrices?p.sizes[0]:'';selectedPrint=(id==='sds-128646'||id==='sds-138708')?'wrap':'front';$('#preserveOriginalDesign').checked=false;
     renderProductDetails();drawStudioVariantChoices();setGallery(0);syncVariants();location.hash='#product-'+id;
     if(location.hash==='#product-'+id){routeCatalog();}
   }

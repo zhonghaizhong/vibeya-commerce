@@ -4,6 +4,7 @@ import path from "node:path"
 const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string> | Record<string, Record<string, string>>> = {
   "sds-97226": "vibeya/assets/products/sds-97226/blank-print-base.webp",
   "sds-138708": "vibeya/assets/products/sds-138708/blank-print-base.webp",
+  "sds-137892": "vibeya/assets/products/mg8011024/swimwear-print-area.jpg",
   "vibeya-shower-curtain": {
     "36x70.8in": { White: "vibeya/assets/products/vibeya-shower-curtain/36x70.8in.webp" },
     "60x70.8in": { White: "vibeya/assets/products/vibeya-shower-curtain/60x70.8in.webp" },
