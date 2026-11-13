@@ -49,7 +49,7 @@ export default async function seedVibeyaCustomTankini({ container }: ExecArgs) {
     sku: `VIBEYA-TANKINI-${color.toUpperCase()}-${size}`,
     manage_inventory: false,
     options: { Color: color, Size: size },
-    prices: [{ amount: 29.99, currency_code: "usd" }],
+    prices: [{ amount: 19.99, currency_code: "usd" }],
   })))
   const description =
     "Design your own women's tankini swimsuit set with a prompt or uploaded artwork, then preview the custom print before ordering. This two-piece set includes a halter-neck swim top and separate side-tie shorts; the custom print is applied to the front panel of the top while the shorts remain in the selected solid color. Made from 80% nylon and 20% spandex. Available in Black, Red, Pink, Blue, and Cyan, sizes S–XL. Gallery prints are samples. Search for custom swimsuit, custom swimwear, design your own swimsuit, personalized swimsuit, and women's tankini swimsuit."

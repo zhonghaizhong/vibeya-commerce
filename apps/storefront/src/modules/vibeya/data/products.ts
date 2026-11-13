@@ -366,7 +366,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
     category: "Apparel",
     name: "VIBEYA Custom Women's Tankini Swimsuit Set",
     short: "Custom women's tankini swimsuit",
-    price: 29.99,
+    price: 19.99,
     currency: "USD",
     colors: [
       { id: "Black", name: "Black", hex: "#17171b", folder: "black" },
