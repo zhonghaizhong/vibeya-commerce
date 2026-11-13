@@ -1,6 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { VIBEYA_AI_JOBS_MODULE } from "../../../../../modules/vibeya-ai-jobs"
-import { getVibeyaProductReference } from "../../../../../lib/vibeya-product-references"
+import { getVibeyaProductPrintAreaReference, getVibeyaProductReference } from "../../../../../lib/vibeya-product-references"
 import {
   getVibeyaDesignCredits,
   reconcileVibeyaDesignReservations,
@@ -62,6 +62,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const references = Array.isArray(body?.references) ? body.references : []
   const preserveBaseComposite = typeof body?.preserveBaseComposite === "string" ? body.preserveBaseComposite : ""
   let productReference = typeof body?.productReference === "string" ? body.productReference : ""
+  let productPrintAreaReference = typeof body?.productPrintAreaReference === "string" ? body.productPrintAreaReference : ""
   const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : ""
   const productId = typeof body?.productId === "string" ? body.productId : ""
   const color = typeof body?.color === "string" ? body.color : ""
@@ -92,6 +93,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(503).json({ error: isBeanie ? "The beanie print-area reference is not available right now. Please try again later." : "The product print reference is not available right now. Please try again later." })
     }
   }
+  if (isTankini && !productPrintAreaReference) {
+    try {
+      productPrintAreaReference = await getVibeyaProductPrintAreaReference(productId)
+    } catch (error) {
+      console.error("Unable to load the VIBEYA product print-area guide", error)
+      return res.status(503).json({ error: "The tankini print-area guide is not available right now. Please try again later." })
+    }
+  }
   if (isTumbler && !productReference) {
     return res.status(400).json({ error: "The tumbler print-area reference is missing. Refresh the page and try again." })
   }
@@ -101,8 +110,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isTankini && !productReference) {
     return res.status(400).json({ error: "The tankini print-area reference is missing. Refresh the page and try again." })
   }
-  if (productReference && (productReference.length > (isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+  if (isTankini && !productPrintAreaReference) {
+    return res.status(400).json({ error: "The tankini print-area guide is missing. Refresh the page and try again." })
+  }
+  if (productReference && (productReference.length > (isTankini ? 2500000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
     return res.status(400).json({ error: "The product print-area reference is invalid. Refresh the page and try again." })
+  }
+  if (productPrintAreaReference && (productPrintAreaReference.length > 420000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
+    return res.status(400).json({ error: "The tankini print-area guide is invalid. Refresh the page and try again." })
   }
   const placement = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini ? "front" : body?.printPlacement
   const placementGuideCount = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
@@ -125,7 +140,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       size,
       print_placement: String(placement ?? ""),
       preserve_original_design: body?.preserveOriginalDesign === true,
-      references: JSON.stringify({ images: references, preserveBaseComposite, productReference }),
+      references: JSON.stringify({ images: references, preserveBaseComposite, productReference, productPrintAreaReference }),
     })
     const reconciled = await reconcileVibeyaDesignReservations(req.scope, customerId, service)
     if (!reconciled.acceptedJobIds.includes(job.id)) {

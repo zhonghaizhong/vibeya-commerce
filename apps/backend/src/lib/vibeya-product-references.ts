@@ -4,7 +4,7 @@ import path from "node:path"
 const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string> | Record<string, Record<string, string>>> = {
   "sds-97226": "vibeya/assets/products/sds-97226/blank-print-base.webp",
   "sds-138708": "vibeya/assets/products/sds-138708/blank-print-base.webp",
-  "sds-137892": "vibeya/assets/products/mg8011024/swimwear-print-area.jpg",
+  "sds-137892": "vibeya/assets/products/mg8011024/swimwear-blank-product-base.png",
   "vibeya-shower-curtain": {
     "36x70.8in": { White: "vibeya/assets/products/vibeya-shower-curtain/36x70.8in.webp" },
     "60x70.8in": { White: "vibeya/assets/products/vibeya-shower-curtain/60x70.8in.webp" },
@@ -18,12 +18,11 @@ const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string> | 
   },
 }
 
-export async function getVibeyaProductReference(productId: string, color?: string, size?: string): Promise<string> {
-  const configuredPath = PRODUCT_REFERENCE_PATHS[productId]
-  const selectedPath = typeof configuredPath === "string"
-    ? configuredPath
-    : configuredPath?.[size || ""] ?? configuredPath?.[color || "Black"]
-  const referencePath = typeof selectedPath === "string" ? selectedPath : selectedPath?.[color || "Black"]
+const PRODUCT_PRINT_AREA_REFERENCE_PATHS: Record<string, string> = {
+  "sds-137892": "vibeya/assets/products/mg8011024/swimwear-front-print-area-guide.png",
+}
+
+async function readProductReference(referencePath: string): Promise<string> {
   if (!referencePath) return ""
 
   const candidates = [
@@ -37,12 +36,27 @@ export async function getVibeyaProductReference(productId: string, color?: strin
   for (const filePath of candidates) {
     try {
       const image = await readFile(filePath)
-      const mimeType = path.extname(filePath).toLowerCase() === ".png" ? "image/png" : "image/webp"
+      const extension = path.extname(filePath).toLowerCase()
+      const mimeType = extension === ".png" ? "image/png" : extension === ".jpg" || extension === ".jpeg" ? "image/jpeg" : "image/webp"
       return `data:${mimeType};base64,${image.toString("base64")}`
     } catch {
-      // Try the other workspace layout before reporting a missing base image.
+      // Try the other workspace layout before reporting a missing reference.
     }
   }
 
-  throw new Error(`The print reference image for ${productId} is missing from the storefront assets.`)
+  throw new Error(`The print reference image is missing from the storefront assets: ${referencePath}`)
+}
+
+export async function getVibeyaProductReference(productId: string, color?: string, size?: string): Promise<string> {
+  const configuredPath = PRODUCT_REFERENCE_PATHS[productId]
+  const selectedPath = typeof configuredPath === "string"
+    ? configuredPath
+    : configuredPath?.[size || ""] ?? configuredPath?.[color || "Black"]
+  const referencePath = typeof selectedPath === "string" ? selectedPath : selectedPath?.[color || "Black"]
+  return referencePath ? readProductReference(referencePath) : ""
+}
+
+export async function getVibeyaProductPrintAreaReference(productId: string): Promise<string> {
+  const referencePath = PRODUCT_PRINT_AREA_REFERENCE_PATHS[productId]
+  return referencePath ? readProductReference(referencePath) : ""
 }
