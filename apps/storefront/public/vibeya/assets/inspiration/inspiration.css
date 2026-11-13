@@ -164,22 +164,23 @@ body.customize-open{overflow:hidden;}
 #featuredShowerCurtainResult>.art-card-full img{transform:scale(1.03)}
 @media(max-width:640px){#featuredShowerCurtainResult>.art-card-full{aspect-ratio:1448/1024;align-self:start}}
 
-/* Show two smaller inspiration cards per row while keeping each card image-left / story-right. */
+/* Keep the approved image-left / story-right composition at a usable scale.
+   One spotlight per row gives the complete original art room to fill its panel. */
 .inspiration-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:20px}
 .inspiration-feature-grid>.story-spotlight{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);align-items:stretch;gap:0;min-width:0;overflow:hidden;margin:0;border:1px solid #e5d4f7;border-radius:26px;background:#fffdfced;box-shadow:0 12px 35px #603dc018;scroll-margin-top:94px}
-.inspiration-feature-grid>.story-spotlight>.art-card{position:relative;width:100%;height:auto;min-height:0;aspect-ratio:var(--artwork-ratio,3/2);align-self:stretch;border:0;border-radius:0;background:#ead8f8;isolation:isolate}
+.inspiration-feature-grid>.story-spotlight>.art-card{position:relative;width:100%;height:auto;min-height:0;aspect-ratio:var(--artwork-ratio,4/5);align-self:stretch;border:0;border-radius:0;background:#ead8f8;isolation:isolate}
 .inspiration-feature-grid>.story-spotlight>.art-card:before{display:none}
 .inspiration-feature-grid>.story-spotlight>.art-card img{z-index:1;object-fit:contain;object-position:center;transform:none}
-.inspiration-feature-grid>.story-spotlight>.featured-text{min-width:0;align-self:stretch;border:0;border-radius:0;background:transparent;box-shadow:none;padding:20px;gap:9px}
-.inspiration-feature-grid>.story-spotlight .featured-text h2{font-size:clamp(25px,2.6vw,36px);line-height:1.04;letter-spacing:-.9px}
-.inspiration-feature-grid>.story-spotlight .featured-text p{font-size:13px;line-height:1.45;margin:0}
+.inspiration-feature-grid>.story-spotlight>.featured-text{min-width:0;align-self:stretch;border:0;border-radius:0;background:transparent;box-shadow:none;padding:14px;gap:7px}
+.inspiration-feature-grid>.story-spotlight .featured-text h2{font-size:clamp(21px,1.75vw,24px);line-height:1.04;letter-spacing:-.7px}
+.inspiration-feature-grid>.story-spotlight .featured-text p{font-size:11px;line-height:1.4;margin:0}
 .inspiration-feature-grid>.story-spotlight .pill-label{font-size:10px;padding:5px 9px}
 .inspiration-feature-grid>.story-spotlight .chips{gap:5px}
 .inspiration-feature-grid>.story-spotlight .chip{font-size:10px;padding:5px 8px}
 .inspiration-feature-grid>.story-spotlight .details{gap:5px}
-.inspiration-feature-grid>.story-spotlight .detail-row{gap:8px;padding:7px 9px;font-size:11px;line-height:1.25}
+.inspiration-feature-grid>.story-spotlight .detail-row{gap:7px;padding:5px 7px;font-size:9px;line-height:1.22}
 .inspiration-feature-grid>.story-spotlight .actions{margin-top:auto;padding-top:4px}
-.inspiration-feature-grid>.story-spotlight .actions .btn{min-height:38px;padding:9px 14px;font-size:12px;border-radius:13px}
-@media(max-width:1100px){.inspiration-feature-grid>.story-spotlight{grid-template-columns:minmax(0,1.05fr) minmax(0,0.95fr)}.inspiration-feature-grid>.story-spotlight .featured-text{padding:17px;gap:8px}.inspiration-feature-grid>.story-spotlight .featured-text h2{font-size:clamp(22px,2.8vw,30px)}.inspiration-feature-grid>.story-spotlight .featured-text p{font-size:12px}.inspiration-feature-grid>.story-spotlight .chip{font-size:9px;padding:5px 7px}.inspiration-feature-grid>.story-spotlight .detail-row{font-size:10px;padding:6px 8px}}
+.inspiration-feature-grid>.story-spotlight .actions .btn{min-height:32px;padding:7px 10px;font-size:10px;border-radius:11px}
+@media(max-width:1100px){.inspiration-feature-grid{gap:20px}.inspiration-feature-grid>.story-spotlight{grid-template-columns:minmax(0,1.05fr) minmax(0,0.95fr)}.inspiration-feature-grid>.story-spotlight .featured-text{padding:12px;gap:6px}.inspiration-feature-grid>.story-spotlight .featured-text h2{font-size:clamp(20px,2.1vw,22px)}.inspiration-feature-grid>.story-spotlight .featured-text p{font-size:10px}.inspiration-feature-grid>.story-spotlight .chip{font-size:9px;padding:4px 6px}.inspiration-feature-grid>.story-spotlight .detail-row{font-size:9px;padding:5px 6px}}
 @media(max-width:900px){.inspiration-feature-grid{grid-template-columns:minmax(0,1fr);gap:20px}}
-@media(max-width:640px){.inspiration-feature-grid>.story-spotlight{grid-template-columns:minmax(0,0.9fr) minmax(0,1.1fr);border-radius:20px}.inspiration-feature-grid>.story-spotlight>.art-card{height:auto;aspect-ratio:var(--artwork-ratio,3/2);border-radius:0}.inspiration-feature-grid>.story-spotlight>.art-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}.inspiration-feature-grid>.story-spotlight>.featured-text{padding:14px;gap:8px}.inspiration-feature-grid>.story-spotlight .featured-text h2{font-size:clamp(20px,5vw,28px);letter-spacing:-.7px}.inspiration-feature-grid>.story-spotlight .featured-text p{font-size:12px;line-height:1.45}.inspiration-feature-grid>.story-spotlight .chips{display:flex}.inspiration-feature-grid>.story-spotlight .details{gap:5px}.inspiration-feature-grid>.story-spotlight .detail-row{display:flex;flex-direction:row;align-items:center;padding:7px 8px;font-size:10px}.inspiration-feature-grid>.story-spotlight .actions .btn{font-size:11px;padding:8px 10px;min-height:36px}}
+@media(max-width:640px){.inspiration-feature-grid{grid-template-columns:1fr}.inspiration-feature-grid>.story-spotlight{grid-template-columns:1fr;border-radius:20px}.inspiration-feature-grid>.story-spotlight>.art-card{height:auto;aspect-ratio:var(--artwork-ratio,4/5);border-radius:0}.inspiration-feature-grid>.story-spotlight>.art-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.inspiration-feature-grid>.story-spotlight>.featured-text{padding:20px;gap:11px}.inspiration-feature-grid>.story-spotlight .featured-text h2{font-size:clamp(23px,7vw,32px);letter-spacing:-.7px}.inspiration-feature-grid>.story-spotlight .featured-text p{font-size:13px;line-height:1.55}.inspiration-feature-grid>.story-spotlight .chips{display:flex}.inspiration-feature-grid>.story-spotlight .details{gap:6px}.inspiration-feature-grid>.story-spotlight .detail-row{display:flex;flex-direction:row;align-items:center;padding:8px 10px;font-size:11px}.inspiration-feature-grid>.story-spotlight .actions .btn{font-size:13px;padding:10px 14px;min-height:42px}}
