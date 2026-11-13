@@ -1913,8 +1913,9 @@
    const blanketGalleryTitles=['Meet Your Custom Throw','Your Art, Your Cozy','A Gift That Feels Personal','Soft From Both Sides','Soft Flannel Details','Slow Down, Get Cozy','Why Make It Yours','Pick Your Perfect Size'];
    const beanieGalleryFiles=['01-hero.png','02-custom-print-model.png','03-lifestyle-product.png','04-front-back.png','05-knit-print-detail.png','06-model-lifestyle.png','07-color-options.png','08-size-specs.png'];
    const beanieGalleryTitles=['Make It Yours','Your Design, Your Beanie','Made for Everyday','Front and Back','Knit and Print Details','Wear It Your Way','Choose Your Color','One Size, Easy Fit'];
-   const showerCurtainGalleryFiles=['36x70.8in.webp','60x70.8in.webp','70.8x70.8in.png','70.8x84in.webp'];
-   const showerCurtainGalleryTitles=['36 × 70.8 in','60 × 70.8 in','70.8 × 70.8 in','70.8 × 84 in'];
+   const showerCurtainGalleryFiles=['01-main-image.png','02-print-detail.png','03-size-guide.png','04-design-your-own.png','05-lifestyle-model.png','06-product-details.png'];
+   const showerCurtainGalleryTitles=['Meet Your Custom Shower Curtain','Your Art, Your Curtain','Choose Your Shower Curtain Size','Create or Upload a Print','A Little Cat Style for Your Bathroom','Polyester, Print, and C-Hook Details'];
+   const showerCurtainReferenceFiles={'36x70.8in':'36x70.8in.webp','60x70.8in':'60x70.8in.webp','70.8x70.8in':'70.8x70.8in.png','70.8x84in':'70.8x84in.webp'};
    const galleryCount=()=>chosen.id==='sds-128646'?tumblerGalleryFiles.length:chosen.id==='sds-138708'?bathMatGalleryFiles.length:chosen.id==='sds-97226'?blanketGalleryFiles.length:chosen.id==='sds-172647'?beanieGalleryFiles.length:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryFiles.length:galleryTitles.length;
    const galleryTitleAt=i=>chosen.id==='sds-128646'?tumblerGalleryTitles[i]:chosen.id==='sds-138708'?bathMatGalleryTitles[i]:chosen.id==='sds-97226'?blanketGalleryTitles[i]:chosen.id==='sds-172647'?selectedColor==='Black'?(i===0?beanieGalleryTitles[1]:i===1?beanieGalleryTitles[0]:beanieGalleryTitles[i]):beanieGalleryTitles[i]:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryTitles[i]:chosen.id==='vibeya-washed-hoodie'?hoodieGalleryTitles[i]:galleryTitles[i];
   const galleryFiles=['01-brand-lifestyle.webp','02-make-it-personal.webp','03-cotton-comfort.webp','04-wear-it-your-way.webp','05-attention-to-detail.webp','06-idea-to-outfit.webp','07-make-it-yours.webp'];
@@ -1945,7 +1946,7 @@
     if(chosen.id==='sds-128646')src='assets/products/sds-128646/'+tumblerGalleryFiles[i];
     else if(chosen.id==='sds-138708')src='assets/products/sds-138708/'+bathMatGalleryFiles[i];
     else if(chosen.id==='sds-97226')src='assets/products/sds-97226/'+blanketGalleryFiles[i];
-    else if(chosen.id==='vibeya-shower-curtain')src='assets/products/vibeya-shower-curtain/'+showerCurtainGalleryFiles[i];
+    else if(chosen.id==='vibeya-shower-curtain')src='assets/products/mg8014087/'+showerCurtainGalleryFiles[i];
     else if(chosen.id==='sds-172647'){
       const files=color==='Black'?[beanieGalleryFiles[1],beanieGalleryFiles[0],...beanieGalleryFiles.slice(2)]:beanieGalleryFiles;
       src='assets/products/sds-172647/'+({Black:'black',Red:'red',Gray:'gray'}[color]||'black')+'/'+files[i]+(color==='Black'&&i<2?'?rev=2':'');
@@ -2153,7 +2154,7 @@ const blanket=chosen.id==='sds-97226';
     }
 
     b=e.target.closest('[data-gallery-index]');if(b){setGallery(Number(b.dataset.galleryIndex));return;}
-    b=e.target.closest('[data-select-size]');if(b){selectedSize=b.dataset.selectSize;if(chosen.id==='vibeya-shower-curtain'){const sizeIndex=chosen.sizes.indexOf(selectedSize);studioImageIndex=Math.max(0,sizeIndex);setGallery(studioImageIndex);}studioViewMode='product';syncVariants();drawPreview();return;}
+    b=e.target.closest('[data-select-size]');if(b){selectedSize=b.dataset.selectSize;studioViewMode='product';syncVariants();drawPreview();return;}
     b=e.target.closest('[data-select-print]');if(b){selectedPrint=b.dataset.selectPrint;studioViewMode='product';syncVariants();syncStudioPromptFields();hasPreview=false;drawPreview();return;}
     b=e.target.closest('[data-select-color]');if(b){
       const color=b.dataset.selectColor;
@@ -2234,7 +2235,7 @@ const blanket=chosen.id==='sds-97226';
       const productReference=chosen.id==='sds-128646'
         ?await compressReferenceForAI('assets/products/sds-128646/print-area-reference.png',14000)
         :chosen.id==='vibeya-shower-curtain'
-          ?await compressReferenceForAI('assets/products/vibeya-shower-curtain/'+selectedSize+'.webp',32000,[768,640,512])
+          ?await compressReferenceForAI('assets/products/vibeya-shower-curtain/'+(showerCurtainReferenceFiles[selectedSize]||selectedSize+'.webp'),32000,[768,640,512])
           :'';
       const preserveBaseComposite=preserveOriginalDesign&&(chosen.id==='sds-167256'||chosen.id==='vibeya-washed-hoodie')
         ?await compressPreservedReference(blankProductPreviewSource(),150000,[1254,1024,896])
