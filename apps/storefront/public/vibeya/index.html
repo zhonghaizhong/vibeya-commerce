@@ -223,6 +223,7 @@
     .my-design-size{font-size:11px;color:var(--muted);}
     .my-design-size-select{border:1px solid var(--edge);border-radius:9px;background:#fff;color:var(--ink);font:700 12px var(--body);padding:7px 9px;}
     .my-design-variant-select{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:10px;}
+    .my-design-variant-select label,.studio-saved-variant-select label{display:grid;gap:5px;color:#766a81;font-size:10px;font-weight:700;line-height:1.35;}
     .my-design-variant-select select{min-width:0;border:1px solid var(--edge);border-radius:9px;background:#fff;color:var(--ink);font:700 12px var(--body);padding:8px;}
     .my-design-empty{padding:55px 22px;text-align:center;border:1px dashed #d9c9e7;border-radius:20px;background:#fff;grid-column:1/-1;color:var(--muted);}
     .my-design-empty strong{display:block;color:var(--ink);font-size:20px;margin-bottom:9px;}
@@ -543,6 +544,7 @@
     .studio-saved-card-state{display:inline-block;margin-top:7px;font-size:12px;font-weight:800;color:#64428f;}
     .studio-saved-card-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px;padding:0 10px 10px;}
     .studio-saved-variant-select{display:grid;grid-template-columns:1fr;gap:6px;padding:0 10px 8px;}
+    .studio-saved-variant-select label{padding:0 0 2px;}
     .studio-saved-variant-select select{width:100%;min-width:0;border:1px solid #e4d6ee;border-radius:9px;background:#fff;color:#261a32;font:700 12px var(--body);padding:8px;}
     .studio-saved-card-actions .btn{min-width:0;min-height:36px;padding:0 9px;font-size:12px;}
     .studio-saved-card-actions .btn:disabled{opacity:.45;cursor:not-allowed;}
@@ -1017,6 +1019,44 @@
   function readDesignVariantCache(){try{const value=JSON.parse(localStorage.getItem(DESIGN_VARIANT_CACHE_KEY)||'{}');return value&&typeof value==='object'?value:{};}catch{return {};}}
   function saveDesignVariant(jobId,product,color,size){try{const cache=readDesignVariantCache();cache[String(jobId)]={product,color,size};localStorage.setItem(DESIGN_VARIANT_CACHE_KEY,JSON.stringify(cache));}catch(error){console.warn('Could not cache selected design options',error);}}
   function designVariant(job){const saved=readDesignVariantCache()[String(job?.id)]||{};return {color:job?.color||saved.color||'',size:job?.size||saved.size||''};}
+  function productColorName(product,color){
+    if(product?.id==='vibeya-washed-hoodie')return ({Black:'Washed Black',Gray:'Light Gray',Khaki:'Brown',Green:'Muted Green',Pink:'Pink',Purple:'Lavender'}[color]||color);
+    if(product?.id==='sds-172647')return ({Black:'Black',Red:'Red',Gray:'Medium Gray'}[color]||color);
+    return ({Black:'Black',White:'White',Red:'Red',Gray:'Heather Gray',LightGray:'Light Heather Gray',Cream:'Cream',Navy:'Navy'}[color]||color);
+  }
+  async function createColorVariant(job,color,size,button,refresh){
+    const product=products.find(item=>item.id===job?.product_id);
+    if(!job||!product||!product.colors?.includes(color)||!product.sizes?.includes(size))throw new Error('Choose a valid product color and size.');
+    if(color===designVariant(job).color){toast('This design already uses that color.');return;}
+    if(button){button.disabled=true;button.textContent='Creating…';}
+    try{
+      const detail=await fetch(`/api/vibeya/ai/jobs/${encodeURIComponent(job.id)}`,{credentials:'same-origin',cache:'no-store'}),data=await detail.json();
+      if(!detail.ok||!data.job)throw new Error(data.error||'Could not load the original design settings.');
+      let savedReferences={};try{savedReferences=JSON.parse(data.job.references||'{}');}catch{}
+      const oldImages=Array.isArray(savedReferences.images)?savedReferences.images:[];
+      let references=oldImages;
+      let preserveBaseComposite=typeof savedReferences.preserveBaseComposite==='string'?savedReferences.preserveBaseComposite:'';
+      if(['sds-167256','vibeya-washed-hoodie'].includes(product.id)){
+        const previous={chosen,selectedColor,selectedPrint};
+        try{
+          chosen=product;selectedColor=color;selectedPrint=job.print_placement||'front';
+          const sources=productReferenceSources();
+          if(!sources)throw new Error('The clean garment reference for this color is unavailable.');
+          const replacement=await Promise.all(sources.map(source=>compressReferenceForAI(source)));
+          const oldBaseCount=job.print_placement==='both'?4:3;
+          references=[...replacement,...oldImages.slice(oldBaseCount)];
+          if(job.preserve_original_design)preserveBaseComposite=await compressPreservedReference(blankProductPreviewSource(),150000,[1254,1024,896]);
+        }finally{chosen=previous.chosen;selectedColor=previous.selectedColor;selectedPrint=previous.selectedPrint;}
+      }
+      const response=await fetch('/api/vibeya/ai/jobs',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:job.prompt||'',productId:job.product_id,color,size,printPlacement:job.print_placement||'front',mode:'designed-product',preserveOriginalDesign:job.preserve_original_design===true,preserveBaseComposite,productReference:'',references})});
+      const result=await response.json();renderDesignCreditBalance(result.credits);
+      if(!response.ok||!result.job?.id)throw new Error(result.error||'Could not create the color variation.');
+      saveDesignVariant(result.job.id,job.product_id,color,size);
+      toast(`Creating ${productColorName(product,color)} version. One design credit is used.`);
+      if(refresh)await refresh();
+      await startGenerationRun(result.job.id);
+    }finally{if(button){button.disabled=false;button.textContent='Create color design';}}
+  }
   const guidedExamples={
     front:'Front: Create a bold graffiti-style illustration of a brave black cat wearing headphones, with neon-lime lightning and violet stars. Center it on the chest. Keep the design print-ready against the shirt color.',
     back:'Back: Design an expressive statement reading "OWN YOUR ENERGY" with layered stars and bright brush strokes in neon lime and violet. Position it on the upper back.',
@@ -1300,7 +1340,7 @@
         const addDisabled=job.status!=='completed'||!product;
         const shownColor=job.product_id==='sds-128646'&&variant.color==='NightGarden'?'White':variant.color||'';
         const shownPlacement=job.print_placement==='wrap'?'Full Wrap':job.print_placement||'';
-        const variantChoices=product&&((!variant.color&&(product.colors||[]).length>1)||(!variant.size&&(product.sizes||[]).length>1))?`<div class="my-design-variant-select">${!variant.color&&(product.colors||[]).length>1?`<select data-job-color="${esc(job.id)}" aria-label="Choose color"><option value="">Choose color</option>${product.colors.map(color=>`<option value="${esc(color)}">${esc(colorLabel(color))}</option>`).join('')}</select>`:''}${!variant.size&&(product.sizes||[]).length>1?`<select data-job-size="${esc(job.id)}" aria-label="Choose size"><option value="">Choose size</option>${product.sizes.map(size=>`<option value="${esc(size)}">${esc(sizeLabel(product,size))}</option>`).join('')}</select>`:''}</div>`:'';
+        const variantChoices=product&&((product.colors||[]).length>1||(product.sizes||[]).length>1)?`<div class="my-design-variant-select">${(product.colors||[]).length>1?`<label>Make another color · uses 1 design<select data-job-color="${esc(job.id)}" aria-label="Choose another color"><option value="${esc(variant.color||'')}">${esc(variant.color?productColorName(product,variant.color):'Choose color')}</option>${product.colors.filter(color=>color!==variant.color).map(color=>`<option value="${esc(color)}">${esc(productColorName(product,color))}</option>`).join('')}</select></label>`:''}${(product.sizes||[]).length>1?`<label>Size for your bag<select data-job-size="${esc(job.id)}" aria-label="Choose size">${product.sizes.map(size=>`<option value="${esc(size)}" ${size===(variant.size||product.sizes[0])?'selected':''}>${esc(sizeLabel(product,size))}</option>`).join('')}</select></label>`:''}</div>`:'';
         const runAction=job.status==='queued'||(job.status==='failed'&&job.provider_task_id)?`<button type="button" class="btn secondary" data-job-run="${esc(job.id)}">${job.status==='failed'?'Recover image':'Start generation'}</button>`:'';
         const retryAction=job.status==='failed'?`<button type="button" class="btn secondary" data-job-retry="${esc(job.id)}">Edit &amp; retry</button>`:'';
         const failureNote=job.status==='failed'?`<p class="my-design-failure-note">${job.provider_task_id?'The provider task can be checked again. Recover it to load the generated image.':'No image was returned. Edit the description and try again; failed generations do not use a design credit.'}</p>`:'';
@@ -1314,7 +1354,7 @@
         if(runButton){const id=runButton.dataset.jobRun;runButton.disabled=true;runButton.textContent='Starting…';await startGenerationRun(id);grid.dataset.signature='';loadMyDesigns();return;}
         const addButton=event.target.closest('[data-job-add]');
         if(addButton){
-          const job=jobs.find(item=>String(item.id)===addButton.dataset.jobAdd),product=products.find(p=>p.id===job?.product_id),card=addButton.closest('[data-job-card]'),savedVariant=designVariant(job),color=savedVariant.color||card?.querySelector('[data-job-color]')?.value||(product?.colors?.length===1?product.colors[0]:''),size=savedVariant.size||card?.querySelector('[data-job-size]')?.value||(product?.sizes?.length===1?product.sizes[0]:'');
+          const job=jobs.find(item=>String(item.id)===addButton.dataset.jobAdd),product=products.find(p=>p.id===job?.product_id),card=addButton.closest('[data-job-card]'),savedVariant=designVariant(job),color=card?.querySelector('[data-job-color]')?.value||savedVariant.color||(product?.colors?.length===1?product.colors[0]:''),size=card?.querySelector('[data-job-size]')?.value||savedVariant.size||(product?.sizes?.length===1?product.sizes[0]:'');
           if(!job||job.status!=='completed'){toast('This design is not ready yet.');return;}
           if(!color){toast('Choose a product color before adding this design to your bag.');card?.querySelector('[data-job-color]')?.focus();return;}
           if(!size){toast('Choose a product size before adding this design to your bag.');card?.querySelector('[data-job-size]')?.focus();return;}
@@ -1352,6 +1392,16 @@
         }
         const preview=event.target.closest('[data-job-preview]');if(preview)loadDesignImage(preview);
       };
+      grid.onchange=async event=>{
+        const colorSelect=event.target.closest('[data-job-color]');if(!colorSelect)return;
+        const job=jobs.find(item=>String(item.id)===colorSelect.dataset.jobColor),card=colorSelect.closest('[data-job-card]'),product=products.find(item=>item.id===job?.product_id),variant=designVariant(job);
+        if(!job||!product||colorSelect.value===variant.color)return;
+        const size=card?.querySelector('[data-job-size]')?.value||variant.size||product.sizes?.[0];
+        colorSelect.disabled=true;
+        try{await createColorVariant(job,colorSelect.value,size,null,async()=>{grid.dataset.signature='';await loadMyDesigns();});}
+        catch(error){toast(error.message||'Could not create this color variation.');colorSelect.value=variant.color||'';}
+        finally{colorSelect.disabled=false;}
+      };
       if('IntersectionObserver'in window){const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){observer.unobserve(entry.target);loadDesignImage(entry.target);}}),{rootMargin:'200px'});grid.querySelectorAll('[data-job-preview]').forEach(item=>observer.observe(item));}
     }catch(error){if(grid.dataset.loaded!=='1')grid.innerHTML=`<div class="my-design-empty"><strong>Unable to load designs</strong><p>${esc(error.message||'Please refresh and try again.')}</p></div>`;}
   }
@@ -1381,13 +1431,23 @@
         const visual=image?`<button type="button" class="studio-saved-image" data-studio-job-preview="${esc(job.id)}" aria-label="Enlarge ${esc(title)} image" title="Click to enlarge"><img src="${esc(image)}" alt="${esc(title)} generated design" loading="lazy"></button>`:`<div class="studio-saved-placeholder">${esc(jobStatusLabel(job.status))}</div>`;
         const prompt=(job.prompt||'Custom print design').trim();
         const addDisabled=job.status!=='completed'||!product;
-        const colorChoices=product&&!variant.color&&(product.colors||[]).length>1?`<select data-studio-job-color aria-label="Choose color"><option value="">Choose color</option>${product.colors.map(color=>`<option value="${esc(color)}">${esc(colorLabel(color))}</option>`).join('')}</select>`:'';
-        const sizeChoices=product&&!variant.size&&(product.sizes||[]).length>1?`<select data-studio-job-size aria-label="Choose size"><option value="">Choose size</option>${product.sizes.map(size=>`<option value="${esc(size)}">${esc(sizeLabel(product,size))}</option>`).join('')}</select>`:'';
+        const colorChoices=product&&(product.colors||[]).length>1?`<label>Make another color · uses 1 design<select data-studio-job-color="${esc(job.id)}" aria-label="Choose another color"><option value="${esc(variant.color||'')}">${esc(variant.color?productColorName(product,variant.color):'Choose color')}</option>${product.colors.filter(color=>color!==variant.color).map(color=>`<option value="${esc(color)}">${esc(productColorName(product,color))}</option>`).join('')}</select></label>`:'';
+        const sizeChoices=product&&(product.sizes||[]).length>1?`<label>Size for your bag<select data-studio-job-size aria-label="Choose size">${product.sizes.map(size=>`<option value="${esc(size)}" ${size===(variant.size||product.sizes[0])?'selected':''}>${esc(sizeLabel(product,size))}</option>`).join('')}</select></label>`:'';
         const variantChoices=colorChoices||sizeChoices?`<div class="studio-saved-variant-select">${colorChoices}${sizeChoices}</div>`:'';
         const retryAction=job.status==='failed'?`<button type="button" class="btn secondary" data-studio-job-retry="${esc(job.id)}">Edit &amp; retry</button>`:'';
         const recoverAction=job.status==='failed'&&job.provider_task_id?`<button type="button" class="btn secondary" data-job-run="${esc(job.id)}">Recover image</button>`:'';
-        return `<article class="studio-saved-card">${visual}<div class="studio-saved-card-copy"><strong>${esc(title)} · ${esc(variant.color?colorLabel(variant.color):'')}</strong><p>${esc(prompt.length>90?prompt.slice(0,90)+'…':prompt)}</p><span class="studio-saved-card-state">${esc(jobStatusLabel(job.status))}</span>${job.status==='failed'?`<p class="my-design-failure-note">${job.provider_task_id?'The provider task can be checked again.':'No image was returned. Failed generations do not use a design credit.'}</p>`:''}</div>${variantChoices}<div class="studio-saved-card-actions">${recoverAction}${retryAction}<button type="button" class="btn primary" data-studio-job-add="${esc(job.id)}" ${addDisabled?'disabled':''}>Add to bag</button><button type="button" class="studio-saved-delete" data-studio-job-delete="${esc(job.id)}">Delete</button></div></article>`;
+        return `<article class="studio-saved-card">${visual}<div class="studio-saved-card-copy"><strong>${esc(title)} · ${esc(variant.color?productColorName(product,variant.color):'')}</strong><p>${esc(prompt.length>90?prompt.slice(0,90)+'…':prompt)}</p><span class="studio-saved-card-state">${esc(jobStatusLabel(job.status))}</span>${job.status==='failed'?`<p class="my-design-failure-note">${job.provider_task_id?'The provider task can be checked again.':'No image was returned. Failed generations do not use a design credit.'}</p>`:''}</div>${variantChoices}<div class="studio-saved-card-actions">${recoverAction}${retryAction}<button type="button" class="btn primary" data-studio-job-add="${esc(job.id)}" ${addDisabled?'disabled':''}>Add to bag</button><button type="button" class="studio-saved-delete" data-studio-job-delete="${esc(job.id)}">Delete</button></div></article>`;
       }).join('')}</div>`;
+      container.onchange=async event=>{
+        const colorSelect=event.target.closest('[data-studio-job-color]');if(!colorSelect)return;
+        const job=designs.find(item=>String(item.job.id)===colorSelect.dataset.studioJobColor)?.job,card=colorSelect.closest('.studio-saved-card'),product=products.find(item=>item.id===job?.product_id),variant=designVariant(job);
+        if(!job||!product||colorSelect.value===variant.color)return;
+        const size=card?.querySelector('[data-studio-job-size]')?.value||variant.size||product.sizes?.[0];
+        colorSelect.disabled=true;
+        try{await createColorVariant(job,colorSelect.value,size,null,()=>renderStudioSavedDesigns());loadMyDesigns();}
+        catch(error){toast(error.message||'Could not create this color variation.');colorSelect.value=variant.color||'';}
+        finally{colorSelect.disabled=false;}
+      };
       container.onclick=async event=>{
         const preview=event.target.closest('[data-studio-job-preview]');
         if(preview){const image=preview.querySelector('img');if(!image)return;generatedArtworkDataUrl=image.currentSrc||image.src;lastZoomTrigger=preview;openImageZoom();return;}
@@ -1415,8 +1475,8 @@
         if(!job||job.status!=='completed'||!product){toast('This design is not ready yet.');return;}
         const card=addButton.closest('.studio-saved-card');
         const savedVariant=designVariant(job);
-        const color=savedVariant.color||card?.querySelector('[data-studio-job-color]')?.value||(product.colors?.length===1?product.colors[0]:'');
-        const size=savedVariant.size||card?.querySelector('[data-studio-job-size]')?.value||(product.sizes?.length===1?product.sizes[0]:'');
+        const color=card?.querySelector('[data-studio-job-color]')?.value||savedVariant.color||(product.colors?.length===1?product.colors[0]:'');
+        const size=card?.querySelector('[data-studio-job-size]')?.value||savedVariant.size||(product.sizes?.length===1?product.sizes[0]:'');
         if(!color){toast('Choose a product color before adding this design to your bag.');card?.querySelector('[data-studio-job-color]')?.focus();return;}
         if(!size){toast('Choose a product size before adding this design to your bag.');card?.querySelector('[data-studio-job-size]')?.focus();return;}
         if(product.colors?.length&&!product.colors.includes(color)){toast('Please choose a valid color.');return;}
