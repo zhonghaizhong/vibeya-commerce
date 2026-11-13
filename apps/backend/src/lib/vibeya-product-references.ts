@@ -4,6 +4,7 @@ import path from "node:path"
 const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string>> = {
   "sds-97226": "vibeya/assets/products/sds-97226/blank-print-base.webp",
   "sds-138708": "vibeya/assets/products/sds-138708/blank-print-base.webp",
+  "sds-163412": "vibeya/assets/products/mg8014087/blank-print-base.jpg",
   "sds-172647": {
     Black: "vibeya/assets/products/sds-172647/beanie-print-area-guide.webp",
     Red: "vibeya/assets/products/sds-172647/red/beanie-print-area-guide.webp",
@@ -27,7 +28,9 @@ export async function getVibeyaProductReference(productId: string, color?: strin
   for (const filePath of candidates) {
     try {
       const image = await readFile(filePath)
-      return `data:image/webp;base64,${image.toString("base64")}`
+      const extension = path.extname(filePath).toLowerCase()
+      const mimeType = extension === ".png" ? "image/png" : extension === ".jpg" || extension === ".jpeg" ? "image/jpeg" : "image/webp"
+      return `data:${mimeType};base64,${image.toString("base64")}`
     } catch {
       // Try the other workspace layout before reporting a missing base image.
     }

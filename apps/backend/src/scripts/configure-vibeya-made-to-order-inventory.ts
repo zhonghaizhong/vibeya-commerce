@@ -6,6 +6,7 @@ const PRODUCT_HANDLES = [
   "vibeya-custom-cotton-long-sleeve-tee",
   "vibeya-washed-vintage-hooded-sweatshirt",
   "vibeya-custom-20oz-stainless-steel-tumbler",
+  "vibeya-custom-shower-curtain",
 ]
 
 export default async function configureVibeyaMadeToOrderInventory({

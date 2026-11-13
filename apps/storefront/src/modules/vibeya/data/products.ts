@@ -84,6 +84,15 @@ const blanketGallery = [
   "08-size-guide.png",
 ]
 
+const showerCurtainGallery = [
+  "01-main-image.png",
+  "02-print-detail.png",
+  "03-size-guide.png",
+  "04-design-your-own.png",
+  "05-lifestyle-model.png",
+  "06-product-details.png",
+]
+
 const beanieGallery = [
   "01-hero.png",
   "02-custom-print-model.png",
@@ -310,6 +319,46 @@ export const vibeyaProducts: VibeyaProduct[] = [
       ["Free U.S. shipping", "Shipping to U.S. addresses only."],
     ],
   },
+  {
+    id: "sds-163412",
+    handle: "vibeya-custom-shower-curtain",
+    category: "Home & Bath",
+    name: "VIBEYA Custom Shower Curtain",
+    short: "Custom shower curtain",
+    price: 17.99,
+    currency: "USD",
+    colors: [{ id: "White", name: "White", hex: "#ffffff", folder: "" }],
+    sizes: ["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"],
+    sizePrices: { "36x70.8in": 17.99, "60x70.8in": 19.99, "70.8x70.8in": 21.99, "70.8x84in": 23.99 },
+    sizeLabels: {
+      "36x70.8in": "36 × 70.8 in",
+      "60x70.8in": "60 × 70.8 in",
+      "70.8x70.8in": "70.8 × 70.8 in",
+      "70.8x84in": "70.8 × 84 in",
+    },
+    defaultSize: "36x70.8in",
+    gallery: showerCurtainGallery,
+    eyebrow: "VIBEYA / CUSTOM HOME",
+    intro: "Make your bathroom your own with a custom polyester shower curtain. Create a print or upload your artwork for a single-sided, full-panel design; the Little Cat gallery print is only a sample.",
+    highlights: ["Custom full-panel print", "Polyester", "C-hooks included", "4 sizes"],
+    sizeGuide: "in",
+    sizeRows: [],
+    sizeNote: "Supplier dimensions. C-hook quantity: 12 for lengths up to 70.8 in; 24 for the 84 in length.",
+    variantSummary: "Design or upload artwork · 4 sizes",
+    colorOptionLabel: "Base color",
+    sizeOptionLabel: "Size",
+    measurementRows: [
+      ["36 × 70.8 in", "$17.99 · 12 C-hooks"],
+      ["60 × 70.8 in", "$19.99 · 12 C-hooks"],
+      ["70.8 × 70.8 in", "$21.99 · 12 C-hooks"],
+      ["70.8 × 84 in", "$23.99 · 24 C-hooks"],
+    ],
+    services: [
+      ["Single-sided custom print", "Create or upload artwork for the curtain front."],
+      ["C-hooks included", "Hang the curtain from a shower rod using the included C-hooks."],
+      ["Four size options", "Choose the width and length that fit your shower."],
+    ],
+  },
 ]
 
 export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index = 0) {
@@ -322,6 +371,9 @@ export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index
   }
   if (product.id === "sds-97226") {
     return `/vibeya/assets/products/sds-97226/${file}`
+  }
+  if (product.id === "sds-163412") {
+    return `/vibeya/assets/products/mg8014087/${file}`
   }
   if (product.id === "sds-172647") {
     const colorGallery = color.id === "Black"

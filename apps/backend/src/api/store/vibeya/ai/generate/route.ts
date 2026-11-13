@@ -306,8 +306,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const productId = typeof body?.productId === "string" ? body.productId : ""
   const isBlanket = productId === "sds-97226"
   const isBathMat = productId === "sds-138708"
+  const isShowerCurtain = productId === "sds-163412"
   const isBeanie = productId === "sds-172647"
-  const printPlacement = isBlanket || isBathMat || isBeanie ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
+  const printPlacement = isBlanket || isBathMat || isShowerCurtain || isBeanie ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
     ? body.printPlacement
     : "none"
   const isTumbler = productId === "sds-128646"
@@ -345,6 +346,10 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       name: "Custom Full-Surface Bath Mat",
       colorAliases: { White: "White" },
     },
+    "sds-163412": {
+      name: "Custom Polyester Shower Curtain",
+      colorAliases: { White: "White" },
+    },
     "sds-172647": {
       name: "Custom Knitted Beanie",
       colorAliases: { Black: "Black", Red: "Red", Gray: "Medium Gray" },
@@ -358,7 +363,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
   const references = rawReferences
   let productReference = typeof body?.productReference === "string" ? body.productReference : ""
-  if ((isBlanket || isBathMat || isBeanie) && !productReference) {
+  if ((isBlanket || isBathMat || isShowerCurtain || isBeanie) && !productReference) {
     try {
       productReference = await getVibeyaProductReference(productId, colorKey)
     } catch (error) {
@@ -370,26 +375,26 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const preserveOriginalDesign = body?.preserveOriginalDesign === true
   const isWashedHoodie = productId === "vibeya-washed-hoodie"
   const isLongSleeveTee = productId === "sds-167256"
-  const isFullSurfaceMat = isBlanket || isBathMat
-  const placementGuideCount = isFullSurfaceMat || isBeanie || printPlacement === "none" ? 0 : printPlacement === "both" ? 2 : 1
-  const artworkReferenceStart = isTumbler || isFullSurfaceMat || isBeanie ? 0 : 2 + placementGuideCount
+  const isFullSurfaceProduct = isBlanket || isBathMat || isShowerCurtain
+  const placementGuideCount = isFullSurfaceProduct || isBeanie || printPlacement === "none" ? 0 : printPlacement === "both" ? 2 : 1
+  const artworkReferenceStart = isTumbler || isFullSurfaceProduct || isBeanie ? 0 : 2 + placementGuideCount
   const artworkReferenceNumbers = references.slice(artworkReferenceStart).map((_, index) => artworkReferenceStart + index + 1)
   const artworkReferenceLabel = artworkReferenceNumbers.length
     ? `Customer artwork reference${artworkReferenceNumbers.length > 1 ? "s" : ""}: image${artworkReferenceNumbers.length > 1 ? "s" : ""} ${artworkReferenceNumbers.join(", ")}.`
     : "No uploaded artwork reference was provided."
   const compositeReferenceNumber = preserveBaseComposite ? references.length + 1 : 0
-  const hasUploadedArtwork = isTumbler || isFullSurfaceMat || isBeanie ? references.length > 0 : references.length > 2 + placementGuideCount
-  const uploadedArtworkReferences = isTumbler || isFullSurfaceMat || isBeanie ? references : references.slice(2 + placementGuideCount)
-  const preserveArtworkAfterGeneration = preserveOriginalDesign && hasUploadedArtwork && !isFullSurfaceMat && !isBeanie
+  const hasUploadedArtwork = isTumbler || isFullSurfaceProduct || isBeanie ? references.length > 0 : references.length > 2 + placementGuideCount
+  const uploadedArtworkReferences = isTumbler || isFullSurfaceProduct || isBeanie ? references : references.slice(2 + placementGuideCount)
+  const preserveArtworkAfterGeneration = preserveOriginalDesign && hasUploadedArtwork && !isFullSurfaceProduct && !isBeanie
   if (preserveArtworkAfterGeneration && !isTumbler && !preserveBaseComposite) {
     return res.status(400).json({ error: "无法校准这款衣服的印刷区域，请重新选择商品颜色后再提交。" })
   }
-  const minimumReferences = isTumbler || isFullSurfaceMat || isBeanie ? 0 : mode === "designed-product" ? 2 + placementGuideCount : 2
-  const maximumReferences = isTumbler || isFullSurfaceMat || isBeanie ? 6 : minimumReferences + 6
+  const minimumReferences = isTumbler || isFullSurfaceProduct || isBeanie ? 0 : mode === "designed-product" ? 2 + placementGuideCount : 2
+  const maximumReferences = isTumbler || isFullSurfaceProduct || isBeanie ? 6 : minimumReferences + 6
   if (!isProviderResume && (references.length < minimumReferences || references.length > maximumReferences ||
     references.reduce((total, reference) => total + (typeof reference === "string" ? reference.length : 0), 0) > 300000 ||
     references.some((reference, index) =>
-      typeof reference !== "string" || reference.length > (isTumbler || isFullSurfaceMat || isBeanie ? (preserveOriginalDesign ? 150000 : 36000) : index < 2 + placementGuideCount ? 14000 : preserveOriginalDesign ? 150000 : 36000) ||
+      typeof reference !== "string" || reference.length > (isTumbler || isFullSurfaceProduct || isBeanie ? (preserveOriginalDesign ? 150000 : 36000) : index < 2 + placementGuideCount ? 14000 : preserveOriginalDesign ? 150000 : 36000) ||
     !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(reference)
   ))) {
     return res.status(400).json({ error: "商品正反面图或印花区域参考图缺失，或参考图格式、数量、大小不符合要求。" })
@@ -403,8 +408,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isBathMat && !isProviderResume && !productReference) {
     return res.status(400).json({ error: "地毯满印底板缺失，请刷新后重新提交。" })
   }
+  if (isShowerCurtain && !isProviderResume && !productReference) {
+    return res.status(400).json({ error: "浴帘空白底图缺失，请刷新页面后重新提交。" })
+  }
   if (productReference && (productReference.length > (isBeanie ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
-    return res.status(400).json({ error: isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
+    return res.status(400).json({ error: isShowerCurtain ? "浴帘空白底图无效，请刷新页面后重新提交。" : isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
   }
   if (preserveBaseComposite && (preserveBaseComposite.length > 150000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(preserveBaseComposite))) {
     return res.status(400).json({ error: "原创印花底图无效，请重新选择图片并提交。" })
@@ -434,7 +442,21 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     : preserveOriginalDesign
       ? "KEEP ORIGINAL DESIGN MODE (PRESERVE ON): Treat the complete uploaded image canvas as the locked artwork, including its background. Preserve every visible pixel, subject, wording, layout, colors, textures, and details; do not cut out, remove, replace, blur, recolor, rewrite, rearrange, redraw, or invent any part. If the image has transparency, preserve the transparent areas. Only uniformly scale the complete image and move it to fit inside the selected print area with margin. Do not crop any edge."
       : "PROMPT-LED ADAPTATION MODE (PRESERVE OFF): Treat the customer's written instructions as the primary requirements for the final artwork. Follow the requested subject, wording, colors, style, composition, scale, and placement closely. Use all uploaded images as visual references and keep the result strongly related to their subjects, mood, and recognizable visual cues; do not replace them with an unrelated concept. When the prompt asks for changes, adapt the references to satisfy those instructions. Keep all requested content together and fit it proportionally inside the printable area; do not crop any required content."
-  const safePrompt = isBathMat
+  const showerCurtainSize = typeof body?.size === "string" ? body.size : "the selected size"
+  const curtainHookCount = showerCurtainSize === "70.8x84in" ? 24 : 12
+  const safePrompt = isShowerCurtain
+    ? [
+        "Create exactly ONE photorealistic e-commerce product image on a pure white (#FFFFFF) background. Show one complete polyester shower curtain panel, front-facing and hanging from a straight horizontal shower rod with separate white C-hooks threaded through small metal grommets. Keep the whole curtain visible, centered, and vertically hanging with only gentle natural folds. Do not show a person, bathroom, tub, window, door, room scene, alternate views, collage, badges, borders, or extra props.",
+        `Image ${references.length + 1} is the exact blank shower-curtain product reference. Preserve the curtain's white polyester fabric, subtle woven texture, rectangular shape, top band, grommets, C-hooks, hem, and overall proportions. The selected product size is ${showerCurtainSize}; use ${curtainHookCount} hanging points as supplied for that size.`,
+        "SINGLE-SIDED FULL-PANEL PRINT: apply the custom artwork to the front fabric panel only. Keep the rod, C-hooks, grommets, top sewing band, hem, background, and reverse side unprinted. Fit the entire requested composition across the printable fabric without cropping required wording or subjects; do not add a separate inset panel, border, or sticker edge.",
+        hasUploadedArtwork
+          ? `${artworkReferenceLabel} Use the uploaded artwork as the customer's shower-curtain print. Preserve its recognizable content and follow the written brief.`
+          : "Create original artwork directly from the customer's written instructions.",
+        artworkHandlingInstruction,
+        `Customer design brief: ${prompt}`,
+        "Render the print naturally into the polyester fabric texture and gentle folds. Keep all print inside the fabric panel and the hardware visible. Output one complete front view of the finished shower curtain only.",
+      ].join("\n")
+    : isBathMat
     ? [
         "Create exactly ONE photorealistic Amazon-style product image on a pure white (#FFFFFF) background. Show exactly ONE complete white rectangular bath mat/rug in landscape orientation, viewed from slightly above so the full face is clearly visible. Keep the mat centered and fully inside the frame; do not create a collage, alternate views, room scene, feet, furniture, or extra products.",
         `Image ${references.length + 1} is the exact blank white bath mat product reference. Preserve its landscape proportions, softly rounded corners, stitched construction, subtle plush surface texture, and clean white product-photo appearance. Do not change the mat into a blanket or reshape its corners. The white reference is only the blank base: do not preserve a visible white strip or unprinted border on the printable top face.`,
@@ -599,8 +621,8 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
             ? { images: [...references, ...(productReference ? [productReference] : []), ...(preserveArtworkAfterGeneration && preserveBaseComposite ? [preserveBaseComposite] : [])] }
             : {}),
           aspectRatio: modelUsesPixelSizes(stored.model)
-            ? (["2048x2048", "2880x2880"].includes(stored.aspectRatio) ? stored.aspectRatio : "1024x1024")
-            : "1:1",
+            ? (isShowerCurtain ? "1024x1536" : ["2048x2048", "2880x2880"].includes(stored.aspectRatio) ? stored.aspectRatio : "1024x1024")
+            : isShowerCurtain ? "2:3" : "1:1",
           quality: stored.quality,
           replyType: "async",
         }),

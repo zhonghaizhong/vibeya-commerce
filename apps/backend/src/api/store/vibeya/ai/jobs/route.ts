@@ -18,6 +18,7 @@ const DESIGN_GENERATION_PRODUCT_IDS = new Set([
   "sds-97226",
   "sds-138708",
   "sds-172647",
+  "sds-163412",
 ])
 
 const serviceFor = (req: MedusaRequest) =>
@@ -76,8 +77,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const isTumbler = body?.productId === "sds-128646"
   const isBlanket = productId === "sds-97226"
   const isBathMat = productId === "sds-138708"
+  const isShowerCurtain = productId === "sds-163412"
   const isBeanie = productId === "sds-172647"
-  if ((isBlanket || isBathMat || isBeanie) && !productReference) {
+  if ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference) {
     try {
       productReference = await getVibeyaProductReference(productId, color)
     } catch (error) {
@@ -91,9 +93,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (productReference && (productReference.length > (isBeanie ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
     return res.status(400).json({ error: "The product print-area reference is invalid. Refresh the page and try again." })
   }
-  const placement = isBlanket || isBathMat || isBeanie ? "front" : body?.printPlacement
-  const placementGuideCount = isBlanket || isBathMat || isBeanie ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
-  const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie ? 6 : 2 + placementGuideCount + 6
+  const placement = isBlanket || isBathMat || isBeanie || isShowerCurtain ? "front" : body?.printPlacement
+  const placementGuideCount = isBlanket || isBathMat || isShowerCurtain || isBeanie ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
+  const maximumReferences = isTumbler || isBlanket || isBathMat || isShowerCurtain || isBeanie ? 6 : 2 + placementGuideCount + 6
   if (references.length > maximumReferences || references.some((item) => typeof item !== "string") || JSON.stringify(references).length > 300_000 || preserveBaseComposite.length > 150_000 || (preserveBaseComposite && !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(preserveBaseComposite))) {
     return res.status(400).json({ error: "The reference image is too large. Please compress it and try again." })
   }

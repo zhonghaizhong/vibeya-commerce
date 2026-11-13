@@ -21,6 +21,7 @@ const PRODUCT_HANDLES = {
   beanie: "vibeya-custom-knitted-beanie",
   blanket: "vibeya-custom-flannel-throw-blanket",
   bathMat: "vibeya-custom-3d-bath-mat",
+  showerCurtain: "vibeya-custom-shower-curtain",
 } as const
 
 const locations = [
@@ -53,6 +54,16 @@ const locations = [
     name: "Bay Shore · Cleveland Ave",
     address: { address_1: "70 Cleveland Ave", city: "Bay Shore", province: "NY", country_code: "US" },
     products: ["blanket"],
+  },
+  {
+    name: "Jurupa Valley · Felspar St",
+    address: { address_1: "4720 Felspar St", city: "Jurupa Valley", province: "CA", country_code: "US" },
+    products: ["showerCurtain"],
+  },
+  {
+    name: "Hauppauge · Kennedy Dr",
+    address: { address_1: "55 Kennedy Dr STE 1", city: "Hauppauge", province: "NY", country_code: "US" },
+    products: ["showerCurtain"],
   },
 ] as const
 
@@ -102,6 +113,11 @@ export default async function seedVibeyaFulfillmentLocations({ container }: Exec
       location.address?.city?.trim().toLowerCase() === definition.address.city.toLowerCase() &&
       location.address?.province?.trim().toLowerCase() === definition.address.province.toLowerCase()
     ) as any
+    const currentProductIds = current?.metadata?.[PRODUCT_IDS_METADATA_KEY]
+    const locationProductIds = Array.from(new Set([
+      ...(Array.isArray(currentProductIds) ? currentProductIds : []),
+      ...assignedProductIds,
+    ]))
 
     let locationId: string
     let fulfillmentSetId = current?.fulfillment_sets?.[0]?.id as string | undefined
@@ -112,7 +128,7 @@ export default async function seedVibeyaFulfillmentLocations({ container }: Exec
           selector: { id: current.id },
           update: {
             name: definition.name,
-            metadata: { ...(current.metadata ?? {}), [PRODUCT_IDS_METADATA_KEY]: assignedProductIds },
+            metadata: { ...(current.metadata ?? {}), [PRODUCT_IDS_METADATA_KEY]: locationProductIds },
           },
         },
       })
@@ -124,7 +140,7 @@ export default async function seedVibeyaFulfillmentLocations({ container }: Exec
           locations: [{
             name: definition.name,
             address: definition.address,
-            metadata: { [PRODUCT_IDS_METADATA_KEY]: assignedProductIds },
+            metadata: { [PRODUCT_IDS_METADATA_KEY]: locationProductIds },
           }],
         },
       })
@@ -202,7 +218,7 @@ export default async function seedVibeyaFulfillmentLocations({ container }: Exec
         update: {
           metadata: {
             ...(current?.metadata ?? {}),
-            [PRODUCT_IDS_METADATA_KEY]: assignedProductIds,
+            [PRODUCT_IDS_METADATA_KEY]: locationProductIds,
             [FULFILLMENT_SET_ID_METADATA_KEY]: fulfillmentSetId,
           },
         },

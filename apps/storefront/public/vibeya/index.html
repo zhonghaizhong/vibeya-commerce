@@ -1020,6 +1020,23 @@
        sizeLabels:{'30x40':'30 × 40 in','40x50':'40 × 50 in','50x60':'50 × 60 in','60x80':'60 × 80 in'},
        sizePrices:{'30x40':14.99,'40x50':16.99,'50x60':18.99,'60x80':20.99},
        variantSummary:'Custom full-surface print · 4 sizes'
+     },
+     {
+       id:'sds-163412',
+       handle:'vibeya-custom-shower-curtain',
+       name:'VIBEYA Custom Shower Curtain',
+       short:'Custom shower curtain',
+       price:'$17.99 USD',
+       category:'Home & Bath',
+       supplier:'SDSDIY',
+       supplierId:'163412',
+       supplierUrl:'https://www.sdsdiy.com/portal/detail/163412',
+       asset:'assets/products/mg8014087/01-main-image.png',
+       colors:['White'],
+       sizes:['36x70.8in','60x70.8in','70.8x70.8in','70.8x84in'],
+       sizePrices:{'36x70.8in':17.99,'60x70.8in':19.99,'70.8x70.8in':21.99,'70.8x84in':23.99},
+       sizeLabels:{'36x70.8in':'36 × 70.8 in','60x70.8in':'60 × 70.8 in','70.8x70.8in':'70.8 × 70.8 in','70.8x84in':'70.8 × 84 in'},
+       variantSummary:'Design or upload artwork · 4 sizes'
      }
    ];
   const inspirations=[{title:'Funny Skeleton — Lazy Mood',tags:['Funny','Skull','Streetwear'],prompt:'Front: A laid-back cartoon skeleton lounging in headphones and a purple hoodie with a coffee cup, cheeky expression, street graffiti lettering PROFESSIONAL PROCRASTINATOR. Back: ZERO TASKS TODAY in bold typography, with matching lime-and-purple doodles. Keep the designs connected in color and attitude.'}];
@@ -1283,6 +1300,24 @@
         services:[['Made in the USA','Made in the United States.'],['Ships within 24 hours','Dispatched within 24 hours from the USA.'],['Free U.S. shipping','Free shipping to U.S. addresses.']],
         productDetails:'Custom flannel throw blanket with full-surface print on the front and a soft white plush reverse.',
         productionDetails:'Create or upload your artwork. The print covers the front through to the edges; the reverse remains white.'
+      }
+    },
+    'sds-163412':{
+      colors:{White:['White','#ffffff']},
+      image:()=> 'assets/products/mg8014087/01-main-image.png',
+      sizesLabel:'36 × 70.8–70.8 × 84 in',
+      sizeOptionLabel:'Size',
+      colorOptionLabel:'Base color',
+      details:{
+        title:'Custom Shower Curtain',eyebrow:'VIBEYA / CUSTOM HOME',
+        intro:'Make your bathroom your own with a custom polyester shower curtain. Create a print or upload your artwork for a single-sided, full-panel design; the Little Cat gallery print is only a sample.',
+        highlights:['Custom full-panel print','Polyester','C-hooks included','4 sizes'],
+        measurementRows:[['36 × 70.8 in','$17.99 · 12 C-hooks'],['60 × 70.8 in','$19.99 · 12 C-hooks'],['70.8 × 70.8 in','$21.99 · 12 C-hooks'],['70.8 × 84 in','$23.99 · 24 C-hooks']],
+        sizePrices:{'36x70.8in':17.99,'60x70.8in':19.99,'70.8x70.8in':21.99,'70.8x84in':23.99},
+        guide:'View curtain sizes (in)',note:'Supplier dimensions. C-hook quantity: 12 for lengths up to 70.8 in; 24 for the 84 in length.',
+        services:[['Single-sided custom print','Create or upload artwork for the curtain front.'],['C-hooks included','Hang the curtain from a shower rod using the included C-hooks.'],['Four size options','Choose the width and length that fit your shower.']],
+        productDetails:'Polyester shower curtain with single-sided heat-transfer printing, top grommets, and separate C-hooks for hanging from a shower rod.',
+        productionDetails:'The Little Cat print is a sample only. Create your own design or upload artwork for a single-sided print across the curtain panel. Twelve C-hooks are included for lengths up to 70.8 in; the 84 in length includes 24.'
       }
     }
   };
@@ -1880,14 +1915,16 @@
    const blanketGalleryTitles=['Meet Your Custom Throw','Your Art, Your Cozy','A Gift That Feels Personal','Soft From Both Sides','Soft Flannel Details','Slow Down, Get Cozy','Why Make It Yours','Pick Your Perfect Size'];
    const beanieGalleryFiles=['01-hero.png','02-custom-print-model.png','03-lifestyle-product.png','04-front-back.png','05-knit-print-detail.png','06-model-lifestyle.png','07-color-options.png','08-size-specs.png'];
    const beanieGalleryTitles=['Make It Yours','Your Design, Your Beanie','Made for Everyday','Front and Back','Knit and Print Details','Wear It Your Way','Choose Your Color','One Size, Easy Fit'];
-   const galleryCount=()=>chosen.id==='sds-128646'?tumblerGalleryFiles.length:chosen.id==='sds-138708'?bathMatGalleryFiles.length:chosen.id==='sds-97226'?blanketGalleryFiles.length:chosen.id==='sds-172647'?beanieGalleryFiles.length:galleryTitles.length;
-   const galleryTitleAt=i=>chosen.id==='sds-128646'?tumblerGalleryTitles[i]:chosen.id==='sds-138708'?bathMatGalleryTitles[i]:chosen.id==='sds-97226'?blanketGalleryTitles[i]:chosen.id==='sds-172647'?selectedColor==='Black'?(i===0?beanieGalleryTitles[1]:i===1?beanieGalleryTitles[0]:beanieGalleryTitles[i]):beanieGalleryTitles[i]:chosen.id==='vibeya-washed-hoodie'?hoodieGalleryTitles[i]:galleryTitles[i];
+   const showerCurtainGalleryFiles=['01-main-image.png','02-print-detail.png','03-size-guide.png','04-design-your-own.png','05-lifestyle-model.png','06-product-details.png'];
+   const showerCurtainGalleryTitles=['Meet Your Custom Shower Curtain','Your Art, Your Curtain','Choose Your Shower Curtain Size','Create or Upload a Print','A Little Cat Style for Your Bathroom','Polyester, Print, and C-Hook Details'];
+   const galleryCount=()=>chosen.id==='sds-128646'?tumblerGalleryFiles.length:chosen.id==='sds-138708'?bathMatGalleryFiles.length:chosen.id==='sds-97226'?blanketGalleryFiles.length:chosen.id==='sds-163412'?showerCurtainGalleryFiles.length:chosen.id==='sds-172647'?beanieGalleryFiles.length:galleryTitles.length;
+   const galleryTitleAt=i=>chosen.id==='sds-128646'?tumblerGalleryTitles[i]:chosen.id==='sds-138708'?bathMatGalleryTitles[i]:chosen.id==='sds-97226'?blanketGalleryTitles[i]:chosen.id==='sds-163412'?showerCurtainGalleryTitles[i]:chosen.id==='sds-172647'?selectedColor==='Black'?(i===0?beanieGalleryTitles[1]:i===1?beanieGalleryTitles[0]:beanieGalleryTitles[i]):beanieGalleryTitles[i]:chosen.id==='vibeya-washed-hoodie'?hoodieGalleryTitles[i]:galleryTitles[i];
   const galleryFiles=['01-brand-lifestyle.webp','02-make-it-personal.webp','03-cotton-comfort.webp','04-wear-it-your-way.webp','05-attention-to-detail.webp','06-idea-to-outfit.webp','07-make-it-yours.webp'];
   const colorGalleries={Black:galleryFiles,White:galleryFiles.map(f=>'white/'+f),Red:galleryFiles.map(f=>'red/'+f),Gray:galleryFiles.map(f=>'gray/'+f),LightGray:galleryFiles.map(f=>'light-gray/'+f),Cream:galleryFiles.map(f=>'cream/'+f),Navy:galleryFiles.map(f=>'navy/'+f)};
   const colorDisplayNames={Black:'Black',White:'White',Red:'Red',Gray:'Heather Gray',LightGray:'Light Heather Gray',Cream:'Cream',Navy:'Navy'};
   const hoodieColorNames={Black:'Washed Black',Gray:'Light Gray',Khaki:'Brown',Green:'Muted Green',Pink:'Pink',Purple:'Lavender'};
    const beanieColorNames={Black:'Black',Red:'Red',Gray:'Medium Gray'};
-   const colorLabel=(key)=>chosen.id==='sds-128646'?'White':chosen.id==='sds-138708'||chosen.id==='sds-97226'?'White':chosen.id==='sds-172647'?(beanieColorNames[key]||key):chosen.id==='vibeya-washed-hoodie'?(hoodieColorNames[key]||key):(colorDisplayNames[key]||key);
+   const colorLabel=(key)=>chosen.id==='sds-128646'?'White':chosen.id==='sds-138708'||chosen.id==='sds-97226'||chosen.id==='sds-163412'?'White':chosen.id==='sds-172647'?(beanieColorNames[key]||key):chosen.id==='vibeya-washed-hoodie'?(hoodieColorNames[key]||key):(colorDisplayNames[key]||key);
    let galleryIndex=0,selectedColor='Black',selectedColorConfirmed=false,selectedSize='',selectedPrint='front';
    const printNames={none:'No print',front:'Front Only',back:'Back Only',both:'Front + Back',wrap:'Full Wrap'};
    const teeBlankFolders={Black:'black',White:'white',Red:'red',Gray:'gray',LightGray:'light-gray',Cream:'cream',Navy:'navy'};
@@ -1903,13 +1940,14 @@
    }));
    const cleanProductReferences={'sds-167256':teeReferences,'vibeya-washed-hoodie':hoodieReferences};
    const blankProductReferenceSource=()=>cleanProductReferences[chosen.id]?.[selectedColor]||null;
-   const productReferenceSources=()=>{if(chosen.id==='sds-128646'||chosen.id==='sds-97226'||chosen.id==='sds-138708'||chosen.id==='sds-172647')return [];const refs=blankProductReferenceSource();if(!refs)return null;const zones=selectedPrint==='both'?[refs.zoneFront,refs.zoneBack]:[selectedPrint==='back'?refs.zoneBack:refs.zoneFront];return [refs.front,refs.back,...zones];};
+   const productReferenceSources=()=>{if(chosen.id==='sds-128646'||chosen.id==='sds-97226'||chosen.id==='sds-138708'||chosen.id==='sds-163412'||chosen.id==='sds-172647')return [];const refs=blankProductReferenceSource();if(!refs)return null;const zones=selectedPrint==='both'?[refs.zoneFront,refs.zoneBack]:[selectedPrint==='back'?refs.zoneBack:refs.zoneFront];return [refs.front,refs.back,...zones];};
    const blankProductPreviewSource=()=>blankProductReferenceSource()?.composite||null;
   const gallerySrc=(i,color=selectedColor)=>{
     let src;
     if(chosen.id==='sds-128646')src='assets/products/sds-128646/'+tumblerGalleryFiles[i];
     else if(chosen.id==='sds-138708')src='assets/products/sds-138708/'+bathMatGalleryFiles[i];
     else if(chosen.id==='sds-97226')src='assets/products/sds-97226/'+blanketGalleryFiles[i];
+    else if(chosen.id==='sds-163412')src='assets/products/mg8014087/'+showerCurtainGalleryFiles[i];
     else if(chosen.id==='sds-172647'){
       const files=color==='Black'?[beanieGalleryFiles[1],beanieGalleryFiles[0],...beanieGalleryFiles.slice(2)]:beanieGalleryFiles;
       src='assets/products/sds-172647/'+({Black:'black',Red:'red',Gray:'gray'}[color]||'black')+'/'+files[i]+(color==='Black'&&i<2?'?rev=2':'');
@@ -1952,15 +1990,15 @@
     $('#detailSizeGuideNote').textContent=config.note;
     $('#detailServices').innerHTML=config.services.map((service,index)=>'<div class="detail-service"><span class="service-ico" aria-hidden="true">'+['✦','◷','↗'][index]+'</span><div><strong>'+esc(service[0])+'</strong><p>'+esc(service[1])+'</p></div></div>').join('');
     $('#detailPrintSection').hidden=false;
-    const fullSurface=chosen.id==='sds-128646'||chosen.id==='sds-138708';
+    const showerCurtain=chosen.id==='sds-163412'; const fullSurface=chosen.id==='sds-128646'||chosen.id==='sds-138708'||showerCurtain;
 const blanket=chosen.id==='sds-97226';
     const beanie=chosen.id==='sds-172647';
-    $('#detailPrintSection .variant-label strong').textContent=chosen.id==='sds-138708'||blanket?'Print coverage':'Print placement';
-    $('#detailPrints').innerHTML=fullSurface?`<button type="button" class="variant-side" data-select-print="wrap" aria-pressed="${selectedPrint==='wrap'}">${chosen.id==='sds-138708'?'Full Surface':'Full Wrap'}</button>`:blanket?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Surface · Front Only</button>`:beanie?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Folded Front Cuff Only</button>`:`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Front Only</button><button type="button" class="variant-side" data-select-print="back" aria-pressed="${selectedPrint==='back'}">Back Only</button><button type="button" class="variant-side" data-select-print="both" aria-pressed="${selectedPrint==='both'}">Front + Back</button>`;
-    $('#detailPrintSection .option-helper').textContent=chosen.id==='sds-128646'?'Create a continuous design for the printable area around the cup, or upload your own artwork in AI Studio. The gallery art is only an example.':chosen.id==='sds-138708'?'The custom print covers the entire mat, including its rounded edges. Upload artwork or create a design in AI Studio.':blanket?'Upload or create your artwork. It prints across the blanket front to the edges; the reverse remains white.':beanie?'Upload your artwork or describe a new design. Printing is limited to the front of the folded cuff; the rest of the beanie stays plain.':'Choose one side or both. The gallery shows example prints for each color. Your own design can be added to either side in AI Studio.';
+    $('#detailPrintSection .variant-label strong').textContent=fullSurface||blanket?'Print coverage':'Print placement';
+    $('#detailPrints').innerHTML=fullSurface?`<button type="button" class="variant-side" data-select-print="wrap" aria-pressed="${selectedPrint==='wrap'}">${showerCurtain?'Full Panel · Single-Sided':chosen.id==='sds-138708'?'Full Surface':'Full Wrap'}</button>`:blanket?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Surface · Front Only</button>`:beanie?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Folded Front Cuff Only</button>`:`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Front Only</button><button type="button" class="variant-side" data-select-print="back" aria-pressed="${selectedPrint==='back'}">Back Only</button><button type="button" class="variant-side" data-select-print="both" aria-pressed="${selectedPrint==='both'}">Front + Back</button>`;
+    $('#detailPrintSection .option-helper').textContent=showerCurtain?'Create a new print or upload your own artwork in AI Studio. Your design prints on the curtain front; the reverse is unprinted.':chosen.id==='sds-128646'?'Create a continuous design for the printable area around the cup, or upload your own artwork in AI Studio. The gallery art is only an example.':chosen.id==='sds-138708'?'The custom print covers the entire mat, including its rounded edges. Upload artwork or create a design in AI Studio.':blanket?'Upload or create your artwork. It prints across the blanket front to the edges; the reverse remains white.':beanie?'Upload your artwork or describe a new design. Printing is limited to the front of the folded cuff; the rest of the beanie stays plain.':'Choose one side or both. The gallery shows example prints for each color. Your own design can be added to either side in AI Studio.';
     $('#detailCustomize').innerHTML='✦&nbsp; START CUSTOMIZING <span>↗</span>';
     $('#detailSalesNotice').textContent='Create a design in AI Studio, then add the finished artwork to your bag. Free U.S. shipping.';
-    $('#detailGalleryNote').textContent=chosen.id==='sds-128646'?'The cat-and-moon print is a sample. Create a new full-wrap design or upload your own artwork in AI Studio.':chosen.id==='sds-138708'?'The 3D Bubble Duck print is an example. Create or upload your own full-surface design in AI Studio.':blanket?'The artwork shown is a sample. Create or upload your own design for a full-front print that reaches the edges; the reverse stays white.':beanie?'All displayed prints are examples. Create or upload your design for the folded front cuff; no other part of the beanie is printed.':'Example artwork shown. Create your own print on the front, back, or both sides.';
+    $('#detailGalleryNote').textContent=showerCurtain?'The Little Cat print is a sample. Create your own design or upload artwork for a full-panel, single-sided print.':chosen.id==='sds-128646'?'The cat-and-moon print is a sample. Create a new full-wrap design or upload your own artwork in AI Studio.':chosen.id==='sds-138708'?'The 3D Bubble Duck print is an example. Create or upload your own full-surface design in AI Studio.':blanket?'The artwork shown is a sample. Create or upload your own design for a full-front print that reaches the edges; the reverse stays white.':beanie?'All displayed prints are examples. Create or upload your design for the folded front cuff; no other part of the beanie is printed.':'Example artwork shown. Create your own print on the front, back, or both sides.';
     $('#detailProductDetails').textContent=config.productDetails||'100% cotton, relaxed fit, crew neckline, long sleeves and custom artwork placement. Available in Black, White and Red, sizes XS–3XL.';
     $('#detailProductionDetails').textContent=config.productionDetails||'Made in the USA. Ships from the USA within 24 hours of order confirmation, according to current store fulfillment information. Delivery time depends on carrier and destination.';
     $('#detailThumbnails').innerHTML=Array.from({length:galleryCount()},(_,index)=>'<button type="button" class="detail-thumb" data-gallery-index="'+index+'" aria-label="View product image '+(index+1)+': '+esc(galleryTitleAt(index))+'" aria-pressed="'+(index===galleryIndex)+'"><img src="'+gallerySrc(index)+'" alt="" loading="lazy"></button>').join('');
@@ -1974,7 +2012,7 @@ const blanket=chosen.id==='sds-97226';
     hero.fetchPriority='high';
     hero.src=gallerySrc(galleryIndex);
     hero.style.objectFit='cover';
-    const garment=chosen.id==='sds-128646'?'20 oz tumbler':chosen.id==='sds-138708'?'custom bath mat':chosen.id==='sds-97226'?'custom flannel throw blanket':chosen.id==='sds-172647'?'custom knitted beanie':chosen.id==='vibeya-washed-hoodie'?'washed hoodie':'custom cotton long sleeve';
+    const garment=chosen.id==='sds-128646'?'20 oz tumbler':chosen.id==='sds-138708'?'custom bath mat':chosen.id==='sds-97226'?'custom flannel throw blanket':chosen.id==='sds-163412'?'custom shower curtain':chosen.id==='sds-172647'?'custom knitted beanie':chosen.id==='vibeya-washed-hoodie'?'washed hoodie':'custom cotton long sleeve';
     $('#detailHeroImage').alt=`${galleryTitleAt(galleryIndex)} — ${colorLabel(selectedColor)} VIBEYA ${garment}, example artwork`;
     $('#detailImageCount').textContent=String(galleryIndex+1).padStart(2,'0')+' / '+String(galleryCount()).padStart(2,'0');
     const updateThumbnails=()=>{
@@ -2019,13 +2057,13 @@ const blanket=chosen.id==='sds-97226';
     }).join('');
     const sizes=chosen.sizes||['XS','S','M','L','XL','2XL','3XL'];
     $('#studioSizes').innerHTML=sizes.map(s=>`<button type="button" class="studio-size" data-select-size="${s}">${esc(sizeLabel(chosen,s))}</button>`).join('');
-     const placements=chosen.id==='sds-128646'||chosen.id==='sds-138708'?['wrap']:chosen.id==='sds-97226'||chosen.id==='sds-172647'?['front']:['front','back','both'];
-     $('#studioPrints').innerHTML=placements.map(k=>`<button type="button" class="studio-print" data-select-print="${k}">${chosen.id==='sds-97226'?'Full Surface · Front Only':chosen.id==='sds-138708'?'Full Surface · Single Sided':chosen.id==='sds-172647'?'Folded Front Cuff Only':printNames[k]}</button>`).join('');
+     const placements=chosen.id==='sds-128646'||chosen.id==='sds-138708'||chosen.id==='sds-163412'?['wrap']:chosen.id==='sds-97226'||chosen.id==='sds-172647'?['front']:['front','back','both'];
+     $('#studioPrints').innerHTML=placements.map(k=>`<button type="button" class="studio-print" data-select-print="${k}">${chosen.id==='sds-97226'?'Full Surface · Front Only':chosen.id==='sds-138708'?'Full Surface · Single Sided':chosen.id==='sds-163412'?'Full Panel · Single-Sided':chosen.id==='sds-172647'?'Folded Front Cuff Only':printNames[k]}</button>`).join('');
     syncVariants();
   }
   function openProductById(id,color){
     const p=products.find(x=>x.id===id);if(!p)return;
-      chosen=p;const requestedColor=id==='sds-128646'&&color==='NightGarden'?'White':color;selectedColor=p.colors?.includes(requestedColor)?requestedColor:(p.colors?.[0]||'Black');selectedColorConfirmed=p.colors?.length===1||p.colors?.includes(requestedColor);selectedSize=p.sizes?.length===1?p.sizes[0]:p.id==='sds-138708'||p.sizePrices?p.sizes[0]:'';selectedPrint=(id==='sds-128646'||id==='sds-138708')?'wrap':'front';$('#preserveOriginalDesign').checked=false;
+      chosen=p;const requestedColor=id==='sds-128646'&&color==='NightGarden'?'White':color;selectedColor=p.colors?.includes(requestedColor)?requestedColor:(p.colors?.[0]||'Black');selectedColorConfirmed=p.colors?.length===1||p.colors?.includes(requestedColor);selectedSize=p.defaultSize||(p.sizes?.length===1?p.sizes[0]:p.id==='sds-138708'||p.sizePrices?p.sizes[0]:'');selectedPrint=(id==='sds-128646'||id==='sds-138708'||id==='sds-163412')?'wrap':'front';$('#preserveOriginalDesign').checked=false;
     renderProductDetails();drawStudioVariantChoices();setGallery(0);syncVariants();location.hash='#product-'+id;
     if(location.hash==='#product-'+id){routeCatalog();}
   }
@@ -2120,7 +2158,7 @@ const blanket=chosen.id==='sds-97226';
     b=e.target.closest('[data-select-print]');if(b){selectedPrint=b.dataset.selectPrint;studioViewMode='product';syncVariants();syncStudioPromptFields();hasPreview=false;drawPreview();return;}
     b=e.target.closest('[data-select-color]');if(b){
       const color=b.dataset.selectColor;
-      const allowed=chosen.id==='vibeya-washed-hoodie'||chosen.id==='sds-128646'||chosen.id==='sds-172647'?chosen.colors?.includes(color):!!colorGalleries[color];
+      const allowed=chosen.id==='vibeya-washed-hoodie'||chosen.id==='sds-128646'||chosen.id==='sds-163412'||chosen.id==='sds-172647'?chosen.colors?.includes(color):!!colorGalleries[color];
       if(!allowed)return;
       selectedColor=color;
       selectedColorConfirmed=true;
@@ -2133,7 +2171,7 @@ const blanket=chosen.id==='sds-97226';
     }
     b=e.target.closest('[data-product]');if(b){openProductById(b.dataset.product,b.dataset.productColor);return;}
     b=e.target.closest('[data-inspo]');if(b){chosenArt=+b.dataset.inspo;hasPreview=true;requestStudio(chosen,inspirations[chosenArt].prompt);return;}
-    b=e.target.closest('[data-studio-product]');if(b){chosen=products.find(p=>p.id===b.dataset.studioProduct);selectedColor=chosen.colors?.[0]||'Black';selectedColorConfirmed=chosen.colors?.length===1;selectedSize=chosen.sizes?.length===1?chosen.sizes[0]:'';selectedPrint=chosen.id==='sds-128646'?'wrap':'front';studioViewMode='product';drawProductChoices();drawStudioVariantChoices();syncStudioPromptFields();hasPreview=false;drawPreview();return;}
+    b=e.target.closest('[data-studio-product]');if(b){chosen=products.find(p=>p.id===b.dataset.studioProduct);selectedColor=chosen.colors?.[0]||'Black';selectedColorConfirmed=chosen.colors?.length===1;selectedSize=chosen.defaultSize||(chosen.sizes?.length===1?chosen.sizes[0]:'');selectedPrint=chosen.id==='sds-128646'||chosen.id==='sds-138708'||chosen.id==='sds-163412'?'wrap':'front';studioViewMode='product';drawProductChoices();drawStudioVariantChoices();syncStudioPromptFields();hasPreview=false;drawPreview();return;}
     b=e.target.closest('[data-example]');if(b){studioActiveInput().value=b.dataset.example;hasPreview=false;drawPreview();return;}
     b=e.target.closest('[data-insert-example]');if(b){const target=$('#studioPrompt');target.value=guidedExamples[selectedPrint]||guidedExamples.both;hasPreview=false;drawPreview();target.focus();return;}
     b=e.target.closest('[data-add-ref]');if(b){$('#studioFileInput').click();return;}
@@ -2153,7 +2191,7 @@ const blanket=chosen.id==='sds-97226';
 
   $('#detailPrev').addEventListener('click',()=>setGallery(galleryIndex-1));
   $('#detailNext').addEventListener('click',()=>setGallery(galleryIndex+1));
-  $('#detailCustomize').addEventListener('click',()=>{selectedPrint=chosen.id==='sds-128646'?'wrap':'front';syncVariants();syncStudioPromptFields();requestStudio(chosen);});
+  $('#detailCustomize').addEventListener('click',()=>{selectedPrint=chosen.id==='sds-128646'||chosen.id==='sds-138708'||chosen.id==='sds-163412'?'wrap':'front';syncVariants();syncStudioPromptFields();requestStudio(chosen);});
   $('#quickPromptForm').addEventListener('submit',e=>{e.preventDefault();let prompt=$('#quickPrompt').value.trim();chosenArt=detectArtwork(prompt);selectedPrint='front';syncVariants();syncStudioPromptFields();hasPreview=false;requestStudio(chosen,prompt);});
   $('#generateBtn').addEventListener('click',async()=>{
     // The blanket only supports a single-sided full-surface print. Never route it
@@ -2164,7 +2202,7 @@ const blanket=chosen.id==='sds-97226';
     // Prevent a typed print idea from being mistaken for a request to make another blank product.
     // Front Only is the safest default when the user has not selected a placement yet.
     if(selectedPrint==='none'&&($('#studioPrompt').value.trim()||uploadedReferences.length)){
-      selectedPrint=chosen.id==='sds-128646'?'wrap':'front';syncVariants();syncStudioPromptFields();
+      selectedPrint=chosen.id==='sds-128646'||chosen.id==='sds-138708'||chosen.id==='sds-163412'?'wrap':'front';syncVariants();syncStudioPromptFields();
     }
     if(selectedPrint==='none'&&$('#studioPrompt').value.trim()){
       selectedPrint='front';syncVariants();syncStudioPromptFields();
