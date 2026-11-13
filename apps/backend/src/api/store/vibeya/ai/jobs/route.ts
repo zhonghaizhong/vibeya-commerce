@@ -116,7 +116,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (productReference && (productReference.length > (isTankini ? 2500000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
     return res.status(400).json({ error: "The product print-area reference is invalid. Refresh the page and try again." })
   }
-  if (productPrintAreaReference && (productPrintAreaReference.length > 420000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
+  if (productPrintAreaReference && (productPrintAreaReference.length > 2500000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
     return res.status(400).json({ error: "The tankini print-area guide is invalid. Refresh the page and try again." })
   }
   const placement = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini ? "front" : body?.printPlacement
