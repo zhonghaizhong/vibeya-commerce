@@ -151,6 +151,11 @@ body.customize-open{overflow:hidden;}
 [data-inspiration-feature][hidden]{display:none!important}
 
 .related-card.home-featured-inspo[data-inspiration="midnight-cat-cafe"]>img{object-fit:cover;object-position:center;background:#fceded}
+.site-socials{display:flex;align-items:center;gap:10px}
+.site-socials a{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;margin:0;border:1px solid #e5d4f7;border-radius:50%;color:#5b35a0;transition:background .18s,border-color .18s,color .18s}
+.site-socials a:hover{background:#f1e5ff;border-color:#8f60ed;color:#542b9e}
+.site-socials svg{width:19px;height:19px;display:block}
+@media(max-width:640px){.site-socials{align-self:flex-start}}
 .beanie-featured-layout>.art-card{aspect-ratio:4/3}
 @media(max-width:640px){.beanie-featured-layout>.art-card{aspect-ratio:4/3}}
 

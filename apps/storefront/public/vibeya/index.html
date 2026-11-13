@@ -138,6 +138,11 @@
     .footer-links h4{font-size:12px;margin:0 0 13px;text-transform:uppercase;letter-spacing:.1em;color:#ac95bd;}
     .footer-links a{display:block;font-size:13px;margin:9px 0;color:#f3eaf9;}
     .footer-links a:hover{color:var(--lime);}
+    .footer-socials{display:flex;gap:10px;margin-top:16px;}
+    .footer-socials a{display:grid;place-items:center;width:38px;height:38px;margin:0;border:1px solid #ffffff4d;border-radius:50%;color:#fff;transition:background .18s,border-color .18s;}
+    .footer-socials a:hover{background:#ffffff1c;border-color:var(--lime);color:var(--lime);}
+    .footer-socials svg{display:block;width:19px;height:19px;}
+    .footer-socials .instagram-mark{fill:none;stroke:currentColor;stroke-width:1.8;}
     .footer-bottom{border-top:1px solid #ffffff2b;margin-top:45px;padding-top:19px;color:#a99db1;font-size:11px;display:flex;justify-content:space-between;gap:15px;}
     /* dialogs, menus, studio */
     .overlay{position:fixed;inset:0;background:#160d24a8;backdrop-filter:blur(5px);z-index:50;display:none;align-items:center;justify-content:center;padding:20px;}
@@ -863,7 +868,7 @@
 </main>
 
   <footer>
-    <div class="container"><div class="footer-top"><div><a class="logo" href="#top">VIBEYA<span>.</span></a><p class="footer-desc">A place to make things that feel like you. No templates for personality. No rules for imagination.</p></div><div class="footer-links"><div><h4>Explore</h4><a href="#shop">Shop products</a><a href="#create">Design your look</a><a href="inspiration/index.html">Inspiration</a></div><div><h4>Discover</h4><a href="#how-it-works">How it works</a><a href="#top">Back to top</a></div><div><h4>Customer care</h4><a data-store-route="shipping" href="/us/shipping" target="_top">Shipping</a><a data-store-route="returns" href="/us/returns" target="_top">Custom order policy</a><a data-store-route="contact" href="/us/contact" target="_top">Contact</a></div></div></div><div class="footer-bottom"><span>© 2026 VIBEYA.</span><span>Designed for expression. Made to be yours.</span></div></div>
+    <div class="container"><div class="footer-top"><div><a class="logo" href="#top">VIBEYA<span>.</span></a><p class="footer-desc">A place to make things that feel like you. No templates for personality. No rules for imagination.</p><div class="footer-socials"><a href="https://www.facebook.com/profile.php?id=61596154035820" target="_blank" rel="noopener noreferrer" aria-label="VIBEYA on Facebook" title="Facebook"><svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.5 1.6-1.5h1.7V3.9c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3V10H7.3v3h2.8v8h3.4Z"/></svg></a><a href="https://www.instagram.com/vibeya.studio/" target="_blank" rel="noopener noreferrer" aria-label="VIBEYA on Instagram" title="Instagram"><svg class="instagram-mark" aria-hidden="true" viewBox="0 0 24 24"><rect x="3.25" y="3.25" width="17.5" height="17.5" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.7" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a></div></div><div class="footer-links"><div><h4>Explore</h4><a href="#shop">Shop products</a><a href="#create">Design your look</a><a href="inspiration/index.html">Inspiration</a></div><div><h4>Discover</h4><a href="#how-it-works">How it works</a><a href="#top">Back to top</a></div><div><h4>Customer care</h4><a data-store-route="shipping" href="/us/shipping" target="_top">Shipping</a><a data-store-route="returns" href="/us/returns" target="_top">Custom order policy</a><a data-store-route="contact" href="/us/contact" target="_top">Contact</a></div></div></div><div class="footer-bottom"><span>© 2026 VIBEYA.</span><span>Designed for expression. Made to be yours.</span></div></div>
   </footer>
 
   <!-- AI artwork generation is connected through the server; checkout remains handled by Medusa. -->
