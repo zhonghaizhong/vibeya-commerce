@@ -95,6 +95,16 @@ const beanieGallery = [
   "08-size-specs.png",
 ]
 
+const tankiniGallery = [
+  "01-main-image.jpg",
+  "02-prompt-preview.jpg",
+  "03-fabric-fit.jpg",
+  "04-two-piece.jpg",
+  "05-sizes.jpg",
+  "06-care.jpg",
+  "07-customize.jpg",
+]
+
 const longSleeveColors: VibeyaColor[] = [
   { id: "Black", name: "Black", hex: "#17171b", folder: "" },
   { id: "White", name: "White", hex: "#ffffff", folder: "white" },
@@ -310,6 +320,84 @@ export const vibeyaProducts: VibeyaProduct[] = [
       ["Free U.S. shipping", "Shipping to U.S. addresses only."],
     ],
   },
+  {
+    id: "vibeya-shower-curtain",
+    handle: "vibeya-custom-shower-curtain",
+    category: "Home & Bath",
+    priceUnavailable: true,
+    name: "VIBEYA Custom Shower Curtain",
+    short: "Custom shower curtain",
+    price: 0,
+    currency: "USD",
+    colors: [{ id: "White", name: "White", hex: "#ffffff", folder: "" }],
+    sizes: ["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"],
+    sizeLabels: {
+      "36x70.8in": "36 × 70.8 in",
+      "60x70.8in": "60 × 70.8 in",
+      "70.8x70.8in": "70.8 × 70.8 in",
+      "70.8x84in": "70.8 × 84 in",
+    },
+    defaultSize: "36x70.8in",
+    gallery: ["36x70.8in.webp", "60x70.8in.webp", "70.8x70.8in.png", "70.8x84in.webp"],
+    eyebrow: "VIBEYA / CUSTOM HOME",
+    intro: "Create a custom shower curtain with a single-sided, edge-to-edge print. Choose from four sizes; your finished design is shown hanging naturally against a white background.",
+    highlights: ["Single-sided full-surface print", "Four size options", "White-background hanging preview"],
+    sizeGuide: "in / cm",
+    sizeRows: [],
+    sizeNote: "Measurements are taken from the supplied product references.",
+    variantSummary: "Custom full-surface print · 4 sizes",
+    colorOptionLabel: "Color",
+    sizeOptionLabel: "Size",
+    measurementRows: [
+      ["36 × 70.8 in", "90 × 180 cm"],
+      ["60 × 70.8 in", "152 × 180 cm"],
+      ["70.8 × 70.8 in", "180 × 180 cm"],
+      ["70.8 × 84 in", "180 × 213 cm"],
+    ],
+    services: [
+      ["Single-sided full print", "Artwork covers the visible curtain face edge to edge."],
+      ["Hanging product preview", "Shown on a rod with natural fabric folds."],
+      ["Free U.S. shipping", "Shipping to U.S. addresses only."],
+    ],
+  },
+  {
+    id: "sds-137892",
+    handle: "vibeya-custom-womens-tankini-swimsuit-set",
+    category: "Apparel",
+    name: "VIBEYA Custom Women's Tankini Swimsuit Set",
+    short: "Custom women's tankini swimsuit",
+    price: 19.99,
+    currency: "USD",
+    colors: [
+      { id: "Black", name: "Black", hex: "#17171b", folder: "black" },
+      { id: "Red", name: "Red", hex: "#ec4329", folder: "red" },
+      { id: "Pink", name: "Pink", hex: "#ec4c91", folder: "pink" },
+      { id: "Blue", name: "Blue", hex: "#3859d7", folder: "blue" },
+      { id: "Cyan", name: "Cyan", hex: "#22c3d7", folder: "cyan" },
+    ],
+    sizes: ["S", "M", "L", "XL"],
+    gallery: tankiniGallery,
+    eyebrow: "VIBEYA / CUSTOM SWIMWEAR",
+    intro: "Design a swimsuit that feels like yours. Describe a print or upload your artwork, preview it on this two-piece tankini, then choose your color and size. Each gallery print is only a sample.",
+    highlights: ["Two-piece tankini set", "Halter swim top + side-tie shorts", "80% nylon · 20% spandex", "Custom front print"],
+    sizeGuide: "in",
+    sizeRows: [],
+    sizeNote: "Supplier measurements are approximate. Check the size guide images before ordering; fit may vary by 1–2 cm.",
+    variantSummary: "Design or upload artwork · 5 colors · Sizes S–XL",
+    colorOptionLabel: "Base color",
+    sizeOptionLabel: "Size",
+    measurementRows: [
+      ["S", "18.3 in length · 14.2 in half chest · 32.3 in hip"],
+      ["M", "18.7 in length · 15.0 in half chest · 33.9 in hip"],
+      ["L", "19.3 in length · 15.9 in half chest · 35.8 in hip"],
+      ["XL", "19.9 in length · 16.9 in half chest · 37.8 in hip"],
+    ],
+    services: [
+      ["Made for your design", "Create a print from a prompt or upload your own artwork."],
+      ["Two-piece tankini", "Includes a halter-style swim top and separate side-tie shorts."],
+      ["U.S. shipping", "Shipping options and delivery estimates appear at checkout."],
+    ],
+  },
 ]
 
 export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index = 0) {
@@ -322,6 +410,12 @@ export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index
   }
   if (product.id === "sds-97226") {
     return `/vibeya/assets/products/sds-97226/${file}`
+  }
+  if (product.id === "vibeya-shower-curtain") {
+    return `/vibeya/assets/products/vibeya-shower-curtain/${file}`
+  }
+  if (product.id === "sds-137892") {
+    return `/vibeya/assets/products/mg8011024/${color.folder}/${file}`
   }
   if (product.id === "sds-172647") {
     const colorGallery = color.id === "Black"

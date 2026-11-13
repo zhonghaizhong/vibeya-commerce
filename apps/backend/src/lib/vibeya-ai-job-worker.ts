@@ -27,14 +27,16 @@ export function processVibeyaAiJob(req: MedusaRequest, job: any, customerId: str
     let references: unknown[] = []
     let preserveBaseComposite = ""
     let productReference = ""
+    let productPrintAreaReference = ""
     try {
       const parsed = JSON.parse(currentJob.references || "[]")
       if (Array.isArray(parsed)) references = parsed
       else if (parsed && typeof parsed === "object") {
-        const stored = parsed as { images?: unknown; preserveBaseComposite?: unknown; productReference?: unknown }
+        const stored = parsed as { images?: unknown; preserveBaseComposite?: unknown; productReference?: unknown; productPrintAreaReference?: unknown }
         if (Array.isArray(stored.images)) references = stored.images
         if (typeof stored.preserveBaseComposite === "string") preserveBaseComposite = stored.preserveBaseComposite
         if (typeof stored.productReference === "string") productReference = stored.productReference
+        if (typeof stored.productPrintAreaReference === "string") productPrintAreaReference = stored.productPrintAreaReference
       }
     } catch {}
 
@@ -48,6 +50,7 @@ export function processVibeyaAiJob(req: MedusaRequest, job: any, customerId: str
         preserveOriginalDesign: currentJob.preserve_original_design,
         preserveBaseComposite,
         productReference,
+        productPrintAreaReference,
         references,
         providerTaskId: activeProviderTaskId,
       },

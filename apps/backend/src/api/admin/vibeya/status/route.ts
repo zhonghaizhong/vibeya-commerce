@@ -12,6 +12,7 @@ const PRODUCT_HANDLES = [
   "vibeya-custom-20oz-stainless-steel-tumbler",
   "vibeya-custom-3d-bath-mat",
   "vibeya-custom-flannel-throw-blanket",
+  "vibeya-custom-shower-curtain",
 ]
 const VIBEYA_SHIPPING_LABELS: Record<string, string> = {
   "GOFO Parcel": "GOFO Parcel",

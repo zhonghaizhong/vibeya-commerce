@@ -1,4 +1,4 @@
-import { createProductsWorkflow, updateProductsWorkflow } from "@medusajs/medusa/core-flows"
+import { batchProductVariantsWorkflow, createProductsWorkflow, updateProductsWorkflow } from "@medusajs/medusa/core-flows"
 import { ContainerRegistrationKeys, ProductStatus } from "@medusajs/framework/utils"
 import type { ExecArgs } from "@medusajs/framework/types"
 
@@ -13,6 +13,7 @@ const products = [
     sizes: ["40x60cm", "50x80cm", "60x90cm"],
     prices: [19.99, 21.99, 23.99],
     skuPrefix: "VIBEYA-BATHMAT",
+    galleryFiles: ["01-main-image.png", "02-core-reason.png", "03-need-solution.png", "04-product-structure.png", "05-detail-evidence.png", "06-usage-scene.png", "07-choice-reasons.png", "08-size-guide.png"],
   },
   {
     title: "VIBEYA Custom Flannel Throw Blanket",
@@ -24,6 +25,19 @@ const products = [
     sizes: ["30x40", "40x50", "50x60", "60x80"],
     prices: [14.99, 16.99, 18.99, 20.99],
     skuPrefix: "VIBEYA-BLANKET",
+    galleryFiles: ["01-main-image.png", "02-core-reason.png", "03-need-solution.png", "04-product-structure.png", "05-detail-evidence.png", "06-usage-scene.png", "07-choice-reasons.png", "08-size-guide.png"],
+  },
+  {
+    title: "VIBEYA Custom Shower Curtain",
+    handle: "vibeya-custom-shower-curtain",
+    subtitle: "Custom single-sided print · polyester shower curtain · 4 sizes",
+    description:
+      "A custom polyester shower curtain with single-sided heat-transfer printing. Create a design or upload your own artwork for a full-panel print. Includes C-hooks: 12 for lengths up to 70.8 in and 24 for the 84 in length. Available in four sizes and ships from U.S. fulfillment locations.",
+    assetFolder: "mg8014087",
+    sizes: ["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"],
+    prices: [17.99, 19.99, 21.99, 23.99],
+    skuPrefix: "VIBEYA-SHOWER-CURTAIN",
+    galleryFiles: ["01-main-image.png", "02-print-detail.png", "03-size-guide.png", "04-design-your-own.png", "05-lifestyle-model.png", "06-product-details.png"],
   },
 ] as const
 
@@ -48,7 +62,7 @@ export default async function seedVibeyaHomeProducts({ container }: ExecArgs) {
   for (const product of products) {
     const { data: existing } = await query.graph({
       entity: "product",
-      fields: ["id", "title"],
+      fields: ["id", "title", "variants.id", "variants.title", "variants.prices.id", "variants.prices.currency_code", "variants.prices.amount", "variants.options.option.title", "variants.options.value"],
       filters: { handle: product.handle },
     })
     const variants = product.sizes.map((size, index) => ({
@@ -59,28 +73,44 @@ export default async function seedVibeyaHomeProducts({ container }: ExecArgs) {
       prices: [{ amount: product.prices[index], currency_code: "usd" }],
     }))
     const assetBase = `/vibeya/assets/products/${product.assetFolder}`
-    const gallery = [
-      "01-main-image.png",
-      "02-core-reason.png",
-      "03-need-solution.png",
-      "04-product-structure.png",
-      "05-detail-evidence.png",
-      "06-usage-scene.png",
-      "07-choice-reasons.png",
-      "08-size-guide.png",
-    ].map((file) => ({ url: `${storefrontUrl}${assetBase}/${file}` }))
+    const gallery = product.galleryFiles.map((file) => ({ url: `${storefrontUrl}${assetBase}/${file}` }))
 
     if (existing.length) {
+      const isShowerCurtain = product.handle === "vibeya-custom-shower-curtain"
       await updateProductsWorkflow(container).run({
         input: {
           products: [{
             id: existing[0].id,
             thumbnail: gallery[0].url,
             images: gallery,
+            ...(isShowerCurtain ? {
+              title: product.title,
+              subtitle: product.subtitle,
+              description: product.description,
+              status: ProductStatus.PUBLISHED,
+            } : {}),
           }],
         },
       })
-      logger.info(`Updated absolute storefront image URLs for ${product.title}.`)
+      const existingProduct = existing[0] as any
+      if (isShowerCurtain) {
+        const updates = (existingProduct.variants ?? []).flatMap((variant: any) => {
+          const size = variant.options?.find((option: any) => option.option?.title?.toLowerCase() === "size")?.value
+          const price = product.sizes.indexOf(size)
+          if (price < 0) return []
+          const currentPrices = variant.prices ?? []
+          if (!currentPrices.some((item: any) => item.currency_code?.toLowerCase() === "usd")) return []
+          return [{
+            id: variant.id,
+            prices: currentPrices.map((item: any) => ({
+              id: item.id,
+              amount: item.currency_code?.toLowerCase() === "usd" ? product.prices[price] : item.amount,
+            })),
+          }]
+        })
+        if (updates.length) await batchProductVariantsWorkflow(container).run({ input: { update: updates } })
+      }
+      logger.info(`Synchronized product details, gallery, and any matching variant prices for ${product.title}.`)
       continue
     }
 

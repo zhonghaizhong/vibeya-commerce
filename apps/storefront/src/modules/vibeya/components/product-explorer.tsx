@@ -83,7 +83,7 @@ function ProductCard({ product, onSelect, countryCode = "us" }: ProductCardProps
       <p className={`${styles.cardVariant} card-color-caption`}>{product.variantSummary ?? `${color.name} · ${product.colors.length} colors · Sizes ${product.sizes[0]}–${product.sizes.at(-1)}`}</p>
       <button className={`${styles.cardInfo} product-card-info`} type="button" onClick={() => onSelect(product, color.id)} aria-label={`View details for ${product.name} in ${color.name}`}>
         <h3>{product.name}</h3>
-        <p>{product.sizePrices ? `From ${formatPrice(product.price, product.currency)}` : formatPrice(product.price, product.currency)}</p>
+        <p>{product.priceUnavailable ? "Price to be confirmed" : product.sizePrices ? `From ${formatPrice(product.price, product.currency)}` : formatPrice(product.price, product.currency)}</p>
       </button>
     </article>
   )
@@ -91,7 +91,11 @@ function ProductCard({ product, onSelect, countryCode = "us" }: ProductCardProps
 
 export function ProductCards({ onSelect, countryCode = "us" }: { onSelect: ProductCardProps["onSelect"]; countryCode?: string }) {
   const products = useVibeyaProducts()
-  const featured = [...products.filter((product) => product.catalogOnly), ...products.filter((product) => !product.catalogOnly)].slice(0, 6)
+  const ordered = [...products.filter((product) => product.catalogOnly), ...products.filter((product) => !product.catalogOnly)]
+  const pinned = ["sds-137892", "sds-97226"]
+    .map((id) => ordered.find((product) => product.id === id))
+    .filter((product): product is VibeyaProduct => Boolean(product))
+  const featured = [...pinned, ...ordered.filter((product) => !pinned.includes(product))].slice(0, 6)
   return <>{featured.map((product) => <ProductCard key={product.id} product={product} onSelect={onSelect} countryCode={countryCode} />)}</>
 }
 
@@ -176,7 +180,7 @@ function ProductDetail({
           <span className={styles.eyebrow}>{product.eyebrow}</span>
           <h1>{product.name}</h1>
           <p className={styles.intro}>{product.intro}</p>
-          <p className={styles.price}>{formatPrice(product.sizePrices?.[size] ?? product.price, product.currency)}</p>
+          <p className={styles.price}>{product.priceUnavailable ? "Price to be confirmed" : formatPrice(product.sizePrices?.[size] ?? product.price, product.currency)}</p>
           <div className={styles.optionBlock}>
             <div className={styles.optionHeading}><strong>{product.colorOptionLabel ?? "Color"}</strong><span>{color.name}</span></div>
             <div className={styles.swatches} role="group" aria-label="Choose a color">

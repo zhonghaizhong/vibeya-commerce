@@ -321,17 +321,42 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         )
       }
 
-      const refundRequest = {
-        amount: {
-          currencyCode: (input.data?.currency_code as string | undefined)
-            ?.toUpperCase() || "",
-          value: new BigNumber(input.amount).numeric.toString(),
-        }
+      const currencyCode = (input.data?.currency_code as string | undefined)?.toUpperCase() || ""
+      const refundAmount = new BigNumber(input.amount).numeric
+      if (!currencyCode || !Number.isFinite(refundAmount) || refundAmount <= 0) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          "PayPal refund requires a valid currency and positive amount"
+        )
       }
+
+      const captureResponse = await this.paymentsController_.getCapturedPayment({ captureId })
+      const capture = captureResponse.result
+      if (capture.status === "REFUNDED") {
+        throw new MedusaError(
+          MedusaError.Types.NOT_ALLOWED,
+          "这笔 PayPal 付款已经全额退款，请先查看 PayPal 交易记录。"
+        )
+      }
+      const capturedAmount = Number(capture.amount?.value)
+      const capturedCurrency = capture.amount?.currencyCode?.toUpperCase()
+      if (!Number.isFinite(capturedAmount) || capturedCurrency !== currencyCode) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          "The PayPal capture currency does not match the requested refund."
+        )
+      }
+
+      // PayPal expects an empty request body for a full refund. Sending the
+      // amount object is reserved for partial refunds.
+      const isFullRefund = capture.status === "COMPLETED" && Math.abs(refundAmount - capturedAmount) < 0.000001
+      const refundRequest = isFullRefund
+        ? undefined
+        : { amount: { currencyCode, value: refundAmount.toString() } }
 
       const response = await this.paymentsController_.refundCapturedPayment({
         captureId: captureId,
-        body: Object.keys(refundRequest).length > 0 ? refundRequest : undefined,
+        body: refundRequest,
         prefer: "return=representation",
       })
 
@@ -351,10 +376,15 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         },
       }
     } catch (error: any) {
-      console.log(error)
+      if (error.statusCode === 409 || error.response?.statusCode === 409) {
+        throw new MedusaError(
+          MedusaError.Types.CONFLICT,
+          "PayPal 正在处理这笔退款。请稍等片刻并先查看 PayPal 交易记录，避免重复退款。"
+        )
+      }
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
-        `Failed to refund PayPal payment: ${error.result?.message || error}`
+        `Failed to refund PayPal payment: ${error.result?.message || error.message || error}`
       )
     }
   }

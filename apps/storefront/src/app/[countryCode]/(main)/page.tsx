@@ -4,9 +4,9 @@ import { toJsonLd } from "@lib/util/product-structured-data"
 import { retrieveCustomer } from "@lib/data/customer"
 import VibeyaHome from "./vibeya-home"
 
-const HOME_TITLE = "Custom Hoodies & T-Shirts Designed by You | VIBEYA"
+const HOME_TITLE = "Custom Products & Personalized Gifts | VIBEYA"
 const HOME_DESCRIPTION =
-  "Shop custom hoodies and graphic T-shirts made to order. Choose your garment color, size, and print placement, then personalize your look. Free U.S. shipping."
+  "Create custom apparel, drinkware, blankets, shower curtains, and home decor online. Personalize a product, preview your design, and order one made for you."
 
 export async function generateMetadata({
   params,
@@ -55,6 +55,16 @@ export default async function Home({
         "@id": `${origin}/#organization`,
         name: STORE_NAME,
         url: origin,
+        description:
+          "VIBEYA is an online store for customizable apparel, accessories, drinkware, blankets, and bathroom products. Customers can personalize supported products, preview their designs, and order online.",
+        knowsAbout: [
+          "Personalized gifts",
+          "Custom apparel and accessories",
+          "Custom drinkware",
+          "Custom blankets",
+          "Custom bath mats and shower curtains",
+          "Online product customization",
+        ],
       },
       {
         "@type": "WebSite",

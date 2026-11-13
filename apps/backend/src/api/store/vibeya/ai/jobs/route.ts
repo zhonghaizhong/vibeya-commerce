@@ -1,6 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { VIBEYA_AI_JOBS_MODULE } from "../../../../../modules/vibeya-ai-jobs"
-import { getVibeyaProductReference } from "../../../../../lib/vibeya-product-references"
+import { getVibeyaProductPrintAreaReference, getVibeyaProductReference } from "../../../../../lib/vibeya-product-references"
 import {
   getVibeyaDesignCredits,
   reconcileVibeyaDesignReservations,
@@ -18,6 +18,8 @@ const DESIGN_GENERATION_PRODUCT_IDS = new Set([
   "sds-97226",
   "sds-138708",
   "sds-172647",
+  "vibeya-shower-curtain",
+  "sds-137892",
 ])
 
 const serviceFor = (req: MedusaRequest) =>
@@ -60,6 +62,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const references = Array.isArray(body?.references) ? body.references : []
   const preserveBaseComposite = typeof body?.preserveBaseComposite === "string" ? body.preserveBaseComposite : ""
   let productReference = typeof body?.productReference === "string" ? body.productReference : ""
+  let productPrintAreaReference = typeof body?.productPrintAreaReference === "string" ? body.productPrintAreaReference : ""
   const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : ""
   const productId = typeof body?.productId === "string" ? body.productId : ""
   const color = typeof body?.color === "string" ? body.color : ""
@@ -77,23 +80,48 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const isBlanket = productId === "sds-97226"
   const isBathMat = productId === "sds-138708"
   const isBeanie = productId === "sds-172647"
-  if ((isBlanket || isBathMat || isBeanie) && !productReference) {
+  const isShowerCurtain = productId === "vibeya-shower-curtain"
+  const isTankini = productId === "sds-137892"
+  if (isShowerCurtain && !["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"].includes(size)) {
+    return res.status(400).json({ error: "Choose one of the available shower curtain sizes before creating your design." })
+  }
+  if (isTankini || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
     try {
-      productReference = await getVibeyaProductReference(productId, color)
+      productReference = await getVibeyaProductReference(productId, color, size)
     } catch (error) {
       console.error("Unable to load the VIBEYA product print reference", error)
       return res.status(503).json({ error: isBeanie ? "The beanie print-area reference is not available right now. Please try again later." : "The product print reference is not available right now. Please try again later." })
     }
   }
+  if (isTankini) {
+    try {
+      productPrintAreaReference = await getVibeyaProductPrintAreaReference(productId, color)
+    } catch (error) {
+      console.error("Unable to load the VIBEYA product print-area guide", error)
+      return res.status(503).json({ error: "The tankini print-area guide is not available right now. Please try again later." })
+    }
+  }
   if (isTumbler && !productReference) {
     return res.status(400).json({ error: "The tumbler print-area reference is missing. Refresh the page and try again." })
   }
-  if (productReference && (productReference.length > (isBeanie ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+  if (isShowerCurtain && !productReference) {
+    return res.status(400).json({ error: "The selected shower curtain size reference is missing. Refresh the page and try again." })
+  }
+  if (isTankini && !productReference) {
+    return res.status(400).json({ error: "The tankini print-area reference is missing. Refresh the page and try again." })
+  }
+  if (isTankini && !productPrintAreaReference) {
+    return res.status(400).json({ error: "The tankini print-area guide is missing. Refresh the page and try again." })
+  }
+  if (productReference && (productReference.length > (isTankini ? 2500000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
     return res.status(400).json({ error: "The product print-area reference is invalid. Refresh the page and try again." })
   }
-  const placement = isBlanket || isBathMat || isBeanie ? "front" : body?.printPlacement
-  const placementGuideCount = isBlanket || isBathMat || isBeanie ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
-  const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie ? 6 : 2 + placementGuideCount + 6
+  if (productPrintAreaReference && (productPrintAreaReference.length > 2500000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
+    return res.status(400).json({ error: "The tankini print-area guide is invalid. Refresh the page and try again." })
+  }
+  const placement = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini ? "front" : body?.printPlacement
+  const placementGuideCount = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
+  const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini ? 6 : 2 + placementGuideCount + 6
   if (references.length > maximumReferences || references.some((item) => typeof item !== "string") || JSON.stringify(references).length > 300_000 || preserveBaseComposite.length > 150_000 || (preserveBaseComposite && !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(preserveBaseComposite))) {
     return res.status(400).json({ error: "The reference image is too large. Please compress it and try again." })
   }
@@ -112,7 +140,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       size,
       print_placement: String(placement ?? ""),
       preserve_original_design: body?.preserveOriginalDesign === true,
-      references: JSON.stringify({ images: references, preserveBaseComposite, productReference }),
+      references: JSON.stringify({ images: references, preserveBaseComposite, productReference, productPrintAreaReference }),
     })
     const reconciled = await reconcileVibeyaDesignReservations(req.scope, customerId, service)
     if (!reconciled.acceptedJobIds.includes(job.id)) {
