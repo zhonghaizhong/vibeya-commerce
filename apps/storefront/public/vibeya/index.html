@@ -1051,11 +1051,10 @@
     if(button){button.disabled=true;button.textContent='Creating…';}
     try{
       const detail=await fetch(`/api/vibeya/ai/jobs/${encodeURIComponent(job.id)}`,{credentials:'same-origin',cache:'no-store'}),data=await detail.json();
-      if(!detail.ok||!data.job)throw new Error(data.error||'Could not load the original design settings.');
-      let savedReferences={};try{savedReferences=JSON.parse(data.job.references||'{}');}catch{}
-      const oldImages=Array.isArray(savedReferences.images)?savedReferences.images:[];
-      let references=oldImages;
-      let preserveBaseComposite=typeof savedReferences.preserveBaseComposite==='string'?savedReferences.preserveBaseComposite:'';
+      if(!detail.ok||!data.job)throw new Error(data.error||'Could not load the original design.');
+      if(data.job.status!=='completed'||!data.job.image)throw new Error('The original design image is not ready yet. Wait for it to finish before creating another color.');
+      const originalImage=await compressReferenceForAI(data.job.image,36000,[768,640,512,384]);
+      let references=[];
       if(['sds-167256','vibeya-washed-hoodie'].includes(product.id)){
         const previous={chosen,selectedColor,selectedPrint};
         try{
@@ -1063,12 +1062,24 @@
           const sources=productReferenceSources();
           if(!sources)throw new Error('The clean garment reference for this color is unavailable.');
           const replacement=await Promise.all(sources.map(source=>compressReferenceForAI(source)));
-          const oldBaseCount=job.print_placement==='both'?4:3;
-          references=[...replacement,...oldImages.slice(oldBaseCount)];
-          if(job.preserve_original_design)preserveBaseComposite=await compressPreservedReference(blankProductPreviewSource(),150000,[1254,1024,896]);
+          references=[...replacement,originalImage];
         }finally{chosen=previous.chosen;selectedColor=previous.selectedColor;selectedPrint=previous.selectedPrint;}
+      }else{
+        // Color variants use the completed image as the print source. Product-specific
+        // base references (for example, the beanie) are supplied by the existing API flow.
+        references=[originalImage];
       }
-      const response=await fetch('/api/vibeya/ai/jobs',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:job.prompt||'',productId:job.product_id,color,size,printPlacement:job.print_placement||'front',mode:'designed-product',preserveOriginalDesign:job.preserve_original_design===true,preserveBaseComposite,productReference:'',references})});
+      const placement=job.print_placement||'front';
+      const variantPrompt=[
+        'COLOR VARIANT: recreate the same finished print from the completed source design image on the newly selected garment color.',
+        'Use the completed source image as the authoritative artwork reference. Extract only the printed artwork from the garment; do not copy the source garment, its color, background, layout, photo, model, or product mockup into the new image.',
+        placement==='both'
+          ? 'Preserve the exact same front print on the front and the same back print on the back. Keep their artwork, wording, colors, composition, scale, and placement consistent with the source image.'
+          : `Preserve the exact same ${placement} print from the source image. Keep the other side completely blank.`,
+        'Do not redesign, replace, add, remove, or reinterpret any part of the print. Render it anew as realistic ink integrated into the selected garment fabric, while keeping it wholly inside the existing print boundary. Keep the selected garment shape, seams, fabric and new color accurate.',
+        `Original design brief for context: ${job.prompt||'Keep the same artwork shown in the completed source image.'}`
+      ].join(' ');
+      const response=await fetch('/api/vibeya/ai/jobs',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:variantPrompt,productId:job.product_id,color,size,printPlacement:placement,mode:'designed-product',preserveOriginalDesign:false,preserveBaseComposite:'',productReference:'',references})});
       const result=await response.json();renderDesignCreditBalance(result.credits);
       if(!response.ok||!result.job?.id)throw new Error(result.error||'Could not create the color variation.');
       saveDesignVariant(result.job.id,job.product_id,color,size);
@@ -1360,7 +1371,7 @@
         const addDisabled=job.status!=='completed'||!product;
         const shownColor=job.product_id==='sds-128646'&&variant.color==='NightGarden'?'White':variant.color||'';
         const shownPlacement=job.print_placement==='wrap'?'Full Wrap':job.print_placement||'';
-        const variantChoices=product&&((product.colors||[]).length>1||(product.sizes||[]).length>1)?`<div class="my-design-variant-select">${designColorPicker(job,product,variant.color,'job-color-choice')}${(product.sizes||[]).length>1?`<label>Size for your bag<select data-job-size="${esc(job.id)}" aria-label="Choose size">${product.sizes.map(size=>`<option value="${esc(size)}" ${size===(variant.size||product.sizes[0])?'selected':''}>${esc(sizeLabel(product,size))}</option>`).join('')}</select></label>`:''}</div>`:'';
+        const variantChoices=product&&job.status==='completed'&&((product.colors||[]).length>1||(product.sizes||[]).length>1)?`<div class="my-design-variant-select">${designColorPicker(job,product,variant.color,'job-color-choice')}${(product.sizes||[]).length>1?`<label>Size for your bag<select data-job-size="${esc(job.id)}" aria-label="Choose size">${product.sizes.map(size=>`<option value="${esc(size)}" ${size===(variant.size||product.sizes[0])?'selected':''}>${esc(sizeLabel(product,size))}</option>`).join('')}</select></label>`:''}</div>`:'';
         const runAction=job.status==='queued'||(job.status==='failed'&&job.provider_task_id)?`<button type="button" class="btn secondary" data-job-run="${esc(job.id)}">${job.status==='failed'?'Recover image':'Start generation'}</button>`:'';
         const retryAction=job.status==='failed'?`<button type="button" class="btn secondary" data-job-retry="${esc(job.id)}">Edit &amp; retry</button>`:'';
         const failureNote=job.status==='failed'?`<p class="my-design-failure-note">${job.provider_task_id?'The provider task can be checked again. Recover it to load the generated image.':'No image was returned. Edit the description and try again; failed generations do not use a design credit.'}</p>`:'';
@@ -1455,7 +1466,7 @@
         const visual=image?`<button type="button" class="studio-saved-image" data-studio-job-preview="${esc(job.id)}" aria-label="Enlarge ${esc(title)} image" title="Click to enlarge"><img src="${esc(image)}" alt="${esc(title)} generated design" loading="lazy"></button>`:`<div class="studio-saved-placeholder">${esc(jobStatusLabel(job.status))}</div>`;
         const prompt=(job.prompt||'Custom print design').trim();
         const addDisabled=job.status!=='completed'||!product;
-        const colorChoices=designColorPicker(job,product,variant.color,'studio-job-color-choice');
+        const colorChoices=job.status==='completed'&&image?designColorPicker(job,product,variant.color,'studio-job-color-choice'):'';
         const sizeChoices=product&&(product.sizes||[]).length>1?`<label>Size for your bag<select data-studio-job-size aria-label="Choose size">${product.sizes.map(size=>`<option value="${esc(size)}" ${size===(variant.size||product.sizes[0])?'selected':''}>${esc(sizeLabel(product,size))}</option>`).join('')}</select></label>`:'';
         const variantChoices=colorChoices||sizeChoices?`<div class="studio-saved-variant-select">${colorChoices}${sizeChoices}</div>`:'';
         const retryAction=job.status==='failed'?`<button type="button" class="btn secondary" data-studio-job-retry="${esc(job.id)}">Edit &amp; retry</button>`:'';
