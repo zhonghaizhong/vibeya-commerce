@@ -36,7 +36,7 @@ type Order = {
   fulfillments?: Array<{
     id: string
     created_at?: string
-    items?: Array<{ id: string; quantity: number }>
+    items?: Array<{ id: string; line_item_id?: string | null; quantity: number }>
     labels?: Array<{ tracking_number?: string | null; tracking_url?: string | null }>
   }>
   items?: OrderItem[]
@@ -195,6 +195,10 @@ const OrderCenterPage = () => {
     const fulfillment = detail?.fulfillments?.find((item) => item.id === trackingFulfillment)
     const number = trackingNumber.trim()
     if (!selected || !fulfillment || !number || !fulfillment.items?.length) return
+    if (fulfillment.items.some((item) => !item.line_item_id)) {
+      setDetailsError("订单商品信息不完整，请刷新订单后再登记运单。")
+      return
+    }
     setSavingTracking(true)
     setDetailsError("")
     try {
@@ -203,7 +207,10 @@ const OrderCenterPage = () => {
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items: fulfillment.items,
+          items: fulfillment.items.map((item) => ({
+            id: item.line_item_id,
+            quantity: item.quantity,
+          })),
           labels: [{ tracking_number: number, tracking_url: "", label_url: "" }],
         }),
       })

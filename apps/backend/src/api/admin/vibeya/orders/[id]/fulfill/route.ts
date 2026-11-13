@@ -14,7 +14,7 @@ export const POST = async (req: MedusaRequest<RequestBody>, res: MedusaResponse)
     const [{ data: orders }, { data: locations }] = await Promise.all([
       query.graph({
         entity: "order",
-        fields: ["id", "items.id", "items.quantity", "items.product.id", "fulfillments.items.id", "fulfillments.items.quantity"],
+        fields: ["id", "items.id", "items.quantity", "items.product.id", "fulfillments.items.id", "fulfillments.items.line_item_id", "fulfillments.items.quantity"],
         filters: { id: req.params.id },
         pagination: { take: 1 },
       }),
@@ -33,7 +33,8 @@ export const POST = async (req: MedusaRequest<RequestBody>, res: MedusaResponse)
     const fulfilled = new Map<string, number>()
     for (const fulfillment of order.fulfillments ?? []) {
       for (const item of fulfillment.items ?? []) {
-        fulfilled.set(item.id, (fulfilled.get(item.id) ?? 0) + Number(item.quantity ?? 0))
+        const lineItemId = item.line_item_id || item.id
+        fulfilled.set(lineItemId, (fulfilled.get(lineItemId) ?? 0) + Number(item.quantity ?? 0))
       }
     }
     const items = (order.items ?? []).map((item: any) => ({
