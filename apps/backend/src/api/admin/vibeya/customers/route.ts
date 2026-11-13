@@ -8,6 +8,7 @@ import {
   toVibeyaCustomerCreditAdjustment,
   toVibeyaDesignCreditConfig,
   VIBEYA_DESIGN_CREDITS_METADATA_KEY,
+  isVibeyaOrderPaid,
 } from "../../../../lib/vibeya-design-credits"
 
 type CustomerRow = {
@@ -78,7 +79,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       }),
       query.graph({
         entity: "order",
-        fields: ["id", "customer_id", "email", "created_at", "payment_status", "items.quantity", "shipping_address.first_name", "shipping_address.last_name", "shipping_address.phone"],
+        fields: ["id", "customer_id", "email", "created_at", "payment_status", "total", "payment_collections.status", "payment_collections.captured_amount", "items.quantity", "shipping_address.first_name", "shipping_address.last_name", "shipping_address.phone"],
         pagination: { take: 10000, order: { created_at: "DESC" } },
       }),
       query.graph({ entity: "store", fields: ["metadata"] }),
@@ -116,7 +117,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       const email = normalizedEmail(emailValue)
       for (const order of postActivationOrdersByEmail.get(email)?.values() ?? []) matchingOrders.set(order.id, order)
       return Array.from(matchingOrders.values()).reduce((total, order) => {
-        if (order.payment_status !== "captured") return total
+        if (!isVibeyaOrderPaid(order)) return total
         if ((timestampOf(order.created_at) ?? Number.NEGATIVE_INFINITY) < activatedAt) return total
         const quantity = Array.isArray(order.items)
           ? order.items.reduce((count: number, item: { quantity?: number }) => count + Math.max(0, Number(item.quantity) || 0), 0)
@@ -221,7 +222,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       if (!row) continue
       row.order_count += 1
       row.last_order_at = newestDate(row.last_order_at, order.created_at)
-      if (order.payment_status === "captured") {
+      if (isVibeyaOrderPaid(order)) {
         row.paid_order_count += 1
         row.last_paid_order_at = newestDate(row.last_paid_order_at, order.created_at)
       }
@@ -294,7 +295,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
   const [{ data: stores }, { data: orders }, jobs] = await Promise.all([
     query.graph({ entity: "store", fields: ["metadata"] }),
-    query.graph({ entity: "order", fields: ["id", "created_at", "payment_status", "items.quantity"], filters: { customer_id: customer.id }, pagination: { take: 10000 } }),
+    query.graph({ entity: "order", fields: ["id", "created_at", "payment_status", "total", "payment_collections.status", "payment_collections.captured_amount", "items.quantity"], filters: { customer_id: customer.id }, pagination: { take: 10000 } }),
     jobService.listVibeyaAiJobs({ customer_id: customer.id }, { select: ["id", "status", "created_at"], take: 100000 }),
   ])
 
@@ -307,7 +308,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     ? Date.parse(storedActivation)
     : Date.parse(DEFAULT_VIBEYA_DESIGN_CREDITS_START_AT)
   const paidProductCount = orders.reduce((total, order) => {
-    if (order.payment_status !== "captured" || (timestampOf(order.created_at) ?? Number.NEGATIVE_INFINITY) < activatedAt) return total
+    if (!isVibeyaOrderPaid(order) || (timestampOf(order.created_at) ?? Number.NEGATIVE_INFINITY) < activatedAt) return total
     const quantity = Array.isArray(order.items)
       ? order.items.reduce((count: number, item: { quantity?: number }) => count + Math.max(0, Number(item.quantity) || 0), 0)
       : 0

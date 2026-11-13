@@ -1249,7 +1249,7 @@
   function renderDesignCreditBalance(credits){
     if(!credits)return;
     designCreditsRemaining=Number(credits.remaining)||0;
-    const text=`${designCreditsRemaining} free design${designCreditsRemaining===1?'':'s'} remaining · ${Number(credits.perOrderDesigns)||0} added per order.`;
+    const text=`${designCreditsRemaining} free design${designCreditsRemaining===1?'':'s'} remaining · ${Number(credits.perPaidProductDesigns)||0} added per paid item.`;
     const studioLabel=$('#studioCreditBalance'),designsLabel=$('#myDesignCreditBalance');
     if(studioLabel)studioLabel.textContent=text;
     if(designsLabel)designsLabel.textContent=text;

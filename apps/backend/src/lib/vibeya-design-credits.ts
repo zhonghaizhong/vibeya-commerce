@@ -41,6 +41,11 @@ type CreditQuery = {
       created_at?: string
       metadata?: Record<string, unknown> | null
       payment_status?: string
+      total?: number | string
+      payment_collections?: Array<{
+        status?: string
+        captured_amount?: number | string | null
+      }>
       items?: Array<{ quantity?: number | string }>
     }>
   }>
@@ -55,6 +60,25 @@ const timestampOf = (value: unknown): number | null => {
         ? Date.parse(value)
         : Number.NaN
   return Number.isFinite(timestamp) ? timestamp : null
+}
+
+export function isVibeyaOrderPaid(order: {
+  payment_status?: string | null
+  total?: number | string | null
+  payment_collections?: Array<{
+    status?: string | null
+    captured_amount?: number | string | null
+  }> | null
+}): boolean {
+  if (["refunded", "partially_refunded", "canceled", "not_paid"].includes(String(order.payment_status ?? ""))) return false
+  if (order.payment_status === "captured") return true
+
+  const total = Number(order.total)
+  return (order.payment_collections ?? []).some((collection) => {
+    if (collection.status === "captured") return true
+    const captured = Number(collection.captured_amount)
+    return Number.isFinite(total) && total > 0 && Number.isFinite(captured) && captured >= total - 0.01
+  })
 }
 
 async function loadCreditState(scope: RequestScope, customerId: string, service: CreditJobService) {
@@ -74,7 +98,7 @@ async function loadCreditState(scope: RequestScope, customerId: string, service:
   ])
   const customer = customerResult.data[0]
   const customerEmail = typeof customer?.email === "string" ? customer.email.trim().toLowerCase() : ""
-  const orderFields = ["id", "email", "customer_id", "created_at", "payment_status", "items.quantity"]
+  const orderFields = ["id", "email", "customer_id", "created_at", "payment_status", "total", "payment_collections.status", "payment_collections.captured_amount", "items.quantity"]
   const [customerOrders, emailOrders] = await Promise.all([
     query.graph({
       entity: "order",
@@ -108,7 +132,7 @@ async function loadCreditState(scope: RequestScope, customerId: string, service:
     ? Date.parse(storedActivation)
     : Date.parse(DEFAULT_VIBEYA_DESIGN_CREDITS_START_AT)
   const paidProductCount = orders.reduce((total, order) => {
-    if (order.payment_status !== "captured" || (timestampOf(order.created_at) ?? Number.NEGATIVE_INFINITY) < activatedAt) return total
+    if (!isVibeyaOrderPaid(order) || (timestampOf(order.created_at) ?? Number.NEGATIVE_INFINITY) < activatedAt) return total
     return total + (order.items ?? []).reduce((quantity, item) => quantity + Math.max(0, Number(item.quantity) || 0), 0)
   }, 0)
   const storedAdjustment = customer?.metadata?.[VIBEYA_CUSTOMER_DESIGN_CREDIT_ADJUSTMENT_KEY]
