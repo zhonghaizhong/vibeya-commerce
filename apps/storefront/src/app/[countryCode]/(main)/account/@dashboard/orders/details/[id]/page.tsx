@@ -1,4 +1,4 @@
-import { retrieveOrder } from "@lib/data/orders"
+import { retrieveOrder, retrieveOrderTracking, saveOrderAddressToAddressBook } from "@lib/data/orders"
 import OrderDetailsTemplate from "@modules/order/templates/order-details-template"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
@@ -16,18 +16,23 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   return {
-    title: `Order #${order.display_id}`,
+    title: `Order #${order.custom_display_id || order.display_id || "—"}`,
     description: `View your order`,
   }
 }
 
 export default async function OrderDetailPage(props: Props) {
   const params = await props.params
-  const order = await retrieveOrder(params.id).catch(() => null)
+  const [order, tracking] = await Promise.all([
+    retrieveOrder(params.id).catch(() => null),
+    retrieveOrderTracking(params.id).catch(() => ({ shipments: [] })),
+  ])
 
   if (!order) {
     notFound()
   }
 
-  return <OrderDetailsTemplate order={order} />
+  await saveOrderAddressToAddressBook(order.id).catch(() => null)
+
+  return <OrderDetailsTemplate order={order} shipments={tracking.shipments} />
 }

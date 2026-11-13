@@ -7,8 +7,8 @@ type OrderSummaryProps = {
 
 const OrderSummary = ({ order }: OrderSummaryProps) => {
   const getAmount = (amount?: number | null) => {
-    if (!amount) {
-      return
+    if (typeof amount !== "number" || !Number.isFinite(amount)) {
+      return "—"
     }
 
     return convertToLocale({
@@ -36,7 +36,7 @@ const OrderSummary = ({ order }: OrderSummaryProps) => {
           )}
           {order.gift_card_total > 0 && (
             <div className="flex items-center justify-between">
-              <span>Discount</span>
+              <span>Gift card</span>
               <span>- {getAmount(order.gift_card_total)}</span>
             </div>
           )}

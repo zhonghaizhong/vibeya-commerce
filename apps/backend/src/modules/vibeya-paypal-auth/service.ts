@@ -127,7 +127,7 @@ class VibeyaPayPalAuthService extends AbstractAuthModuleProvider {
         user_id?: string
         sub?: string
         email?: string
-        verified_account?: boolean
+        email_verified?: boolean
         name?: string
         given_name?: string
         family_name?: string
@@ -140,7 +140,7 @@ class VibeyaPayPalAuthService extends AbstractAuthModuleProvider {
         }
       }
       if (!userInfoResponse.ok) throw new Error("PayPal did not return account information. Check that Log in with PayPal is enabled for this app.")
-      if (!userInfo.email || userInfo.verified_account !== true) {
+      if (!userInfo.email || userInfo.email_verified !== true) {
         throw new Error("PayPal must return a verified email address to sign in.")
       }
 

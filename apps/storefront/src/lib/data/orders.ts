@@ -5,6 +5,23 @@ import medusaError from "@lib/util/medusa-error"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { HttpTypes } from "@medusajs/types"
 
+export type OrderTrackingEvent = {
+  description: string
+  location: string
+  time: string
+  carrier: string
+}
+
+export type OrderTrackingShipment = {
+  trackingNumber: string
+  trackingUrl?: string
+  carrier?: string
+  status: string
+  statusCode?: string
+  updatedAt?: string
+  events: OrderTrackingEvent[]
+}
+
 export const retrieveOrder = async (id: string) => {
   const headers = {
     ...(await getAuthHeaders()),
@@ -18,8 +35,32 @@ export const retrieveOrder = async (id: string) => {
     .fetch<HttpTypes.StoreOrderResponse>(`/store/orders/${id}`, {
       method: "GET",
       query: {
-        fields:
-          "*payment_collections.payments,*items,*items.metadata,*items.variant,*items.product,items.thumbnail,items.product.thumbnail",
+        fields: [
+          "id",
+          "display_id",
+          "custom_display_id",
+          "created_at",
+          "email",
+          "currency_code",
+          "subtotal",
+          "total",
+          "tax_total",
+          "shipping_total",
+          "discount_total",
+          "gift_card_total",
+          "fulfillment_status",
+          "payment_status",
+          "*shipping_address",
+          "*billing_address",
+          "*shipping_methods",
+          "*payment_collections.payments",
+          "*items",
+          "*items.metadata",
+          "*items.variant",
+          "*items.product",
+          "items.thumbnail",
+          "items.product.thumbnail",
+        ].join(","),
       },
       headers,
       next,
@@ -27,6 +68,22 @@ export const retrieveOrder = async (id: string) => {
     })
     .then(({ order }) => order)
     .catch((err) => medusaError(err))
+}
+
+export const retrieveOrderTracking = async (id: string) => {
+  const headers = { ...(await getAuthHeaders()) }
+  return sdk.client.fetch<{ shipments: OrderTrackingShipment[] }>(
+    `/store/vibeya/orders/${encodeURIComponent(id)}/tracking`,
+    { method: "GET", headers, cache: "no-store" }
+  ).catch((err) => medusaError(err))
+}
+
+export const saveOrderAddressToAddressBook = async (id: string) => {
+  const headers = { ...(await getAuthHeaders()) }
+  return sdk.client.fetch<{ saved: boolean; alreadySaved: boolean }>(
+    `/store/vibeya/orders/${encodeURIComponent(id)}/save-address`,
+    { method: "POST", headers, cache: "no-store" }
+  )
 }
 
 export const listOrders = async (
@@ -50,7 +107,7 @@ export const listOrders = async (
         offset,
         order: "-created_at",
         fields:
-          "total,currency_code,*items,+items.metadata,*items.variant,*items.product,items.thumbnail,items.product.thumbnail",
+          "id,display_id,custom_display_id,created_at,email,total,currency_code,fulfillment_status,payment_status,shipping_address,*items,+items.metadata,*items.variant,*items.product,items.thumbnail,items.product.thumbnail",
         ...filters,
       },
       headers,

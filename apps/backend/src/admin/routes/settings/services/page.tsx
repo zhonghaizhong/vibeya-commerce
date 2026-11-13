@@ -7,6 +7,7 @@ type Config = {
   turnstile: { enabled: boolean; siteKey: string; secretHint: string; hasSecret: boolean }
   paypal: { enabled: boolean; clientId: string; secretHint: string; hasSecret: boolean; environment: "sandbox" | "production"; webhookId: string; autoCapture: boolean; loginEnabled: boolean; loginCallbackUrl: string }
   google: { enabled: boolean; clientId: string; secretHint: string; hasSecret: boolean; callbackUrl: string }
+  tracking: { enabled: boolean; apiKeyHint: string; hasApiKey: boolean }
 }
 
 const initialConfig: Config = {
@@ -14,6 +15,7 @@ const initialConfig: Config = {
   turnstile: { enabled: false, siteKey: "", secretHint: "", hasSecret: false },
   paypal: { enabled: false, clientId: "", secretHint: "", hasSecret: false, environment: "sandbox", webhookId: "", autoCapture: true, loginEnabled: false, loginCallbackUrl: "http://localhost:8000/us/auth/paypal/callback" },
   google: { enabled: false, clientId: "", secretHint: "", hasSecret: false, callbackUrl: "http://localhost:8000/us/auth/google/callback" },
+  tracking: { enabled: false, apiKeyHint: "", hasApiKey: false },
 }
 
 const inputClass = "mt-1 w-full rounded-md border border-ui-border-base bg-ui-bg-field px-3 py-2 text-sm text-ui-fg-base outline-none focus:border-ui-border-interactive"
@@ -26,11 +28,12 @@ async function readError(response: Response) {
 
 const IntegrationsPage = () => {
   const [config, setConfig] = useState<Config>(initialConfig)
-  const [secrets, setSecrets] = useState({ brevoKey: "", turnstileSecret: "", paypalSecret: "", googleSecret: "" })
+  const [secrets, setSecrets] = useState({ brevoKey: "", turnstileSecret: "", paypalSecret: "", googleSecret: "", trackingApiKey: "" })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
+  const [trackingWebhookUrl, setTrackingWebhookUrl] = useState("")
 
   const copyCallbackUrl = async () => {
     try {
@@ -68,6 +71,20 @@ const IntegrationsPage = () => {
 
   useEffect(() => { load() }, [load])
 
+  useEffect(() => {
+    setTrackingWebhookUrl(`${window.location.origin}/webhooks/17track`)
+  }, [])
+
+  const copyTrackingWebhookUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(trackingWebhookUrl)
+      setMessage("17TRACK Webhook 地址已复制。请粘贴到 17TRACK API 控制台的 Settings 中并保存。")
+      setError("")
+    } catch {
+      setError("无法自动复制，请手动选中并复制 Webhook 地址。")
+    }
+  }
+
   const save = async () => {
     setSaving(true)
     setError("")
@@ -82,12 +99,13 @@ const IntegrationsPage = () => {
           turnstile: { ...config.turnstile, secret: secrets.turnstileSecret },
           paypal: { ...config.paypal, secret: secrets.paypalSecret },
           google: { ...config.google, secret: secrets.googleSecret },
+          tracking: { ...config.tracking, apiKey: secrets.trackingApiKey },
         }),
       })
       if (!response.ok) throw new Error(await readError(response))
       const data = await response.json()
       setConfig({ ...initialConfig, ...data.config })
-      setSecrets({ brevoKey: "", turnstileSecret: "", paypalSecret: "", googleSecret: "" })
+      setSecrets({ brevoKey: "", turnstileSecret: "", paypalSecret: "", googleSecret: "", trackingApiKey: "" })
       setMessage("配置已加密保存。密钥不会在页面中再次显示。")
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "保存配置失败。")
@@ -204,6 +222,25 @@ const IntegrationsPage = () => {
           <Container className="flex flex-wrap items-center justify-between gap-3 bg-ui-bg-subtle p-3">
             <Text size="small" className="break-all text-ui-fg-subtle">本地测试地址通常以 http://localhost:8000 开头；线上请使用店铺正式域名。请以当前输入框中的地址为准，并在 Google Cloud 登记完全相同的地址。</Text>
             <button type="button" onClick={copyCallbackUrl} className="shrink-0 rounded-md border border-ui-border-base bg-ui-bg-base px-3 py-1.5 text-sm font-medium text-ui-fg-base">复制回调地址</button>
+          </Container>
+        </Container>
+
+        <Container className="flex flex-col gap-y-5 p-5">
+          <div><Heading level="h2">17TRACK 物流追踪</Heading><Text className="mt-1 text-ui-fg-subtle">17TRACK 有物流变化时会主动推送到 VIBEYA，客户订单页读取已保存的物流节点。</Text></div>
+          {toggle("启用 17TRACK 主动推送", config.tracking.enabled, (enabled) => setConfig({ ...config, tracking: { ...config.tracking, enabled } }), "启用后，新录入运单会登记到 17TRACK；请同时把下方 Webhook 地址填入 17TRACK。")}
+          <Container className="bg-ui-bg-subtle p-4">
+            <Text className="font-medium">去哪里获取 API 密钥</Text>
+            <Text size="small" className="mt-1 text-ui-fg-subtle">登录 17TRACK API 控制台，创建 API Key 后粘贴到下方。密钥会加密保存在后台，仅用于登记运单和验证推送签名，不会发送到顾客浏览器。开启后，新录入的运单会关联订单并接收物流推送。</Text>
+            <a className="mt-2 inline-block text-sm text-ui-fg-interactive underline" href="https://api.17track.net/" target="_blank" rel="noreferrer">打开 17TRACK API</a>
+          </Container>
+          {field("17TRACK API Key", secrets.trackingApiKey, (apiKey) => setSecrets({ ...secrets, trackingApiKey: apiKey }), config.tracking.hasApiKey ? `已保存（末尾 ${config.tracking.apiKeyHint}），留空不更换` : "粘贴 17TRACK API Key", "password")}
+          <Container className="flex flex-wrap items-end justify-between gap-3 bg-ui-bg-subtle p-4">
+            <div className="min-w-0 flex-1">
+              <Text className="font-medium">17TRACK Webhook 地址</Text>
+              <Text size="small" className="mt-1 text-ui-fg-subtle">复制此地址，到 17TRACK API 控制台 → Settings → Webhook URL 粘贴并保存。线上请从线上管理后台复制线上地址。</Text>
+              <div className="mt-2 break-all rounded-md border border-ui-border-base bg-ui-bg-field px-3 py-2 text-sm">{trackingWebhookUrl || "正在生成地址…"}</div>
+            </div>
+            <button type="button" disabled={!trackingWebhookUrl} onClick={copyTrackingWebhookUrl} className="shrink-0 rounded-md border border-ui-border-base bg-ui-bg-base px-3 py-1.5 text-sm font-medium text-ui-fg-base disabled:opacity-50">复制 Webhook 地址</button>
           </Container>
         </Container>
 
