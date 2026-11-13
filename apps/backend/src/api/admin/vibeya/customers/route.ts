@@ -93,15 +93,36 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     const activatedAt = typeof storedActivation === "string" && Number.isFinite(Date.parse(storedActivation))
       ? Date.parse(storedActivation)
       : Date.parse(DEFAULT_VIBEYA_DESIGN_CREDITS_START_AT)
-    const postActivationPaidProducts = new Map<string, number>()
+    const postActivationOrdersByCustomerId = new Map<string, Map<string, any>>()
+    const postActivationOrdersByEmail = new Map<string, Map<string, any>>()
     for (const order of orders) {
-      if (typeof order.customer_id !== "string") continue
-      if (order.payment_status !== "captured") continue
-      if ((timestampOf(order.created_at) ?? Number.NEGATIVE_INFINITY) < activatedAt) continue
-      const quantity = Array.isArray(order.items)
-        ? order.items.reduce((total: number, item: { quantity?: number }) => total + Math.max(0, Number(item.quantity) || 0), 0)
-        : 0
-      postActivationPaidProducts.set(order.customer_id, (postActivationPaidProducts.get(order.customer_id) ?? 0) + quantity)
+      if (typeof order.id !== "string") continue
+      if (typeof order.customer_id === "string") {
+        const customerOrders = postActivationOrdersByCustomerId.get(order.customer_id) ?? new Map<string, any>()
+        customerOrders.set(order.id, order)
+        postActivationOrdersByCustomerId.set(order.customer_id, customerOrders)
+      }
+      const email = normalizedEmail(order.email)
+      if (email) {
+        const emailOrders = postActivationOrdersByEmail.get(email) ?? new Map<string, any>()
+        emailOrders.set(order.id, order)
+        postActivationOrdersByEmail.set(email, emailOrders)
+      }
+    }
+
+    const paidProductsForCustomer = (customerId: string, emailValue: unknown) => {
+      const matchingOrders = new Map<string, any>()
+      for (const order of postActivationOrdersByCustomerId.get(customerId)?.values() ?? []) matchingOrders.set(order.id, order)
+      const email = normalizedEmail(emailValue)
+      for (const order of postActivationOrdersByEmail.get(email)?.values() ?? []) matchingOrders.set(order.id, order)
+      return Array.from(matchingOrders.values()).reduce((total, order) => {
+        if (order.payment_status !== "captured") return total
+        if ((timestampOf(order.created_at) ?? Number.NEGATIVE_INFINITY) < activatedAt) return total
+        const quantity = Array.isArray(order.items)
+          ? order.items.reduce((count: number, item: { quantity?: number }) => count + Math.max(0, Number(item.quantity) || 0), 0)
+          : 0
+        return total + quantity
+      }, 0)
     }
     const usedDesigns = new Map<string, number>()
     for (const job of jobs) {
@@ -167,7 +188,8 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       const designUsed = usedDesigns.get(customer.id) ?? 0
       const storedAdjustment = customer.metadata?.[VIBEYA_CUSTOMER_DESIGN_CREDIT_ADJUSTMENT_KEY]
       const adjustment = toVibeyaCustomerCreditAdjustment(storedAdjustment)
-      const designTotal = Math.max(0, creditConfig.initialDesigns + (postActivationPaidProducts.get(customer.id) ?? 0) * creditConfig.perPaidProductDesigns + adjustment)
+      const paidProductCount = paidProductsForCustomer(customer.id, customer.email)
+      const designTotal = Math.max(0, creditConfig.initialDesigns + paidProductCount * creditConfig.perPaidProductDesigns + adjustment)
       row.design_total = designTotal
       row.design_used = designUsed
       row.design_remaining = Math.max(0, designTotal - designUsed)

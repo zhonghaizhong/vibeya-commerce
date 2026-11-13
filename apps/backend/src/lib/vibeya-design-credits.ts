@@ -36,6 +36,8 @@ type CreditQuery = {
   graph(input: Record<string, unknown>): Promise<{
     data: Array<{
       id?: string
+      email?: string | null
+      customer_id?: string | null
       created_at?: string
       metadata?: Record<string, unknown> | null
       payment_status?: string
@@ -57,17 +59,11 @@ const timestampOf = (value: unknown): number | null => {
 
 async function loadCreditState(scope: RequestScope, customerId: string, service: CreditJobService) {
   const query = scope.resolve(ContainerRegistrationKeys.QUERY) as CreditQuery
-  const [storeResult, orderResult, customerResult, jobs] = await Promise.all([
+  const [storeResult, customerResult, jobs] = await Promise.all([
     query.graph({ entity: "store", fields: ["metadata"] }),
     query.graph({
-      entity: "order",
-      fields: ["id", "created_at", "payment_status", "items.quantity"],
-      filters: { customer_id: customerId },
-      pagination: { skip: 0, take: 10000, order: { created_at: "DESC" } },
-    }),
-    query.graph({
       entity: "customer",
-      fields: ["id", "metadata"],
+      fields: ["id", "email", "metadata"],
       filters: { id: customerId },
       pagination: { take: 1 },
     }),
@@ -76,6 +72,33 @@ async function loadCreditState(scope: RequestScope, customerId: string, service:
       { select: ["id", "status", "created_at"], take: 100000 }
     ),
   ])
+  const customer = customerResult.data[0]
+  const customerEmail = typeof customer?.email === "string" ? customer.email.trim().toLowerCase() : ""
+  const orderFields = ["id", "email", "customer_id", "created_at", "payment_status", "items.quantity"]
+  const [customerOrders, emailOrders] = await Promise.all([
+    query.graph({
+      entity: "order",
+      fields: orderFields,
+      filters: { customer_id: customerId },
+      pagination: { skip: 0, take: 10000, order: { created_at: "DESC" } },
+    }),
+    customerEmail
+      ? query.graph({
+          entity: "order",
+          fields: orderFields,
+          filters: { email: { $ilike: customerEmail } },
+          pagination: { skip: 0, take: 10000, order: { created_at: "DESC" } },
+        })
+      : Promise.resolve({ data: [] }),
+  ])
+  const ordersById = new Map<string, (typeof customerOrders.data)[number]>()
+  for (const order of [...customerOrders.data, ...emailOrders.data]) {
+    if (order.id) ordersById.set(order.id, order)
+  }
+  const orders = [...ordersById.values()].filter((order) =>
+    order.customer_id === customerId ||
+    (customerEmail && typeof order.email === "string" && order.email.trim().toLowerCase() === customerEmail)
+  )
   const storedConfig = storeResult.data[0]?.metadata?.[VIBEYA_DESIGN_CREDITS_METADATA_KEY]
   const config = toVibeyaDesignCreditConfig(storedConfig)
   const storedActivation = storedConfig && typeof storedConfig === "object"
@@ -84,11 +107,11 @@ async function loadCreditState(scope: RequestScope, customerId: string, service:
   const activatedAt = typeof storedActivation === "string" && Number.isFinite(Date.parse(storedActivation))
     ? Date.parse(storedActivation)
     : Date.parse(DEFAULT_VIBEYA_DESIGN_CREDITS_START_AT)
-  const paidProductCount = orderResult.data.reduce((total, order) => {
+  const paidProductCount = orders.reduce((total, order) => {
     if (order.payment_status !== "captured" || (timestampOf(order.created_at) ?? Number.NEGATIVE_INFINITY) < activatedAt) return total
     return total + (order.items ?? []).reduce((quantity, item) => quantity + Math.max(0, Number(item.quantity) || 0), 0)
   }, 0)
-  const storedAdjustment = customerResult.data[0]?.metadata?.[VIBEYA_CUSTOMER_DESIGN_CREDIT_ADJUSTMENT_KEY]
+  const storedAdjustment = customer?.metadata?.[VIBEYA_CUSTOMER_DESIGN_CREDIT_ADJUSTMENT_KEY]
   const adjustment = toVibeyaCustomerCreditAdjustment(storedAdjustment)
   const total = Math.max(0, config.initialDesigns + paidProductCount * config.perPaidProductDesigns + adjustment)
   const eligibleJobs = jobs.filter((job) =>
