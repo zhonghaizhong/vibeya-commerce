@@ -226,8 +226,8 @@ importers:
         specifier: ^7.17.5
         version: 7.29.7(supports-color@8.1.1)
       '@medusajs/types':
-        specifier: 2.22.3
-        version: 2.22.3(express@4.22.2(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(vite@7.3.7(@types/node@17.0.21)(jiti@1.21.7)(terser@5.51.0)(yaml@2.9.0))
+        specifier: 2.22.6
+        version: 2.22.6(express@4.22.2(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(vite@7.3.7(@types/node@17.0.21)(jiti@1.21.7)(terser@5.51.0)(yaml@2.9.0))
       '@types/lodash':
         specifier: ^4.14.195
         version: 4.17.25
@@ -2121,21 +2121,6 @@ packages:
     engines: {node: '>=22.22.0'}
     peerDependencies:
       '@medusajs/framework': 2.22.6
-
-  '@medusajs/types@2.22.3':
-    resolution: {integrity: sha512-oE/wAwrqBSThEOx0rdaSmPSD4CfuOL9h6VdsoiIfx3SgQ8yLjSkjMh96twmPcH/h5ol+ZkXEkpHNW4YDUaAiRA==}
-    engines: {node: '>=22.22.0'}
-    peerDependencies:
-      express: ^4.21.0
-      ioredis: ^5.11.1
-      vite: '>=5'
-    peerDependenciesMeta:
-      express:
-        optional: true
-      ioredis:
-        optional: true
-      vite:
-        optional: true
 
   '@medusajs/types@2.22.6':
     resolution: {integrity: sha512-SNPY7Scxsq7N4PK63bSCfCjbPm4glkYmqGNLHXu+F5P9vjPtd3hAL790nvk/JyWgAf6dOHrVp22261391q0bVw==}
@@ -10954,7 +10939,7 @@ snapshots:
     dependencies:
       '@medusajs/framework': 2.22.6(@medusajs/cli@2.22.6(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@20.19.43)(jiti@2.7.0)(terser@5.51.0)(yaml@2.9.0))(zod@4.2.0)
 
-  '@medusajs/types@2.22.3(express@4.22.2(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(vite@7.3.7(@types/node@17.0.21)(jiti@1.21.7)(terser@5.51.0)(yaml@2.9.0))':
+  '@medusajs/types@2.22.6(express@4.22.2(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(vite@7.3.7(@types/node@17.0.21)(jiti@1.21.7)(terser@5.51.0)(yaml@2.9.0))':
     dependencies:
       bignumber.js: 11.1.5
     optionalDependencies:

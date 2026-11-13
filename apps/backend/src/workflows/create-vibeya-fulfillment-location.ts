@@ -29,6 +29,13 @@ type CreateLocationLinksInput = {
   salesChannelId?: string
 }
 
+type LinkDefinition = Record<string, Record<string, string>>
+
+type VibeyaLinkService = {
+  create(links: LinkDefinition[]): Promise<unknown>
+  dismiss(links: LinkDefinition[]): Promise<unknown>
+}
+
 const createLocationLinksStep = createStep(
   "create-location-links",
   async (input: CreateLocationLinksInput, { container }) => {
@@ -49,12 +56,12 @@ const createLocationLinksStep = createStep(
       })
     }
 
-    await container.resolve(ContainerRegistrationKeys.LINK).create(links)
+    await container.resolve<VibeyaLinkService>(ContainerRegistrationKeys.LINK).create(links)
     return new StepResponse(undefined, links)
   },
   async (createdLinks, { container }) => {
     if (!createdLinks) return
-    await container.resolve(ContainerRegistrationKeys.LINK).dismiss(createdLinks)
+    await container.resolve<VibeyaLinkService>(ContainerRegistrationKeys.LINK).dismiss(createdLinks)
   }
 )
 
