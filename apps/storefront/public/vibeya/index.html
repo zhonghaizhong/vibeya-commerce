@@ -2195,7 +2195,7 @@ const blanket=chosen.id==='sds-97226';
     b=e.target.closest('[data-select-print]');if(b){selectedPrint=b.dataset.selectPrint;studioViewMode='product';syncVariants();syncStudioPromptFields();hasPreview=false;drawPreview();return;}
     b=e.target.closest('[data-select-color]');if(b){
       const color=b.dataset.selectColor;
-      const allowed=chosen.id==='vibeya-washed-hoodie'||chosen.id==='sds-128646'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'?chosen.colors?.includes(color):!!colorGalleries[color];
+      const allowed=chosen.id==='vibeya-washed-hoodie'||chosen.id==='sds-128646'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'?chosen.colors?.includes(color):!!colorGalleries[color];
       if(!allowed)return;
       selectedColor=color;
       selectedColorConfirmed=true;
