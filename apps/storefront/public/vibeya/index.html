@@ -226,6 +226,10 @@
     .my-design-variant-select label,.studio-saved-variant-select label{display:grid;gap:5px;color:#766a81;font-size:10px;font-weight:700;line-height:1.35;}
     .my-design-variant-select select{min-width:0;border:1px solid var(--edge);border-radius:9px;background:#fff;color:var(--ink);font:700 12px var(--body);padding:8px;}
     .my-design-color-picker{display:grid;gap:7px;min-width:0;}
+    .my-design-color-confirm{display:grid;gap:8px;padding:10px;border:1px solid #dfd0ee;border-radius:12px;background:#fbf7ff;color:#50415f;font-size:12px;line-height:1.45;}
+    .my-design-color-confirm[hidden]{display:none!important;}
+    .my-design-color-confirm>div{display:flex;flex-wrap:wrap;gap:7px;}
+    .my-design-color-confirm .btn{padding:8px 11px;font-size:11px;}
     .my-design-color-swatches{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
     .my-design-color-swatches .color-choice{width:34px;height:34px;padding:4px;}
     .my-design-color-swatches .color-choice span{width:22px;height:22px;border-radius:50%;display:block;box-shadow:inset 0 0 0 1px rgba(37,27,39,.17);}
@@ -1037,7 +1041,8 @@
   function designColorPicker(job,product,currentColor,attribute){
     if(!product?.colors||product.colors.length<2)return '';
     const colorType=product.category==='Apparel'?'garment color':'product color';
-    return `<div class="my-design-color-picker"><span>Same print · different ${colorType} · uses 1 design</span><div class="my-design-color-swatches" role="group" aria-label="Choose another color for the same print">${product.colors.map(color=>`<button type="button" class="color-choice" data-${attribute}="${esc(job.id)}" data-color="${esc(color)}" aria-pressed="${color===currentColor}" aria-label="Create same print on ${esc(productColorName(product,color))}" title="${esc(productColorName(product,color))}"><span style="background:${designColorHex(product,color)}"></span></button>`).join('')}</div></div>`;
+    const confirmAttribute=attribute.replace('choice','confirm'),cancelAttribute=attribute.replace('choice','cancel');
+    return `<div class="my-design-color-picker"><span>Same print · different ${colorType} · uses 1 design</span><div class="my-design-color-swatches" role="group" aria-label="Choose another color for the same print">${product.colors.map(color=>`<button type="button" class="color-choice" data-${attribute}="${esc(job.id)}" data-color="${esc(color)}" aria-pressed="${color===currentColor}" aria-label="Choose ${esc(productColorName(product,color))} for the same print" title="${esc(productColorName(product,color))}"><span style="background:${designColorHex(product,color)}"></span></button>`).join('')}</div><div class="my-design-color-confirm" data-color-confirm hidden><span data-color-confirm-label></span><div><button type="button" class="btn primary" data-${confirmAttribute}="${esc(job.id)}">Confirm generation</button><button type="button" class="btn secondary" data-${cancelAttribute}="${esc(job.id)}">Cancel</button></div></div></div>`;
   }
   async function createColorVariant(job,color,size,button,refresh){
     const product=products.find(item=>item.id===job?.product_id);
@@ -1068,8 +1073,8 @@
       if(!response.ok||!result.job?.id)throw new Error(result.error||'Could not create the color variation.');
       saveDesignVariant(result.job.id,job.product_id,color,size);
       toast(`Creating ${productColorName(product,color)} version. One design credit is used.`);
-      if(refresh)await refresh();
       await startGenerationRun(result.job.id);
+      if(refresh)await refresh();
     }finally{if(button){button.disabled=false;button.textContent='Create color design';}}
   }
   const guidedExamples={
@@ -1365,15 +1370,18 @@
       grid.onclick=async event=>{
         const colorChoice=event.target.closest('[data-job-color-choice]');
         if(colorChoice){
-          const job=jobs.find(item=>String(item.id)===colorChoice.dataset.jobColorChoice),card=colorChoice.closest('[data-job-card]'),product=products.find(item=>item.id===job?.product_id),variant=designVariant(job),color=colorChoice.dataset.color;
-          if(!job||!product||!color||color===variant.color)return;
-          const size=card?.querySelector('[data-job-size]')?.value||variant.size||product.sizes?.[0];
-          card?.querySelectorAll('[data-job-color-choice]').forEach(button=>button.disabled=true);
-          try{await createColorVariant(job,color,size,null,async()=>{grid.dataset.signature='';await loadMyDesigns();});}
-          catch(error){toast(error.message||'Could not create this color variation.');}
-          finally{card?.querySelectorAll('[data-job-color-choice]').forEach(button=>button.disabled=false);}
+          const job=jobs.find(item=>String(item.id)===colorChoice.dataset.jobColorChoice),card=colorChoice.closest('[data-job-card]'),variant=designVariant(job),color=colorChoice.dataset.color,picker=colorChoice.closest('.my-design-color-picker');
+          if(!job||!color||color===variant.color)return;
+          picker.dataset.pendingColor=color;
+          picker.querySelectorAll('[data-job-color-choice]').forEach(button=>button.setAttribute('aria-pressed',String(button===colorChoice)));
+          const confirm=picker.querySelector('[data-color-confirm]');confirm.hidden=false;
+          confirm.querySelector('[data-color-confirm-label]').textContent=`Generate the same print in ${productColorName(products.find(item=>item.id===job.product_id),color)}? This uses 1 design.`;
           return;
         }
+        const cancelColor=event.target.closest('[data-job-color-cancel]');
+        if(cancelColor){const picker=cancelColor.closest('.my-design-color-picker'),job=jobs.find(item=>String(item.id)===cancelColor.dataset.jobColorCancel),color=designVariant(job).color;picker?.querySelectorAll('[data-job-color-choice]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.color===color)));if(picker){delete picker.dataset.pendingColor;picker.querySelector('[data-color-confirm]').hidden=true;}return;}
+        const confirmColor=event.target.closest('[data-job-color-confirm]');
+        if(confirmColor){const job=jobs.find(item=>String(item.id)===confirmColor.dataset.jobColorConfirm),card=confirmColor.closest('[data-job-card]'),picker=confirmColor.closest('.my-design-color-picker'),product=products.find(item=>item.id===job?.product_id),color=picker?.dataset.pendingColor,size=card?.querySelector('[data-job-size]')?.value||designVariant(job).size||product?.sizes?.[0];if(!job||!color||!size)return;confirmColor.disabled=true;confirmColor.textContent='Starting…';picker.querySelectorAll('[data-job-color-choice],[data-job-color-cancel]').forEach(button=>button.disabled=true);try{await createColorVariant(job,color,size,null,async()=>{grid.dataset.signature='';await loadMyDesigns();});}catch(error){toast(error.message||'Could not create this color variation.');confirmColor.disabled=false;confirmColor.textContent='Confirm generation';picker.querySelectorAll('[data-job-color-choice],[data-job-color-cancel]').forEach(button=>button.disabled=false);}return;}
         const retryButton=event.target.closest('[data-job-retry]');
         if(retryButton){const job=jobs.find(item=>String(item.id)===retryButton.dataset.jobRetry);if(job)retryFailedDesign(job);return;}
         const runButton=event.target.closest('[data-job-run]');
@@ -1452,20 +1460,23 @@
         const variantChoices=colorChoices||sizeChoices?`<div class="studio-saved-variant-select">${colorChoices}${sizeChoices}</div>`:'';
         const retryAction=job.status==='failed'?`<button type="button" class="btn secondary" data-studio-job-retry="${esc(job.id)}">Edit &amp; retry</button>`:'';
         const recoverAction=job.status==='failed'&&job.provider_task_id?`<button type="button" class="btn secondary" data-job-run="${esc(job.id)}">Recover image</button>`:'';
-        return `<article class="studio-saved-card">${visual}<div class="studio-saved-card-copy"><strong>${esc(title)} · ${esc(variant.color?productColorName(product,variant.color):'')}</strong><p>${esc(prompt.length>90?prompt.slice(0,90)+'…':prompt)}</p><span class="studio-saved-card-state">${esc(jobStatusLabel(job.status))}</span>${job.status==='failed'?`<p class="my-design-failure-note">${job.provider_task_id?'The provider task can be checked again.':'No image was returned. Failed generations do not use a design credit.'}</p>`:''}</div>${variantChoices}<div class="studio-saved-card-actions">${recoverAction}${retryAction}<button type="button" class="btn primary" data-studio-job-add="${esc(job.id)}" ${addDisabled?'disabled':''}>Add to bag</button><button type="button" class="studio-saved-delete" data-studio-job-delete="${esc(job.id)}">Delete</button></div></article>`;
+        return `<article class="studio-saved-card">${visual}<div class="studio-saved-card-copy"><strong>${esc(title)} · ${esc(variant.color?productColorName(product,variant.color):'')}</strong><p>${esc(prompt.length>90?prompt.slice(0,90)+'…':prompt)}</p><span class="studio-saved-card-state">${esc(jobStatusLabel(job.status))}${job.error?` · ${esc(job.error)}`:''}</span>${job.status==='failed'?`<p class="my-design-failure-note">${job.provider_task_id?'The provider task can be checked again.':'No image was returned. Failed generations do not use a design credit.'}</p>`:''}</div>${variantChoices}<div class="studio-saved-card-actions">${recoverAction}${retryAction}<button type="button" class="btn primary" data-studio-job-add="${esc(job.id)}" ${addDisabled?'disabled':''}>Add to bag</button><button type="button" class="studio-saved-delete" data-studio-job-delete="${esc(job.id)}">Delete</button></div></article>`;
       }).join('')}</div>`;
       container.onclick=async event=>{
         const colorChoice=event.target.closest('[data-studio-job-color-choice]');
         if(colorChoice){
-          const job=designs.find(item=>String(item.job.id)===colorChoice.dataset.studioJobColorChoice)?.job,card=colorChoice.closest('.studio-saved-card'),product=products.find(item=>item.id===job?.product_id),variant=designVariant(job),color=colorChoice.dataset.color;
-          if(!job||!product||!color||color===variant.color)return;
-          const size=card?.querySelector('[data-studio-job-size]')?.value||variant.size||product.sizes?.[0];
-          card?.querySelectorAll('[data-studio-job-color-choice]').forEach(button=>button.disabled=true);
-          try{await createColorVariant(job,color,size,null,()=>renderStudioSavedDesigns());loadMyDesigns();}
-          catch(error){toast(error.message||'Could not create this color variation.');}
-          finally{card?.querySelectorAll('[data-studio-job-color-choice]').forEach(button=>button.disabled=false);}
+          const job=designs.find(item=>String(item.job.id)===colorChoice.dataset.studioJobColorChoice)?.job,variant=designVariant(job),color=colorChoice.dataset.color,picker=colorChoice.closest('.my-design-color-picker');
+          if(!job||!color||color===variant.color)return;
+          picker.dataset.pendingColor=color;
+          picker.querySelectorAll('[data-studio-job-color-choice]').forEach(button=>button.setAttribute('aria-pressed',String(button===colorChoice)));
+          const confirm=picker.querySelector('[data-color-confirm]');confirm.hidden=false;
+          confirm.querySelector('[data-color-confirm-label]').textContent=`Generate the same print in ${productColorName(products.find(item=>item.id===job.product_id),color)}? This uses 1 design.`;
           return;
         }
+        const cancelColor=event.target.closest('[data-studio-job-color-cancel]');
+        if(cancelColor){const picker=cancelColor.closest('.my-design-color-picker'),job=designs.find(item=>String(item.job.id)===cancelColor.dataset.studioJobColorCancel)?.job,color=designVariant(job).color;picker?.querySelectorAll('[data-studio-job-color-choice]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.color===color)));if(picker){delete picker.dataset.pendingColor;picker.querySelector('[data-color-confirm]').hidden=true;}return;}
+        const confirmColor=event.target.closest('[data-studio-job-color-confirm]');
+        if(confirmColor){const job=designs.find(item=>String(item.job.id)===confirmColor.dataset.studioJobColorConfirm)?.job,card=confirmColor.closest('.studio-saved-card'),picker=confirmColor.closest('.my-design-color-picker'),product=products.find(item=>item.id===job?.product_id),color=picker?.dataset.pendingColor,size=card?.querySelector('[data-studio-job-size]')?.value||designVariant(job).size||product?.sizes?.[0];if(!job||!color||!size)return;confirmColor.disabled=true;confirmColor.textContent='Starting…';picker.querySelectorAll('[data-studio-job-color-choice],[data-studio-job-color-cancel]').forEach(button=>button.disabled=true);try{await createColorVariant(job,color,size,null,()=>renderStudioSavedDesigns());loadMyDesigns();}catch(error){toast(error.message||'Could not create this color variation.');confirmColor.disabled=false;confirmColor.textContent='Confirm generation';picker.querySelectorAll('[data-studio-job-color-choice],[data-studio-job-color-cancel]').forEach(button=>button.disabled=false);}return;}
         const preview=event.target.closest('[data-studio-job-preview]');
         if(preview){const image=preview.querySelector('img');if(!image)return;generatedArtworkDataUrl=image.currentSrc||image.src;lastZoomTrigger=preview;openImageZoom();return;}
         const recoverButton=event.target.closest('[data-job-run]');
