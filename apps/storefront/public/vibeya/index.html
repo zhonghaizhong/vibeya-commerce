@@ -1727,7 +1727,7 @@
     return data.cart;
   }
   function hideCart(){$('#drawerOverlay').classList.remove('open');$('#cartDrawer').classList.remove('open');syncLock();}
-  function renderProductCards(){if(document.body.dataset.reactProductCards==='true')return;const featured=[...catalogProducts.filter(p=>p.catalogOnly),...catalogProducts.filter(p=>!p.catalogOnly)].slice(0,6);const blanket=catalogProducts.find(p=>p.id==='sds-97226');if(blanket&&!featured.some(p=>p.id===blanket.id))featured[featured.length-1]=blanket;$('#productCards').innerHTML=featured.map(productHTML).join('');}
+  function renderProductCards(){if(document.body.dataset.reactProductCards==='true')return;const ordered=[...catalogProducts.filter(p=>p.catalogOnly),...catalogProducts.filter(p=>!p.catalogOnly)],tankini=ordered.find(p=>p.id==='sds-137892'),blanket=ordered.find(p=>p.id==='sds-97226'),pinned=[tankini,blanket].filter(Boolean),featured=[...pinned,...ordered.filter(p=>!pinned.includes(p))].slice(0,6);$('#productCards').innerHTML=featured.map(productHTML).join('');}
   async function renderInspo(){
     let catalog=Array.isArray(window.VIBEYA_INSPIRATION_CATALOG)?window.VIBEYA_INSPIRATION_CATALOG:[];
     try{const response=await fetch('/api/vibeya/inspirations',{credentials:'same-origin',cache:'no-store'});if(response.ok){const data=await response.json();if(Array.isArray(data.inspirations))catalog=data.inspirations;}}catch(error){console.warn('Using bundled inspiration catalog',error);}
