@@ -163,3 +163,20 @@ body.customize-open{overflow:hidden;}
 #featuredShowerCurtainResult>.art-card-full{aspect-ratio:auto;align-self:stretch;min-height:0;overflow:hidden}
 #featuredShowerCurtainResult>.art-card-full img{transform:scale(1.03)}
 @media(max-width:640px){#featuredShowerCurtainResult>.art-card-full{aspect-ratio:1448/1024;align-self:start}}
+
+/* Two inspiration stories per row on the market page. Keep each campaign image
+   intact and place its searchable story details directly below it. */
+.inspiration-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:22px}
+.inspiration-feature-grid>.story-spotlight{display:flex;min-width:0;flex-direction:column;gap:0;overflow:hidden;margin:0;border:1px solid #e5d4f7;border-radius:24px;background:#fffdfced;box-shadow:0 12px 35px #603dc018;scroll-margin-top:94px}
+.inspiration-feature-grid>.story-spotlight>.art-card{flex:none;width:100%;aspect-ratio:1.42;align-self:stretch;border-radius:0;background:#ead8f8}
+.inspiration-feature-grid>.story-spotlight>.art-card img{object-fit:contain}
+.inspiration-feature-grid>.story-spotlight>.featured-text{flex:1;border:0;border-radius:0;background:transparent;box-shadow:none;padding:22px;gap:12px}
+.inspiration-feature-grid>.story-spotlight .featured-text h2{font-size:clamp(24px,2.1vw,32px);line-height:1.04}
+.inspiration-feature-grid>.story-spotlight .featured-text p{font-size:14px;line-height:1.55;margin:0}
+.inspiration-feature-grid>.story-spotlight .chips{gap:7px}
+.inspiration-feature-grid>.story-spotlight .chip{font-size:11px;padding:7px 10px}
+.inspiration-feature-grid>.story-spotlight .details{gap:7px}
+.inspiration-feature-grid>.story-spotlight .detail-row{padding:9px 11px;font-size:12px}
+.inspiration-feature-grid>.story-spotlight .actions{margin-top:auto;padding-top:2px}
+@media(max-width:760px){.inspiration-feature-grid{grid-template-columns:1fr;gap:16px}}
+@media(max-width:640px){.inspiration-feature-grid>.story-spotlight{border-radius:20px}.inspiration-feature-grid>.story-spotlight>.art-card{aspect-ratio:1.38}.inspiration-feature-grid>.story-spotlight>.featured-text{padding:18px}.inspiration-feature-grid>.story-spotlight .featured-text h2{font-size:clamp(24px,7vw,31px)}}
