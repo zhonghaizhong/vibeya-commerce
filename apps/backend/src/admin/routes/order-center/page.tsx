@@ -54,13 +54,14 @@ const filters: Array<{ id: Filter; label: string }> = [
 const paymentLabel = (value: string) => ({
   captured: "已支付",
   partially_captured: "部分支付",
+  partially_refunded: "部分退款",
+  pending: "等待付款",
   authorized: "已授权",
   awaiting: "等待付款",
   not_paid: "未付款",
   refunded: "已退款",
-  partially_refunded: "部分退款",
-  unknown: "待确认",
-}[value] || value || "待确认")
+  unknown: "待核实",
+}[value] || value || "待核实")
 
 const fulfillmentLabel = (value: string) => ({
   fulfilled: "已发货",
@@ -70,8 +71,12 @@ const fulfillmentLabel = (value: string) => ({
   partially_shipped: "部分发货",
   delivered: "已送达",
   canceled: "已取消",
-  unknown: "待处理",
-}[value] || value || "待处理")
+  unknown: "待确认",
+}[value] || value || "待确认")
+
+const isPaid = (paymentStatus: string) => ["captured", "partially_captured"].includes(paymentStatus)
+const needsFulfillment = (fulfillmentStatus: string) => !["fulfilled", "shipped", "delivered", "canceled"].includes(fulfillmentStatus)
+const canRefund = (paymentStatus: string) => ["captured", "partially_captured", "partially_refunded"].includes(paymentStatus)
 
 const formatDate = (value: string) => {
   const date = new Date(value)
@@ -173,9 +178,8 @@ const OrderCenterPage = () => {
     return orders.filter((order) => {
       const fulfillment = order.fulfillment_status || "not_fulfilled"
       const payment = order.payment_status || "not_paid"
-      const isUnpaid = !["captured", "partially_captured", "refunded", "partially_refunded"].includes(payment)
-      const needsFulfillment = !["fulfilled", "shipped", "delivered", "canceled"].includes(fulfillment)
-      const matchesFilter = filter === "all" || isUnpaid || needsFulfillment
+      const isAwaitingShipment = isPaid(payment) && needsFulfillment(fulfillment)
+      const matchesFilter = filter === "all" || isAwaitingShipment
       const customer = getCustomerName(order)
       return matchesFilter && (!keyword || [order.display_id, order.email, customer].join(" ").toLowerCase().includes(keyword))
     })
@@ -183,14 +187,15 @@ const OrderCenterPage = () => {
 
   const selected = visibleOrders.find((order) => order.id === selectedId) || visibleOrders[0]
   const detail = orderDetails?.id === selected?.id ? orderDetails : null
-  const selectedNeedsFulfillment = Boolean(selected && !["fulfilled", "shipped", "delivered", "canceled"].includes(selected.fulfillment_status || "not_fulfilled"))
+  const selectedNeedsFulfillment = Boolean(selected && needsFulfillment(selected.fulfillment_status || "not_fulfilled"))
+  const selectedCanShip = Boolean(selected && isPaid(selected.payment_status) && selectedNeedsFulfillment)
+  const selectedCanRefund = Boolean(selected && canRefund(selected.payment_status))
+  const getOrderThumbnail = (order: Order) => order.items?.[0]?.thumbnail || (orderDetails?.id === order.id ? orderDetails.items?.[0]?.thumbnail : null)
   useEffect(() => {
     if (selected && selected.id !== selectedId) setSelectedId(selected.id)
   }, [selected?.id, selectedId])
   const pendingCount = orders.filter((order) => {
-    const unpaidOrder = !["captured", "partially_captured", "refunded", "partially_refunded"].includes(order.payment_status || "not_paid")
-    const needsFulfillment = !["fulfilled", "shipped", "delivered", "canceled"].includes(order.fulfillment_status || "not_fulfilled")
-    return unpaidOrder || needsFulfillment
+    return isPaid(order.payment_status || "not_paid") && needsFulfillment(order.fulfillment_status || "not_fulfilled")
   }).length
 
   const saveTracking = useCallback(async () => {
@@ -345,8 +350,8 @@ const OrderCenterPage = () => {
                   {visibleOrders.map((order) => (
                     <tr key={order.id} tabIndex={0} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedId(order.id) }} onClick={() => setSelectedId(order.id)} className={`cursor-pointer border-t border-ui-border-base transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ui-border-interactive ${selected?.id === order.id ? "bg-ui-bg-interactive-subtle" : "hover:bg-ui-bg-subtle"}`}>
                       <td className="px-4 py-3 align-middle"><div className="font-semibold">#{order.display_id}</div><div className="mt-1 text-xs text-ui-fg-subtle">{getCustomerName(order)}</div><div className="mt-1 max-w-[190px] truncate text-xs text-ui-fg-subtle">{order.email || "—"}</div><div className="mt-1 text-xs text-ui-fg-subtle">{formatDate(order.created_at)}</div></td>
-                      <td className="px-4 py-3 align-middle"><div className="flex max-w-[250px] items-center gap-3">{order.items?.[0]?.thumbnail ? <img src={order.items[0].thumbnail} alt="" className="h-12 w-12 shrink-0 rounded-md border border-ui-border-base bg-ui-bg-subtle object-contain" /> : <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-ui-bg-subtle text-[10px] text-ui-fg-subtle">无图片</div>}<div className="min-w-0"><div className="truncate font-medium">{order.items?.[0]?.title || "商品信息载入中"}{(order.items?.length ?? 0) > 1 ? ` 等 ${order.items?.length} 件` : ""}</div>{order.items?.[0]?.variant_title && <div className="mt-1 truncate text-xs text-ui-fg-subtle">{order.items[0].variant_title}</div>}{order.items?.[0] && <div className="mt-1 text-xs text-ui-fg-subtle">数量：{order.items[0].quantity}</div>}</div></div></td>
-                      <td className="px-4 py-3 align-middle"><div className="flex flex-col items-start gap-1"><span className="rounded-full bg-ui-bg-subtle px-2.5 py-1 text-xs font-medium">{paymentLabel(order.payment_status)}</span><span className="rounded-full bg-ui-bg-subtle px-2.5 py-1 text-xs text-ui-fg-subtle">{fulfillmentLabel(order.fulfillment_status)}</span></div></td>
+                      <td className="px-4 py-3 align-middle"><div className="flex max-w-[250px] items-center gap-3">{getOrderThumbnail(order) ? <img src={getOrderThumbnail(order)!} alt="" className="h-12 w-12 shrink-0 rounded-md border border-ui-border-base bg-ui-bg-subtle object-contain" /> : <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-ui-bg-subtle text-center text-[10px] leading-tight text-ui-fg-subtle">选中查看<br />商品图</div>}<div className="min-w-0"><div className="truncate font-medium">{order.items?.[0]?.title || "商品信息载入中"}{(order.items?.length ?? 0) > 1 ? ` 等 ${order.items?.length} 件` : ""}</div>{order.items?.[0]?.variant_title && <div className="mt-1 truncate text-xs text-ui-fg-subtle">{order.items[0].variant_title}</div>}{order.items?.[0] && <div className="mt-1 text-xs text-ui-fg-subtle">数量：{order.items[0].quantity}</div>}</div></div></td>
+                      <td className="px-4 py-3 align-middle"><div className="flex flex-col items-start gap-1"><span className="rounded-full bg-ui-bg-subtle px-2.5 py-1 text-xs font-medium">付款：{paymentLabel(order.payment_status)}</span><span className="rounded-full bg-ui-bg-subtle px-2.5 py-1 text-xs text-ui-fg-subtle">发货：{fulfillmentLabel(order.fulfillment_status)}</span></div></td>
                       <td className="px-4 py-3 text-right align-top font-medium">{formatTotal(order.total, order.currency_code)}</td>
                     </tr>
                   ))}
@@ -358,7 +363,7 @@ const OrderCenterPage = () => {
               <aside className="flex max-h-[calc(100vh-150px)] flex-col gap-4 overflow-y-auto p-4 sm:sticky sm:top-4 sm:p-5">
                 <div className="flex items-start justify-between gap-3 border-b border-ui-border-base pb-3">
                   <div><Heading level="h2">订单 #{selected.display_id}</Heading><Text size="small" className="mt-1 text-ui-fg-subtle">{formatDate(selected.created_at)}</Text></div>
-                  <div className="text-right"><div className="text-lg font-semibold">{formatTotal(selected.total, selected.currency_code)}</div><div className="mt-2 flex flex-col items-end gap-1"><span className="rounded-full bg-ui-bg-subtle px-2.5 py-1 text-xs font-medium">{paymentLabel(selected.payment_status)}</span><span className="rounded-full bg-ui-bg-subtle px-2.5 py-1 text-xs text-ui-fg-subtle">{fulfillmentLabel(selected.fulfillment_status)}</span></div></div>
+                  <div className="text-right"><div className="text-lg font-semibold">{formatTotal(selected.total, selected.currency_code)}</div><div className="mt-2 flex flex-col items-end gap-1"><span className="rounded-full bg-ui-bg-subtle px-2.5 py-1 text-xs font-medium">付款：{paymentLabel(selected.payment_status)}</span><span className="rounded-full bg-ui-bg-subtle px-2.5 py-1 text-xs text-ui-fg-subtle">发货：{fulfillmentLabel(selected.fulfillment_status)}</span></div></div>
                 </div>
 
                 <section>
@@ -386,9 +391,9 @@ const OrderCenterPage = () => {
                 {detail?.fulfillments?.some((fulfillment) => fulfillment.labels?.length) && <section className="border-t border-ui-border-base pt-3"><Text className="font-semibold">物流</Text><div className="mt-2 space-y-2 text-sm">{detail.fulfillments.flatMap((fulfillment) => (fulfillment.labels ?? []).map((label, index) => <div key={`${fulfillment.id}-${index}`} className="flex flex-wrap items-center justify-between gap-2"><span className="break-all">{label.tracking_number || "运单号待补充"}</span><span className="flex gap-3">{label.tracking_number && <button type="button" onClick={() => void copyText(label.tracking_number!, "运单号")} className="text-ui-fg-interactive">复制</button>}{label.tracking_url && <a className="text-ui-fg-interactive" href={label.tracking_url} target="_blank" rel="noreferrer">17TRACK</a>}</span></div>))}</div></section>}
 
                 <div className="mt-auto flex gap-2 border-t border-ui-border-base pt-3">
-                  {selectedNeedsFulfillment && <button type="button" disabled={!detail || detailsLoading || !["captured", "partially_captured"].includes(selected.payment_status)} onClick={() => void openFulfillment()} className="inline-flex min-h-10 flex-1 items-center justify-center rounded-md bg-ui-bg-interactive px-4 py-2 text-sm font-medium text-ui-fg-on-color disabled:cursor-not-allowed disabled:opacity-50">发货</button>}
-                  {["captured", "partially_captured"].includes(selected.payment_status) && !["refunded"].includes(selected.payment_status) && <a href={`/app/orders/${encodeURIComponent(selected.id)}`} className="inline-flex min-h-10 flex-1 items-center justify-center rounded-md border border-ui-border-base px-4 py-2 text-sm font-medium hover:bg-ui-bg-subtle">退款</a>}
-                  {selectedNeedsFulfillment && !["captured", "partially_captured"].includes(selected.payment_status) && <Text size="small" className="self-center text-ui-fg-subtle">付款后可发货</Text>}
+                  {selectedCanShip && <button type="button" disabled={!detail || detailsLoading} onClick={() => void openFulfillment()} className="inline-flex min-h-10 flex-1 items-center justify-center rounded-md bg-ui-bg-interactive px-4 py-2 text-sm font-medium text-ui-fg-on-color disabled:cursor-not-allowed disabled:opacity-50">发货</button>}
+                  {selectedCanRefund && <a href={`/app/orders/${encodeURIComponent(selected.id)}`} className="inline-flex min-h-10 flex-1 items-center justify-center rounded-md border border-ui-border-base px-4 py-2 text-sm font-medium hover:bg-ui-bg-subtle">退款</a>}
+                  {selectedNeedsFulfillment && !isPaid(selected.payment_status) && <Text size="small" className="self-center text-ui-fg-subtle">收款后可发货</Text>}
                 </div>
               </aside>
             )}
