@@ -55,6 +55,16 @@ export default async function Home({
         "@id": `${origin}/#organization`,
         name: STORE_NAME,
         url: origin,
+        description:
+          "VIBEYA is an online store for customizable apparel, accessories, drinkware, blankets, and bathroom products. Customers can personalize supported products, preview their designs, and order online.",
+        knowsAbout: [
+          "Personalized gifts",
+          "Custom apparel and accessories",
+          "Custom drinkware",
+          "Custom blankets",
+          "Custom bath mats and shower curtains",
+          "Online product customization",
+        ],
       },
       {
         "@type": "WebSite",
