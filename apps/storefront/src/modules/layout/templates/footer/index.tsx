@@ -16,6 +16,14 @@ export default function Footer() {
             Turn your ideas into one-of-a-kind things. Made for the way you see
             the world.
           </p>
+          <div className="mt-5 flex items-center gap-3" aria-label="Follow VIBEYA">
+            <a className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e5d4f7] text-[#5b35a0] transition hover:border-[#8f60ed] hover:bg-[#f1e5ff]" href="https://www.facebook.com/profile.php?id=61596154035820" target="_blank" rel="noopener noreferrer" aria-label="VIBEYA on Facebook" title="Facebook">
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor"><path d="M13.5 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.5 1.6-1.5h1.7V3.9c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3V10H7.3v3h2.8v8h3.4Z" /></svg>
+            </a>
+            <a className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e5d4f7] text-[#5b35a0] transition hover:border-[#8f60ed] hover:bg-[#f1e5ff]" href="https://www.instagram.com/vibeya.studio/" target="_blank" rel="noopener noreferrer" aria-label="VIBEYA on Instagram" title="Instagram">
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3.25" y="3.25" width="17.5" height="17.5" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.7" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg>
+            </a>
+          </div>
           <p className="mt-7 text-xs text-[#77717d]">
             © {new Date().getFullYear()} {STORE_NAME}. Made for you.
           </p>
