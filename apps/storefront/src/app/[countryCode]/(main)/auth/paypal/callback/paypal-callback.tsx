@@ -2,6 +2,7 @@
 
 import { sdk } from "@lib/config"
 import {
+  savePaypalCustomerProfile,
   savePaypalShippingAddress,
   setGoogleCustomerToken,
   type PaypalShippingAddress,
@@ -49,28 +50,30 @@ export default function PayPalCallback({
 
         let token = result
         const claims = decodeToken(token)
-        if (!claims.actor_id) {
-          const email = claims.user_metadata?.email
-          if (!email) throw new Error("PayPal did not return an email address.")
-
-          const association = await sdk.client.fetch<{ linked: boolean }>(
-            "/store/vibeya/auth/associate-customer",
-            {
-              method: "POST",
-              headers: { authorization: `Bearer ${token}` },
-              body: {},
-              cache: "no-store",
-            }
-          )
-
-          if (!association.linked) {
-            await sdk.store.customer.create({
-              email,
-              first_name: claims.user_metadata?.first_name,
-              last_name: claims.user_metadata?.last_name,
-            })
+        const association = await sdk.client.fetch<{
+          linked: boolean
+          profile: {
+            email: string
+            first_name?: string
+            last_name?: string
+            paypal_shipping_address?: PaypalShippingAddress | null
           }
+        }>("/store/vibeya/auth/associate-customer", {
+          method: "POST",
+          headers: { authorization: `Bearer ${token}` },
+          body: {},
+          cache: "no-store",
+        })
+        const profile = association.profile
+        const email = profile.email || claims.user_metadata?.email
+        if (!email) throw new Error("PayPal did not return an email address.")
 
+        if (!claims.actor_id && !association.linked) {
+          await sdk.store.customer.create({
+            email,
+            first_name: profile.first_name || claims.user_metadata?.first_name,
+            last_name: profile.last_name || claims.user_metadata?.last_name,
+          })
           const refreshed = await sdk.auth.refresh()
           if (!("token" in refreshed)) throw new Error("Could not finish creating your customer account.")
           token = refreshed.token
@@ -78,12 +81,16 @@ export default function PayPalCallback({
 
         const saved = await setGoogleCustomerToken(token)
         if (!saved.success) throw new Error(saved.error || "Could not sign in.")
-        const paypalAddress = claims.user_metadata?.paypal_shipping_address
+        await savePaypalCustomerProfile({
+          first_name: profile.first_name || claims.user_metadata?.first_name,
+          last_name: profile.last_name || claims.user_metadata?.last_name,
+        })
+        const paypalAddress = profile.paypal_shipping_address || claims.user_metadata?.paypal_shipping_address
         if (paypalAddress) {
           await savePaypalShippingAddress({
             ...paypalAddress,
-            first_name: claims.user_metadata?.first_name,
-            last_name: claims.user_metadata?.last_name,
+            first_name: profile.first_name || claims.user_metadata?.first_name,
+            last_name: profile.last_name || claims.user_metadata?.last_name,
           })
         }
         router.replace(`/${countryCode}/account`)

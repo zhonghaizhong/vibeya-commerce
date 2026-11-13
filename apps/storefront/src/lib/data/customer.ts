@@ -188,6 +188,33 @@ export type PaypalShippingAddress = {
   country_code: string
 }
 
+export async function savePaypalCustomerProfile(input: {
+  first_name?: string
+  last_name?: string
+}): Promise<void> {
+  const firstName = input.first_name?.trim().slice(0, 100)
+  const lastName = input.last_name?.trim().slice(0, 100)
+  if (!firstName && !lastName) return
+
+  const headers = await getAuthHeaders()
+  try {
+    const { customer } = await sdk.store.customer.retrieve(
+      { fields: "id,first_name,last_name" },
+      headers
+    )
+    const update: HttpTypes.StoreUpdateCustomer = {}
+    if (firstName && !customer.first_name?.trim()) update.first_name = firstName
+    if (lastName && !customer.last_name?.trim()) update.last_name = lastName
+    if (Object.keys(update).length === 0) return
+
+    await sdk.store.customer.update(update, {}, headers)
+    const customerCacheTag = await getCacheTag("customers")
+    revalidateTag(customerCacheTag, { expire: 0 })
+  } catch {
+    // Profile details are optional; a PayPal sign-in should still succeed.
+  }
+}
+
 export async function savePaypalShippingAddress(
   input: PaypalShippingAddress
 ): Promise<{ success: boolean; error?: string }> {

@@ -44,13 +44,24 @@ export const POST = async (req: AuthenticatedRequest, res: MedusaResponse) => {
     return res.status(403).json({ error: "The sign-in provider did not supply an email address." })
   }
 
+  const userMetadata = providerIdentity?.user_metadata || {}
+  const profile = {
+    email,
+    first_name: typeof userMetadata.first_name === "string" ? userMetadata.first_name : "",
+    last_name: typeof userMetadata.last_name === "string" ? userMetadata.last_name : "",
+    paypal_shipping_address:
+      provider === "paypal" && userMetadata.paypal_shipping_address && typeof userMetadata.paypal_shipping_address === "object"
+        ? userMetadata.paypal_shipping_address
+        : null,
+  }
+
   const { data } = await query.graph({
     entity: "customer",
     fields: ["id", "email"],
     filters: { email: { $ilike: email } },
   })
   const matchingCustomers = data.filter((customer) => normalizeEmail(customer.email) === email)
-  if (matchingCustomers.length === 0) return res.json({ linked: false })
+  if (matchingCustomers.length === 0) return res.json({ linked: false, profile })
   if (matchingCustomers.length > 1) {
     return res.status(409).json({ error: "More than one customer record uses this email. Please contact support." })
   }
@@ -69,5 +80,5 @@ export const POST = async (req: AuthenticatedRequest, res: MedusaResponse) => {
     })
   }
 
-  return res.json({ linked: true })
+  return res.json({ linked: true, profile })
 }
