@@ -68,12 +68,21 @@ export default function PayPalCallback({
         const email = profile.email || claims.user_metadata?.email
         if (!email) throw new Error("PayPal did not return an email address.")
 
-        if (!claims.actor_id && !association.linked) {
-          await sdk.store.customer.create({
-            email,
-            first_name: profile.first_name || claims.user_metadata?.first_name,
-            last_name: profile.last_name || claims.user_metadata?.last_name,
-          })
+        if (!claims.actor_id) {
+          if (!association.linked) {
+            await sdk.store.customer.create(
+              {
+                email,
+                first_name: profile.first_name || claims.user_metadata?.first_name,
+                last_name: profile.last_name || claims.user_metadata?.last_name,
+              },
+              {},
+              { authorization: `Bearer ${token}` }
+            )
+          }
+
+          // Linking an existing customer updates the auth identity, but the
+          // callback token still has no customer actor until it is refreshed.
           const refreshed = await sdk.auth.refresh()
           if (!("token" in refreshed)) throw new Error("Could not finish creating your customer account.")
           token = refreshed.token
