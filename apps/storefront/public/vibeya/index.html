@@ -214,6 +214,13 @@
     .my-design-image img{width:100%;height:100%;object-fit:contain;cursor:zoom-in;}
     .my-design-image [data-job-preview]{border:0;background:transparent;color:#684c8a;font:inherit;text-decoration:underline;cursor:pointer;padding:16px;}
     .my-design-copy{padding:16px;}.my-design-copy h2{font-size:15px;margin:0 0 7px;}.my-design-copy p{font-size:12px;line-height:1.5;color:var(--muted);margin:0 0 9px;}
+    .my-design-prompt{margin:0 0 6px;color:var(--muted);font-size:12px;line-height:1.5;min-width:0;}
+    .my-design-prompt summary{display:flex;align-items:flex-start;gap:8px;list-style:none;cursor:pointer;}
+    .my-design-prompt summary::-webkit-details-marker{display:none;}
+    .my-design-prompt summary>span:first-child{display:-webkit-box;min-width:0;flex:1;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow-wrap:anywhere;}
+    .my-design-prompt summary::after{content:'Show';flex:none;color:#684c8a;font-size:11px;font-weight:800;}
+    .my-design-prompt[open] summary::after{content:'Hide';}
+    .my-design-prompt>p{margin:7px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;}
     .my-design-state{font-size:11px;font-weight:800;color:#60458a;}.my-design-state.failed{color:#bd3147;}
     .my-design-failure-note{margin:7px 0 0;color:#7c7182;font-size:12px;line-height:1.5;}
     .my-design-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:13px;}
@@ -1168,6 +1175,7 @@
   
   try{saved=JSON.parse(localStorage.getItem('vibeyaSaved')||'[]');if(!Array.isArray(saved))saved=[];}catch(e){saved=[];}
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const designPromptMarkup=prompt=>{const text=String(prompt||'Custom print design').trim();return `<details class="my-design-prompt"><summary><span>${esc(text)}</span></summary><p>${esc(text)}</p></details>`;};
   // Both libraries are driven by data arrays, not hand-written page cards.
   // More items can be added without expanding the homepage or changing navigation.
   const catalogProducts=[...products];
@@ -1375,7 +1383,7 @@
         const runAction=job.status==='queued'||(job.status==='failed'&&job.provider_task_id)?`<button type="button" class="btn secondary" data-job-run="${esc(job.id)}">${job.status==='failed'?'Recover image':'Start generation'}</button>`:'';
         const retryAction=job.status==='failed'?`<button type="button" class="btn secondary" data-job-retry="${esc(job.id)}">Edit &amp; retry</button>`:'';
         const failureNote=job.status==='failed'?`<p class="my-design-failure-note">${job.provider_task_id?'The provider task can be checked again. Recover it to load the generated image.':'No image was returned. Edit the description and try again; failed generations do not use a design credit.'}</p>`:'';
-        return `<article class="my-design-card" data-job-card="${esc(job.id)}"><div class="my-design-image">${image}</div><div class="my-design-copy"><h2>${esc(title)} · ${esc(shownColor)}</h2><p>${esc(job.prompt||'Custom print design')}<br>${esc(shownPlacement)}</p><span class="my-design-state ${job.status==='failed'?'failed':''}">${esc(jobStatusLabel(job.status))}${job.error?` · ${esc(job.error)}`:''}</span>${failureNote}${variantChoices}<div class="my-design-actions">${runAction}${retryAction}<button type="button" class="btn primary" data-job-add="${esc(job.id)}" ${addDisabled?'disabled':''}>Add to bag</button><button type="button" class="my-design-delete" data-job-delete="${esc(job.id)}">Delete</button></div></div></article>`;
+        return `<article class="my-design-card" data-job-card="${esc(job.id)}"><div class="my-design-image">${image}</div><div class="my-design-copy"><h2>${esc(title)} · ${esc(shownColor)}</h2>${designPromptMarkup(job.prompt)}<p>${esc(shownPlacement)}</p><span class="my-design-state ${job.status==='failed'?'failed':''}">${esc(jobStatusLabel(job.status))}${job.error?` · ${esc(job.error)}`:''}</span>${failureNote}${variantChoices}<div class="my-design-actions">${runAction}${retryAction}<button type="button" class="btn primary" data-job-add="${esc(job.id)}" ${addDisabled?'disabled':''}>Add to bag</button><button type="button" class="my-design-delete" data-job-delete="${esc(job.id)}">Delete</button></div></div></article>`;
       }).join('');
       const loadDesignImage=async preview=>{preview.disabled=true;preview.textContent='Loading image…';try{const response=await fetch(`/api/vibeya/ai/jobs/${encodeURIComponent(preview.dataset.jobPreview)}`,{credentials:'same-origin',cache:'no-store'});const data=await response.json();if(!response.ok||!data.job?.image)throw new Error();const image=document.createElement('img');image.src=data.job.image;image.alt='Generated product design';image.loading='lazy';image.addEventListener('click',()=>{generatedArtworkDataUrl=image.src;lastZoomTrigger=image;openImageZoom();});preview.replaceWith(image);}catch{preview.disabled=false;preview.textContent='Image unavailable — click to retry';}};
       grid.onclick=async event=>{
@@ -1471,7 +1479,7 @@
         const variantChoices=colorChoices||sizeChoices?`<div class="studio-saved-variant-select">${colorChoices}${sizeChoices}</div>`:'';
         const retryAction=job.status==='failed'?`<button type="button" class="btn secondary" data-studio-job-retry="${esc(job.id)}">Edit &amp; retry</button>`:'';
         const recoverAction=job.status==='failed'&&job.provider_task_id?`<button type="button" class="btn secondary" data-job-run="${esc(job.id)}">Recover image</button>`:'';
-        return `<article class="studio-saved-card">${visual}<div class="studio-saved-card-copy"><strong>${esc(title)} · ${esc(variant.color?productColorName(product,variant.color):'')}</strong><p>${esc(prompt.length>90?prompt.slice(0,90)+'…':prompt)}</p><span class="studio-saved-card-state">${esc(jobStatusLabel(job.status))}${job.error?` · ${esc(job.error)}`:''}</span>${job.status==='failed'?`<p class="my-design-failure-note">${job.provider_task_id?'The provider task can be checked again.':'No image was returned. Failed generations do not use a design credit.'}</p>`:''}</div>${variantChoices}<div class="studio-saved-card-actions">${recoverAction}${retryAction}<button type="button" class="btn primary" data-studio-job-add="${esc(job.id)}" ${addDisabled?'disabled':''}>Add to bag</button><button type="button" class="studio-saved-delete" data-studio-job-delete="${esc(job.id)}">Delete</button></div></article>`;
+        return `<article class="studio-saved-card">${visual}<div class="studio-saved-card-copy"><strong>${esc(title)} · ${esc(variant.color?productColorName(product,variant.color):'')}</strong>${designPromptMarkup(prompt)}<span class="studio-saved-card-state">${esc(jobStatusLabel(job.status))}${job.error?` · ${esc(job.error)}`:''}</span>${job.status==='failed'?`<p class="my-design-failure-note">${job.provider_task_id?'The provider task can be checked again.':'No image was returned. Failed generations do not use a design credit.'}</p>`:''}</div>${variantChoices}<div class="studio-saved-card-actions">${recoverAction}${retryAction}<button type="button" class="btn primary" data-studio-job-add="${esc(job.id)}" ${addDisabled?'disabled':''}>Add to bag</button><button type="button" class="studio-saved-delete" data-studio-job-delete="${esc(job.id)}">Delete</button></div></article>`;
       }).join('')}</div>`;
       container.onclick=async event=>{
         const colorChoice=event.target.closest('[data-studio-job-color-choice]');
