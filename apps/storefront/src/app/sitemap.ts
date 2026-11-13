@@ -25,6 +25,7 @@ const INDEXABLE_CONTENT_PATHS = [
   "/vibeya/inspiration/duck-bubble-trouble-custom-bath-mat.html",
   "/vibeya/inspiration/no-nightmares-jesus-blanket.html",
   "/vibeya/inspiration/low-battery-club-custom-beanie.html",
+  "/vibeya/inspiration/cat-bubble-cats-custom-shower-curtain.html",
 ]
 const PAGE_SIZE = 200
 

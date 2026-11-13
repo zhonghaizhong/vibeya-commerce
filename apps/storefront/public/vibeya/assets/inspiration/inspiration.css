@@ -153,3 +153,8 @@ body.customize-open{overflow:hidden;}
 .related-card.home-featured-inspo[data-inspiration="midnight-cat-cafe"]>img{object-fit:cover;object-position:center;background:#fceded}
 .beanie-featured-layout>.art-card{aspect-ratio:4/3}
 @media(max-width:640px){.beanie-featured-layout>.art-card{aspect-ratio:4/3}}
+
+/* Keep the shower curtain campaign flush with the card and equal in height to its story panel. */
+#featuredShowerCurtainResult>.art-card-full{aspect-ratio:auto;align-self:stretch;min-height:0;overflow:hidden}
+#featuredShowerCurtainResult>.art-card-full img{transform:scale(1.03)}
+@media(max-width:640px){#featuredShowerCurtainResult>.art-card-full{aspect-ratio:1448/1024;align-self:start}}

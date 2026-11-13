@@ -4,9 +4,9 @@ import { toJsonLd } from "@lib/util/product-structured-data"
 import { retrieveCustomer } from "@lib/data/customer"
 import VibeyaHome from "./vibeya-home"
 
-const HOME_TITLE = "Custom Hoodies & T-Shirts Designed by You | VIBEYA"
+const HOME_TITLE = "Custom Products & Personalized Gifts | VIBEYA"
 const HOME_DESCRIPTION =
-  "Shop custom hoodies and graphic T-shirts made to order. Choose your garment color, size, and print placement, then personalize your look. Free U.S. shipping."
+  "Create custom apparel, drinkware, blankets, shower curtains, and home decor online. Personalize a product, preview your design, and order one made for you."
 
 export async function generateMetadata({
   params,
