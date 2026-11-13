@@ -600,11 +600,12 @@
     }
 
   .insp-grid.home-inspiration-grid{grid-template-columns:repeat(4,minmax(0,1fr));align-items:start;gap:16px}
-  .home-featured-inspo{display:block;min-width:0;aspect-ratio:7/5;text-decoration:none;background:#eadcf8;border:0;border-radius:20px;overflow:hidden;box-shadow:0 10px 28px #3b1c6e12;transition:transform .2s,box-shadow .2s}
+  .home-featured-inspo{display:block;position:relative;isolation:isolate;min-width:0;aspect-ratio:7/5;text-decoration:none;background:#eadcf8;border:0;border-radius:20px;overflow:hidden;box-shadow:0 10px 28px #3b1c6e12;transition:transform .2s,box-shadow .2s}
+  .home-featured-inspo:before{content:"";position:absolute;inset:-18px;z-index:0;background-image:var(--artwork-extension);background-size:cover;background-position:center;filter:blur(20px) saturate(.9);opacity:.28;transform:scale(1.05)}
   .home-featured-inspo:hover{transform:translateY(-3px);box-shadow:0 16px 36px #3b1c6e20}
   .home-featured-inspo:focus-visible{outline:3px solid #8f60ed;outline-offset:3px}
-  .home-featured-inspo>img{display:block;width:100%;height:100%;object-fit:cover;object-position:center top}
-  .home-featured-inspo[data-inspiration="orbit-bloom"]>img{transform:scale(1.06,1.04)}
+  .home-featured-inspo>img{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:contain;object-position:center}
+  .home-featured-inspo[data-inspiration="orbit-bloom"]>img{transform:none}
   .home-featured-inspo--art{position:relative;color:#fff;background:linear-gradient(135deg,#8538ef,#bd68f2 60%,#e8a9ed);isolation:isolate}
   .home-featured-inspo--art:before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,#641be288 0%,#7027bd44 46%,transparent 80%)}
   .home-featured-inspo--art>img{position:absolute;z-index:0;right:-2%;top:0;width:76%;height:100%;object-fit:cover;object-position:center 48%;mask-image:linear-gradient(90deg,transparent 0%,#000 22%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 22%)}
@@ -1734,8 +1735,9 @@
   function hideCart(){$('#drawerOverlay').classList.remove('open');$('#cartDrawer').classList.remove('open');syncLock();}
   function renderProductCards(){if(document.body.dataset.reactProductCards==='true')return;const ordered=[...catalogProducts.filter(p=>p.catalogOnly),...catalogProducts.filter(p=>!p.catalogOnly)],tankini=ordered.find(p=>p.id==='sds-137892'),blanket=ordered.find(p=>p.id==='sds-97226'),pinned=[tankini,blanket].filter(Boolean),featured=[...pinned,...ordered.filter(p=>!pinned.includes(p))].slice(0,6);$('#productCards').innerHTML=featured.map(productHTML).join('');}
   async function renderInspo(){
-    let catalog=Array.isArray(window.VIBEYA_INSPIRATION_CATALOG)?window.VIBEYA_INSPIRATION_CATALOG:[];
-    try{const response=await fetch('/api/vibeya/inspirations',{credentials:'same-origin',cache:'no-store'});if(response.ok){const data=await response.json();if(Array.isArray(data.inspirations))catalog=data.inspirations;}}catch(error){console.warn('Using bundled inspiration catalog',error);}
+    const bundledCatalog=Array.isArray(window.VIBEYA_INSPIRATION_CATALOG)?window.VIBEYA_INSPIRATION_CATALOG:[];
+    let catalog=[...bundledCatalog];
+    try{const response=await fetch('/api/vibeya/inspirations',{credentials:'same-origin',cache:'no-store'});if(response.ok){const data=await response.json();if(Array.isArray(data.inspirations)){const managed=data.inspirations;catalog=[...bundledCatalog.map(item=>({...item,...(managed.find(entry=>entry.id===item.id)||{})})),...managed.filter(entry=>!bundledCatalog.some(item=>item.id===entry.id))];}}}catch(error){console.warn('Using bundled inspiration catalog',error);}
     const inspirationUrl=new URL('/vibeya/inspiration/index.html',location.origin);
     const cards=[];
     try{
@@ -1749,17 +1751,27 @@
           const href=new URL(link.getAttribute('href'),inspirationUrl);
           const articleFile=href.pathname.split('/').pop()||'';
           const entry=catalog.find(item=>item.slug===articleFile);
-          if(entry&&!entry.published)return;
+          if(entry?.published===false)return;
           const title=entry?.title||section.querySelector('.featured-text h2')?.textContent?.replace(/\s+/g,' ').trim()||'VIBEYA inspiration';
           cards.push({id:entry?.id||articleFile.replace(/\.html$/,''),title,alt:image.getAttribute('alt')||`${title} inspiration card`,image:new URL(image.getAttribute('src')||'',inspirationUrl).href,href:href.href});
         });
       }
     }catch(error){console.warn('Could not load inspiration-list feature cards',error);}
 
+    if(cards.length<4){
+      const known=new Set(cards.map(card=>card.id));
+      for(const entry of catalog){
+        if(entry.published===false||known.has(entry.id)||!entry.slug)continue;
+        const asset=entry.cardImage||entry.image;
+        if(!asset)continue;
+        cards.push({id:entry.id,title:entry.title||'VIBEYA inspiration',alt:`${entry.title||'VIBEYA'} custom design inspiration`,image:new URL(`../assets/inspiration/${encodeURIComponent(asset)}`,inspirationUrl).href,href:new URL(entry.slug,inspirationUrl).href});
+        if(cards.length>=4)break;
+      }
+    }
     for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
     $('#inspoCards').innerHTML=cards.slice(0,4).map(card=>{
       const alt=card.alt||`${card.title} inspiration card`;
-      return `<a class="home-featured-inspo" data-inspiration="${esc(card.id)}" href="${esc(card.href)}" aria-label="Open ${esc(alt)}"><img src="${esc(card.image)}" alt="${esc(alt)}" loading="lazy"></a>`;
+      return `<a class="home-featured-inspo" data-inspiration="${esc(card.id)}" style="--artwork-extension:url('${esc(card.image)}')" href="${esc(card.href)}" aria-label="Open ${esc(alt)}"><img src="${esc(card.image)}" alt="${esc(alt)}" loading="lazy"></a>`;
     }).join('');
   }
   window.addEventListener('pageshow',event=>{if(event.persisted)renderInspo();});

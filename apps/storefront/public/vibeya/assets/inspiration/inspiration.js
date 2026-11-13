@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded',async()=>{
     if(entry.summary){const description=section.querySelector('.featured-text > p');if(description)description.textContent=entry.summary;}
     if(entry.useManagedImage&&entry.image){const image=section.querySelector('.art-card img');if(image){image.src=/^(https?:)?\//.test(entry.image)?new URL(entry.image,location.origin).href:`../assets/inspiration/${encodeURIComponent(entry.image)}`;image.alt=`${entry.title} inspiration`;}}
   });
+  document.querySelectorAll('.inspiration-feature-grid .art-card-full img').forEach(image=>{
+    const panel=image.parentElement;
+    const syncArtworkRatio=()=>{const width=image.naturalWidth||Number(image.getAttribute('width'));const height=image.naturalHeight||Number(image.getAttribute('height'));if(width&&height)panel.style.setProperty('--artwork-ratio',`${width} / ${height}`);};
+    if(image.complete)syncArtworkRatio();else image.addEventListener('load',syncArtworkRatio,{once:true});
+  });
   const isGenericStory=document.body.dataset.inspirationTemplate==='true';
   const articleId=new URLSearchParams(location.search).get('inspiration')||document.body.dataset.inspirationId||'funny-skeleton';
   const current=catalog.find(x=>x.id===articleId)||(isGenericStory?undefined:catalog[0]);
@@ -63,14 +68,14 @@ document.addEventListener('DOMContentLoaded',async()=>{
           const href=new URL(link.getAttribute('href'),inspirationUrl);
           const slug=href.pathname.split('/').pop()||'';
           const entry=catalog.find(item=>item.slug===slug);
-          if((entry&&!entry.published)||entry?.id===current.id)return [];
+          if(entry?.published===false||entry?.id===current.id)return [];
           return [{id:entry?.id||slug.replace(/\.html$/,''),title:entry?.title||section.querySelector('.featured-text h2')?.textContent?.replace(/\s+/g,' ').trim()||'VIBEYA inspiration',product:entry?.product,pattern:entry?.pattern,style:entry?.style,slug:href.href,image:new URL(image.getAttribute('src')||'',inspirationUrl).href,alt:image.getAttribute('alt')||entry?.title||'VIBEYA inspiration'}];
         });
       }
     }catch(error){console.warn('Could not load inspiration-list feature cards',error);}
     for(let i=related.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[related[i],related[j]]=[related[j],related[i]];}
     const selected=related.slice(0,4);
-    moreCards.innerHTML=selected.map(x=>`<a class="related-card home-featured-inspo" data-inspiration="${safe(x.id)}" data-product="${safe(x.product)}" data-pattern="${safe(x.pattern)}" data-style="${safe(x.style)}" href="${safe(x.slug)}" aria-label="Open ${safe(x.title)}"><img loading="lazy" src="${safe(x.image)}" alt="${safe(x.alt)}"></a>`).join('');
+    moreCards.innerHTML=selected.map(x=>`<a class="related-card home-featured-inspo" data-inspiration="${safe(x.id)}" data-product="${safe(x.product)}" data-pattern="${safe(x.pattern)}" data-style="${safe(x.style)}" style="--artwork-extension:url('${safe(x.image)}')" href="${safe(x.slug)}" aria-label="Open ${safe(x.title)}"><img loading="lazy" src="${safe(x.image)}" alt="${safe(x.alt)}"></a>`).join('');
     moreSection.hidden=selected.length===0;
   }
   const countBadge=document.getElementById('marketCartCount');
