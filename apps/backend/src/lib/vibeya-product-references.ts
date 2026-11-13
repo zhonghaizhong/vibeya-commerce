@@ -4,7 +4,13 @@ import path from "node:path"
 const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string> | Record<string, Record<string, string>>> = {
   "sds-97226": "vibeya/assets/products/sds-97226/blank-print-base.webp",
   "sds-138708": "vibeya/assets/products/sds-138708/blank-print-base.webp",
-  "sds-137892": "vibeya/assets/products/mg8011024/swimwear-blank-product-base.png",
+  "sds-137892": {
+    Black: "vibeya/assets/products/mg8011024/swimwear-blank-product-base.png",
+    Red: "vibeya/assets/products/mg8011024/red/swimwear-blank-product-base.png",
+    Pink: "vibeya/assets/products/mg8011024/pink/swimwear-blank-product-base.png",
+    Blue: "vibeya/assets/products/mg8011024/blue/swimwear-blank-product-base.png",
+    Cyan: "vibeya/assets/products/mg8011024/cyan/swimwear-blank-product-base.png",
+  },
   "vibeya-shower-curtain": {
     "36x70.8in": { White: "vibeya/assets/products/vibeya-shower-curtain/36x70.8in.webp" },
     "60x70.8in": { White: "vibeya/assets/products/vibeya-shower-curtain/60x70.8in.webp" },
@@ -18,8 +24,14 @@ const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string> | 
   },
 }
 
-const PRODUCT_PRINT_AREA_REFERENCE_PATHS: Record<string, string> = {
-  "sds-137892": "vibeya/assets/products/mg8011024/swimwear-front-print-area-guide.png",
+const PRODUCT_PRINT_AREA_REFERENCE_PATHS: Record<string, string | Record<string, string>> = {
+  "sds-137892": {
+    Black: "vibeya/assets/products/mg8011024/swimwear-front-print-area-guide.png",
+    Red: "vibeya/assets/products/mg8011024/red/swimwear-front-print-area-guide.png",
+    Pink: "vibeya/assets/products/mg8011024/pink/swimwear-front-print-area-guide.png",
+    Blue: "vibeya/assets/products/mg8011024/blue/swimwear-front-print-area-guide.png",
+    Cyan: "vibeya/assets/products/mg8011024/cyan/swimwear-front-print-area-guide.png",
+  },
 }
 
 async function readProductReference(referencePath: string): Promise<string> {
@@ -56,7 +68,8 @@ export async function getVibeyaProductReference(productId: string, color?: strin
   return referencePath ? readProductReference(referencePath) : ""
 }
 
-export async function getVibeyaProductPrintAreaReference(productId: string): Promise<string> {
-  const referencePath = PRODUCT_PRINT_AREA_REFERENCE_PATHS[productId]
+export async function getVibeyaProductPrintAreaReference(productId: string, color?: string): Promise<string> {
+  const configuredPath = PRODUCT_PRINT_AREA_REFERENCE_PATHS[productId]
+  const referencePath = typeof configuredPath === "string" ? configuredPath : configuredPath?.[color || "Black"]
   return referencePath ? readProductReference(referencePath) : ""
 }

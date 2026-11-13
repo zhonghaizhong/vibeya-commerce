@@ -85,7 +85,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isShowerCurtain && !["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"].includes(size)) {
     return res.status(400).json({ error: "Choose one of the available shower curtain sizes before creating your design." })
   }
-  if ((isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini) && !productReference) {
+  if (isTankini || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
     try {
       productReference = await getVibeyaProductReference(productId, color, size)
     } catch (error) {
@@ -93,9 +93,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(503).json({ error: isBeanie ? "The beanie print-area reference is not available right now. Please try again later." : "The product print reference is not available right now. Please try again later." })
     }
   }
-  if (isTankini && !productPrintAreaReference) {
+  if (isTankini) {
     try {
-      productPrintAreaReference = await getVibeyaProductPrintAreaReference(productId)
+      productPrintAreaReference = await getVibeyaProductPrintAreaReference(productId, color)
     } catch (error) {
       console.error("Unable to load the VIBEYA product print-area guide", error)
       return res.status(503).json({ error: "The tankini print-area guide is not available right now. Please try again later." })
