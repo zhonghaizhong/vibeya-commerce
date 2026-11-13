@@ -1036,7 +1036,8 @@
   }
   function designColorPicker(job,product,currentColor,attribute){
     if(!product?.colors||product.colors.length<2)return '';
-    return `<div class="my-design-color-picker"><span>Make another color · uses 1 design</span><div class="my-design-color-swatches" role="group" aria-label="Choose another color">${product.colors.map(color=>`<button type="button" class="color-choice" data-${attribute}="${esc(job.id)}" data-color="${esc(color)}" aria-pressed="${color===currentColor}" aria-label="Create ${esc(productColorName(product,color))} design" title="${esc(productColorName(product,color))}"><span style="background:${designColorHex(product,color)}"></span></button>`).join('')}</div></div>`;
+    const colorType=product.category==='Apparel'?'garment color':'product color';
+    return `<div class="my-design-color-picker"><span>Same print · different ${colorType} · uses 1 design</span><div class="my-design-color-swatches" role="group" aria-label="Choose another color for the same print">${product.colors.map(color=>`<button type="button" class="color-choice" data-${attribute}="${esc(job.id)}" data-color="${esc(color)}" aria-pressed="${color===currentColor}" aria-label="Create same print on ${esc(productColorName(product,color))}" title="${esc(productColorName(product,color))}"><span style="background:${designColorHex(product,color)}"></span></button>`).join('')}</div></div>`;
   }
   async function createColorVariant(job,color,size,button,refresh){
     const product=products.find(item=>item.id===job?.product_id);
