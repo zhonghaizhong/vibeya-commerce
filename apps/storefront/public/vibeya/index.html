@@ -600,12 +600,11 @@
     }
 
   .insp-grid.home-inspiration-grid{grid-template-columns:repeat(4,minmax(0,1fr));align-items:start;gap:16px}
-  .home-featured-inspo{display:block;position:relative;isolation:isolate;min-width:0;aspect-ratio:7/5;text-decoration:none;background:#eadcf8;border:0;border-radius:20px;overflow:hidden;box-shadow:0 10px 28px #3b1c6e12;transition:transform .2s,box-shadow .2s}
-  .home-featured-inspo:before{content:"";position:absolute;inset:-18px;z-index:0;background-image:var(--artwork-extension);background-size:cover;background-position:center;filter:blur(20px) saturate(.9);opacity:.28;transform:scale(1.05)}
+  .home-featured-inspo{display:block;position:relative;isolation:isolate;min-width:0;aspect-ratio:4/5;text-decoration:none;background:#eadcf8;border:0;border-radius:20px;overflow:hidden;box-shadow:0 10px 28px #3b1c6e12;transition:transform .2s,box-shadow .2s}
+  .home-featured-inspo:before{content:"";position:absolute;inset:-18px;z-index:0;background-image:var(--artwork-extension);background-size:cover;background-position:center;filter:blur(18px) saturate(.9);opacity:.62;transform:scale(1.05)}
   .home-featured-inspo:hover{transform:translateY(-3px);box-shadow:0 16px 36px #3b1c6e20}
   .home-featured-inspo:focus-visible{outline:3px solid #8f60ed;outline-offset:3px}
-  .home-featured-inspo>img{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:contain;object-position:center}
-  .home-featured-inspo[data-inspiration="orbit-bloom"]>img{transform:none}
+  .home-featured-inspo>img{position:relative;z-index:0;display:block;width:100%;height:100%;object-fit:contain;object-position:center}
   .home-featured-inspo--art{position:relative;color:#fff;background:linear-gradient(135deg,#8538ef,#bd68f2 60%,#e8a9ed);isolation:isolate}
   .home-featured-inspo--art:before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,#641be288 0%,#7027bd44 46%,transparent 80%)}
   .home-featured-inspo--art>img{position:absolute;z-index:0;right:-2%;top:0;width:76%;height:100%;object-fit:cover;object-position:center 48%;mask-image:linear-gradient(90deg,transparent 0%,#000 22%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 22%)}
@@ -670,7 +669,7 @@
   </style>
 <link rel="stylesheet" href="assets/shared/header.css?v=nav-match-5">
 <script src="assets/shared/catalog-price.js" defer></script>
-<script src="assets/inspiration/catalog.js?v=gallery-cover-1"></script>
+<script src="assets/inspiration/catalog.js?v=portrait-six-inspirations-1"></script>
 </head>
 <body>
   <div class="announcement">YOUR IDEA, YOUR VIBE, YOURS TO KEEP. <strong>✳ MADE JUST FOR YOU</strong></div>
@@ -1769,7 +1768,7 @@
       }
     }
     for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
-    $('#inspoCards').innerHTML=cards.slice(0,4).map(card=>{
+    $('#inspoCards').innerHTML=cards.slice(0,6).map(card=>{
       const alt=card.alt||`${card.title} inspiration card`;
       return `<a class="home-featured-inspo" data-inspiration="${esc(card.id)}" style="--artwork-extension:url('${esc(card.image)}')" href="${esc(card.href)}" aria-label="Open ${esc(alt)}"><img src="${esc(card.image)}" alt="${esc(alt)}" loading="lazy"></a>`;
     }).join('');

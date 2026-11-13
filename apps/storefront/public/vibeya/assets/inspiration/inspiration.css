@@ -158,29 +158,57 @@ body.customize-open{overflow:hidden;}
 @media(max-width:640px){.site-socials{align-self:flex-start}}
 .beanie-featured-layout>.art-card{aspect-ratio:4/3}
 @media(max-width:640px){.beanie-featured-layout>.art-card{aspect-ratio:4/3}}
+.tankini-featured-layout>.art-card{aspect-ratio:4/3;align-self:start}
+.tankini-featured-layout>.art-card img{object-fit:cover;object-position:center}
+@media(max-width:640px){.tankini-featured-layout>.art-card{aspect-ratio:4/3}}
+.tankini-gallery .gallery-stage{aspect-ratio:4/3}
+.tankini-gallery .gallery-thumb{aspect-ratio:4/3}
 
 /* Keep the shower curtain campaign flush with the card and equal in height to its story panel. */
 #featuredShowerCurtainResult>.art-card-full{aspect-ratio:auto;align-self:stretch;min-height:0;overflow:hidden}
 #featuredShowerCurtainResult>.art-card-full img{transform:scale(1.03)}
 @media(max-width:640px){#featuredShowerCurtainResult>.art-card-full{aspect-ratio:1448/1024;align-self:start}}
 
-/* Keep the approved image-left / story-right composition at a usable scale.
-   One spotlight per row gives the complete original art room to fill its panel. */
-.inspiration-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:20px}
-.inspiration-feature-grid>.story-spotlight{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);align-items:stretch;gap:0;min-width:0;overflow:hidden;margin:0;border:1px solid #e5d4f7;border-radius:26px;background:#fffdfced;box-shadow:0 12px 35px #603dc018;scroll-margin-top:94px}
-.inspiration-feature-grid>.story-spotlight>.art-card{position:relative;width:100%;height:auto;min-height:0;aspect-ratio:var(--artwork-ratio,4/5);align-self:stretch;border:0;border-radius:0;background:#ead8f8;isolation:isolate}
-.inspiration-feature-grid>.story-spotlight>.art-card:before{display:none}
-.inspiration-feature-grid>.story-spotlight>.art-card img{z-index:1;object-fit:contain;object-position:center;transform:none}
-.inspiration-feature-grid>.story-spotlight>.featured-text{min-width:0;align-self:stretch;border:0;border-radius:0;background:transparent;box-shadow:none;padding:14px;gap:7px}
-.inspiration-feature-grid>.story-spotlight .featured-text h2{font-size:clamp(21px,1.75vw,24px);line-height:1.04;letter-spacing:-.7px}
-.inspiration-feature-grid>.story-spotlight .featured-text p{font-size:11px;line-height:1.4;margin:0}
-.inspiration-feature-grid>.story-spotlight .pill-label{font-size:10px;padding:5px 9px}
-.inspiration-feature-grid>.story-spotlight .chips{gap:5px}
-.inspiration-feature-grid>.story-spotlight .chip{font-size:10px;padding:5px 8px}
-.inspiration-feature-grid>.story-spotlight .details{gap:5px}
-.inspiration-feature-grid>.story-spotlight .detail-row{gap:7px;padding:5px 7px;font-size:9px;line-height:1.22}
-.inspiration-feature-grid>.story-spotlight .actions{margin-top:auto;padding-top:4px}
-.inspiration-feature-grid>.story-spotlight .actions .btn{min-height:32px;padding:7px 10px;font-size:10px;border-radius:11px}
-@media(max-width:1100px){.inspiration-feature-grid{gap:20px}.inspiration-feature-grid>.story-spotlight{grid-template-columns:minmax(0,1.05fr) minmax(0,0.95fr)}.inspiration-feature-grid>.story-spotlight .featured-text{padding:12px;gap:6px}.inspiration-feature-grid>.story-spotlight .featured-text h2{font-size:clamp(20px,2.1vw,22px)}.inspiration-feature-grid>.story-spotlight .featured-text p{font-size:10px}.inspiration-feature-grid>.story-spotlight .chip{font-size:9px;padding:4px 6px}.inspiration-feature-grid>.story-spotlight .detail-row{font-size:9px;padding:5px 6px}}
-@media(max-width:900px){.inspiration-feature-grid{grid-template-columns:minmax(0,1fr);gap:20px}}
-@media(max-width:640px){.inspiration-feature-grid{grid-template-columns:1fr}.inspiration-feature-grid>.story-spotlight{grid-template-columns:1fr;border-radius:20px}.inspiration-feature-grid>.story-spotlight>.art-card{height:auto;aspect-ratio:var(--artwork-ratio,4/5);border-radius:0}.inspiration-feature-grid>.story-spotlight>.art-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.inspiration-feature-grid>.story-spotlight>.featured-text{padding:20px;gap:11px}.inspiration-feature-grid>.story-spotlight .featured-text h2{font-size:clamp(23px,7vw,32px);letter-spacing:-.7px}.inspiration-feature-grid>.story-spotlight .featured-text p{font-size:13px;line-height:1.55}.inspiration-feature-grid>.story-spotlight .chips{display:flex}.inspiration-feature-grid>.story-spotlight .details{gap:6px}.inspiration-feature-grid>.story-spotlight .detail-row{display:flex;flex-direction:row;align-items:center;padding:8px 10px;font-size:11px}.inspiration-feature-grid>.story-spotlight .actions .btn{font-size:13px;padding:10px 14px;min-height:42px}}
+/* Keep the complete campaign artwork visible. A softened extension of the same
+   image fills the canvas behind it, so the artwork is never stretched or cropped. */
+.story-spotlight>.art-card.art-card-full{align-self:stretch;aspect-ratio:auto;height:100%;min-height:0;isolation:isolate;background:#eadcf8}
+.story-spotlight>.art-card.art-card-full:before{display:block;z-index:0;inset:-20px;background-image:var(--artwork-extension);background-size:cover;background-position:center;filter:blur(20px) saturate(.92);opacity:.62;transform:scale(1.06)}
+.story-spotlight>.art-card.art-card-full img{z-index:1;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;border-radius:inherit;transform:none}
+@media(max-width:980px){
+  .story-spotlight>.art-card.art-card-full{height:auto;aspect-ratio:4/3;align-self:start}
+}
+
+/* Two complete inspiration stories per row, with the campaign art beside its copy. */
+.inspiration-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr;gap:24px;align-items:stretch}
+.inspiration-feature-grid>.story-spotlight{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);align-items:stretch;gap:0;min-width:0;height:100%;min-height:400px;overflow:hidden;margin:0;border:1px solid #e5cdfb;border-radius:24px;background:#fffdfaed;box-shadow:0 10px 30px #622bad10}
+.inspiration-feature-grid>.story-spotlight>.art-card.art-card-full{position:relative;width:100%;height:100%;min-height:0;aspect-ratio:auto;align-self:stretch;border:0;border-radius:0;background:#eadcf8;isolation:isolate}
+.inspiration-feature-grid>.story-spotlight>.art-card.art-card-full:before{display:block;z-index:0;inset:-18px;background-image:var(--artwork-extension);background-size:cover;background-position:center;filter:blur(18px) saturate(.94);opacity:.72;transform:scale(1.06)}
+.inspiration-feature-grid>.story-spotlight>.art-card.art-card-full img{inset:0;width:100%;height:100%;object-fit:contain;object-position:center;border-radius:0;transform:none}
+.inspiration-feature-grid>.story-spotlight>.featured-text{min-width:0;align-self:stretch;border:0;border-radius:0;background:transparent;box-shadow:none;padding:16px;gap:8px}
+.inspiration-feature-grid>.story-spotlight .featured-text h2{font-size:clamp(19px,1.7vw,25px);line-height:1.04;letter-spacing:-.7px}
+.inspiration-feature-grid>.story-spotlight .featured-text p{font-size:11px;line-height:1.42}
+.inspiration-feature-grid>.story-spotlight .pill-label{font-size:9px;padding:5px 8px}
+.inspiration-feature-grid>.story-spotlight .chips{gap:4px}
+.inspiration-feature-grid>.story-spotlight .chip{font-size:9px;padding:5px 6px}
+.inspiration-feature-grid>.story-spotlight .details{gap:4px}
+.inspiration-feature-grid>.story-spotlight .detail-row{font-size:9px;padding:6px 7px;line-height:1.25}
+.inspiration-feature-grid>.story-spotlight .actions .btn{min-height:34px;padding:8px 10px;font-size:10px;border-radius:12px}
+@media(max-width:980px){.inspiration-feature-grid{grid-auto-rows:auto;gap:16px}.inspiration-feature-grid>.story-spotlight{grid-template-columns:minmax(0,1fr);height:auto;min-height:0}.inspiration-feature-grid>.story-spotlight>.art-card.art-card-full{height:auto;aspect-ratio:4/3}.inspiration-feature-grid>.story-spotlight>.featured-text{padding:16px}}
+@media(max-width:700px){.inspiration-feature-grid{grid-template-columns:1fr;gap:18px}}
+
+
+/* Match the shared VIBEYA storefront footer across menus. */
+.site-footer{display:block;width:100%;max-width:none;margin:76px 0 0;padding:42px 0 25px;border:0;border-radius:0;background:#1c102d;color:#fff;font:inherit}
+.site-footer-inner{width:min(100% - 88px,1440px);margin-inline:auto}
+.site-footer .footer-top{display:flex;justify-content:space-between;gap:30px;align-items:flex-start}
+.site-footer .brand{display:inline-block;color:#fff;font:900 32px/.9 var(--font);letter-spacing:-2.6px;text-decoration:none}
+.site-footer .brand:after{display:none}
+.site-footer .brand span{color:#c9ef52}
+.site-footer .footer-desc{font-size:13px;line-height:1.6;color:#c5bacc;max-width:370px;margin:15px 0 0}
+.site-footer .footer-links{display:flex;gap:60px}
+.site-footer .footer-links h4{font-size:12px;margin:0 0 13px;text-transform:uppercase;letter-spacing:.1em;color:#ac95bd}
+.site-footer .footer-links a{display:block;font:400 13px/1.4 var(--body);margin:9px 0;color:#f3eaf9}
+.site-footer .footer-links a:hover{color:var(--bright)}
+.site-footer .footer-bottom{border-top:1px solid #ffffff2b;margin-top:45px;padding-top:19px;color:#a99db1;font-size:11px;display:flex;justify-content:space-between;gap:15px}
+@media(max-width:980px){.site-footer .footer-links{gap:20px}}
+@media(max-width:640px){.site-footer-inner{width:min(100% - 30px,1440px)}.site-footer .footer-top,.site-footer .footer-bottom{flex-direction:column}.site-footer .footer-links{justify-content:space-between;gap:14px}}

@@ -14,16 +14,16 @@ document.addEventListener('DOMContentLoaded',async()=>{
   });
   document.querySelectorAll('.inspiration-feature-grid .art-card-full img').forEach(image=>{
     const panel=image.parentElement;
-    const syncArtworkRatio=()=>{const width=image.naturalWidth||Number(image.getAttribute('width'));const height=image.naturalHeight||Number(image.getAttribute('height'));if(width&&height)panel.style.setProperty('--artwork-ratio',`${width} / ${height}`);};
-    if(image.complete)syncArtworkRatio();else image.addEventListener('load',syncArtworkRatio,{once:true});
+    const syncImage=()=>{const width=image.naturalWidth||Number(image.getAttribute('width'));const height=image.naturalHeight||Number(image.getAttribute('height'));if(width&&height)panel.style.setProperty('--artwork-ratio',`${width} / ${height}`);const source=image.currentSrc||image.src;if(source)panel.style.setProperty('--artwork-extension',`url("${source.replace(/"/g,'%22')}")`);};
+    if(image.complete)syncImage();else image.addEventListener('load',syncImage,{once:true});
   });
   const isGenericStory=document.body.dataset.inspirationTemplate==='true';
   const articleId=new URLSearchParams(location.search).get('inspiration')||document.body.dataset.inspirationId||'funny-skeleton';
   const current=catalog.find(x=>x.id===articleId)||(isGenericStory?undefined:catalog[0]);
   const storyLabels={
-    product:{'long-sleeve':'Custom Long Sleeve Tee',hoodie:'Washed Vintage Hoodie',tumbler:'20 oz Stainless Steel Tumbler','bath-mat':'Custom 3D Bath Mat',beanie:'Custom Knitted Beanie','shower-curtain':'Custom Shower Curtain'},
-    pattern:{skeleton:'Humorous Skeleton','botanical-celestial':'Botanical & Celestial',animal:'Midnight Cat Café',cat:'Cats, Bathtub & Bubbles','rubber-duck':'Duck Bubble Trouble',typography:'Sleepy Cat & Bold Typography'},
-    style:{'street-graffiti':'Street Graffiti / Chill Mood','nature-streetwear':'Nature-Inspired Streetwear','retro-whimsical':'Retro Whimsical','playful-whimsy':'Playful Bathroom Decor','cozy-cute':'Cozy, Cute & Playful',streetwear:'Retro Varsity Streetwear'}
+    product:{'long-sleeve':'Custom Long Sleeve Tee',hoodie:'Washed Vintage Hoodie',tumbler:'20 oz Stainless Steel Tumbler','bath-mat':'Custom 3D Bath Mat',beanie:'Custom Knitted Beanie','shower-curtain':'Custom Shower Curtain',tankini:"Custom Women's Tankini Swimsuit Set"},
+    pattern:{skeleton:'Humorous Skeleton','botanical-celestial':'Botanical & Celestial',animal:'Animal Print',penguin:'Deadpan Penguin Face',cat:'Cats, Bathtub & Bubbles','rubber-duck':'Duck Bubble Trouble',typography:'Sleepy Cat & Bold Typography'},
+    style:{'street-graffiti':'Street Graffiti / Chill Mood','nature-streetwear':'Nature-Inspired Streetwear','retro-whimsical':'Retro Whimsical','playful-whimsy':'Playful Bathroom Decor','cozy-cute':'Cozy, Cute & Playful',streetwear:'Retro Varsity Streetwear',funny:'Funny Graphic Swimwear'}
   };
   const storyMeta=document.querySelector('.story-meta');
   if(isGenericStory&&current){
