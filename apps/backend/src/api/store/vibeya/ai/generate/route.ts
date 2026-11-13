@@ -310,7 +310,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const isShowerCurtain = productId === "vibeya-shower-curtain"
   const isFullSurfaceProduct = isBlanket || isBathMat || isShowerCurtain
   const size = typeof body?.size === "string" ? body.size : ""
-  if (isShowerCurtain && !["36x72in", "60x72in", "84x72in"].includes(size)) {
+  if (isShowerCurtain && !["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"].includes(size)) {
     return res.status(400).json({ error: "请选择有效的浴帘尺寸后重新生成。" })
   }
   const printPlacement = isBlanket || isBathMat || isBeanie || isShowerCurtain ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"

@@ -5,9 +5,10 @@ const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string> | 
   "sds-97226": "vibeya/assets/products/sds-97226/blank-print-base.webp",
   "sds-138708": "vibeya/assets/products/sds-138708/blank-print-base.webp",
   "vibeya-shower-curtain": {
-    "36x72in": { White: "vibeya/assets/products/vibeya-shower-curtain/36x72.webp" },
-    "60x72in": { White: "vibeya/assets/products/vibeya-shower-curtain/60x72.webp" },
-    "84x72in": { White: "vibeya/assets/products/vibeya-shower-curtain/84x72.webp" },
+    "36x70.8in": { White: "vibeya/assets/products/vibeya-shower-curtain/36x70.8in.webp" },
+    "60x70.8in": { White: "vibeya/assets/products/vibeya-shower-curtain/60x70.8in.webp" },
+    "70.8x70.8in": { White: "vibeya/assets/products/vibeya-shower-curtain/70.8x70.8in.png" },
+    "70.8x84in": { White: "vibeya/assets/products/vibeya-shower-curtain/70.8x84in.webp" },
   },
   "sds-172647": {
     Black: "vibeya/assets/products/sds-172647/beanie-print-area-guide.webp",
@@ -35,7 +36,8 @@ export async function getVibeyaProductReference(productId: string, color?: strin
   for (const filePath of candidates) {
     try {
       const image = await readFile(filePath)
-      return `data:image/webp;base64,${image.toString("base64")}`
+      const mimeType = path.extname(filePath).toLowerCase() === ".png" ? "image/png" : "image/webp"
+      return `data:${mimeType};base64,${image.toString("base64")}`
     } catch {
       // Try the other workspace layout before reporting a missing base image.
     }

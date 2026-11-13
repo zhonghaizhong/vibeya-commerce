@@ -1029,11 +1029,11 @@
        price:'Price to be confirmed',
        category:'Home & Bath',
        supplier:'VIBEYA',
-       asset:'assets/products/vibeya-shower-curtain/36x72.webp',
+       asset:'assets/products/vibeya-shower-curtain/36x70.8in.webp',
        colors:['White'],
-       sizes:['36x72in','60x72in','84x72in'],
-       sizeLabels:{'36x72in':'36 × 72 in (90 × 180 cm)','60x72in':'60 × 72 in (152 × 180 cm)','84x72in':'84 × 72 in (213 × 180 cm)'},
-       variantSummary:'Single-sided full-bleed print · 3 sizes'
+       sizes:['36x70.8in','60x70.8in','70.8x70.8in','70.8x84in'],
+       sizeLabels:{'36x70.8in':'36 × 70.8 in (90 × 180 cm)','60x70.8in':'60 × 70.8 in (152 × 180 cm)','70.8x70.8in':'70.8 × 70.8 in (180 × 180 cm)','70.8x84in':'70.8 × 84 in (180 × 213 cm)'},
+       variantSummary:'Single-sided full-bleed print · 4 sizes'
      }
    ];
   const inspirations=[{title:'Funny Skeleton — Lazy Mood',tags:['Funny','Skull','Streetwear'],prompt:'Front: A laid-back cartoon skeleton lounging in headphones and a purple hoodie with a coffee cup, cheeky expression, street graffiti lettering PROFESSIONAL PROCRASTINATOR. Back: ZERO TASKS TODAY in bold typography, with matching lime-and-purple doodles. Keep the designs connected in color and attitude.'}];
@@ -1303,17 +1303,17 @@
     },
     'vibeya-shower-curtain':{
       colors:{White:['White','#ffffff']},
-      image:()=> 'assets/products/vibeya-shower-curtain/36x72.webp',
-      sizesLabel:'36 × 72–84 × 72 in',
+      image:()=> 'assets/products/vibeya-shower-curtain/36x70.8in.webp',
+      sizesLabel:'36 × 70.8–70.8 × 84 in',
       sizeOptionLabel:'Size',
       details:{
         title:'Custom Shower Curtain',eyebrow:'VIBEYA / CUSTOM HOME',
-        intro:'Create a custom shower curtain with one continuous, edge-to-edge print across the front. Choose from three sizes; the finished design is shown hanging naturally against a white background.',
-        highlights:['Single-sided full-surface print','Three size options','Hanging white-background preview'],
-        measurementRows:[['36 × 72 in','90 × 180 cm'],['60 × 72 in','152 × 180 cm'],['84 × 72 in','213 × 180 cm']],
+        intro:'Create a custom shower curtain with one continuous, edge-to-edge print across the front. Choose from four sizes; the finished design is shown hanging naturally against a white background.',
+        highlights:['Single-sided full-surface print','Four size options','Hanging white-background preview'],
+        measurementRows:[['36 × 70.8 in','90 × 180 cm'],['60 × 70.8 in','152 × 180 cm'],['70.8 × 70.8 in','180 × 180 cm'],['70.8 × 84 in','180 × 213 cm']],
         guide:'View dimensions (in / cm)',note:'Dimensions follow the supplied product references.',
         services:[['Single-sided full print','One continuous design covers the visible curtain face edge to edge.'],['Natural hanging preview','Shown hanging from a rod with realistic folds and drape.'],['U.S. delivery','Delivery availability is confirmed at checkout.']],
-        productDetails:'Custom shower curtain available in 36 × 72 in, 60 × 72 in, and 84 × 72 in.',
+        productDetails:'Custom shower curtain available in 36 × 70.8 in, 60 × 70.8 in, 70.8 × 70.8 in, and 70.8 × 84 in.',
         productionDetails:'Single-sided, full-bleed print across the curtain face. The finished image shows the full curtain hanging against a pure white background.'
       }
     }
@@ -1913,8 +1913,8 @@
    const blanketGalleryTitles=['Meet Your Custom Throw','Your Art, Your Cozy','A Gift That Feels Personal','Soft From Both Sides','Soft Flannel Details','Slow Down, Get Cozy','Why Make It Yours','Pick Your Perfect Size'];
    const beanieGalleryFiles=['01-hero.png','02-custom-print-model.png','03-lifestyle-product.png','04-front-back.png','05-knit-print-detail.png','06-model-lifestyle.png','07-color-options.png','08-size-specs.png'];
    const beanieGalleryTitles=['Make It Yours','Your Design, Your Beanie','Made for Everyday','Front and Back','Knit and Print Details','Wear It Your Way','Choose Your Color','One Size, Easy Fit'];
-   const showerCurtainGalleryFiles=['36x72.webp','60x72.webp','84x72.webp'];
-   const showerCurtainGalleryTitles=['36 × 72 in','60 × 72 in','84 × 72 in'];
+   const showerCurtainGalleryFiles=['36x70.8in.webp','60x70.8in.webp','70.8x70.8in.png','70.8x84in.webp'];
+   const showerCurtainGalleryTitles=['36 × 70.8 in','60 × 70.8 in','70.8 × 70.8 in','70.8 × 84 in'];
    const galleryCount=()=>chosen.id==='sds-128646'?tumblerGalleryFiles.length:chosen.id==='sds-138708'?bathMatGalleryFiles.length:chosen.id==='sds-97226'?blanketGalleryFiles.length:chosen.id==='sds-172647'?beanieGalleryFiles.length:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryFiles.length:galleryTitles.length;
    const galleryTitleAt=i=>chosen.id==='sds-128646'?tumblerGalleryTitles[i]:chosen.id==='sds-138708'?bathMatGalleryTitles[i]:chosen.id==='sds-97226'?blanketGalleryTitles[i]:chosen.id==='sds-172647'?selectedColor==='Black'?(i===0?beanieGalleryTitles[1]:i===1?beanieGalleryTitles[0]:beanieGalleryTitles[i]):beanieGalleryTitles[i]:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryTitles[i]:chosen.id==='vibeya-washed-hoodie'?hoodieGalleryTitles[i]:galleryTitles[i];
   const galleryFiles=['01-brand-lifestyle.webp','02-make-it-personal.webp','03-cotton-comfort.webp','04-wear-it-your-way.webp','05-attention-to-detail.webp','06-idea-to-outfit.webp','07-make-it-yours.webp'];

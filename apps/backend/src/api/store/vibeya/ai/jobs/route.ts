@@ -79,7 +79,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const isBathMat = productId === "sds-138708"
   const isBeanie = productId === "sds-172647"
   const isShowerCurtain = productId === "vibeya-shower-curtain"
-  if (isShowerCurtain && !["36x72in", "60x72in", "84x72in"].includes(size)) {
+  if (isShowerCurtain && !["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"].includes(size)) {
     return res.status(400).json({ error: "Choose one of the available shower curtain sizes before creating your design." })
   }
   if ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference) {
