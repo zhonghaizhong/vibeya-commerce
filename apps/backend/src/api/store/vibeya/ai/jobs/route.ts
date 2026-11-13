@@ -18,7 +18,7 @@ const DESIGN_GENERATION_PRODUCT_IDS = new Set([
   "sds-97226",
   "sds-138708",
   "sds-172647",
-  "sds-163412",
+  "vibeya-shower-curtain",
 ])
 
 const serviceFor = (req: MedusaRequest) =>
@@ -77,11 +77,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const isTumbler = body?.productId === "sds-128646"
   const isBlanket = productId === "sds-97226"
   const isBathMat = productId === "sds-138708"
-  const isShowerCurtain = productId === "sds-163412"
   const isBeanie = productId === "sds-172647"
+  const isShowerCurtain = productId === "vibeya-shower-curtain"
+  if (isShowerCurtain && !["36x72in", "60x72in", "84x72in"].includes(size)) {
+    return res.status(400).json({ error: "Choose one of the available shower curtain sizes before creating your design." })
+  }
   if ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference) {
     try {
-      productReference = await getVibeyaProductReference(productId, color)
+      productReference = await getVibeyaProductReference(productId, color, size)
     } catch (error) {
       console.error("Unable to load the VIBEYA product print reference", error)
       return res.status(503).json({ error: isBeanie ? "The beanie print-area reference is not available right now. Please try again later." : "The product print reference is not available right now. Please try again later." })
@@ -90,12 +93,15 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isTumbler && !productReference) {
     return res.status(400).json({ error: "The tumbler print-area reference is missing. Refresh the page and try again." })
   }
-  if (productReference && (productReference.length > (isBeanie ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+  if (isShowerCurtain && !productReference) {
+    return res.status(400).json({ error: "The selected shower curtain size reference is missing. Refresh the page and try again." })
+  }
+  if (productReference && (productReference.length > (isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
     return res.status(400).json({ error: "The product print-area reference is invalid. Refresh the page and try again." })
   }
   const placement = isBlanket || isBathMat || isBeanie || isShowerCurtain ? "front" : body?.printPlacement
-  const placementGuideCount = isBlanket || isBathMat || isShowerCurtain || isBeanie ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
-  const maximumReferences = isTumbler || isBlanket || isBathMat || isShowerCurtain || isBeanie ? 6 : 2 + placementGuideCount + 6
+  const placementGuideCount = isBlanket || isBathMat || isBeanie || isShowerCurtain ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
+  const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie || isShowerCurtain ? 6 : 2 + placementGuideCount + 6
   if (references.length > maximumReferences || references.some((item) => typeof item !== "string") || JSON.stringify(references).length > 300_000 || preserveBaseComposite.length > 150_000 || (preserveBaseComposite && !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(preserveBaseComposite))) {
     return res.status(400).json({ error: "The reference image is too large. Please compress it and try again." })
   }

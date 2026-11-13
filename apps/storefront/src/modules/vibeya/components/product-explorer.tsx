@@ -83,7 +83,7 @@ function ProductCard({ product, onSelect, countryCode = "us" }: ProductCardProps
       <p className={`${styles.cardVariant} card-color-caption`}>{product.variantSummary ?? `${color.name} · ${product.colors.length} colors · Sizes ${product.sizes[0]}–${product.sizes.at(-1)}`}</p>
       <button className={`${styles.cardInfo} product-card-info`} type="button" onClick={() => onSelect(product, color.id)} aria-label={`View details for ${product.name} in ${color.name}`}>
         <h3>{product.name}</h3>
-        <p>{product.sizePrices ? `From ${formatPrice(product.price, product.currency)}` : formatPrice(product.price, product.currency)}</p>
+        <p>{product.priceUnavailable ? "Price to be confirmed" : product.sizePrices ? `From ${formatPrice(product.price, product.currency)}` : formatPrice(product.price, product.currency)}</p>
       </button>
     </article>
   )
@@ -176,7 +176,7 @@ function ProductDetail({
           <span className={styles.eyebrow}>{product.eyebrow}</span>
           <h1>{product.name}</h1>
           <p className={styles.intro}>{product.intro}</p>
-          <p className={styles.price}>{formatPrice(product.sizePrices?.[size] ?? product.price, product.currency)}</p>
+          <p className={styles.price}>{product.priceUnavailable ? "Price to be confirmed" : formatPrice(product.sizePrices?.[size] ?? product.price, product.currency)}</p>
           <div className={styles.optionBlock}>
             <div className={styles.optionHeading}><strong>{product.colorOptionLabel ?? "Color"}</strong><span>{color.name}</span></div>
             <div className={styles.swatches} role="group" aria-label="Choose a color">

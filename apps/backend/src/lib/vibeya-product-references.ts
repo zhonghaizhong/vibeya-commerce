@@ -1,10 +1,14 @@
 import { readFile } from "node:fs/promises"
 import path from "node:path"
 
-const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string>> = {
+const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string> | Record<string, Record<string, string>>> = {
   "sds-97226": "vibeya/assets/products/sds-97226/blank-print-base.webp",
   "sds-138708": "vibeya/assets/products/sds-138708/blank-print-base.webp",
-  "sds-163412": "vibeya/assets/products/mg8014087/blank-print-base.jpg",
+  "vibeya-shower-curtain": {
+    "36x72in": { White: "vibeya/assets/products/vibeya-shower-curtain/36x72.webp" },
+    "60x72in": { White: "vibeya/assets/products/vibeya-shower-curtain/60x72.webp" },
+    "84x72in": { White: "vibeya/assets/products/vibeya-shower-curtain/84x72.webp" },
+  },
   "sds-172647": {
     Black: "vibeya/assets/products/sds-172647/beanie-print-area-guide.webp",
     Red: "vibeya/assets/products/sds-172647/red/beanie-print-area-guide.webp",
@@ -12,9 +16,12 @@ const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string>> =
   },
 }
 
-export async function getVibeyaProductReference(productId: string, color?: string): Promise<string> {
+export async function getVibeyaProductReference(productId: string, color?: string, size?: string): Promise<string> {
   const configuredPath = PRODUCT_REFERENCE_PATHS[productId]
-  const referencePath = typeof configuredPath === "string" ? configuredPath : configuredPath?.[color || "Black"]
+  const selectedPath = typeof configuredPath === "string"
+    ? configuredPath
+    : configuredPath?.[size || ""] ?? configuredPath?.[color || "Black"]
+  const referencePath = typeof selectedPath === "string" ? selectedPath : selectedPath?.[color || "Black"]
   if (!referencePath) return ""
 
   const candidates = [
@@ -28,9 +35,7 @@ export async function getVibeyaProductReference(productId: string, color?: strin
   for (const filePath of candidates) {
     try {
       const image = await readFile(filePath)
-      const extension = path.extname(filePath).toLowerCase()
-      const mimeType = extension === ".png" ? "image/png" : extension === ".jpg" || extension === ".jpeg" ? "image/jpeg" : "image/webp"
-      return `data:${mimeType};base64,${image.toString("base64")}`
+      return `data:image/webp;base64,${image.toString("base64")}`
     } catch {
       // Try the other workspace layout before reporting a missing base image.
     }

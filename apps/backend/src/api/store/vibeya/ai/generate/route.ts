@@ -306,9 +306,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const productId = typeof body?.productId === "string" ? body.productId : ""
   const isBlanket = productId === "sds-97226"
   const isBathMat = productId === "sds-138708"
-  const isShowerCurtain = productId === "sds-163412"
   const isBeanie = productId === "sds-172647"
-  const printPlacement = isBlanket || isBathMat || isShowerCurtain || isBeanie ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
+  const isShowerCurtain = productId === "vibeya-shower-curtain"
+  const isFullSurfaceProduct = isBlanket || isBathMat || isShowerCurtain
+  const size = typeof body?.size === "string" ? body.size : ""
+  if (isShowerCurtain && !["36x72in", "60x72in", "84x72in"].includes(size)) {
+    return res.status(400).json({ error: "请选择有效的浴帘尺寸后重新生成。" })
+  }
+  const printPlacement = isBlanket || isBathMat || isBeanie || isShowerCurtain ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
     ? body.printPlacement
     : "none"
   const isTumbler = productId === "sds-128646"
@@ -346,13 +351,13 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       name: "Custom Full-Surface Bath Mat",
       colorAliases: { White: "White" },
     },
-    "sds-163412": {
-      name: "Custom Polyester Shower Curtain",
-      colorAliases: { White: "White" },
-    },
     "sds-172647": {
       name: "Custom Knitted Beanie",
       colorAliases: { Black: "Black", Red: "Red", Gray: "Medium Gray" },
+    },
+    "vibeya-shower-curtain": {
+      name: "Custom Shower Curtain",
+      colorAliases: { White: "White" },
     },
   }
   const productConfig = products[productId]
@@ -363,9 +368,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
   const references = rawReferences
   let productReference = typeof body?.productReference === "string" ? body.productReference : ""
-  if ((isBlanket || isBathMat || isShowerCurtain || isBeanie) && !productReference) {
+  if ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference) {
     try {
-      productReference = await getVibeyaProductReference(productId, colorKey)
+      productReference = await getVibeyaProductReference(productId, colorKey, typeof body?.size === "string" ? body.size : undefined)
     } catch (error) {
       console.error("Unable to load the VIBEYA product print reference", error)
       return res.status(503).json({ error: isBeanie ? "帽子印刷区域参考图暂时无法读取，请稍后重试。" : "商品满印底板暂时无法读取，请稍后重试。" })
@@ -375,7 +380,6 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const preserveOriginalDesign = body?.preserveOriginalDesign === true
   const isWashedHoodie = productId === "vibeya-washed-hoodie"
   const isLongSleeveTee = productId === "sds-167256"
-  const isFullSurfaceProduct = isBlanket || isBathMat || isShowerCurtain
   const placementGuideCount = isFullSurfaceProduct || isBeanie || printPlacement === "none" ? 0 : printPlacement === "both" ? 2 : 1
   const artworkReferenceStart = isTumbler || isFullSurfaceProduct || isBeanie ? 0 : 2 + placementGuideCount
   const artworkReferenceNumbers = references.slice(artworkReferenceStart).map((_, index) => artworkReferenceStart + index + 1)
@@ -409,10 +413,10 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     return res.status(400).json({ error: "地毯满印底板缺失，请刷新后重新提交。" })
   }
   if (isShowerCurtain && !isProviderResume && !productReference) {
-    return res.status(400).json({ error: "浴帘空白底图缺失，请刷新页面后重新提交。" })
+    return res.status(400).json({ error: "对应尺寸的浴帘底图缺失，请重新选择尺寸后提交。" })
   }
-  if (productReference && (productReference.length > (isBeanie ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
-    return res.status(400).json({ error: isShowerCurtain ? "浴帘空白底图无效，请刷新页面后重新提交。" : isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
+  if (productReference && (productReference.length > (isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+    return res.status(400).json({ error: isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : isShowerCurtain ? "浴帘底图无效，请重新选择尺寸后提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
   }
   if (preserveBaseComposite && (preserveBaseComposite.length > 150000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(preserveBaseComposite))) {
     return res.status(400).json({ error: "原创印花底图无效，请重新选择图片并提交。" })
@@ -442,19 +446,16 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     : preserveOriginalDesign
       ? "KEEP ORIGINAL DESIGN MODE (PRESERVE ON): Treat the complete uploaded image canvas as the locked artwork, including its background. Preserve every visible pixel, subject, wording, layout, colors, textures, and details; do not cut out, remove, replace, blur, recolor, rewrite, rearrange, redraw, or invent any part. If the image has transparency, preserve the transparent areas. Only uniformly scale the complete image and move it to fit inside the selected print area with margin. Do not crop any edge."
       : "PROMPT-LED ADAPTATION MODE (PRESERVE OFF): Treat the customer's written instructions as the primary requirements for the final artwork. Follow the requested subject, wording, colors, style, composition, scale, and placement closely. Use all uploaded images as visual references and keep the result strongly related to their subjects, mood, and recognizable visual cues; do not replace them with an unrelated concept. When the prompt asks for changes, adapt the references to satisfy those instructions. Keep all requested content together and fit it proportionally inside the printable area; do not crop any required content."
-  const showerCurtainSize = typeof body?.size === "string" ? body.size : "the selected size"
-  const curtainHookCount = showerCurtainSize === "70.8x84in" ? 24 : 12
   const safePrompt = isShowerCurtain
     ? [
-        "Create exactly ONE photorealistic e-commerce product image on a pure white (#FFFFFF) background. Show one complete polyester shower curtain panel, front-facing and hanging from a straight horizontal shower rod with separate white C-hooks threaded through small metal grommets. Keep the whole curtain visible, centered, and vertically hanging with only gentle natural folds. Do not show a person, bathroom, tub, window, door, room scene, alternate views, collage, badges, borders, or extra props.",
-        `Image ${references.length + 1} is the exact blank shower-curtain product reference. Preserve the curtain's white polyester fabric, subtle woven texture, rectangular shape, top band, grommets, C-hooks, hem, and overall proportions. The selected product size is ${showerCurtainSize}; use ${curtainHookCount} hanging points as supplied for that size.`,
-        "SINGLE-SIDED FULL-PANEL PRINT: apply the custom artwork to the front fabric panel only. Keep the rod, C-hooks, grommets, top sewing band, hem, background, and reverse side unprinted. Fit the entire requested composition across the printable fabric without cropping required wording or subjects; do not add a separate inset panel, border, or sticker edge.",
-        hasUploadedArtwork
-          ? `${artworkReferenceLabel} Use the uploaded artwork as the customer's shower-curtain print. Preserve its recognizable content and follow the written brief.`
-          : "Create original artwork directly from the customer's written instructions.",
-        artworkHandlingInstruction,
-        `Customer design brief: ${prompt}`,
-        "Render the print naturally into the polyester fabric texture and gentle folds. Keep all print inside the fabric panel and the hardware visible. Output one complete front view of the finished shower curtain only.",
+        "Create exactly ONE photorealistic Amazon-style product image on a pure white background. Show exactly one complete shower curtain hanging vertically from a simple horizontal shower rod with evenly spaced rings through its reinforced top holes. View it straight-on, centered, fully visible from top edge to bottom hem, with natural vertical folds and realistic soft fabric drape. Do not show a bathroom, bathtub, person, hands, dimensions, labels, text, collage, or additional product views.",
+        `${references.length ? `Customer artwork is supplied in image${references.length > 1 ? "s 1–" + references.length : " 1"}; the selected-size blank shower-curtain product reference is the final image (${references.length + 1}).` : "Image 1 is the selected-size blank shower-curtain product reference."} Use that product reference as the authority for the curtain's white fabric, exact width-to-height proportions, and construction. The supplied reference may be a flat product/dimension diagram: ignore and do not reproduce its measurement arrows, dimensions, icons, captions, background, or diagram layout. Render a clean, realistic hanging product view with its top header and rings visible.`,
+        "SINGLE-SIDED FULL-BLEED PRINT: cover the complete visible curtain fabric face edge to edge, from below the reinforced header to the bottom hem and from side seam to side seam. The selected size reference determines the curtain proportions. There must be no white border, margin, inset panel, blank band, or unprinted fabric area anywhere on the printable face. This is a continuous all-over print, not a centered chest graphic.",
+        "Keep the print strictly on curtain fabric. Do not print on the rod, rings, grommets, reinforced header, stitching, hem, or white background. Preserve seams and natural folds; make artwork follow the folds and lighting so it looks printed into real fabric, never like a pasted sticker or flat overlay.",
+        hasUploadedArtwork ? artworkReferenceLabel + " Use the uploaded artwork as the design reference and follow the written instructions closely. Fit it across the full curtain face without stretching or cropping important content." : "Create original artwork directly from the customer's written instructions as an edge-to-edge shower curtain print.",
+        preserveOriginalDesign && hasUploadedArtwork ? "PRESERVE ORIGINAL DESIGN: retain the uploaded image's artwork, colors, background, and composition as closely as possible. Adapt only its proportional layout to cover the full curtain face; do not remove the background or distort the artwork. Extend its existing background naturally to the fabric edges if needed." : artworkHandlingInstruction,
+        "Customer instructions (follow closely): " + prompt,
+        "Do not add VIBEYA branding, product names, logos, watermarks, borders, or extra text unless explicitly requested. Keep the whole hanging curtain visible against pure white. Output one finished product image only.",
       ].join("\n")
     : isBathMat
     ? [
@@ -621,8 +622,8 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
             ? { images: [...references, ...(productReference ? [productReference] : []), ...(preserveArtworkAfterGeneration && preserveBaseComposite ? [preserveBaseComposite] : [])] }
             : {}),
           aspectRatio: modelUsesPixelSizes(stored.model)
-            ? (isShowerCurtain ? "1024x1536" : ["2048x2048", "2880x2880"].includes(stored.aspectRatio) ? stored.aspectRatio : "1024x1024")
-            : isShowerCurtain ? "2:3" : "1:1",
+            ? (["2048x2048", "2880x2880"].includes(stored.aspectRatio) ? stored.aspectRatio : "1024x1024")
+            : "1:1",
           quality: stored.quality,
           replyType: "async",
         }),
