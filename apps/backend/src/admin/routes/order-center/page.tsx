@@ -59,7 +59,8 @@ const paymentLabel = (value: string) => ({
   not_paid: "未付款",
   refunded: "已退款",
   partially_refunded: "部分退款",
-}[value] || value || "未知")
+  unknown: "待确认",
+}[value] || value || "待确认")
 
 const fulfillmentLabel = (value: string) => ({
   fulfilled: "已发货",
@@ -69,7 +70,8 @@ const fulfillmentLabel = (value: string) => ({
   partially_shipped: "部分发货",
   delivered: "已送达",
   canceled: "已取消",
-}[value] || value || "未处理")
+  unknown: "待处理",
+}[value] || value || "待处理")
 
 const formatDate = (value: string) => {
   const date = new Date(value)
@@ -304,7 +306,7 @@ const OrderCenterPage = () => {
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Heading level="h1">订单快捷操作</Heading>
+          <Heading level="h1">订单</Heading>
         </div>
         <button type="button" onClick={() => void load()} disabled={loading} className="rounded-md border border-ui-border-base px-3 py-2 text-sm font-medium disabled:opacity-50">
           {loading ? "同步中…" : "刷新订单"}
@@ -333,18 +335,18 @@ const OrderCenterPage = () => {
         {loading ? <div className="p-8 text-center"><Text>正在读取订单…</Text></div> : visibleOrders.length === 0 ? (
           <div className="p-10 text-center"><Text className="text-ui-fg-subtle">{orders.length ? "没有符合条件的订单。" : "还没有订单。新订单会显示在这里。"}</Text></div>
         ) : (
-          <div className="grid min-h-[520px] lg:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)]">
+          <div className="grid min-h-[440px] lg:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)]">
             <div className="overflow-x-auto border-b border-ui-border-base lg:border-b-0 lg:border-r">
-              <table className="w-full min-w-[610px] text-left text-sm">
+              <table className="w-full min-w-[760px] text-left text-sm">
                 <thead className="bg-ui-bg-subtle text-ui-fg-subtle">
-                  <tr><th className="px-4 py-3 font-medium">订单</th><th className="px-4 py-3 font-medium">客户</th><th className="px-4 py-3 font-medium">状态</th><th className="px-4 py-3 text-right font-medium">金额</th></tr>
+                  <tr><th className="px-4 py-3 font-medium">订单 / 客户</th><th className="px-4 py-3 font-medium">商品</th><th className="px-4 py-3 font-medium">状态</th><th className="px-4 py-3 text-right font-medium">金额</th></tr>
                 </thead>
                 <tbody>
                   {visibleOrders.map((order) => (
                     <tr key={order.id} tabIndex={0} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedId(order.id) }} onClick={() => setSelectedId(order.id)} className={`cursor-pointer border-t border-ui-border-base transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ui-border-interactive ${selected?.id === order.id ? "bg-ui-bg-interactive-subtle" : "hover:bg-ui-bg-subtle"}`}>
-                      <td className="px-4 py-3 align-top"><div className="font-semibold">#{order.display_id}</div><div className="mt-1 text-xs text-ui-fg-subtle">{formatDate(order.created_at)}</div></td>
-                      <td className="px-4 py-3 align-top"><div>{getCustomerName(order)}</div><div className="mt-1 max-w-[180px] truncate text-xs text-ui-fg-subtle">{order.email || "—"}</div></td>
-                      <td className="px-4 py-3 align-top"><div className="font-medium">{paymentLabel(order.payment_status)}</div><div className="mt-1 text-xs text-ui-fg-subtle">{fulfillmentLabel(order.fulfillment_status)}</div></td>
+                      <td className="px-4 py-3 align-middle"><div className="font-semibold">#{order.display_id}</div><div className="mt-1 text-xs text-ui-fg-subtle">{getCustomerName(order)}</div><div className="mt-1 max-w-[190px] truncate text-xs text-ui-fg-subtle">{order.email || "—"}</div><div className="mt-1 text-xs text-ui-fg-subtle">{formatDate(order.created_at)}</div></td>
+                      <td className="px-4 py-3 align-middle"><div className="flex max-w-[250px] items-center gap-3">{order.items?.[0]?.thumbnail ? <img src={order.items[0].thumbnail} alt="" className="h-12 w-12 shrink-0 rounded-md border border-ui-border-base bg-ui-bg-subtle object-contain" /> : <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-ui-bg-subtle text-[10px] text-ui-fg-subtle">无图片</div>}<div className="min-w-0"><div className="truncate font-medium">{order.items?.[0]?.title || "商品信息载入中"}{(order.items?.length ?? 0) > 1 ? ` 等 ${order.items?.length} 件` : ""}</div>{order.items?.[0]?.variant_title && <div className="mt-1 truncate text-xs text-ui-fg-subtle">{order.items[0].variant_title}</div>}{order.items?.[0] && <div className="mt-1 text-xs text-ui-fg-subtle">数量：{order.items[0].quantity}</div>}</div></div></td>
+                      <td className="px-4 py-3 align-middle"><div className="flex flex-col items-start gap-1"><span className="rounded-full bg-ui-bg-subtle px-2.5 py-1 text-xs font-medium">{paymentLabel(order.payment_status)}</span><span className="rounded-full bg-ui-bg-subtle px-2.5 py-1 text-xs text-ui-fg-subtle">{fulfillmentLabel(order.fulfillment_status)}</span></div></td>
                       <td className="px-4 py-3 text-right align-top font-medium">{formatTotal(order.total, order.currency_code)}</td>
                     </tr>
                   ))}
@@ -354,60 +356,39 @@ const OrderCenterPage = () => {
 
             {selected && (
               <aside className="flex max-h-[calc(100vh-150px)] flex-col gap-4 overflow-y-auto p-4 sm:sticky sm:top-4 sm:p-5">
-                <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="flex items-start justify-between gap-3 border-b border-ui-border-base pb-3">
                   <div><Heading level="h2">订单 #{selected.display_id}</Heading><Text size="small" className="mt-1 text-ui-fg-subtle">{formatDate(selected.created_at)}</Text></div>
-                  <div className="text-right"><div className="text-lg font-semibold">{formatTotal(selected.total, selected.currency_code)}</div><div className="mt-1 text-xs text-ui-fg-subtle">订单总额</div></div>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <span className="rounded-full bg-ui-bg-subtle px-3 py-1 text-xs font-medium">付款：{paymentLabel(selected.payment_status)}</span>
-                  <span className="rounded-full bg-ui-bg-subtle px-3 py-1 text-xs font-medium">发货：{fulfillmentLabel(selected.fulfillment_status)}</span>
+                  <div className="text-right"><div className="text-lg font-semibold">{formatTotal(selected.total, selected.currency_code)}</div><div className="mt-2 flex flex-col items-end gap-1"><span className="rounded-full bg-ui-bg-subtle px-2.5 py-1 text-xs font-medium">{paymentLabel(selected.payment_status)}</span><span className="rounded-full bg-ui-bg-subtle px-2.5 py-1 text-xs text-ui-fg-subtle">{fulfillmentLabel(selected.fulfillment_status)}</span></div></div>
                 </div>
 
                 <section>
-                  <div className="flex items-center justify-between gap-2"><Text className="font-semibold">客户与收货</Text>{detail?.shipping_address && <button type="button" onClick={() => void copyText([detail.shipping_address?.first_name, detail.shipping_address?.last_name, detail.shipping_address?.address_1, detail.shipping_address?.address_2, [detail.shipping_address?.city, detail.shipping_address?.province, detail.shipping_address?.postal_code].filter(Boolean).join(", "), detail.shipping_address?.country_code?.toUpperCase(), detail.shipping_address?.phone || detail.customer?.phone].filter(Boolean).join("\n"), "收货地址")} className="text-xs font-medium text-ui-fg-interactive">复制地址</button>}</div>
-                  <div className="mt-2 rounded-lg bg-ui-bg-subtle p-3 text-sm">
-                    <div className="font-medium">{getCustomerName(selected)}</div>
-                    <div className="mt-1 break-all text-ui-fg-subtle">{detail?.email || selected.email || "未提供邮箱"}</div>
-                    {(detail?.shipping_address?.phone || detail?.customer?.phone) && <div className="mt-1 text-ui-fg-subtle">{detail.shipping_address?.phone || detail.customer?.phone}</div>}
-                    {detail?.shipping_address && <div className="mt-3 border-t border-ui-border-base pt-2 leading-6 text-ui-fg-subtle">
-                      {[detail.shipping_address.address_1, detail.shipping_address.address_2, [detail.shipping_address.city, detail.shipping_address.province, detail.shipping_address.postal_code].filter(Boolean).join(", "), detail.shipping_address.country_code?.toUpperCase()].filter(Boolean).map((line, index) => <div key={`${line}-${index}`}>{line}</div>)}
-                    </div>}
-                    {!detail?.shipping_address && (detailsLoading ? <div className="mt-2 text-ui-fg-subtle">正在读取收货地址…</div> : <div className="mt-2 text-ui-fg-subtle">{detailsError || "订单没有收货地址。"}</div>)}
+                  <div className="flex items-center justify-between gap-2"><Text className="font-semibold">客户信息</Text>{detail?.shipping_address && <button type="button" onClick={() => void copyText([detail.shipping_address?.first_name, detail.shipping_address?.last_name, detail.shipping_address?.address_1, detail.shipping_address?.address_2, [detail.shipping_address?.city, detail.shipping_address?.province, detail.shipping_address?.postal_code].filter(Boolean).join(", "), detail.shipping_address?.country_code?.toUpperCase(), detail.shipping_address?.phone || detail.customer?.phone].filter(Boolean).join("\n"), "收货地址")} className="text-xs font-medium text-ui-fg-interactive">复制地址</button>}</div>
+                  <div className="mt-2 space-y-1 text-sm"><div className="font-medium">{getCustomerName(selected)}</div><div className="break-all text-ui-fg-subtle">{detail?.email || selected.email || "未提供邮箱"}</div>{(detail?.shipping_address?.phone || detail?.customer?.phone) && <div className="text-ui-fg-subtle">{detail.shipping_address?.phone || detail.customer?.phone}</div>}
+                    {detail?.shipping_address && <div className="pt-1 leading-5 text-ui-fg-subtle">{[detail.shipping_address.address_1, detail.shipping_address.address_2, [detail.shipping_address.city, detail.shipping_address.province, detail.shipping_address.postal_code].filter(Boolean).join(", "), detail.shipping_address.country_code?.toUpperCase()].filter(Boolean).map((line, index) => <div key={`${line}-${index}`}>{line}</div>)}</div>}
+                    {!detail?.shipping_address && <div className="text-ui-fg-subtle">{detailsLoading ? "读取收货地址中…" : detailsError || "订单没有收货地址。"}</div>}
                   </div>
                 </section>
 
-                <section>
+                <section className="border-t border-ui-border-base pt-3">
                   <Text className="font-semibold">商品</Text>
-                  <div className="mt-2 flex flex-col gap-2">
+                  <div className="mt-2 divide-y divide-ui-border-base">
                     {detail?.items?.map((item) => (
-                      <div key={item.id} className="flex gap-3 rounded-lg border border-ui-border-base p-3">
-                        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-ui-bg-subtle">
-                          {item.thumbnail ? <button type="button" onClick={() => setPreview({ src: item.thumbnail!, title: item.title })} aria-label={`放大查看${item.title}`} className="h-full w-full cursor-zoom-in"><img src={item.thumbnail} alt={item.title} className="h-full w-full object-contain" /></button> : <span className="text-xs text-ui-fg-subtle">无图片</span>}
-                        </div>
-                        <div className="min-w-0 text-sm"><div className="font-medium">{item.title}</div>{item.variant_title && <div className="mt-1 text-xs text-ui-fg-subtle">{item.variant_title}</div>}<div className="mt-1 text-xs text-ui-fg-subtle">数量：{item.quantity}</div></div>
+                      <div key={item.id} className="flex items-center gap-3 py-2 first:pt-0">
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-ui-bg-subtle">{item.thumbnail ? <button type="button" onClick={() => setPreview({ src: item.thumbnail!, title: item.title })} aria-label={`放大查看${item.title}`} className="h-full w-full cursor-zoom-in"><img src={item.thumbnail} alt={item.title} className="h-full w-full object-contain" /></button> : <span className="text-[10px] text-ui-fg-subtle">无图片</span>}</div>
+                        <div className="min-w-0 text-sm"><div className="font-medium">{item.title}</div>{item.variant_title && <div className="mt-1 text-xs text-ui-fg-subtle">{item.variant_title}</div>}<div className="mt-1 text-xs text-ui-fg-subtle">× {item.quantity}</div></div>
                       </div>
                     ))}
-                    {detailsLoading && <div className="rounded-lg border border-ui-border-base p-4 text-sm text-ui-fg-subtle">正在读取商品图片…</div>}
-                    {!detailsLoading && !detail?.items?.length && <div className="rounded-lg border border-ui-border-base p-4 text-sm text-ui-fg-subtle">{detailsError || "订单没有商品图片信息。"}</div>}
+                    {detailsLoading && <div className="py-3 text-sm text-ui-fg-subtle">读取商品中…</div>}
+                    {!detailsLoading && !detail?.items?.length && <div className="py-3 text-sm text-ui-fg-subtle">{detailsError || "暂无商品信息。"}</div>}
                   </div>
                 </section>
 
-                <section>
-                  <Text className="font-semibold">物流</Text>
-                  <div className="mt-2 rounded-lg border border-ui-border-base p-3 text-sm">
-                    {detail?.fulfillments?.length ? detail.fulfillments.map((fulfillment) => (
-                      <div key={fulfillment.id} className="border-t border-ui-border-base py-2 first:border-0">
-                        {(fulfillment.labels ?? []).length ? fulfillment.labels?.map((label, index) => <div key={`${label.tracking_number}-${index}`} className="flex flex-wrap items-center justify-between gap-2"><span className="break-all font-medium">{label.tracking_number || "暂无运单号"}</span><span className="flex gap-3">{label.tracking_number && <button type="button" onClick={() => void copyText(label.tracking_number!, "运单号")} className="text-ui-fg-interactive">复制</button>}{label.tracking_url && <a className="text-ui-fg-interactive" href={label.tracking_url} target="_blank" rel="noreferrer">17TRACK 追踪</a>}</span></div>) : <div className="flex flex-wrap items-center justify-between gap-2"><span className="text-ui-fg-subtle">已创建发货单，暂无运单号。</span>{fulfillment.items?.length ? <button type="button" onClick={() => { setTrackingFulfillment(fulfillment.id); setDetailsError("") }} className="font-medium text-ui-fg-interactive">登记运单</button> : null}</div>}
-                      </div>
-                    )) : <div className="text-ui-fg-subtle">{detailsLoading ? "正在读取物流信息…" : detailsError || "尚未创建发货单。"}</div>}
-                  </div>
-                </section>
+                {detail?.fulfillments?.some((fulfillment) => fulfillment.labels?.length) && <section className="border-t border-ui-border-base pt-3"><Text className="font-semibold">物流</Text><div className="mt-2 space-y-2 text-sm">{detail.fulfillments.flatMap((fulfillment) => (fulfillment.labels ?? []).map((label, index) => <div key={`${fulfillment.id}-${index}`} className="flex flex-wrap items-center justify-between gap-2"><span className="break-all">{label.tracking_number || "运单号待补充"}</span><span className="flex gap-3">{label.tracking_number && <button type="button" onClick={() => void copyText(label.tracking_number!, "运单号")} className="text-ui-fg-interactive">复制</button>}{label.tracking_url && <a className="text-ui-fg-interactive" href={label.tracking_url} target="_blank" rel="noreferrer">17TRACK</a>}</span></div>))}</div></section>}
 
-                <div className="mt-auto flex flex-col gap-2">
-                  {selectedNeedsFulfillment && <button type="button" disabled={!detail || detailsLoading || !["captured", "partially_captured"].includes(selected.payment_status)} onClick={() => void openFulfillment()} className="inline-flex min-h-10 items-center justify-center rounded-md bg-ui-bg-interactive px-4 py-2 text-sm font-medium text-ui-fg-on-color disabled:cursor-not-allowed disabled:opacity-50">一键发货</button>}
-                  {selectedNeedsFulfillment && !["captured", "partially_captured"].includes(selected.payment_status) && <Text size="small" className="text-center text-ui-fg-subtle">收款后即可发货</Text>}
-                  {!selectedNeedsFulfillment && detail?.fulfillments?.length ? <a href={`/app/orders/${encodeURIComponent(selected.id)}`} className="inline-flex min-h-10 items-center justify-center rounded-md border border-ui-border-base px-4 py-2 text-sm font-medium hover:bg-ui-bg-subtle">退款等其他操作</a> : null}
+                <div className="mt-auto flex gap-2 border-t border-ui-border-base pt-3">
+                  {selectedNeedsFulfillment && <button type="button" disabled={!detail || detailsLoading || !["captured", "partially_captured"].includes(selected.payment_status)} onClick={() => void openFulfillment()} className="inline-flex min-h-10 flex-1 items-center justify-center rounded-md bg-ui-bg-interactive px-4 py-2 text-sm font-medium text-ui-fg-on-color disabled:cursor-not-allowed disabled:opacity-50">发货</button>}
+                  {["captured", "partially_captured"].includes(selected.payment_status) && !["refunded"].includes(selected.payment_status) && <a href={`/app/orders/${encodeURIComponent(selected.id)}`} className="inline-flex min-h-10 flex-1 items-center justify-center rounded-md border border-ui-border-base px-4 py-2 text-sm font-medium hover:bg-ui-bg-subtle">退款</a>}
+                  {selectedNeedsFulfillment && !["captured", "partially_captured"].includes(selected.payment_status) && <Text size="small" className="self-center text-ui-fg-subtle">付款后可发货</Text>}
                 </div>
               </aside>
             )}
