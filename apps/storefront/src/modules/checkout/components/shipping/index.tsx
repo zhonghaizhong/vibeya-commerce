@@ -84,6 +84,25 @@ const Shipping: React.FC<ShippingProps> = ({
     (sm) => (sm as unknown as { service_zone?: { fulfillment_set?: { type?: string; location?: { address: HttpTypes.StoreCartAddress } } } }).service_zone?.fulfillment_set?.type === "pickup"
   )
 
+  // Each fulfillment location exposes its own option for the same carrier.
+  // Customers only need to choose the carrier once, so show one representative
+  // option per carrier while preserving the active option when editing delivery.
+  const shippingMethodsByCarrier = new Map<string, HttpTypes.StoreCartShippingOption>()
+  for (const option of _shippingMethods ?? []) {
+    const carrier = carrierLabel(option.name)
+    if (!carrier) continue
+
+    const currentOption = shippingMethodsByCarrier.get(carrier)
+    if (!currentOption || option.id === shippingMethodId) {
+      shippingMethodsByCarrier.set(carrier, option)
+    }
+  }
+  const visibleShippingMethods = Array.from(shippingMethodsByCarrier.entries())
+    .sort(([first], [second]) => first === "USPS" ? -1 : second === "USPS" ? 1 : first.localeCompare(second))
+  const selectedCarrier = carrierLabel(
+    (_shippingMethods ?? []).find((option) => option.id === shippingMethodId)?.name
+  )
+
   const hasPickupOptions = !!_pickupMethods?.length
 
   useEffect(() => {
@@ -243,68 +262,60 @@ const Shipping: React.FC<ShippingProps> = ({
                   </RadioGroup>
                 )}
                 <RadioGroup
-                  value={shippingMethodId}
+                  value={selectedCarrier}
                   onChange={(v) => {
                     if (v) {
-                      return handleSetShippingMethod(v, "shipping")
+                      const option = shippingMethodsByCarrier.get(v)
+                      if (option) return handleSetShippingMethod(option.id, "shipping")
                     }
                   }}
                 >
-                  {_shippingMethods
-                    ?.filter((option) => carrierLabel(option.name) !== null)
-                    .sort((first, second) =>
-                      carrierLabel(first.name) === "USPS" ? -1 : carrierLabel(second.name) === "USPS" ? 1 : 0
-                    )
-                    .map((option) => {
-                      const isDisabled =
-                        option.price_type === "calculated" &&
-                        !isLoadingPrices &&
-                        typeof calculatedPricesMap[option.id] !== "number"
+                  {visibleShippingMethods.map(([carrier, option]) => {
+                    const isDisabled =
+                      option.price_type === "calculated" &&
+                      !isLoadingPrices &&
+                      typeof calculatedPricesMap[option.id] !== "number"
 
-                      return (
-                        <Radio
-                          key={option.id}
-                          value={option.id}
-                          data-testid="delivery-option-radio"
-                          disabled={isDisabled}
-                          className={clx(
-                            "flex items-center justify-between text-small-regular cursor-pointer py-4 border rounded-rounded px-8 mb-2 hover:shadow-borders-interactive-with-active",
-                            {
-                              "border-ui-border-interactive":
-                                option.id === shippingMethodId,
-                              "hover:shadow-brders-none cursor-not-allowed":
-                                isDisabled,
-                            }
+                    return (
+                      <Radio
+                        key={carrier}
+                        value={carrier}
+                        data-testid="delivery-option-radio"
+                        disabled={isDisabled}
+                        className={clx(
+                          "flex items-center justify-between text-small-regular cursor-pointer py-4 border rounded-rounded px-8 mb-2 hover:shadow-borders-interactive-with-active",
+                          {
+                            "border-ui-border-interactive":
+                              carrier === selectedCarrier,
+                            "hover:shadow-brders-none cursor-not-allowed":
+                              isDisabled,
+                          }
+                        )}
+                      >
+                        <div className="flex items-center gap-x-4">
+                          <MedusaRadio checked={carrier === selectedCarrier} />
+                          <span className="text-base-regular">{carrier}</span>
+                        </div>
+                        <span className="justify-self-end text-ui-fg-base">
+                          {option.price_type === "flat" ? (
+                            convertToLocale({
+                              amount: option.amount!,
+                              currency_code: cart?.currency_code,
+                            })
+                          ) : calculatedPricesMap[option.id] ? (
+                            convertToLocale({
+                              amount: calculatedPricesMap[option.id],
+                              currency_code: cart?.currency_code,
+                            })
+                          ) : isLoadingPrices ? (
+                            <Loader />
+                          ) : (
+                            "-"
                           )}
-                        >
-                          <div className="flex items-center gap-x-4">
-                            <MedusaRadio
-                              checked={option.id === shippingMethodId}
-                            />
-                            <span className="text-base-regular">
-                              {carrierLabel(option.name)}
-                            </span>
-                          </div>
-                          <span className="justify-self-end text-ui-fg-base">
-                            {option.price_type === "flat" ? (
-                              convertToLocale({
-                                amount: option.amount!,
-                                currency_code: cart?.currency_code,
-                              })
-                            ) : calculatedPricesMap[option.id] ? (
-                              convertToLocale({
-                                amount: calculatedPricesMap[option.id],
-                                currency_code: cart?.currency_code,
-                              })
-                            ) : isLoadingPrices ? (
-                              <Loader />
-                            ) : (
-                              "-"
-                            )}
-                          </span>
-                        </Radio>
-                      )
-                    })}
+                        </span>
+                      </Radio>
+                    )
+                  })}
                 </RadioGroup>
               </div>
             </div>
