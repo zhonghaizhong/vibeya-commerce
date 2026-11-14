@@ -373,6 +373,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   }
   const productConfig = products[productId]
   const colorKey = typeof body?.color === "string" ? body.color : ""
+  const isBlackBasketballUniform = isBasketballUniform && colorKey === "Black"
   if (!productConfig || !productConfig.colorAliases[colorKey]) {
     return res.status(400).json({ error: "请选择有效的 VIBEYA 商品和颜色。" })
   }
@@ -380,20 +381,20 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const references = rawReferences
   let productReference = typeof body?.productReference === "string" ? body.productReference : ""
   let productPrintAreaReference = typeof body?.productPrintAreaReference === "string" ? body.productPrintAreaReference : ""
-  if (isTankini || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
+  if (isTankini || isBlackBasketballUniform || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
     try {
       productReference = await getVibeyaProductReference(productId, colorKey, typeof body?.size === "string" ? body.size : undefined)
     } catch (error) {
       console.error("Unable to load the VIBEYA product print reference", error)
-      return res.status(503).json({ error: isBeanie ? "帽子印刷区域参考图暂时无法读取，请稍后重试。" : "商品满印底板暂时无法读取，请稍后重试。" })
+      return res.status(503).json({ error: isBlackBasketballUniform ? "黑色篮球服正面印刷区域参考图暂时无法读取，请稍后重试。" : isBeanie ? "帽子印刷区域参考图暂时无法读取，请稍后重试。" : "商品满印底板暂时无法读取，请稍后重试。" })
     }
   }
-  if (isTankini) {
+  if (isTankini || isBlackBasketballUniform) {
     try {
       productPrintAreaReference = await getVibeyaProductPrintAreaReference(productId, colorKey)
     } catch (error) {
       console.error("Unable to load the VIBEYA product print-area guide", error)
-      return res.status(503).json({ error: "泳衣印花区域参考图暂时无法读取，请稍后重试。" })
+      return res.status(503).json({ error: isBlackBasketballUniform ? "黑色篮球服背面印刷区域参考图暂时无法读取，请稍后重试。" : "泳衣印花区域参考图暂时无法读取，请稍后重试。" })
     }
   }
   const preserveBaseComposite = typeof body?.preserveBaseComposite === "string" ? body.preserveBaseComposite : ""
@@ -441,11 +442,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isTankini && !isProviderResume && !productPrintAreaReference) {
     return res.status(400).json({ error: "泳衣印花位置参考图缺失，请刷新页面后重新提交。" })
   }
-  if (productReference && (productReference.length > (isTankini ? 2500000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
-    return res.status(400).json({ error: isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : isShowerCurtain ? "浴帘底图无效，请重新选择尺寸后提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
+  if (isBlackBasketballUniform && (!productReference || !productPrintAreaReference)) {
+    return res.status(400).json({ error: "黑色篮球服正反面印刷区域参考图缺失，请刷新页面后重新提交。" })
+  }
+  if (productReference && (productReference.length > (isTankini || isBlackBasketballUniform ? 2500000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+    return res.status(400).json({ error: isBlackBasketballUniform ? "黑色篮球服正面印刷区域参考图无效，请刷新页面后重新提交。" : isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : isShowerCurtain ? "浴帘底图无效，请重新选择尺寸后提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
   }
   if (productPrintAreaReference && (productPrintAreaReference.length > 2500000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
-    return res.status(400).json({ error: "泳衣印花位置参考图无效，请刷新页面后重新提交。" })
+    return res.status(400).json({ error: isBlackBasketballUniform ? "黑色篮球服背面印刷区域参考图无效，请刷新页面后重新提交。" : "泳衣印花位置参考图无效，请刷新页面后重新提交。" })
   }
   if (preserveBaseComposite && (preserveBaseComposite.length > 150000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(preserveBaseComposite))) {
     return res.status(400).json({ error: "原创印花底图无效，请重新选择图片并提交。" })
@@ -479,11 +483,16 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     ? [
         `Create exactly ONE photorealistic kids' basketball uniform product image on a pure white (#FFFFFF) background. Show one matching uniform set in a clear three-part product layout: one front-facing sleeveless jersey, one back-facing sleeveless jersey, and one front-facing pair of separate basketball shorts. Render all views in the selected ${productConfig.colorAliases[colorKey]} base color. This is for size ${size}; keep it recognizably children's apparel with realistic proportions. Preserve a conventional basketball jersey-and-shorts silhouette, stitched hems, armholes, crew neckline, side panels, and lightweight 100% polyester fabric. Do not turn it into a one-piece, adult-size uniform, football kit, or another garment. No person, mannequin, hanger, room, props, labels, or extra products.`,
         "PRINT AREA LOCK — THREE INDEPENDENT ZONES: jersey-front, jersey-back, and shorts are separate printable fabric areas. The exact IDs in the CUSTOMER-SELECTED PRINT ZONES line are a hard allowlist: apply print only to those zones and leave every other zone in the selected base color. If the prompt gives separate artwork instructions for each selected area, keep each design in its matching area. If it gives one general design idea, adapt it as coordinated artwork across every selected area. Do not move artwork between the jersey front, jersey back, or shorts unless the written brief explicitly requests that.",
+        ...(isBlackBasketballUniform ? [
+          `BLACK UNIFORM REFERENCE VIEWS: image ${references.length + 1} is the exact black/red-trim uniform front guide; image ${references.length + 2} is its matching back guide. Use them as the authority for the black fabric, red rib trim, garment cut, stitching, and exact product-specific print zones. The guides show placement placeholders and product arrangement; do not reproduce their white placeholders, duplicate views, or change the requested final three-part layout.`,
+          `HARD PRINT BOUNDARIES: in image ${references.length + 1}, the white rectangle on the front jersey is the ONLY printable part of the jersey-front zone, and the white angled rectangle on the viewer-right shorts leg is the ONLY printable part of the shorts zone. In image ${references.length + 2}, the white rectangle on the back jersey is the ONLY printable part of the jersey-back zone. The shorts back has no print area. Treat every white placeholder's perimeter as a hard closed boundary: replace the placeholder with the complete requested artwork only when its zone is selected, keep every pixel of that artwork inside the same placeholder, and leave all surrounding black fabric, red trim, seams, waistband, hems, legs, and white background blank. Never enlarge, extend, wrap around, or transfer a design beyond its marked panel. If the full artwork does not fit, uniformly reduce and reposition it just enough to fit completely inside that exact marked area; preserve its proportions and requested details. Do not crop the returned image.`,
+        ] : []),
         hasUploadedArtwork
           ? `${artworkReferenceLabel} Treat uploaded images as visual references for the requested zone designs. Follow the written instructions for which artwork belongs on the jersey front, jersey back, or shorts.`
           : "Create original artwork from the customer's written instructions, using distinct, clearly separated designs for each zone that is described.",
         artworkHandlingInstruction,
         `CUSTOMER DESIGN BRIEF — follow each area label independently and preserve the requested artwork, wording, color palette, and style: ${prompt}`,
+        ...(isBlackBasketballUniform ? ["FINAL PRINT CHECK: compare each selected print with its corresponding white placeholder in the matching reference view. All artwork must remain within that placeholder; all unselected panels and every area outside the placeholders must remain unprinted. The white guide boxes themselves must not appear in the final image."] : []),
         "Render each print as sublimation ink integrated into the polyester fibers, following the fabric texture, seams, natural folds, lighting, and perspective. No pasted sticker, raised patch, hard rectangular border, fake panel, brand name, logo, watermark, or text unless requested as part of the custom artwork. Keep all ink on the selected fabric panels; do not print over neck binding, armhole binding, hems, seams, or the white photo background. Output one complete product image only.",
       ].join("\n")
     : isTankini
