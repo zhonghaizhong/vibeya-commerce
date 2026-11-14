@@ -2018,7 +2018,7 @@
    const beanieColorNames={Black:'Black',Red:'Red',Gray:'Medium Gray'};
    const colorLabel=(key)=>chosen.id==='sds-128646'?'White':chosen.id==='sds-138708'||chosen.id==='sds-97226'||chosen.id==='vibeya-shower-curtain'?'White':chosen.id==='sds-172647'?(beanieColorNames[key]||key):chosen.id==='vibeya-washed-hoodie'?(hoodieColorNames[key]||key):chosen.id==='sds-233939'?(key==='Pure yellow'?'Pure Yellow':key):(colorDisplayNames[key]||key);
    let galleryIndex=0,selectedColor='Black',selectedColorConfirmed=false,selectedSize='',selectedPrint='front',selectedUniformZones=['jersey-front','jersey-back','shorts'];
-   const uniformPrintZones=[['jersey-front','Jersey Front'],['jersey-back','Jersey Back'],['shorts','Shorts']];
+   const uniformPrintZones=[['jersey-front','Jersey Front'],['jersey-back','Jersey Back'],['shorts','Shorts · One Leg Only']];
    const selectedUniformZoneLabel=()=>uniformPrintZones.filter(([id])=>selectedUniformZones.includes(id)).map(([,label])=>label).join(' + ')||'Choose at least one print area';
    const uniformPromptFor=(prompt)=>`CUSTOMER-SELECTED PRINT ZONES (print only on these selected areas): ${selectedUniformZones.join(', ')}. Keep all unselected areas in the selected solid base color.\n\n${prompt||''}`;
    const restoreUniformZonesFromPrompt=(prompt)=>{const match=String(prompt||'').match(/CUSTOMER-SELECTED PRINT ZONES[^:]*:\s*([a-z,-]+)/i);if(!match)return;const zones=match[1].split(',').filter(id=>uniformPrintZones.some(([zone])=>zone===id));if(zones.length)selectedUniformZones=zones;};
