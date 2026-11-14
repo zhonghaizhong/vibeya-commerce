@@ -110,6 +110,11 @@ const basketballUniformGallery = Array.from(
   (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.jpg`
 )
 
+const apronGallery = Array.from(
+  { length: 6 },
+  (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.png`
+)
+
 const longSleeveColors: VibeyaColor[] = [
   { id: "Black", name: "Black", hex: "#17171b", folder: "" },
   { id: "White", name: "White", hex: "#ffffff", folder: "white" },
@@ -442,6 +447,41 @@ export const vibeyaProducts: VibeyaProduct[] = [
       ["U.S. shipping", "Shipping options and delivery estimates appear at checkout."],
     ],
   },
+  {
+    id: "sds-275844",
+    handle: "vibeya-custom-prompt-design-apron",
+    category: "Kitchen & Dining",
+    name: "VIBEYA Custom Prompt-Designed Apron",
+    short: "Custom black cooking apron",
+    priceUnavailable: true,
+    price: 0,
+    currency: "USD",
+    colors: [{ id: "Black", name: "Black", hex: "#17171b", folder: "black" }],
+    sizes: ["One Size"],
+    sizeLabels: { "One Size": "One Size" },
+    defaultSize: "One Size",
+    gallery: apronGallery,
+    eyebrow: "VIBEYA / CUSTOM KITCHEN",
+    intro: "Describe your idea with a text prompt, preview the generated design on this black apron, then place your custom order. The artwork shown is a sample; your own design can be different.",
+    highlights: ["Prompt-to-preview custom design", "Black base color", "Adjustable neck strap · 3 divided pockets", "100% polyester · 180 GSM"],
+    sizeGuide: "cm / in",
+    sizeRows: [],
+    sizeNote: "One size. Approximate apron dimensions: 80 × 70 cm.",
+    variantSummary: "Design with a prompt · Black · One Size",
+    colorOptionLabel: "Base color",
+    sizeOptionLabel: "Size",
+    measurementRows: [
+      ["Apron dimensions", "Approx. 80 × 70 cm"],
+      ["Material", "100% polyester · 180 GSM"],
+      ["Pockets", "3 divided front pockets"],
+      ["Neck strap", "Adjustable"],
+    ],
+    services: [
+      ["Design from a prompt", "Describe a design idea, then preview it on the apron before ordering."],
+      ["Made personal", "The gallery artwork is a sample; your custom print can be your own."],
+      ["Black apron base", "The product base color shown here is black."],
+    ],
+  },
 ]
 
 export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index = 0) {
@@ -463,6 +503,9 @@ export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index
   }
   if (product.id === "sds-233939") {
     return `/vibeya/assets/products/sds-233939/${color.folder}/${file}`
+  }
+  if (product.id === "sds-275844") {
+    return `/vibeya/assets/products/sds-275844/${color.folder}/${file}`
   }
   if (product.id === "sds-172647") {
     const colorGallery = color.id === "Black"
