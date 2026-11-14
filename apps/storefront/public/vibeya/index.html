@@ -1032,12 +1032,13 @@
        handle:'vibeya-custom-shower-curtain',
        name:'VIBEYA Custom Shower Curtain',
        short:'Custom shower curtain',
-       price:'Price to be confirmed',
+       price:'$17.99 USD',
        category:'Home & Bath',
        supplier:'VIBEYA',
        asset:'assets/products/vibeya-shower-curtain/36x70.8in.webp',
        colors:['White'],
        sizes:['36x70.8in','60x70.8in','70.8x70.8in','70.8x84in'],
+       sizePrices:{'36x70.8in':17.99,'60x70.8in':19.99,'70.8x70.8in':21.99,'70.8x84in':23.99},
        sizeLabels:{'36x70.8in':'36 × 70.8 in (90 × 180 cm)','60x70.8in':'60 × 70.8 in (152 × 180 cm)','70.8x70.8in':'70.8 × 70.8 in (180 × 180 cm)','70.8x84in':'70.8 × 84 in (180 × 213 cm)'},
        variantSummary:'Single-sided full-bleed print · 4 sizes'
      },{
@@ -1482,14 +1483,14 @@
         const product=products.find(p=>p.id===job.product_id),title=product?.name||job.product_id||'Custom product';
         const variant=designVariant(job);
         const image=job.status==='completed'?`<button type="button" data-job-preview="${esc(job.id)}">Load image</button>`:(job.status==='failed'?'No image returned':'Your image will appear here when it is ready');
-        const addDisabled=job.status!=='completed'||!product||job.product_id==='vibeya-shower-curtain';
+        const addDisabled=job.status!=='completed'||!product;
         const shownColor=job.product_id==='sds-128646'&&variant.color==='NightGarden'?'White':variant.color||'';
         const shownPlacement=job.print_placement==='wrap'?'Full Wrap':job.print_placement||'';
         const variantChoices=product&&job.status==='completed'&&((product.colors||[]).length>1||(product.sizes||[]).length>1)?`<div class="my-design-variant-select">${designColorPicker(job,product,variant.color,'job-color-choice')}${(product.sizes||[]).length>1?`<label>Size for your bag<select data-job-size="${esc(job.id)}" aria-label="Choose size">${product.sizes.map(size=>`<option value="${esc(size)}" ${size===(variant.size||product.sizes[0])?'selected':''}>${esc(sizeLabel(product,size))}</option>`).join('')}</select></label>`:''}</div>`:'';
         const runAction=job.status==='queued'||(job.status==='failed'&&job.provider_task_id)?`<button type="button" class="btn secondary" data-job-run="${esc(job.id)}">${job.status==='failed'?'Recover image':'Start generation'}</button>`:'';
         const retryAction=job.status==='failed'?`<button type="button" class="btn secondary" data-job-retry="${esc(job.id)}">Edit &amp; retry</button>`:'';
         const failureNote=job.status==='failed'?`<p class="my-design-failure-note">${job.provider_task_id?'The provider task can be checked again. Recover it to load the generated image.':'No image was returned. Edit the description and try again; failed generations do not use a design credit.'}</p>`:'';
-        return `<article class="my-design-card" data-job-card="${esc(job.id)}"><div class="my-design-image">${image}</div><div class="my-design-copy"><h2>${esc(title)} · ${esc(shownColor)}</h2>${designPromptMarkup(job.prompt)}<p>${esc(shownPlacement)}</p><span class="my-design-state ${job.status==='failed'?'failed':''}">${esc(jobStatusLabel(job.status))}${job.error?` · ${esc(job.error)}`:''}</span>${failureNote}${variantChoices}<div class="my-design-actions">${runAction}${retryAction}<button type="button" class="btn primary" data-job-add="${esc(job.id)}" ${addDisabled?'disabled':''}>${job.product_id==='vibeya-shower-curtain'?'Ordering unavailable':'Add to bag'}</button><button type="button" class="my-design-delete" data-job-delete="${esc(job.id)}">Delete</button></div></div></article>`;
+        return `<article class="my-design-card" data-job-card="${esc(job.id)}"><div class="my-design-image">${image}</div><div class="my-design-copy"><h2>${esc(title)} · ${esc(shownColor)}</h2>${designPromptMarkup(job.prompt)}<p>${esc(shownPlacement)}</p><span class="my-design-state ${job.status==='failed'?'failed':''}">${esc(jobStatusLabel(job.status))}${job.error?` · ${esc(job.error)}`:''}</span>${failureNote}${variantChoices}<div class="my-design-actions">${runAction}${retryAction}<button type="button" class="btn primary" data-job-add="${esc(job.id)}" ${addDisabled?'disabled':''}>Add to bag</button><button type="button" class="my-design-delete" data-job-delete="${esc(job.id)}">Delete</button></div></div></article>`;
       }).join('');
       const loadDesignImage=async preview=>{preview.disabled=true;preview.textContent='Loading image…';try{const response=await fetch(`/api/vibeya/ai/jobs/${encodeURIComponent(preview.dataset.jobPreview)}`,{credentials:'same-origin',cache:'no-store'});const data=await response.json();if(!response.ok||!data.job?.image)throw new Error();const image=document.createElement('img');image.src=data.job.image;image.alt='Generated product design';image.loading='lazy';image.addEventListener('click',()=>{generatedArtworkDataUrl=image.src;lastZoomTrigger=image;openImageZoom();});preview.replaceWith(image);}catch{preview.disabled=false;preview.textContent='Image unavailable — click to retry';}};
       grid.onclick=async event=>{
@@ -1514,7 +1515,6 @@
         const addButton=event.target.closest('[data-job-add]');
         if(addButton){
           const job=jobs.find(item=>String(item.id)===addButton.dataset.jobAdd),product=products.find(p=>p.id===job?.product_id),card=addButton.closest('[data-job-card]'),savedVariant=designVariant(job),color=card?.querySelector('[data-job-color]')?.value||savedVariant.color||(product?.colors?.length===1?product.colors[0]:''),size=card?.querySelector('[data-job-size]')?.value||savedVariant.size||(product?.sizes?.length===1?product.sizes[0]:'');
-          if(job?.product_id==='vibeya-shower-curtain'){toast('Ordering is not available for this product yet.');return;}
           if(!job||job.status!=='completed'){toast('This design is not ready yet.');return;}
           if(!color){toast('Choose a product color before adding this design to your bag.');card?.querySelector('[data-job-color]')?.focus();return;}
           if(!size){toast('Choose a product size before adding this design to your bag.');card?.querySelector('[data-job-size]')?.focus();return;}
