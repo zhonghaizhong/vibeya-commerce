@@ -92,7 +92,7 @@ function ProductCard({ product, onSelect, countryCode = "us" }: ProductCardProps
 export function ProductCards({ onSelect, countryCode = "us" }: { onSelect: ProductCardProps["onSelect"]; countryCode?: string }) {
   const products = useVibeyaProducts()
   const ordered = [...products.filter((product) => product.catalogOnly), ...products.filter((product) => !product.catalogOnly)]
-  const pinned = ["sds-137892", "sds-97226"]
+  const pinned = ["sds-137892", "sds-97226", "sds-233939"]
     .map((id) => ordered.find((product) => product.id === id))
     .filter((product): product is VibeyaProduct => Boolean(product))
   const featured = [...pinned, ...ordered.filter((product) => !pinned.includes(product))].slice(0, 6)

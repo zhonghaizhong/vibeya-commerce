@@ -5,11 +5,11 @@ import { ProductCards } from "@modules/vibeya/components/product-explorer"
 import { createPortal } from "react-dom"
 import { useCallback, useEffect, useRef, useState, type SyntheticEvent } from "react"
 
-type StudioRequest = { product?: string; color?: string; size?: string; print?: string; prompt?: string }
+type StudioRequest = { product?: string; color?: string; size?: string; print?: string; areas?: string; prompt?: string }
 
 function getStudioReturnUrl(countryCode: string, request: StudioRequest) {
   const params = new URLSearchParams({ openStudio: "1" })
-  for (const key of ["product", "color", "size", "print", "prompt"] as const) {
+  for (const key of ["product", "color", "size", "print", "areas", "prompt"] as const) {
     const value = request[key]
     if (typeof value === "string" && value) params.set(key, value)
   }
@@ -71,7 +71,7 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
     const currentParams = new URLSearchParams(window.location.search)
     const forwardedParams = new URLSearchParams()
     forwardedParams.set("v", "home-inspiration-six-cards-1")
-    for (const key of ["viewCart", "openStudio", "openSearch", "product", "color", "size", "print", "prompt", "inspiration"]) {
+    for (const key of ["viewCart", "openStudio", "openSearch", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
       const value = currentParams.get(key)
       if (value) forwardedParams.set(key, value)
     }
@@ -121,6 +121,7 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
           color: typeof event.data.color === "string" ? event.data.color : undefined,
           size: typeof event.data.size === "string" ? event.data.size : undefined,
           print: typeof event.data.print === "string" ? event.data.print : undefined,
+          areas: typeof event.data.areas === "string" ? event.data.areas : undefined,
           prompt: typeof event.data.prompt === "string" ? event.data.prompt : undefined,
         }
         if (!isAuthenticated) {

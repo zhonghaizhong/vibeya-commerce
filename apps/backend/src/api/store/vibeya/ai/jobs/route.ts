@@ -20,6 +20,7 @@ const DESIGN_GENERATION_PRODUCT_IDS = new Set([
   "sds-172647",
   "vibeya-shower-curtain",
   "sds-137892",
+  "sds-233939",
 ])
 
 const serviceFor = (req: MedusaRequest) =>
@@ -119,9 +120,10 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (productPrintAreaReference && (productPrintAreaReference.length > 2500000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
     return res.status(400).json({ error: "The tankini print-area guide is invalid. Refresh the page and try again." })
   }
-  const placement = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini ? "front" : body?.printPlacement
-  const placementGuideCount = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
-  const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini ? 6 : 2 + placementGuideCount + 6
+  const isBasketballUniform = productId === "sds-233939"
+  const placement = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform ? "front" : body?.printPlacement
+  const placementGuideCount = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
+  const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform ? 6 : 2 + placementGuideCount + 6
   if (references.length > maximumReferences || references.some((item) => typeof item !== "string") || JSON.stringify(references).length > 300_000 || preserveBaseComposite.length > 150_000 || (preserveBaseComposite && !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(preserveBaseComposite))) {
     return res.status(400).json({ error: "The reference image is too large. Please compress it and try again." })
   }

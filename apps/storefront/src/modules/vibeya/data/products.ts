@@ -105,6 +105,11 @@ const tankiniGallery = [
   "07-customize.jpg",
 ]
 
+const basketballUniformGallery = Array.from(
+  { length: 7 },
+  (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.jpg`
+)
+
 const longSleeveColors: VibeyaColor[] = [
   { id: "Black", name: "Black", hex: "#17171b", folder: "" },
   { id: "White", name: "White", hex: "#ffffff", folder: "white" },
@@ -398,6 +403,45 @@ export const vibeyaProducts: VibeyaProduct[] = [
       ["U.S. shipping", "Shipping options and delivery estimates appear at checkout."],
     ],
   },
+  {
+    id: "sds-233939",
+    handle: "vibeya-custom-kids-basketball-uniform",
+    category: "Apparel",
+    name: "VIBEYA Custom Kids' Basketball Uniform",
+    short: "Custom kids' basketball jersey and shorts set",
+    price: 19.99,
+    currency: "USD",
+    colors: [
+      { id: "Black", name: "Black", hex: "#17171b", folder: "black" },
+      { id: "White", name: "White", hex: "#ffffff", folder: "white" },
+      { id: "Red", name: "Red", hex: "#e52d3d", folder: "red" },
+      { id: "Sapphire Blue", name: "Sapphire Blue", hex: "#315ad8", folder: "blue" },
+      { id: "Pure yellow", name: "Pure Yellow", hex: "#ffe100", folder: "yellow" },
+    ],
+    sizes: ["100CM", "110CM", "120CM", "130CM", "140CM"],
+    gallery: basketballUniformGallery,
+    eyebrow: "VIBEYA / CUSTOM BASKETBALL",
+    intro: "Create a kids' basketball uniform from a text prompt. Customize the jersey front, jersey back, and shorts as three separate print areas, then mix and match your artwork for a one-of-a-kind set. The gallery design is only an example.",
+    highlights: ["Custom jersey + shorts set", "3 independently customizable print areas", "100% polyester · 140 GSM", "Sizes 100–140 cm"],
+    sizeGuide: "cm / in",
+    sizeRows: [],
+    sizeNote: "Supplier garment measurements. Manual measurement may vary by 1–2 cm.",
+    variantSummary: "Design with a prompt · 5 colors · 5 sizes · 3 print areas",
+    colorOptionLabel: "Base color",
+    sizeOptionLabel: "Size",
+    measurementRows: [
+      ["100 cm", "Top length 42 cm · chest 65 cm · shorts length 27 cm · hip 72 cm · waist 17 cm"],
+      ["110 cm", "Top length 44 cm · chest 69 cm · shorts length 29 cm · hip 76 cm · waist 20 cm"],
+      ["120 cm", "Top length 47 cm · chest 73 cm · shorts length 31 cm · hip 80 cm · waist 23 cm"],
+      ["130 cm", "Top length 50 cm · chest 77 cm · shorts length 33 cm · hip 84 cm · waist 25 cm"],
+      ["140 cm", "Top length 53 cm · chest 81 cm · shorts length 35 cm · hip 88 cm · waist 27 cm"],
+    ],
+    services: [
+      ["Made for your design", "Describe your artwork with a text prompt and personalize the set."],
+      ["Mix three print areas", "Customize the jersey front, jersey back, and shorts independently, then combine designs your way."],
+      ["U.S. shipping", "Shipping options and delivery estimates appear at checkout."],
+    ],
+  },
 ]
 
 export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index = 0) {
@@ -416,6 +460,9 @@ export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index
   }
   if (product.id === "sds-137892") {
     return `/vibeya/assets/products/mg8011024/${color.folder}/${file}`
+  }
+  if (product.id === "sds-233939") {
+    return `/vibeya/assets/products/sds-233939/${color.folder}/${file}`
   }
   if (product.id === "sds-172647") {
     const colorGallery = color.id === "Black"

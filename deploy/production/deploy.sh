@@ -30,6 +30,7 @@ fi
 COMPOSE_PARALLEL_LIMIT=1 "${compose[@]}" build backend storefront
 "${compose[@]}" run --rm backend pnpm exec medusa db:migrate
 "${compose[@]}" run --rm backend pnpm exec medusa exec ./src/scripts/seed-vibeya-custom-tankini.ts
+"${compose[@]}" run --rm backend pnpm exec medusa exec ./src/scripts/seed-vibeya-custom-kids-basketball-uniform.ts
 "${compose[@]}" run --rm backend pnpm exec medusa exec ./src/scripts/seed-vibeya-fulfillment-locations.ts
 "${compose[@]}" up -d --remove-orphans
 

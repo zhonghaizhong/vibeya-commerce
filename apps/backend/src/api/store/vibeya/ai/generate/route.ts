@@ -310,12 +310,13 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const isBeanie = productId === "sds-172647"
   const isShowerCurtain = productId === "vibeya-shower-curtain"
   const isTankini = productId === "sds-137892"
-  const isFullSurfaceProduct = isBlanket || isBathMat || isShowerCurtain || isTankini
+  const isBasketballUniform = productId === "sds-233939"
+  const isFullSurfaceProduct = isBlanket || isBathMat || isShowerCurtain || isTankini || isBasketballUniform
   const size = typeof body?.size === "string" ? body.size : ""
   if (isShowerCurtain && !["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"].includes(size)) {
     return res.status(400).json({ error: "请选择有效的浴帘尺寸后重新生成。" })
   }
-  const printPlacement = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
+  const printPlacement = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
     ? body.printPlacement
     : "none"
   const isTumbler = productId === "sds-128646"
@@ -364,6 +365,10 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     "sds-137892": {
       name: "Custom Women's Two-Piece Tankini Swimsuit Set",
       colorAliases: { Black: "Black", Red: "Red", Pink: "Pink", Blue: "Blue", Cyan: "Cyan" },
+    },
+    "sds-233939": {
+      name: "Custom Kids' Basketball Jersey and Shorts Set",
+      colorAliases: { Black: "Black", White: "White", Red: "Red", "Sapphire Blue": "Sapphire Blue", "Pure yellow": "Pure Yellow" },
     },
   }
   const productConfig = products[productId]
@@ -470,7 +475,18 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     : preserveOriginalDesign
       ? "KEEP ORIGINAL DESIGN MODE (PRESERVE ON): Treat the complete uploaded image canvas as the locked artwork, including its background. Preserve every visible pixel, subject, wording, layout, colors, textures, and details; do not cut out, remove, replace, blur, recolor, rewrite, rearrange, redraw, or invent any part. If the image has transparency, preserve the transparent areas. Only uniformly scale the complete image and move it to fit inside the selected print area with margin. Do not crop any edge."
       : "PROMPT-LED ADAPTATION MODE (PRESERVE OFF): Treat the customer's written instructions as the primary requirements for the final artwork. Follow the requested subject, wording, colors, style, composition, scale, and placement closely. Use all uploaded images as visual references and keep the result strongly related to their subjects, mood, and recognizable visual cues; do not replace them with an unrelated concept. When the prompt asks for changes, adapt the references to satisfy those instructions. Keep all requested content together and fit it proportionally inside the printable area; do not crop any required content."
-  const safePrompt = isTankini
+  const safePrompt = isBasketballUniform
+    ? [
+        `Create exactly ONE photorealistic kids' basketball uniform product image on a pure white (#FFFFFF) background. Show one matching uniform set in a clear three-part product layout: one front-facing sleeveless jersey, one back-facing sleeveless jersey, and one front-facing pair of separate basketball shorts. Render all views in the selected ${productConfig.colorAliases[colorKey]} base color. This is for size ${size}; keep it recognizably children's apparel with realistic proportions. Preserve a conventional basketball jersey-and-shorts silhouette, stitched hems, armholes, crew neckline, side panels, and lightweight 100% polyester fabric. Do not turn it into a one-piece, adult-size uniform, football kit, or another garment. No person, mannequin, hanger, room, props, labels, or extra products.`,
+        "PRINT AREA LOCK — THREE INDEPENDENT ZONES: jersey-front, jersey-back, and shorts are separate printable fabric areas. The exact IDs in the CUSTOMER-SELECTED PRINT ZONES line are a hard allowlist: apply print only to those zones and leave every other zone in the selected base color. If the prompt gives separate artwork instructions for each selected area, keep each design in its matching area. If it gives one general design idea, adapt it as coordinated artwork across every selected area. Do not move artwork between the jersey front, jersey back, or shorts unless the written brief explicitly requests that.",
+        hasUploadedArtwork
+          ? `${artworkReferenceLabel} Treat uploaded images as visual references for the requested zone designs. Follow the written instructions for which artwork belongs on the jersey front, jersey back, or shorts.`
+          : "Create original artwork from the customer's written instructions, using distinct, clearly separated designs for each zone that is described.",
+        artworkHandlingInstruction,
+        `CUSTOMER DESIGN BRIEF — follow each area label independently and preserve the requested artwork, wording, color palette, and style: ${prompt}`,
+        "Render each print as sublimation ink integrated into the polyester fibers, following the fabric texture, seams, natural folds, lighting, and perspective. No pasted sticker, raised patch, hard rectangular border, fake panel, brand name, logo, watermark, or text unless requested as part of the custom artwork. Keep all ink on the selected fabric panels; do not print over neck binding, armhole binding, hems, seams, or the white photo background. Output one complete product image only.",
+      ].join("\n")
+    : isTankini
     ? [
         `Create exactly ONE photorealistic square e-commerce product image on a pure white (#FFFFFF) background. Show the exact two-piece women's tankini from the CLEAN GARMENT REFERENCE: one ${productConfig.colorAliases[colorKey]} halter-neck swim top above one separate pair of matching ${productConfig.colorAliases[colorKey]} side-tie shorts below it. The top, shorts, halter straps, neck bow, and both side-tie cords must all be the same selected garment color; do not leave any cord black or recolor any piece differently. Both pieces are front-facing, fully visible, neatly arranged with the top clearly separated above the shorts. Preserve the reference's exact silhouette, neckline, neck ties, top length and hem, shorts rise and leg cut, side ties, seams, fabric texture, relative scale, alignment, and gap. Give the fabric gentle natural 3D volume and soft realistic folds with subtle studio shading so the pieces do not look collapsed or paper-flat; keep them only lightly shaped, never inflated, stuffed, stiff, or exaggerated. Do not rearrange, overlap, crop, simplify, or redesign either garment. Never turn it into a one-piece or another swimsuit style. No person, mannequin, hanger, room, pool, props, decoration, alternate views, collage, labels, or extra objects.`,
         `Image ${references.length + 1} is the CLEAN GARMENT REFERENCE and is the sole authority for the swimsuit pattern, construction, silhouette, two-piece arrangement, proportions, fabric, and studio presentation. It has no print-area marker: do not infer or invent the print location from it. Reproduce its garment exactly in the selected ${productConfig.colorAliases[colorKey]} color, including matching-color halter straps, neck bow, and side ties.`,
