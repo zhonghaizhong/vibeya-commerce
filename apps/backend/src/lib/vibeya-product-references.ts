@@ -29,6 +29,9 @@ const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string> | 
     "Sapphire Blue": "vibeya/assets/products/sds-233939/blue/print-area-front.png",
     "Pure yellow": "vibeya/assets/products/sds-233939/yellow/print-area-front.png",
   },
+  "sds-275844": {
+    Black: "vibeya/assets/products/sds-275844/black/blank-front.png",
+  },
 }
 
 const PRODUCT_PRINT_AREA_REFERENCE_PATHS: Record<string, string | Record<string, string>> = {
@@ -45,6 +48,9 @@ const PRODUCT_PRINT_AREA_REFERENCE_PATHS: Record<string, string | Record<string,
     Red: "vibeya/assets/products/sds-233939/red/print-area-back.png",
     "Sapphire Blue": "vibeya/assets/products/sds-233939/blue/print-area-back.png",
     "Pure yellow": "vibeya/assets/products/sds-233939/yellow/print-area-back.png",
+  },
+  "sds-275844": {
+    Black: "vibeya/assets/products/sds-275844/black/print-area-guide.png",
   },
 }
 

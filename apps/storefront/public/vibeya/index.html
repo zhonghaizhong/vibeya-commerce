@@ -2069,7 +2069,7 @@
    }));
    const cleanProductReferences={'sds-167256':teeReferences,'vibeya-washed-hoodie':hoodieReferences};
    const blankProductReferenceSource=()=>cleanProductReferences[chosen.id]?.[selectedColor]||null;
-   const productReferenceSources=()=>{if(chosen.id==='sds-128646'||chosen.id==='sds-97226'||chosen.id==='sds-138708'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939')return [];const refs=blankProductReferenceSource();if(!refs)return null;const zones=selectedPrint==='both'?[refs.zoneFront,refs.zoneBack]:[selectedPrint==='back'?refs.zoneBack:refs.zoneFront];return [refs.front,refs.back,...zones];};
+   const productReferenceSources=()=>{if(chosen.id==='sds-128646'||chosen.id==='sds-97226'||chosen.id==='sds-138708'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939'||chosen.id==='sds-275844')return [];const refs=blankProductReferenceSource();if(!refs)return null;const zones=selectedPrint==='both'?[refs.zoneFront,refs.zoneBack]:[selectedPrint==='back'?refs.zoneBack:refs.zoneFront];return [refs.front,refs.back,...zones];};
    const blankProductPreviewSource=()=>blankProductReferenceSource()?.composite||null;
   const gallerySrc=(i,color=selectedColor)=>{
     let src;
