@@ -27,6 +27,7 @@ const INDEXABLE_CONTENT_PATHS = [
   "/vibeya/inspiration/low-battery-club-custom-beanie.html",
   "/vibeya/inspiration/cat-bubble-cats-custom-shower-curtain.html",
   "/vibeya/inspiration/deadpan-penguin-custom-tankini.html",
+  "/vibeya/inspiration/custom-kids-basketball-jersey-set.html",
 ]
 const PAGE_SIZE = 200
 
