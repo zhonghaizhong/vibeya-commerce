@@ -134,7 +134,7 @@ export default async function seedVibeyaCustomApron({ container }: ExecArgs) {
       },
     })
   } else {
-    const prices = currentVariant.prices ?? []
+    const prices = (currentVariant as any).prices ?? []
     const hasUsdPrice = prices.some(
       (item: any) => item.currency_code?.toLowerCase() === "usd"
     )
