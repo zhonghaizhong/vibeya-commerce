@@ -22,6 +22,22 @@ const DESIGN_GENERATION_PRODUCT_IDS = new Set([
   "sds-137892",
   "sds-233939",
 ])
+const BASKETBALL_PRINT_ZONES = ["jersey-front", "jersey-back", "shorts"] as const
+
+const basketballPromptWithSelectedZones = (prompt: string, requestedZones: unknown): string => {
+  const fromBody = Array.isArray(requestedZones)
+    ? requestedZones.filter((zone): zone is typeof BASKETBALL_PRINT_ZONES[number] =>
+        typeof zone === "string" && BASKETBALL_PRINT_ZONES.includes(zone as typeof BASKETBALL_PRINT_ZONES[number]))
+    : []
+  const fromPrompt = prompt.match(/VIBEYA_SELECTED_PRINT_ZONES:\s*([^\r\n]+)/i)?.[1]
+    ?? prompt.match(/CUSTOMER-SELECTED PRINT ZONES[^:]*:\s*([^\r\n]+)/i)?.[1]
+  const parsedZones = fromPrompt?.split(",").map((zone) => zone.trim())
+    .filter((zone): zone is typeof BASKETBALL_PRINT_ZONES[number] =>
+      BASKETBALL_PRINT_ZONES.includes(zone as typeof BASKETBALL_PRINT_ZONES[number])) ?? []
+  const selectedZones = [...new Set(fromBody.length ? fromBody : parsedZones.length ? parsedZones : [...BASKETBALL_PRINT_ZONES])]
+  const cleanPrompt = prompt.replace(/(?:VIBEYA_SELECTED_PRINT_ZONES|CUSTOMER-SELECTED PRINT ZONES[^:]*):[^\r\n]+(?:\r?\n){0,2}/i, "").trim()
+  return `VIBEYA_SELECTED_PRINT_ZONES: ${selectedZones.join(", ")}\n\n${cleanPrompt}`
+}
 
 const serviceFor = (req: MedusaRequest) =>
   req.scope.resolve(VIBEYA_AI_JOBS_MODULE) as unknown as JobService
@@ -121,6 +137,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     return res.status(400).json({ error: "The tankini print-area guide is invalid. Refresh the page and try again." })
   }
   const isBasketballUniform = productId === "sds-233939"
+  const savedPrompt = isBasketballUniform
+    ? basketballPromptWithSelectedZones(prompt, body?.printZones)
+    : prompt
+  if (isBasketballUniform && Array.isArray(body?.printZones) && !body.printZones.some((zone) => BASKETBALL_PRINT_ZONES.includes(zone as typeof BASKETBALL_PRINT_ZONES[number]))) {
+    return res.status(400).json({ error: "Choose at least one valid basketball uniform print area." })
+  }
   const placement = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform ? "front" : body?.printPlacement
   const placementGuideCount = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
   const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform ? 6 : 2 + placementGuideCount + 6
@@ -136,7 +158,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     const job = await service.createVibeyaAiJobs({
       customer_id: customerId,
       status: "reservation_pending",
-      prompt: typeof body?.prompt === "string" ? body.prompt : "",
+      prompt: savedPrompt,
       product_id: productId,
       color,
       size,

@@ -2053,8 +2053,8 @@
    let galleryIndex=0,selectedColor='Black',selectedColorConfirmed=false,selectedSize='',selectedPrint='front',selectedUniformZones=['jersey-front','jersey-back','shorts'];
    const uniformPrintZones=[['jersey-front','Jersey Front'],['jersey-back','Jersey Back'],['shorts','Shorts · One Leg Only']];
    const selectedUniformZoneLabel=()=>uniformPrintZones.filter(([id])=>selectedUniformZones.includes(id)).map(([,label])=>label).join(' + ')||'Choose at least one print area';
-   const uniformPromptFor=(prompt)=>`CUSTOMER-SELECTED PRINT ZONES (print only on these selected areas): ${selectedUniformZones.join(', ')}. Keep all unselected areas in the selected solid base color.\n\n${prompt||''}`;
-   const restoreUniformZonesFromPrompt=(prompt)=>{const match=String(prompt||'').match(/CUSTOMER-SELECTED PRINT ZONES[^:]*:\s*([a-z,-]+)/i);if(!match)return;const zones=match[1].split(',').filter(id=>uniformPrintZones.some(([zone])=>zone===id));if(zones.length)selectedUniformZones=zones;};
+   const uniformPromptFor=(prompt)=>`VIBEYA_SELECTED_PRINT_ZONES: ${selectedUniformZones.join(', ')}\n\nOnly these selected zones may receive artwork. This selection overrides any conflicting placement wording in the design brief. Keep every unselected garment area completely plain in the selected base color.\n\n${prompt||''}`;
+   const restoreUniformZonesFromPrompt=(prompt)=>{const text=String(prompt||''),match=text.match(/VIBEYA_SELECTED_PRINT_ZONES:\s*([^\r\n]+)/i)||text.match(/CUSTOMER-SELECTED PRINT ZONES[^:]*:\s*([^\r\n]+)/i);if(!match)return;const zones=match[1].split(',').map(id=>id.trim()).filter(id=>uniformPrintZones.some(([zone])=>zone===id));if(zones.length)selectedUniformZones=zones;};
    const printNames={none:'No print',front:'Front Only',back:'Back Only',both:'Front + Back',wrap:'Full Wrap'};
    const teeBlankFolders={Black:'black',White:'white',Red:'red',Gray:'gray',LightGray:'light-gray',Cream:'cream',Navy:'navy'};
    const teePrintZones={front:[.129,.289,.380,.605],back:[.624,.291,.874,.609]};
@@ -2388,7 +2388,7 @@ const blanket=chosen.id==='sds-97226';
         ?await compressPreservedReference(blankProductPreviewSource(),150000,[1254,1024,896])
         :'';
       const requestPrompt=chosen.id==='sds-233939'?uniformPromptFor(p.all):p.all;
-      const response=await fetch('/api/vibeya/ai/jobs',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:requestPrompt,productId:chosen.id,color:selectedColor,size:selectedSize,printPlacement:selectedPrint,mode:'designed-product',preserveOriginalDesign,preserveBaseComposite,productReference,references})});
+      const response=await fetch('/api/vibeya/ai/jobs',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:requestPrompt,productId:chosen.id,color:selectedColor,size:selectedSize,printPlacement:selectedPrint,printZones:chosen.id==='sds-233939'?[...selectedUniformZones]:undefined,mode:'designed-product',preserveOriginalDesign,preserveBaseComposite,productReference,references})});
       const result=await response.json();renderDesignCreditBalance(result.credits);if(!response.ok||!result.job?.id)throw new Error(result.error||'Could not submit the design task.');
       const jobId=String(result.job.id),taskProductId=chosen.id,taskPlacement=selectedPrint,taskPrompt=p.all;
       saveDesignVariant(jobId,chosen.id,selectedColor,selectedSize);
