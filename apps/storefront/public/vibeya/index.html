@@ -1260,7 +1260,7 @@
   const sizeLabel=(product,size)=>product?.sizeLabels?.[size]||size||'Select a size';
   const selectedProductPrice=(product,size)=>product?.sizePrices?.[size]??itemPrice(product);
   const usdPrice=value=>value===null||value===undefined?'':new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(value)+' USD';
-  const cardColorHex={Black:'#17171b',White:'#ffffff',Red:'#e52537',Pink:'#ec4c91',Blue:'#3859d7',Cyan:'#22c3d7',Gray:'#64666c',LightGray:'#d7d7d9',Cream:'#f2e4cf',Navy:'#283456'};
+  const cardColorHex={Black:'#17171b',White:'#ffffff',Red:'#e52537',Pink:'#ec4c91',Blue:'#3859d7',Cyan:'#22c3d7',Gray:'#64666c',LightGray:'#d7d7d9',Cream:'#f2e4cf',Navy:'#283456','Sapphire Blue':'#315ad8','Pure yellow':'#ffe100'};
   const cardColorNames={Black:'Black',White:'White',Red:'Red',Gray:'Heather Gray',LightGray:'Light Heather Gray',Cream:'Cream',Navy:'Navy'};
   const productVariants={
     'sds-167256':{
