@@ -2,6 +2,61 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const safe=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const bundledCatalog=Array.isArray(window.VIBEYA_INSPIRATION_CATALOG)?window.VIBEYA_INSPIRATION_CATALOG:[];
   let catalog=[...bundledCatalog];
+  const moreSection=document.getElementById('moreInspirationSection');
+  const moreCards=document.getElementById('moreInspirationCards');
+  const form=document.getElementById('inspirationFilters');
+  if(form){
+    const fieldIds=['productFilter','patternFilter','styleFilter'];
+    const cards=[...document.querySelectorAll('[data-inspiration-feature]')];
+    const labels={
+      product:{'long-sleeve':'Long Sleeve Tee',hoodie:'Hoodie',tumbler:'20 oz Tumbler','bath-mat':'3D Bath Mat',blanket:'Flannel Throw Blanket',beanie:'Knitted Beanie','shower-curtain':'Shower Curtain',tankini:"Women's Tankini Swimsuit",'basketball-uniform':"Kids' Basketball Jersey Set",apron:'Apron'},
+      pattern:{animals:'Animals & Creatures','botanical-celestial':'Botanical & Celestial',characters:'Characters & Humor','typography-sports':'Typography & Sports','food-kitchen':'Food & Kitchen',other:'Other Designs'},
+      style:{streetwear:'Streetwear',nature:'Nature-Inspired',playful:'Playful & Whimsical',cozy:'Cozy & Cute','youth-sports':'Youth Sports',other:'Other Styles'}
+    };
+    const facetGroups={
+      pattern:{animal:'animals',penguin:'animals',cat:'animals','rubber-duck':'animals','botanical-celestial':'botanical-celestial',skeleton:'characters','sleepy-sheep':'characters',typography:'typography-sports','sports-typography':'typography-sports','tomato-chef':'food-kitchen'},
+      style:{'street-graffiti':'streetwear',streetwear:'streetwear','nature-streetwear':'nature','retro-whimsical':'playful','playful-whimsy':'playful',funny:'playful','cozy-humor':'cozy','cozy-cute':'cozy','youth-sports':'youth-sports'}
+    };
+    const productGroupLabels={'apparel-accessories':'Apparel & Accessories','home-drinkware':'Home & Drinkware',other:'Other Products'};
+    const productGroups={'long-sleeve':'apparel-accessories',hoodie:'apparel-accessories',beanie:'apparel-accessories',tankini:'apparel-accessories','basketball-uniform':'apparel-accessories',apron:'apparel-accessories',tumbler:'home-drinkware','bath-mat':'home-drinkware',blanket:'home-drinkware','shower-curtain':'home-drinkware'};
+    const facetValue=(key,value)=>key==='product'?value:(facetGroups[key]?.[value]||'other');
+    const fieldOptions=[
+      {id:fieldIds[0],key:'product',all:'All Products'},
+      {id:fieldIds[1],key:'pattern',all:'All Patterns'},
+      {id:fieldIds[2],key:'style',all:'All Styles'}
+    ];
+    fieldOptions.forEach(({id,key,all})=>{
+      const select=document.getElementById(id);
+      const values=[...new Set(cards.map(card=>facetValue(key,card.dataset[key])).filter(Boolean))].sort((a,b)=>(labels[key][a]||a).localeCompare(labels[key][b]||b));
+      select.replaceChildren(new Option(all,'all'));
+      if(key==='product'){
+        const grouped=new Map();
+        values.forEach(value=>{const group=productGroups[value]||'other';if(!grouped.has(group))grouped.set(group,[]);grouped.get(group).push(value);});
+        for(const group of ['apparel-accessories','home-drinkware','other']){
+          const groupValues=grouped.get(group);if(!groupValues?.length)continue;
+          const optgroup=document.createElement('optgroup');optgroup.label=productGroupLabels[group];
+          optgroup.append(...groupValues.map(value=>new Option(labels.product[value]||value.replace(/-/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase()),value)));
+          select.append(optgroup);
+        }
+      }else{
+        select.append(...values.map(value=>new Option(labels[key][value]||value.replace(/-/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase()),value)));
+      }
+    });
+    const matches=(item,p,pat,s)=>!!item&&(p==='all'||item.product===p)&&(pat==='all'||facetValue('pattern',item.pattern)===pat)&&(s==='all'||facetValue('style',item.style)===s);
+    const filter=()=>{
+      const [p,pat,s]=fieldIds.map(id=>document.getElementById(id).value);
+      cards.forEach(card=>card.hidden=!matches({product:card.dataset.product,pattern:card.dataset.pattern,style:card.dataset.style},p,pat,s));
+      const featuredMatches=cards.some(card=>!card.hidden);
+      const relatedCards=[...document.querySelectorAll('#moreInspirationCards .related-card')];
+      relatedCards.forEach(card=>card.hidden=!matches({product:card.dataset.product,pattern:card.dataset.pattern,style:card.dataset.style},p,pat,s));
+      const relatedMatches=relatedCards.some(card=>!card.hidden);
+      if(moreSection)moreSection.hidden=!relatedMatches;
+      const noResults=document.getElementById('noResults');if(noResults)noResults.hidden=featuredMatches||relatedMatches;
+    };
+    form.addEventListener('change',filter);
+    document.getElementById('resetFilters')?.addEventListener('click',()=>{fieldIds.forEach(id=>document.getElementById(id).value='all');filter();});
+    filter();
+  }
   try{const response=await fetch('/api/vibeya/inspirations',{credentials:'same-origin',cache:'no-store'});if(response.ok){const data=await response.json();if(Array.isArray(data.inspirations)){const managed=data.inspirations;catalog=[...bundledCatalog.map(item=>managed.find(entry=>entry.id===item.id)||item),...managed.filter(entry=>!bundledCatalog.some(item=>item.id===entry.id))];}}}catch(error){console.warn('Using bundled inspiration catalog',error);}
   document.querySelectorAll('[data-inspiration-feature]').forEach(section=>{
     const link=section.querySelector('.actions a[href]');
@@ -45,8 +100,6 @@ document.addEventListener('DOMContentLoaded',async()=>{
     ['product','pattern','style'].forEach(key=>{const value=storyMeta.querySelector(`[data-story-value="${key}"]`);if(value)value.textContent=storyLabels[key]?.[current[key]]||current[key]||'';});
     storyMeta.hidden=false;
   }
-  const moreSection=document.getElementById('moreInspirationSection');
-  const moreCards=document.getElementById('moreInspirationCards');
   const isInspirationListing=!!document.getElementById('inspirationFilters');
   fetch('/api/vibeya/session',{credentials:'same-origin',cache:'no-store'}).then(response=>response.ok?response.json():null).then(session=>{
     const authenticated=!!session?.authenticated;
@@ -150,59 +203,6 @@ document.addEventListener('DOMContentLoaded',async()=>{
 
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCustomize();});
 
-  const form=document.getElementById('inspirationFilters');
-  if(form){
-    const fieldIds=['productFilter','patternFilter','styleFilter'];
-    const cards=[...document.querySelectorAll('[data-inspiration-feature]')];
-    const labels={
-      product:{'long-sleeve':'Long Sleeve Tee',hoodie:'Hoodie',tumbler:'20 oz Tumbler','bath-mat':'3D Bath Mat',blanket:'Flannel Throw Blanket',beanie:'Knitted Beanie','shower-curtain':'Shower Curtain',tankini:"Women's Tankini Swimsuit",'basketball-uniform':"Kids' Basketball Jersey Set",apron:'Apron'},
-      pattern:{animals:'Animals & Creatures','botanical-celestial':'Botanical & Celestial',characters:'Characters & Humor','typography-sports':'Typography & Sports','food-kitchen':'Food & Kitchen',other:'Other Designs'},
-      style:{streetwear:'Streetwear',nature:'Nature-Inspired',playful:'Playful & Whimsical',cozy:'Cozy & Cute','youth-sports':'Youth Sports',other:'Other Styles'}
-    };
-    const facetGroups={
-      pattern:{animal:'animals',penguin:'animals',cat:'animals','rubber-duck':'animals','botanical-celestial':'botanical-celestial',skeleton:'characters','sleepy-sheep':'characters',typography:'typography-sports','sports-typography':'typography-sports','tomato-chef':'food-kitchen'},
-      style:{'street-graffiti':'streetwear',streetwear:'streetwear','nature-streetwear':'nature','retro-whimsical':'playful','playful-whimsy':'playful',funny:'playful','cozy-humor':'cozy','cozy-cute':'cozy','youth-sports':'youth-sports'}
-    };
-    const productGroupLabels={'apparel-accessories':'Apparel & Accessories','home-drinkware':'Home & Drinkware',other:'Other Products'};
-    const productGroups={'long-sleeve':'apparel-accessories',hoodie:'apparel-accessories',beanie:'apparel-accessories',tankini:'apparel-accessories','basketball-uniform':'apparel-accessories',apron:'apparel-accessories',tumbler:'home-drinkware','bath-mat':'home-drinkware',blanket:'home-drinkware','shower-curtain':'home-drinkware'};
-    const facetValue=(key,value)=>key==='product'?value:(facetGroups[key]?.[value]||'other');
-    const fieldOptions=[
-      {id:fieldIds[0],key:'product',all:'All Products'},
-      {id:fieldIds[1],key:'pattern',all:'All Patterns'},
-      {id:fieldIds[2],key:'style',all:'All Styles'}
-    ];
-    fieldOptions.forEach(({id,key,all})=>{
-      const select=document.getElementById(id);
-      const values=[...new Set(cards.map(card=>facetValue(key,card.dataset[key])).filter(Boolean))].sort((a,b)=>(labels[key][a]||a).localeCompare(labels[key][b]||b));
-      select.replaceChildren(new Option(all,'all'));
-      if(key==='product'){
-        const grouped=new Map();
-        values.forEach(value=>{const group=productGroups[value]||'other';if(!grouped.has(group))grouped.set(group,[]);grouped.get(group).push(value);});
-        for(const group of ['apparel-accessories','home-drinkware','other']){
-          const groupValues=grouped.get(group);if(!groupValues?.length)continue;
-          const optgroup=document.createElement('optgroup');optgroup.label=productGroupLabels[group];
-          optgroup.append(...groupValues.map(value=>new Option(labels.product[value]||value.replace(/-/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase()),value)));
-          select.append(optgroup);
-        }
-      }else{
-        select.append(...values.map(value=>new Option(labels[key][value]||value.replace(/-/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase()),value)));
-      }
-    });
-    const matches=(item,p,pat,s)=>!!item&&(p==='all'||item.product===p)&&(pat==='all'||facetValue('pattern',item.pattern)===pat)&&(s==='all'||facetValue('style',item.style)===s);
-    const filter=()=>{
-      const [p,pat,s]=fieldIds.map(id=>document.getElementById(id).value);
-      cards.forEach(card=>card.hidden=!matches({product:card.dataset.product,pattern:card.dataset.pattern,style:card.dataset.style},p,pat,s));
-      const featuredMatches=cards.some(card=>!card.hidden);
-      const cards=[...document.querySelectorAll('#moreInspirationCards .related-card')];
-      cards.forEach(card=>card.hidden=!matches({product:card.dataset.product,pattern:card.dataset.pattern,style:card.dataset.style},p,pat,s));
-      const relatedMatches=cards.some(card=>!card.hidden);
-      if(moreSection)moreSection.hidden=!relatedMatches;
-      const noResults=document.getElementById('noResults');if(noResults)noResults.hidden=featuredMatches||relatedMatches;
-    };
-    form.addEventListener('change',filter);
-    document.getElementById('resetFilters')?.addEventListener('click',()=>{fieldIds.forEach(id=>document.getElementById(id).value='all');filter();});
-    filter();
-  }
   const copyButton=document.getElementById('copyPrompt');
   if(copyButton)copyButton.addEventListener('click',async()=>{
     const text=document.getElementById('copySource')?.textContent||'';const status=document.getElementById('copyStatus');
