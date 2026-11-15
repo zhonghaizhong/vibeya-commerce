@@ -3,9 +3,9 @@ import { notFound } from "next/navigation"
 import { listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
-import BathMatProductExperience from "@modules/vibeya/components/bath-mat-product-experience"
-import LongSleeveProductExperience from "@modules/vibeya/components/long-sleeve-product-experience"
 import StandaloneProductPage from "@modules/vibeya/components/standalone-product-page"
+import VibeyaProductExperience from "@modules/vibeya/components/vibeya-product-experience"
+import { vibeyaProducts } from "@modules/vibeya/data/products"
 import { HttpTypes } from "@medusajs/types"
 import { isVariantInStock } from "@lib/util/inventory"
 import {
@@ -17,6 +17,7 @@ import { getSiteOrigin, listCountryCodes, STORE_NAME } from "@lib/util/site"
 
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
 const PRODUCT_SEO: Partial<
@@ -74,7 +75,6 @@ const PRODUCT_SEO: Partial<
   },
   "vibeya-custom-metal-bottle-cap-wall-sign": {
     title: "Custom Bottle Cap Wall Sign | Design & Preview | VIBEYA",
-    name: "Custom Metal Bottle Cap Wall Sign",
     description:
       "Design a custom bottle cap wall sign with a prompt or uploaded artwork. Preview your 30 cm metal wall art, then choose a 1, 2, or 3-piece pack.",
   },
@@ -177,6 +177,7 @@ const ProductMetaTags = ({
 
 export default async function ProductPage(props: Props) {
   const params = await props.params
+  const searchParams = await props.searchParams
   const region = await getRegion(params.countryCode)
 
   if (!region) {
@@ -220,6 +221,12 @@ export default async function ProductPage(props: Props) {
     )
   }
 
+  const vibeyaProduct = vibeyaProducts.find(
+    (product) => product.handle === pricedProduct.handle
+  )
+  const colorParam = searchParams?.color
+  const initialColor = Array.isArray(colorParam) ? colorParam[0] : colorParam
+
   return (
     <>
       <ProductMetaTags product={pricedProduct} region={region} />
@@ -227,10 +234,12 @@ export default async function ProductPage(props: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
       />
-      {pricedProduct.handle === "vibeya-custom-3d-bath-mat" ? (
-        <BathMatProductExperience countryCode={params.countryCode} />
-      ) : pricedProduct.handle === "vibeya-custom-cotton-long-sleeve-tee" ? (
-        <LongSleeveProductExperience countryCode={params.countryCode} />
+      {vibeyaProduct ? (
+        <VibeyaProductExperience
+          countryCode={params.countryCode}
+          productId={vibeyaProduct.id}
+          initialColor={initialColor}
+        />
       ) : (
         <ProductTemplate
           product={pricedProduct}
