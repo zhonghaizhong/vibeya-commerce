@@ -215,7 +215,7 @@ export default async function ProductPage(props: Props) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
         />
-        <StandaloneProductPage countryCode={params.countryCode} />
+        <StandaloneProductPage />
       </>
     )
   }

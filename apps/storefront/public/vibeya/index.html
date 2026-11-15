@@ -1743,7 +1743,7 @@
     }
     if(key.startsWith('product-')){
       const product=products.find(p=>p.id===key.slice(8));
-      if(product?.catalogOnly){window.top.location.assign('/us/products/'+encodeURIComponent(product.handle));return;}
+      if(product?.catalogOnly&&new URLSearchParams(routeQuery).get('standalone')!=='1'){window.top.location.assign('/us/products/'+encodeURIComponent(product.handle));return;}
       const params=new URLSearchParams(routeQuery);
       const requestedColor=params.get('color'),requestedSize=params.get('size');
       if(product&&(product.id!==chosen.id||(product.colors?.includes(requestedColor)&&requestedColor!==selectedColor)||(product.sizes?.includes(requestedSize)&&requestedSize!==selectedSize))){
