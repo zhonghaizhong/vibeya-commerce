@@ -123,7 +123,7 @@ export default function StandaloneProductPage({ countryCode }: { countryCode: st
       <iframe
         ref={frameRef}
         className="vibeya-standalone-product-frame"
-        src="/vibeya/index.html?v=metal-sign-flow-20261116-1&standalone=1#product-mg8014061"
+        src="/vibeya/index.html?v=metal-sign-flow-20261116-2&standalone=1#product-mg8014061"
         title="Custom Metal Bottle Cap Wall Sign"
         onLoad={handleFrameLoad}
         style={{ display: "block", width: "100%", height: "100vh", border: 0 }}
