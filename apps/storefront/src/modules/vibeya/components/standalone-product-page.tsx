@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import AuthModal from "../../../app/[countryCode]/(main)/auth-modal"
 
 type StudioRequest = {
   product?: string
@@ -18,6 +19,53 @@ type StudioSession = {
 
 export default function StandaloneProductPage({ countryCode }: { countryCode: string }) {
   const frameRef = useRef<HTMLIFrameElement>(null)
+  const [authOpen, setAuthOpen] = useState(false)
+  const [authRedirectTo, setAuthRedirectTo] = useState<string>()
+
+  const getStudioUrl = useCallback((request: StudioRequest) => {
+    const params = new URLSearchParams({ openStudio: "1" })
+    for (const [key, value] of Object.entries(request)) {
+      if (value) params.set(key, value)
+    }
+    return `/${countryCode}/products/vibeya-custom-metal-bottle-cap-wall-sign?${params.toString()}`
+  }, [countryCode])
+
+  const openStudio = useCallback((request: StudioRequest) => {
+    frameRef.current?.contentWindow?.postMessage(
+      { type: "vibeya:open-studio", ...request },
+      window.location.origin
+    )
+  }, [])
+
+  const handleFrameLoad = useCallback(async () => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("openStudio") !== "1") return
+
+    const request: StudioRequest = {}
+    for (const key of ["product", "color", "size", "print", "areas", "prompt"] as const) {
+      const value = params.get(key)
+      if (value) request[key] = value
+    }
+
+    try {
+      const response = await fetch("/api/vibeya/session", {
+        credentials: "same-origin",
+        cache: "no-store",
+      })
+      if (!response.ok) throw new Error("Session check unavailable")
+      const session = (await response.json()) as StudioSession
+      if (session.authenticated) {
+        openStudio(request)
+      } else if (session.temporarilyUnavailable) {
+        window.alert("Could not verify your sign-in right now. Please try again in a moment.")
+      } else {
+        setAuthRedirectTo(getStudioUrl(request))
+        setAuthOpen(true)
+      }
+    } catch {
+      window.alert("Could not verify your sign-in right now. Please try again in a moment.")
+    }
+  }, [getStudioUrl, openStudio])
 
   useEffect(() => {
     const handleFrameMessage = async (event: MessageEvent) => {
@@ -34,14 +82,6 @@ export default function StandaloneProductPage({ countryCode }: { countryCode: st
         if (typeof event.data[key] === "string") request[key] = event.data[key]
       }
 
-      const returnUrl = () => {
-        const params = new URLSearchParams({ openStudio: "1" })
-        for (const [key, value] of Object.entries(request)) {
-          if (value) params.set(key, value)
-        }
-        return `/${countryCode}?${params.toString()}#top`
-      }
-
       try {
         const response = await fetch("/api/vibeya/session", {
           credentials: "same-origin",
@@ -51,14 +91,12 @@ export default function StandaloneProductPage({ countryCode }: { countryCode: st
         const session = (await response.json()) as StudioSession
 
         if (session.authenticated) {
-          frameRef.current?.contentWindow?.postMessage(
-            { type: "vibeya:open-studio", ...request },
-            window.location.origin
-          )
+          openStudio(request)
         } else if (session.temporarilyUnavailable) {
           window.alert("Could not verify your sign-in right now. Please try again in a moment.")
         } else {
-          window.location.assign(returnUrl())
+          setAuthRedirectTo(getStudioUrl(request))
+          setAuthOpen(true)
         }
       } catch {
         window.alert("Could not verify your sign-in right now. Please try again in a moment.")
@@ -67,7 +105,7 @@ export default function StandaloneProductPage({ countryCode }: { countryCode: st
 
     window.addEventListener("message", handleFrameMessage)
     return () => window.removeEventListener("message", handleFrameMessage)
-  }, [countryCode])
+  }, [getStudioUrl, openStudio])
 
   return (
     <>
@@ -85,10 +123,18 @@ export default function StandaloneProductPage({ countryCode }: { countryCode: st
       <iframe
         ref={frameRef}
         className="vibeya-standalone-product-frame"
-        src="/vibeya/index.html?v=storefront-seo-copy-20261115-1&standalone=1#product-mg8014061"
+        src="/vibeya/index.html?v=metal-sign-flow-20261116-1&standalone=1#product-mg8014061"
         title="Custom Metal Bottle Cap Wall Sign"
+        onLoad={handleFrameLoad}
         style={{ display: "block", width: "100%", height: "100vh", border: 0 }}
       />
+      {authOpen && (
+        <AuthModal
+          countryCode={countryCode}
+          onClose={() => setAuthOpen(false)}
+          redirectTo={authRedirectTo}
+        />
+      )}
     </>
   )
 }
