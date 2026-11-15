@@ -28,6 +28,7 @@ const INDEXABLE_CONTENT_PATHS = [
   "/vibeya/inspiration/cat-bubble-cats-custom-shower-curtain.html",
   "/vibeya/inspiration/deadpan-penguin-custom-tankini.html",
   "/vibeya/inspiration/custom-kids-basketball-jersey-set.html",
+  "/vibeya/inspiration/sauce-boss-custom-cooking-apron.html",
 ]
 const PAGE_SIZE = 200
 
