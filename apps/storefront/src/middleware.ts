@@ -135,7 +135,9 @@ async function getCountryCode(
  */
 export async function middleware(request: NextRequest) {
   const normalizedPath = request.nextUrl.pathname.replace(/\/+$/, "") || "/"
-  if (/^\/(?:[a-z]{2}\/)?vibeya\/inspiration$/i.test(normalizedPath)) {
+  const cleanInspirationPath = /^\/(?:[a-z]{2}\/)?vibeya\/inspiration$/i.test(normalizedPath)
+  const localizedIndexPath = /^\/[a-z]{2}\/vibeya\/inspiration\/index\.html$/i.test(normalizedPath)
+  if (cleanInspirationPath || localizedIndexPath) {
     const destination = new URL("/vibeya/inspiration/index.html", request.url)
     destination.search = request.nextUrl.search
     return NextResponse.redirect(destination, 308)
