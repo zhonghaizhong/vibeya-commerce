@@ -134,6 +134,13 @@ async function getCountryCode(
  * Middleware to handle region selection and onboarding status.
  */
 export async function middleware(request: NextRequest) {
+  const normalizedPath = request.nextUrl.pathname.replace(/\/+$/, "") || "/"
+  if (/^\/(?:[a-z]{2}\/)?vibeya\/inspiration$/i.test(normalizedPath)) {
+    const destination = new URL("/vibeya/inspiration/index.html", request.url)
+    destination.search = request.nextUrl.search
+    return NextResponse.redirect(destination, 308)
+  }
+
   if (request.nextUrl.pathname.includes(".")) {
     return NextResponse.next()
   }
