@@ -19,7 +19,7 @@ const packOptions = [
 ]
 const galleryFiles = Array.from(
   { length: 6 },
-  (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.png`
+  (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.webp`
 )
 
 const variants = packOptions.map(({ size, amount, sku }) => ({

@@ -117,7 +117,7 @@ const apronGallery = Array.from(
 
 const metalPlaqueGallery = Array.from(
   { length: 6 },
-  (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.png`
+  (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.webp`
 )
 
 const longSleeveColors: VibeyaColor[] = [
@@ -490,7 +490,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
     id: "mg8014061",
     handle: "vibeya-custom-metal-bottle-cap-wall-sign",
     catalogOnly: true,
-    catalogImage: "/vibeya/assets/products/mg8014061/black/01-carousel.png",
+    catalogImage: "/vibeya/assets/products/mg8014061/black/01-carousel.webp",
     category: "Home & Bath",
     name: "VIBEYA Custom Metal Bottle Cap Wall Sign",
     short: "Custom round metal wall sign",
