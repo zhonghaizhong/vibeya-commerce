@@ -102,8 +102,8 @@
 .optionBlock .swatches { justify-content: flex-start; gap: 13px; margin: 0; }
 .optionBlock .swatch { width: 27px; height: 27px; flex-basis: 27px; }
 .textButton { padding: 0; border: 0; color: #705695; background: none; font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
-.sizes { display: flex; flex-wrap: wrap; gap: 8px; }
-.sizes button { min-width: 43px; height: 41px; padding: 0 10px; border: 1px solid #d8d1d9; border-radius: 7px; color: inherit; background: white; font: inherit; font-size: 12px; cursor: pointer; }
+.sizes { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.sizes button { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; min-width: 46px; min-height: 42px; padding: 0 13px; border: 1px solid #d8d1d9; border-radius: 9px; color: inherit; background: white; font: inherit; font-size: 12px; line-height: 1; white-space: nowrap; cursor: pointer; transition: border-color .16s ease, color .16s ease, background-color .16s ease; }
 .sizes button:hover, .sizes .sizeSelected { border-color: #6e548e; color: white; background: #6e548e; }
 .sizeGuide { margin-top: 14px; padding: 12px; border: 1px solid #e9e2e9; border-radius: 10px; background: #fff; }
 .tableScroll { overflow-x: auto; }
