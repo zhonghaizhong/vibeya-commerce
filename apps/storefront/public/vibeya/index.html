@@ -1743,6 +1743,10 @@
   function studioLoginUrl(selection){const params=new URLSearchParams({openStudio:'1',product:selection.product,color:selection.color,size:selection.size,print:selection.print});if(selection.areas)params.set('areas',selection.areas);if(selection.prompt)params.set('prompt',selection.prompt);return '/us?'+params.toString()+'#top';}
   function requestStudio(product=chosen,prompt){
     const selection={product:product.id,color:selectedColor,size:selectedSize,print:selectedPrint,areas:product.id==='sds-233939'?selectedUniformZones.join(','):'',prompt:prompt||''};
+    if(window.parent!==window&&new URLSearchParams(location.search).get('v')==='canonical-bath-mat-product'){
+      showStudio(product,prompt);
+      return;
+    }
     if(window.parent!==window){window.parent.postMessage({type:'vibeya:request-studio',...selection},location.origin);return;}
     fetch('/api/vibeya/session',{credentials:'same-origin',cache:'no-store'}).then(response=>{if(!response.ok)throw new Error('Session check unavailable');return response.json();}).then(session=>{
       if(session?.authenticated){showStudio(product,prompt);return;}
