@@ -18,6 +18,71 @@ type Props = {
   params: Promise<{ countryCode: string; handle: string }>
 }
 
+const PRODUCT_SEO: Partial<
+  Record<string, { title: string; name: string; description: string }>
+> = {
+  "vibeya-custom-cotton-long-sleeve-tee": {
+    title: "Custom Long Sleeve Shirt | Photo & AI Design | VIBEYA",
+    name: "Custom Cotton Long Sleeve Tee",
+    description:
+      "Design a custom long sleeve shirt with a photo, artwork, or AI prompt. Preview front, back, or double-sided print; choose from seven colors and sizes XS–3XL.",
+  },
+  "vibeya-washed-vintage-hooded-sweatshirt": {
+    title: "Custom Graphic Hoodie | Washed Vintage Style | VIBEYA",
+    name: "Custom Graphic Hoodie",
+    description:
+      "Design a custom graphic hoodie with front and back artwork on 400g washed fleece. Choose from six colors and sizes S–2XL, then preview your design.",
+  },
+  "vibeya-custom-knitted-beanie": {
+    title: "Custom Knitted Beanie with Cuff Print | VIBEYA",
+    name: "Custom Knitted Beanie",
+    description:
+      "Create a custom knitted beanie with your design printed on the folded front cuff. Preview a personalized winter hat in black, red, or gray; one size.",
+  },
+  "vibeya-custom-20oz-stainless-steel-tumbler": {
+    title: "Custom 20 oz Stainless Steel Tumbler | VIBEYA",
+    name: "Custom 20 oz Stainless Steel Tumbler",
+    description:
+      "Design a custom 20 oz stainless steel tumbler with your art in a full-wrap print. Includes a clear lid and separate straw; preview before ordering.",
+  },
+  "vibeya-custom-3d-bath-mat": {
+    title: "Custom 3D Bath Mat | Photo & AI Design | VIBEYA",
+    name: "Custom 3D Optical Illusion Bath Mat",
+    description:
+      "Create a custom photo bath mat or describe an original design with an AI prompt. Preview the full-surface print and choose from three sizes for your bathroom.",
+  },
+  "vibeya-custom-flannel-throw-blanket": {
+    title: "Custom Photo Blanket | Flannel Throw Blanket | VIBEYA",
+    name: "Custom Flannel Photo Blanket",
+    description:
+      "Design a custom flannel throw blanket with a full-surface printed front and soft white reverse. Preview your personalized blanket and choose from four sizes.",
+  },
+  "vibeya-custom-shower-curtain": {
+    title: "Custom Shower Curtain | Design Your Own | VIBEYA",
+    name: "Custom Shower Curtain",
+    description:
+      "Design a custom shower curtain with a single-sided, edge-to-edge print. Preview it hanging naturally and choose from four sizes.",
+  },
+  "vibeya-custom-womens-tankini-swimsuit-set": {
+    title: "Custom Tankini Swimsuit Set for Women | VIBEYA",
+    name: "Custom Women's Tankini Swimsuit Set",
+    description:
+      "Design a custom women's tankini swimsuit with artwork or a text prompt. Preview a halter top and separate side-tie shorts; five colors, sizes S–XL.",
+  },
+  "vibeya-custom-kids-basketball-uniform": {
+    title: "Custom Kids Basketball Jersey and Shorts Set | VIBEYA",
+    name: "Custom Kids' Basketball Jersey & Shorts Set",
+    description:
+      "Create a custom kids basketball jersey set with a text prompt. Design the jersey front, back, and shorts separately; five colors, sizes 100–140 cm.",
+  },
+  "vibeya-custom-prompt-design-apron": {
+    title: "Custom Apron Design | Personalized Cooking Apron | VIBEYA",
+    name: "Custom Cooking Apron",
+    description:
+      "Create a personalized cooking apron from a text prompt. Preview it on a black apron with an adjustable neck strap and three divided pockets; one size.",
+  },
+}
+
 export const dynamic = "force-static"
 export const revalidate = 60
 
@@ -42,45 +107,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const [origin, regions] = await Promise.all([getSiteOrigin(), listRegions()])
   const path = `/products/${product.handle}`
   const productUrl = `${origin}/${params.countryCode}${path}`
-  const seoContent: Record<string, { title: string; description: string }> = {
-    "vibeya-washed-vintage-hooded-sweatshirt": {
-      title: "Custom Vintage Graphic Hoodie | VIBEYA",
-      description:
-        "Shop VIBEYA’s 400g washed vintage hoodie with original double-sided artwork. Choose from six colors and sizes S–2XL. Free U.S. shipping.",
-    },
-    "vibeya-custom-knitted-beanie": {
-      title: "Custom Knitted Beanie | Personalize Your Cuff Print | VIBEYA",
-      description:
-        "Design a custom knitted beanie with your own print on the folded front cuff. Choose black, red, or gray, preview your personalized winter hat, and order online.",
-    },
-    "vibeya-custom-3d-bath-mat": {
-      title: "Custom Bath Mat with Photo Upload & AI Design | VIBEYA",
-      description:
-        "Upload a photo or describe your idea to create an AI-designed custom bath mat. Preview the full-surface print, choose from three sizes, and order online.",
-    },
-    "vibeya-custom-cotton-long-sleeve-tee": {
-      title: "Custom Long Sleeve T-Shirt | Design Your Own | VIBEYA",
-      description:
-        "Create a custom long sleeve shirt with an uploaded photo, artwork, or AI prompt. Choose from seven colors and sizes XS–3XL, preview your print, and order online.",
-    },
-    "vibeya-custom-20oz-stainless-steel-tumbler": {
-      title: "Custom 20 oz Stainless Steel Tumbler | VIBEYA",
-      description:
-        "Design your own full-wrap print for VIBEYA’s 20 oz stainless steel tumbler. Clear sliding lid, separate straw, and U.S. shipping available.",
-    },
-    "vibeya-custom-womens-tankini-swimsuit-set": {
-      title: "Custom Women’s Tankini Swimsuit Set | Design Your Own | VIBEYA",
-      description:
-        "Design your own women’s tankini swimsuit with a custom print. Choose a halter swim top and separate side-tie shorts in five colors, sizes S–XL.",
-    },
-    "vibeya-custom-kids-basketball-uniform": {
-      title: "Custom Kids Basketball Jersey & Shorts | Design Your Own | VIBEYA",
-      description:
-        "Design a custom kids basketball uniform with a text prompt. Customize the jersey front, back, and shorts independently, then mix and match prints. Five colors, sizes 100–140 cm.",
-    },
-  }
-  const productSeo = seoContent[product.handle]
-  const title = productSeo?.title ?? `${product.title} | ${STORE_NAME}`
+  const productSeo = PRODUCT_SEO[product.handle]
+  const title =
+    productSeo?.title ??
+    `${product.title.replace(/^VIBEYA\s+/i, "")} | ${STORE_NAME}`
   const description =
     productSeo?.description ??
     `${product.subtitle || product.description || product.title}`
@@ -166,22 +196,16 @@ export default async function ProductPage(props: Props) {
   }
 
   const origin = await getSiteOrigin()
-  const structuredProduct =
-    pricedProduct.handle === "vibeya-custom-3d-bath-mat"
-      ? {
-          ...pricedProduct,
-          description:
-            "Create a custom photo bath mat by uploading an image or describing an original design with a text prompt. Preview the full-surface print, choose from three sizes, and order online.",
-        }
-      : pricedProduct.handle === "vibeya-custom-cotton-long-sleeve-tee"
-        ? {
-            ...pricedProduct,
-            description:
-              "Create a custom cotton long sleeve T-shirt with an uploaded photo, artwork, or an AI design prompt. Choose from seven colors and sizes XS–3XL, preview front or back printing, and order online.",
-          }
-      : pricedProduct
+  const productSeo = PRODUCT_SEO[pricedProduct.handle]
+  const seoProduct = productSeo
+    ? {
+        ...pricedProduct,
+        title: productSeo.name,
+        description: productSeo.description,
+      }
+    : pricedProduct
   const structuredData = buildProductStructuredData({
-    product: structuredProduct,
+    product: seoProduct,
     region,
     countryCode: params.countryCode,
     productUrl: `${origin}/${params.countryCode}/products/${pricedProduct.handle}`,
@@ -200,7 +224,7 @@ export default async function ProductPage(props: Props) {
         <LongSleeveProductExperience countryCode={params.countryCode} />
       ) : (
         <ProductTemplate
-          product={pricedProduct}
+          product={seoProduct}
           region={region}
           countryCode={params.countryCode}
         />

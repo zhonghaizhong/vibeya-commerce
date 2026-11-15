@@ -1436,9 +1436,10 @@
     const cardPrice=p.sizePrices?`From ${p.price}`:p.price;
     if(p.id==='sds-167256'){
       const href=`/us/products/${encodeURIComponent(p.handle)}?color=${encodeURIComponent(defaultColor)}`;
-      return `<article class="product-card" data-product-id="${esc(p.id)}" aria-label="${esc(p.name)}"><a class="product-card-media long-sleeve-product-link" href="${href}" target="_top" aria-label="View ${esc(p.name)} in ${esc(colorName)}"><span class="card-plus" aria-hidden="true">↗</span><div class="photo"><img data-card-image src="${image}" alt="${esc(colorName)} ${esc(p.short)} — product gallery image 1" loading="lazy"></div></a><div class="card-color-options" role="group" aria-label="Preview ${esc(p.short)} colors">${swatches}</div><div class="card-color-caption" aria-live="polite">${esc(variantSummary)}</div><a class="product-card-info long-sleeve-product-link" href="${href}" target="_top" aria-label="View details for ${esc(p.name)} in ${esc(colorName)}"><h3>${esc(p.name)}</h3><p>${esc(cardPrice)}</p></a></article>`;
+      return `<article class="product-card" data-product-id="${esc(p.id)}" aria-label="${esc(p.name)}"><a class="product-card-media product-detail-link" href="${href}" target="_top" aria-label="View ${esc(p.name)} in ${esc(colorName)}"><span class="card-plus" aria-hidden="true">↗</span><div class="photo"><img data-card-image src="${image}" alt="${esc(colorName)} ${esc(p.short)} — product gallery image 1" loading="lazy"></div></a><div class="card-color-options" role="group" aria-label="Preview ${esc(p.short)} colors">${swatches}</div><div class="card-color-caption" aria-live="polite">${esc(variantSummary)}</div><a class="product-card-info product-detail-link" href="${href}" target="_top" aria-label="View details for ${esc(p.name)} in ${esc(colorName)}"><h3>${esc(p.name)}</h3><p>${esc(cardPrice)}</p></a></article>`;
     }
-    return `<article class="product-card" aria-label="${esc(p.name)}"><button type="button" class="product-card-media" data-product="${esc(p.id)}" data-product-color="${defaultColor}" aria-label="View ${esc(p.name)} in ${esc(colorName)}"><span class="card-plus" aria-hidden="true">↗</span><div class="photo"><img data-card-image src="${image}" alt="${esc(colorName)} ${esc(p.short)} — product gallery image 1" loading="lazy"></div></button><div class="card-color-options" role="group" aria-label="Preview ${esc(p.short)} colors">${swatches}</div><div class="card-color-caption" aria-live="polite">${esc(variantSummary)}</div><button type="button" class="product-card-info" data-product="${esc(p.id)}" data-product-color="${defaultColor}" aria-label="View details for ${esc(p.name)} in ${esc(colorName)}"><h3>${esc(p.name)}</h3><p>${esc(cardPrice)}</p></button></article>`;
+    const href=`/us/products/${encodeURIComponent(p.handle)}`;
+    return `<article class="product-card" data-product-id="${esc(p.id)}" aria-label="${esc(p.name)}"><a class="product-card-media product-detail-link" href="${href}" target="_top" aria-label="View ${esc(p.name)} in ${esc(colorName)}"><span class="card-plus" aria-hidden="true">↗</span><div class="photo"><img data-card-image src="${image}" alt="${esc(colorName)} ${esc(p.short)} — product gallery image 1" loading="lazy"></div></a><div class="card-color-options" role="group" aria-label="Preview ${esc(p.short)} colors">${swatches}</div><div class="card-color-caption" aria-live="polite">${esc(variantSummary)}</div><a class="product-card-info product-detail-link" href="${href}" target="_top" aria-label="View details for ${esc(p.name)} in ${esc(colorName)}"><h3>${esc(p.name)}</h3><p>${esc(cardPrice)}</p></a></article>`;
   }
   const productHTML=renderProductCard;
   function paintChips(id,all,selected,attr){$(id).innerHTML=all.map(cat=>`<button type="button" class="catalog-chip ${cat===selected?'active':''}" ${attr}="${esc(cat)}" aria-pressed="${cat===selected}">${esc(cat)}</button>`).join('');}
@@ -2301,13 +2302,19 @@ const blanket=chosen.id==='sds-97226';
     tag=e.target.closest('[data-idea-tag]');if(tag){ideaTag=tag.dataset.ideaTag;ideaVisible=9;paintIdeas();return;}
 
     let colorSwatch=e.target.closest('[data-card-color]');if(colorSwatch){
-      const card=colorSwatch.closest('.product-card'),productId=card.dataset.productId||card.querySelector('[data-product]')?.dataset.product,product=products.find(p=>p.id===productId);
+      const card=colorSwatch.closest('.product-card'),product=products.find(p=>p.id===card.dataset.productId);
       if(!product)return;
       const variant=productVariants[product.id],color=colorSwatch.dataset.cardColor,label=variant.colors[color][0],image=card.querySelector('[data-card-image]');
       card.querySelectorAll('[data-card-color]').forEach(button=>button.setAttribute('aria-pressed',String(button===colorSwatch)));
       image.src=variant.image(color);image.alt=label+' '+product.short+' — product gallery image 1';
-      card.querySelectorAll('[data-product]').forEach(button=>{button.dataset.productColor=color;button.setAttribute('aria-label',(button.classList.contains('product-card-info')?'View details for ':'View ')+product.name+' in '+label);});
-      card.querySelectorAll('.long-sleeve-product-link').forEach(link=>{const destination=new URL(link.href,location.href);destination.searchParams.set('color',color);link.href=destination.pathname+destination.search;link.setAttribute('aria-label',(link.classList.contains('product-card-info')?'View details for ':'View ')+product.name+' in '+label);});
+      card.querySelectorAll('.product-detail-link').forEach(link=>{
+        link.setAttribute('aria-label',(link.classList.contains('product-card-info')?'View details for ':'View ')+product.name+' in '+label);
+        if(product.id==='sds-167256'){
+          const destination=new URL(link.href,location.href);
+          destination.searchParams.set('color',color);
+          link.href=destination.pathname+destination.search;
+        }
+      });
       card.querySelector('.card-color-caption').textContent=product.variantSummary||label+' · '+product.colors.length+' colors · '+variant.sizesLabel;
       return;
     }
@@ -2336,7 +2343,6 @@ const blanket=chosen.id==='sds-97226';
       if(chosen.id==='sds-167256'){renderProductCards();paintProducts();}
       return;
     }
-    b=e.target.closest('[data-product]');if(b){openProductById(b.dataset.product,b.dataset.productColor);return;}
     b=e.target.closest('[data-inspo]');if(b){chosenArt=+b.dataset.inspo;hasPreview=true;requestStudio(chosen,inspirations[chosenArt].prompt);return;}
     b=e.target.closest('[data-studio-product]');if(b){chosen=products.find(p=>p.id===b.dataset.studioProduct);selectedColor=chosen.colors?.[0]||'Black';selectedColorConfirmed=chosen.colors?.length===1;selectedSize=chosen.sizes?.length===1||chosen.id==='vibeya-shower-curtain'?chosen.sizes[0]:'';selectedPrint=chosen.id==='sds-128646'?'wrap':'front';studioViewMode='product';drawProductChoices();drawStudioVariantChoices();syncStudioPromptFields();hasPreview=false;drawPreview();return;}
     b=e.target.closest('[data-example]');if(b){studioActiveInput().value=b.dataset.example;hasPreview=false;drawPreview();return;}
