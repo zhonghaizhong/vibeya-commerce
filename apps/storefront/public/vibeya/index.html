@@ -1691,6 +1691,11 @@
   }
   function routeCatalog(){
     const [key,routeQuery='']=location.hash.slice(1).split('?');
+    if(key==='product-sds-138708'&&window.top===window){
+      const color=new URLSearchParams(routeQuery).get('color')||selectedColor||'White';
+      window.location.replace(`/us/products/vibeya-custom-3d-bath-mat?color=${encodeURIComponent(color)}`);
+      return;
+    }
     if(key.startsWith('product-')){
       const product=products.find(p=>p.id===key.slice(8));
       const params=new URLSearchParams(routeQuery);

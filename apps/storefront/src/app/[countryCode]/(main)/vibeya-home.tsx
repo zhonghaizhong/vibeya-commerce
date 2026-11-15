@@ -145,6 +145,13 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
         return
       }
       if (event.data?.type === "vibeya:route" && typeof event.data.hash === "string") {
+        if (event.data.hash === "#product-sds-138708") {
+          const color = typeof event.data.color === "string" ? event.data.color : "White"
+          window.location.assign(
+            `/${countryCode}/products/vibeya-custom-3d-bath-mat?color=${encodeURIComponent(color)}`
+          )
+          return
+        }
         const incomingHash = event.data.hash.startsWith("#product-") && typeof event.data.color === "string"
           ? `${event.data.hash}?color=${encodeURIComponent(event.data.color)}`
           : event.data.hash
