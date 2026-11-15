@@ -146,7 +146,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
     sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
     gallery: longSleeveGallery,
     eyebrow: "VIBEYA / FIRST COLLECTION",
-    intro: "Your vibe, your rules. Choose from seven colors, then create your own front, back, or double-sided artwork.",
+    intro: "Upload a photo or artwork, or describe a custom long sleeve shirt design with a prompt. Choose from seven colors, then preview front, back, or double-sided printing.",
     highlights: ["100% Cotton", "Custom Front / Back"],
     sizeGuide: "cm",
     sizeRows: [

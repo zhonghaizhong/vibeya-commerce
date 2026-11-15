@@ -814,7 +814,7 @@
       <section class="detail-purchase" aria-labelledby="detailProductTitle">
         <div class="detail-eyebrow" id="detailEyebrow">VIBEYA / FIRST COLLECTION</div>
         <h1 id="detailProductTitle">Custom Cotton Long Sleeve Tee</h1>
-        <p class="detail-intro" id="detailIntro">Your vibe, your rules. Choose from seven colors, then create your own front, back, or double-sided artwork.</p>
+        <p class="detail-intro" id="detailIntro">Upload a photo or artwork, or describe a custom long sleeve shirt design with a prompt. Choose from seven colors, then preview front, back, or double-sided printing.</p>
         <p class="detail-price"><span id="detailPrice" data-vibeya-price="vibeya-custom-cotton-long-sleeve-tee">$19.99 USD</span> <small id="detailShipping">Free U.S. shipping · U.S. addresses only</small></p>
         <div class="detail-trust-mini" id="detailHighlights" aria-label="Product highlights"><span>100% Cotton</span><span>Custom Front / Back</span></div>
         <div class="detail-divider"></div>
@@ -1269,7 +1269,7 @@
       sizesLabel:'Sizes XS–3XL',
       details:{
         title:'Custom Cotton Long Sleeve Tee',eyebrow:'VIBEYA / FIRST COLLECTION',
-        intro:'Your vibe, your rules. Choose from seven colors, then create your own front, back, or double-sided artwork.',
+        intro:'Upload a photo or artwork, or describe a custom long sleeve shirt design with a prompt. Choose from seven colors, then preview front, back, or double-sided printing.',
         highlights:['100% Cotton','Custom Front / Back'],
         rows:[['XS',69,81,52,62],['S',71,91,53,63],['M',75,102,54,64],['L',79,112,55,65],['XL',81,122,56,66],['2XL',84,132,57,67],['3XL',85,141,58,68]],
         guide:'View size guide (cm)',note:'Supplier measurements in centimeters. Manual measurement may vary by 1–2 cm.',
@@ -1434,6 +1434,10 @@
     const image=variant.image(defaultColor),colorName=colorNames[defaultColor];
     const variantSummary=p.variantSummary||`${colorName} · ${p.colors.length} colors · ${variant.sizesLabel}`;
     const cardPrice=p.sizePrices?`From ${p.price}`:p.price;
+    if(p.id==='sds-167256'){
+      const href=`/us/products/${encodeURIComponent(p.handle)}?color=${encodeURIComponent(defaultColor)}`;
+      return `<article class="product-card" data-product-id="${esc(p.id)}" aria-label="${esc(p.name)}"><a class="product-card-media long-sleeve-product-link" href="${href}" target="_top" aria-label="View ${esc(p.name)} in ${esc(colorName)}"><span class="card-plus" aria-hidden="true">↗</span><div class="photo"><img data-card-image src="${image}" alt="${esc(colorName)} ${esc(p.short)} — product gallery image 1" loading="lazy"></div></a><div class="card-color-options" role="group" aria-label="Preview ${esc(p.short)} colors">${swatches}</div><div class="card-color-caption" aria-live="polite">${esc(variantSummary)}</div><a class="product-card-info long-sleeve-product-link" href="${href}" target="_top" aria-label="View details for ${esc(p.name)} in ${esc(colorName)}"><h3>${esc(p.name)}</h3><p>${esc(cardPrice)}</p></a></article>`;
+    }
     return `<article class="product-card" aria-label="${esc(p.name)}"><button type="button" class="product-card-media" data-product="${esc(p.id)}" data-product-color="${defaultColor}" aria-label="View ${esc(p.name)} in ${esc(colorName)}"><span class="card-plus" aria-hidden="true">↗</span><div class="photo"><img data-card-image src="${image}" alt="${esc(colorName)} ${esc(p.short)} — product gallery image 1" loading="lazy"></div></button><div class="card-color-options" role="group" aria-label="Preview ${esc(p.short)} colors">${swatches}</div><div class="card-color-caption" aria-live="polite">${esc(variantSummary)}</div><button type="button" class="product-card-info" data-product="${esc(p.id)}" data-product-color="${defaultColor}" aria-label="View details for ${esc(p.name)} in ${esc(colorName)}"><h3>${esc(p.name)}</h3><p>${esc(cardPrice)}</p></button></article>`;
   }
   const productHTML=renderProductCard;
@@ -1691,6 +1695,11 @@
   }
   function routeCatalog(){
     const [key,routeQuery='']=location.hash.slice(1).split('?');
+    if(key==='product-sds-167256'&&window.top===window){
+      const color=new URLSearchParams(routeQuery).get('color')||'Black';
+      window.location.replace(`/us/products/vibeya-custom-cotton-long-sleeve-tee?color=${encodeURIComponent(color)}`);
+      return;
+    }
     if(key==='product-sds-138708'&&window.top===window){
       const color=new URLSearchParams(routeQuery).get('color')||selectedColor||'White';
       window.location.replace(`/us/products/vibeya-custom-3d-bath-mat?color=${encodeURIComponent(color)}`);
@@ -2292,11 +2301,13 @@ const blanket=chosen.id==='sds-97226';
     tag=e.target.closest('[data-idea-tag]');if(tag){ideaTag=tag.dataset.ideaTag;ideaVisible=9;paintIdeas();return;}
 
     let colorSwatch=e.target.closest('[data-card-color]');if(colorSwatch){
-      const card=colorSwatch.closest('.product-card'),product=products.find(p=>p.id===card.querySelector('[data-product]').dataset.product);
+      const card=colorSwatch.closest('.product-card'),productId=card.dataset.productId||card.querySelector('[data-product]')?.dataset.product,product=products.find(p=>p.id===productId);
+      if(!product)return;
       const variant=productVariants[product.id],color=colorSwatch.dataset.cardColor,label=variant.colors[color][0],image=card.querySelector('[data-card-image]');
       card.querySelectorAll('[data-card-color]').forEach(button=>button.setAttribute('aria-pressed',String(button===colorSwatch)));
       image.src=variant.image(color);image.alt=label+' '+product.short+' — product gallery image 1';
       card.querySelectorAll('[data-product]').forEach(button=>{button.dataset.productColor=color;button.setAttribute('aria-label',(button.classList.contains('product-card-info')?'View details for ':'View ')+product.name+' in '+label);});
+      card.querySelectorAll('.long-sleeve-product-link').forEach(link=>{const destination=new URL(link.href,location.href);destination.searchParams.set('color',color);link.href=destination.pathname+destination.search;link.setAttribute('aria-label',(link.classList.contains('product-card-info')?'View details for ':'View ')+product.name+' in '+label);});
       card.querySelector('.card-color-caption').textContent=product.variantSummary||label+' · '+product.colors.length+' colors · '+variant.sizesLabel;
       return;
     }

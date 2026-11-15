@@ -55,18 +55,33 @@ function ProductCard({ product, onSelect, countryCode = "us" }: ProductCardProps
   }
 
   const color = product.colors.find((option) => option.id === colorId) ?? product.colors[0]
+  const canonicalProductHref = `/${countryCode}/products/${encodeURIComponent(product.handle)}`
+  const singleEntryProduct = product.id === "sds-167256"
+  const canonicalColorHref = `${canonicalProductHref}?color=${encodeURIComponent(color.id)}`
 
   return (
     <article className={`${styles.card} product-card`} aria-label={product.name}>
-      <button
-        className={`${styles.cardImageButton} product-card-media`}
-        type="button"
-        onClick={() => onSelect(product, color.id)}
-        aria-label={`View ${product.name} in ${color.name}`}
-      >
-        <span className={`${styles.cardArrow} card-plus`} aria-hidden="true">↗</span>
-        <div className="photo"><img className={styles.cardImage} src={getVibeyaImage(product, color)} alt={`${color.name} ${product.short}`} /></div>
-      </button>
+      {singleEntryProduct ? (
+        <a
+          className={`${styles.cardImageButton} product-card-media`}
+          href={canonicalColorHref}
+          target="_top"
+          aria-label={`View ${product.name} in ${color.name}`}
+        >
+          <span className={`${styles.cardArrow} card-plus`} aria-hidden="true">↗</span>
+          <div className="photo"><img className={styles.cardImage} src={getVibeyaImage(product, color)} alt={`${color.name} ${product.short}`} /></div>
+        </a>
+      ) : (
+        <button
+          className={`${styles.cardImageButton} product-card-media`}
+          type="button"
+          onClick={() => onSelect(product, color.id)}
+          aria-label={`View ${product.name} in ${color.name}`}
+        >
+          <span className={`${styles.cardArrow} card-plus`} aria-hidden="true">↗</span>
+          <div className="photo"><img className={styles.cardImage} src={getVibeyaImage(product, color)} alt={`${color.name} ${product.short}`} /></div>
+        </button>
+      )}
       <div className={`${styles.swatches} card-color-options`} role="group" aria-label={`${product.short} colors`}>
         {product.colors.map((option) => (
           <button
@@ -81,10 +96,17 @@ function ProductCard({ product, onSelect, countryCode = "us" }: ProductCardProps
         ))}
       </div>
       <p className={`${styles.cardVariant} card-color-caption`}>{product.variantSummary ?? `${color.name} · ${product.colors.length} colors · Sizes ${product.sizes[0]}–${product.sizes.at(-1)}`}</p>
-      <button className={`${styles.cardInfo} product-card-info`} type="button" onClick={() => onSelect(product, color.id)} aria-label={`View details for ${product.name} in ${color.name}`}>
-        <h3>{product.name}</h3>
-        <p>{product.priceUnavailable ? "Price to be confirmed" : product.sizePrices ? `From ${formatPrice(product.price, product.currency)}` : formatPrice(product.price, product.currency)}</p>
-      </button>
+      {singleEntryProduct ? (
+        <a className={`${styles.cardInfo} product-card-info`} href={canonicalColorHref} target="_top" aria-label={`View details for ${product.name} in ${color.name}`}>
+          <h3>{product.name}</h3>
+          <p>{product.priceUnavailable ? "Price to be confirmed" : product.sizePrices ? `From ${formatPrice(product.price, product.currency)}` : formatPrice(product.price, product.currency)}</p>
+        </a>
+      ) : (
+        <button className={`${styles.cardInfo} product-card-info`} type="button" onClick={() => onSelect(product, color.id)} aria-label={`View details for ${product.name} in ${color.name}`}>
+          <h3>{product.name}</h3>
+          <p>{product.priceUnavailable ? "Price to be confirmed" : product.sizePrices ? `From ${formatPrice(product.price, product.currency)}` : formatPrice(product.price, product.currency)}</p>
+        </button>
+      )}
     </article>
   )
 }

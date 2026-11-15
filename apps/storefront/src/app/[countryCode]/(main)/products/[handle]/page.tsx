@@ -4,6 +4,7 @@ import { listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
 import BathMatProductExperience from "@modules/vibeya/components/bath-mat-product-experience"
+import LongSleeveProductExperience from "@modules/vibeya/components/long-sleeve-product-experience"
 import { HttpTypes } from "@medusajs/types"
 import { isVariantInStock } from "@lib/util/inventory"
 import {
@@ -58,9 +59,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         "Upload a photo or describe your idea to create an AI-designed custom bath mat. Preview the full-surface print, choose from three sizes, and order online.",
     },
     "vibeya-custom-cotton-long-sleeve-tee": {
-      title: "Custom Long Sleeve T-Shirt | VIBEYA",
+      title: "Custom Long Sleeve T-Shirt | Design Your Own | VIBEYA",
       description:
-        "Shop VIBEYA’s cotton long sleeve tee with the Funny Skeleton graphic. Choose from seven colors and sizes XS–3XL. Free U.S. shipping.",
+        "Create a custom long sleeve shirt with an uploaded photo, artwork, or AI prompt. Choose from seven colors and sizes XS–3XL, preview your print, and order online.",
     },
     "vibeya-custom-20oz-stainless-steel-tumbler": {
       title: "Custom 20 oz Stainless Steel Tumbler | VIBEYA",
@@ -172,6 +173,12 @@ export default async function ProductPage(props: Props) {
           description:
             "Create a custom photo bath mat by uploading an image or describing an original design with a text prompt. Preview the full-surface print, choose from three sizes, and order online.",
         }
+      : pricedProduct.handle === "vibeya-custom-cotton-long-sleeve-tee"
+        ? {
+            ...pricedProduct,
+            description:
+              "Create a custom cotton long sleeve T-shirt with an uploaded photo, artwork, or an AI design prompt. Choose from seven colors and sizes XS–3XL, preview front or back printing, and order online.",
+          }
       : pricedProduct
   const structuredData = buildProductStructuredData({
     product: structuredProduct,
@@ -189,6 +196,8 @@ export default async function ProductPage(props: Props) {
       />
       {pricedProduct.handle === "vibeya-custom-3d-bath-mat" ? (
         <BathMatProductExperience countryCode={params.countryCode} />
+      ) : pricedProduct.handle === "vibeya-custom-cotton-long-sleeve-tee" ? (
+        <LongSleeveProductExperience countryCode={params.countryCode} />
       ) : (
         <ProductTemplate
           product={pricedProduct}

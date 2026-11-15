@@ -70,7 +70,7 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
   useEffect(() => {
     const currentParams = new URLSearchParams(window.location.search)
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "storefront-seo-copy-20261115-1")
+    forwardedParams.set("v", "storefront-canonical-tee-20261115-1")
     for (const key of ["viewCart", "openStudio", "openSearch", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
       const value = currentParams.get(key)
       if (value) forwardedParams.set(key, value)
@@ -149,6 +149,13 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
           const color = typeof event.data.color === "string" ? event.data.color : "White"
           window.location.assign(
             `/${countryCode}/products/vibeya-custom-3d-bath-mat?color=${encodeURIComponent(color)}`
+          )
+          return
+        }
+        if (event.data.hash === "#product-sds-167256") {
+          const color = typeof event.data.color === "string" ? event.data.color : "Black"
+          window.location.replace(
+            `/${countryCode}/products/vibeya-custom-cotton-long-sleeve-tee?color=${encodeURIComponent(color)}`
           )
           return
         }
