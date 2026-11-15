@@ -70,7 +70,7 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
   useEffect(() => {
     const currentParams = new URLSearchParams(window.location.search)
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "storefront-canonical-tee-20261115-1")
+    forwardedParams.set("v", "storefront-shop-seo-all-products-20261116-1")
     for (const key of ["viewCart", "openStudio", "openSearch", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
       const value = currentParams.get(key)
       if (value) forwardedParams.set(key, value)

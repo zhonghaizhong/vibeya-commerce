@@ -8,6 +8,21 @@ const HOME_TITLE = "Custom Products & Personalized Gifts | VIBEYA"
 const HOME_DESCRIPTION =
   "Create personalized gifts from a photo or AI prompt. Design custom apparel, drinkware, blankets, bath mats, and shower curtains, then preview and order online."
 
+// Keep the indexable shop list aligned with the product catalog in public/vibeya/index.html.
+const SHOP_ITEMS = [
+  ["VIBEYA Custom Cotton Long Sleeve Tee", "vibeya-custom-cotton-long-sleeve-tee"],
+  ["VIBEYA Washed Vintage Hooded Sweatshirt", "vibeya-washed-vintage-hooded-sweatshirt"],
+  ["VIBEYA Custom Knitted Beanie", "vibeya-custom-knitted-beanie"],
+  ["VIBEYA Custom 20 oz Stainless Steel Tumbler", "vibeya-custom-20oz-stainless-steel-tumbler"],
+  ["VIBEYA Custom 3D Optical Illusion Bath Mat", "vibeya-custom-3d-bath-mat"],
+  ["VIBEYA Custom Flannel Throw Blanket", "vibeya-custom-flannel-throw-blanket"],
+  ["VIBEYA Custom Prompt-Designed Apron", "vibeya-custom-prompt-design-apron"],
+  ["VIBEYA Custom Shower Curtain", "vibeya-custom-shower-curtain"],
+  ["VIBEYA Custom Women’s Tankini Swimsuit Set", "vibeya-custom-womens-tankini-swimsuit-set"],
+  ["VIBEYA Custom Kids' Basketball Uniform", "vibeya-custom-kids-basketball-uniform"],
+  ["VIBEYA Custom Metal Bottle Cap Wall Sign", "vibeya-custom-metal-bottle-cap-wall-sign"],
+] as const
+
 export async function generateMetadata({
   params,
 }: {
@@ -86,6 +101,21 @@ export default async function Home({
         description: HOME_DESCRIPTION,
         isPartOf: { "@id": `${origin}/#website` },
         about: { "@id": `${origin}/#organization` },
+        hasPart: { "@id": `${pageUrl}#shop` },
+      },
+      {
+        "@type": "ItemList",
+        "@id": `${pageUrl}#shop`,
+        name: "Custom Products & Personalized Gifts",
+        description: HOME_DESCRIPTION,
+        itemListOrder: "https://schema.org/ItemListUnordered",
+        numberOfItems: SHOP_ITEMS.length,
+        itemListElement: SHOP_ITEMS.map(([name, handle], index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name,
+          url: `${origin}/${countryCode}/products/${encodeURIComponent(handle)}`,
+        })),
       },
     ],
   }

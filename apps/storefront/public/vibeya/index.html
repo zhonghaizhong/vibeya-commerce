@@ -784,7 +784,6 @@
       <div class="catalog-chips" id="productFilters" aria-label="Product categories"></div>
       <div class="catalog-status"><span id="productCount" role="status"></span><span>Choose a product to start customizing ✳</span></div>
       <div class="catalog-grid products-catalog" id="allProducts"></div>
-      <div class="catalog-bottom"><button class="btn secondary" id="moreProducts" hidden>LOAD MORE PRODUCTS</button></div>
       <div class="catalog-callout"><div><strong>Have an idea, but no product yet?</strong><p>Start with your imagination. You can pick a product later.</p></div><button class="btn dark" data-open-studio>✦ START DESIGNING</button></div>
     </div>
   </main>
@@ -1275,7 +1274,7 @@
   const catalogProducts=[...products];
   let productTags=['All Products', ...new Set(catalogProducts.map(p=>p.category))];
   const ideaTags=['All Inspiration','Animals','Cute','Funny','Nature','Retro','Art','Space'];
-  let productTag='All Products',ideaTag='All Inspiration',productVisible=8,ideaVisible=9;
+  let productTag='All Products',ideaTag='All Inspiration',ideaVisible=9;
   const itemPrice=p=>{const v=(p.price.match(/[\d.]+/)||[])[0];return v===undefined?null:Number(v);};
   const sizeLabel=(product,size)=>product?.sizeLabels?.[size]||size||'Select a size';
   const selectedProductPrice=(product,size)=>product?.sizePrices?.[size]??itemPrice(product);
@@ -1486,9 +1485,8 @@
     if(order==='az')matches.sort((a,b)=>a.name.localeCompare(b.name));
     if(order==='low')matches.sort((a,b)=>(itemPrice(a)??Infinity)-(itemPrice(b)??Infinity));
     if(order==='high')matches.sort((a,b)=>{const x=itemPrice(a),y=itemPrice(b);return (y===null?-Infinity:y)-(x===null?-Infinity:x);});
-    $('#allProducts').innerHTML=matches.length?matches.slice(0,productVisible).map(productHTML).join(''):'<div class="catalog-empty"><strong>No products found.</strong>Try a different search or category.</div>';
-    $('#productCount').textContent=`Showing ${Math.min(productVisible,matches.length)} of ${matches.length} products`;
-    $('#moreProducts').hidden=matches.length<=productVisible;
+    $('#allProducts').innerHTML=matches.length?matches.map(productHTML).join(''):'<div class="catalog-empty"><strong>No products found.</strong>Try a different search or category.</div>';
+    $('#productCount').textContent=`Showing ${matches.length} ${matches.length===1?'product':'products'}`;
   }
   function paintIdeas(){
     paintChips('#ideaFilters',ideaTags,ideaTag,'data-idea-tag');
@@ -2322,11 +2320,10 @@ const blanket=chosen.id==='sds-97226';
     setTimeout(()=>requestStudio(products[0],inspirations[0].prompt),60);
   }
 
-  $('#productSearch').addEventListener('input',()=>{productVisible=8;paintProducts();});
+  $('#productSearch').addEventListener('input',paintProducts);
   $('#ideaSearch').addEventListener('input',()=>{ideaVisible=9;paintIdeas();});
   $('#productSort').addEventListener('change',paintProducts);
   $('#ideaSort').addEventListener('change',paintIdeas);
-  $('#moreProducts').addEventListener('click',()=>{productVisible+=8;paintProducts();});
   $('#moreIdeas').addEventListener('click',()=>{ideaVisible+=9;paintIdeas();});
   const preloadedColorImages=new Set();
   document.addEventListener('pointerover',e=>{
@@ -2339,7 +2336,7 @@ const blanket=chosen.id==='sds-97226';
   },{passive:true});
   document.addEventListener('click',e=>{
     let b=e.target.closest('[data-zoom-generated]');if(b){lastZoomTrigger=b;openImageZoom();return;}
-    let tag=e.target.closest('[data-product-tag]');if(tag){productTag=tag.dataset.productTag;productVisible=8;paintProducts();return;}
+    let tag=e.target.closest('[data-product-tag]');if(tag){productTag=tag.dataset.productTag;paintProducts();return;}
     tag=e.target.closest('[data-idea-tag]');if(tag){ideaTag=tag.dataset.ideaTag;ideaVisible=9;paintIdeas();return;}
 
     let colorSwatch=e.target.closest('[data-card-color]');if(colorSwatch){
