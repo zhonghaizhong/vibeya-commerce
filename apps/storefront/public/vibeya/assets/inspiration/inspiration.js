@@ -156,9 +156,16 @@ document.addEventListener('DOMContentLoaded',async()=>{
     const cards=[...document.querySelectorAll('[data-inspiration-feature]')];
     const labels={
       product:{'long-sleeve':'Long Sleeve Tee',hoodie:'Hoodie',tumbler:'Custom 20 oz Tumbler','bath-mat':'Custom 3D Bath Mat',blanket:'Custom Flannel Throw Blanket',beanie:'Custom Knitted Beanie','shower-curtain':'Custom Shower Curtain',tankini:"Custom Women's Tankini Swimsuit",'basketball-uniform':"Kids' Basketball Jersey Set",apron:'Custom Apron'},
-      pattern:{skeleton:'Skeleton','botanical-celestial':'Botanical & Celestial',animal:'Animal',penguin:'Penguin',cat:'Cat','rubber-duck':'Rubber Duck','sleepy-sheep':'Sleepy Sheep', 'tomato-chef':'Tomato Chef',typography:'Typography','sports-typography':'Basketball Typography'},
-      style:{'street-graffiti':'Street Graffiti','nature-streetwear':'Nature-Inspired Streetwear','retro-whimsical':'Retro Whimsical','playful-whimsy':'Playful Whimsy','cozy-humor':'Cozy Humor','cozy-cute':'Cozy & Cute',funny:'Humorous',streetwear:'Retro Varsity Streetwear','youth-sports':'Youth Sports'}
+      pattern:{animals:'Animals & Creatures','botanical-celestial':'Botanical & Celestial',characters:'Characters & Humor','typography-sports':'Typography & Sports','food-kitchen':'Food & Kitchen',other:'Other Designs'},
+      style:{streetwear:'Streetwear',nature:'Nature-Inspired',playful:'Playful & Whimsical',cozy:'Cozy & Cute','youth-sports':'Youth Sports',other:'Other Styles'}
     };
+    const facetGroups={
+      pattern:{animal:'animals',penguin:'animals',cat:'animals','rubber-duck':'animals','botanical-celestial':'botanical-celestial',skeleton:'characters','sleepy-sheep':'characters',typography:'typography-sports','sports-typography':'typography-sports','tomato-chef':'food-kitchen'},
+      style:{'street-graffiti':'streetwear',streetwear:'streetwear','nature-streetwear':'nature','retro-whimsical':'playful','playful-whimsy':'playful',funny:'playful','cozy-humor':'cozy','cozy-cute':'cozy','youth-sports':'youth-sports'}
+    };
+    const productGroupLabels={'apparel-accessories':'Apparel & Accessories','home-drinkware':'Home & Drinkware',other:'Other Products'};
+    const productGroups={'long-sleeve':'apparel-accessories',hoodie:'apparel-accessories',beanie:'apparel-accessories',tankini:'apparel-accessories','basketball-uniform':'apparel-accessories',apron:'apparel-accessories',tumbler:'home-drinkware','bath-mat':'home-drinkware',blanket:'home-drinkware','shower-curtain':'home-drinkware'};
+    const facetValue=(key,value)=>key==='product'?value:(facetGroups[key]?.[value]||'other');
     const fieldOptions=[
       {id:fieldIds[0],key:'product',all:'All Products'},
       {id:fieldIds[1],key:'pattern',all:'All Patterns'},
@@ -166,11 +173,22 @@ document.addEventListener('DOMContentLoaded',async()=>{
     ];
     fieldOptions.forEach(({id,key,all})=>{
       const select=document.getElementById(id);
-      const values=[...new Set(cards.map(card=>card.dataset[key]).filter(Boolean))];
-      const options=[new Option(all,'all'),...values.map(value=>new Option(labels[key][value]||value.replace(/-/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase()),value))];
-      select.replaceChildren(...options);
+      const values=[...new Set(cards.map(card=>facetValue(key,card.dataset[key])).filter(Boolean))].sort((a,b)=>(labels[key][a]||a).localeCompare(labels[key][b]||b));
+      select.replaceChildren(new Option(all,'all'));
+      if(key==='product'){
+        const grouped=new Map();
+        values.forEach(value=>{const group=productGroups[value]||'other';if(!grouped.has(group))grouped.set(group,[]);grouped.get(group).push(value);});
+        for(const group of ['apparel-accessories','home-drinkware','other']){
+          const groupValues=grouped.get(group);if(!groupValues?.length)continue;
+          const optgroup=document.createElement('optgroup');optgroup.label=productGroupLabels[group];
+          optgroup.append(...groupValues.map(value=>new Option(labels.product[value]||value.replace(/-/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase()),value)));
+          select.append(optgroup);
+        }
+      }else{
+        select.append(...values.map(value=>new Option(labels[key][value]||value.replace(/-/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase()),value)));
+      }
     });
-    const matches=(item,p,pat,s)=>!!item&&(p==='all'||item.product===p)&&(pat==='all'||item.pattern===pat)&&(s==='all'||item.style===s);
+    const matches=(item,p,pat,s)=>!!item&&(p==='all'||item.product===p)&&(pat==='all'||facetValue('pattern',item.pattern)===pat)&&(s==='all'||facetValue('style',item.style)===s);
     const filter=()=>{
       const [p,pat,s]=fieldIds.map(id=>document.getElementById(id).value);
       cards.forEach(card=>card.hidden=!matches({product:card.dataset.product,pattern:card.dataset.pattern,style:card.dataset.style},p,pat,s));
