@@ -135,7 +135,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isApron && (!productReference || !productPrintAreaReference)) {
     return res.status(400).json({ error: "The apron blank reference or bib print-area guide is missing. Refresh the page and try again." })
   }
-  if (productReference && (productReference.length > (isTankini || isApron ? 2500000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+  if (productReference && (productReference.length > (isTankini || isApron ? 2500000 : isBathMat ? 300000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
     return res.status(400).json({ error: "The product print-area reference is invalid. Refresh the page and try again." })
   }
   if (productPrintAreaReference && (productPrintAreaReference.length > 2500000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {

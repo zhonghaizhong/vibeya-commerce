@@ -3,7 +3,7 @@ import path from "node:path"
 
 const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string> | Record<string, Record<string, string>>> = {
   "sds-97226": "vibeya/assets/products/sds-97226/blank-print-base.webp",
-  "sds-138708": "vibeya/assets/products/sds-138708/blank-print-base-hd.png",
+  "sds-138708": "vibeya/assets/products/sds-138708/blank-print-base-hd.webp",
   "sds-137892": {
     Black: "vibeya/assets/products/mg8011024/swimwear-blank-product-base.png",
     Red: "vibeya/assets/products/mg8011024/red/swimwear-blank-product-base.png",
