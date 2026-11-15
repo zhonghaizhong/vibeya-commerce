@@ -1704,7 +1704,7 @@
         const sameProduct=product.id===chosen.id;
         const nextColor=product.colors?.includes(requestedColor)?requestedColor:sameProduct&&product.colors?.includes(selectedColor)?selectedColor:(product.colors?.[0]||'Black');
         const nextSize=product.sizes?.includes(requestedSize)?requestedSize:sameProduct&&product.sizes?.includes(selectedSize)?selectedSize:(product.sizePrices?product.sizes?.[0]||'':'');
-      chosen=product;selectedColor=nextColor;selectedColorConfirmed=product.colors?.length===1||!!product.colors?.includes(requestedColor);selectedSize=nextSize;if(!sameProduct){selectedPrint=product.id==='sds-128646'?'wrap':'front';if(product.id==='sds-233939')selectedUniformZones=uniformPrintZones.map(([id])=>id);}
+      chosen=product;selectedColor=nextColor;selectedColorConfirmed=product.colors?.length===1||!!product.colors?.includes(requestedColor);selectedSize=nextSize;if(!sameProduct){selectedPrint=product.id==='sds-128646'||product.id==='sds-138708'?'wrap':'front';if(product.id==='sds-233939')selectedUniformZones=uniformPrintZones.map(([id])=>id);}
         renderProductDetails();drawStudioVariantChoices();setGallery(0);syncVariants();
       }
     }
@@ -2343,7 +2343,7 @@ const blanket=chosen.id==='sds-97226';
 
   $('#detailPrev').addEventListener('click',()=>setGallery(galleryIndex-1));
   $('#detailNext').addEventListener('click',()=>setGallery(galleryIndex+1));
-  $('#detailCustomize').addEventListener('click',()=>{selectedPrint=chosen.id==='sds-128646'?'wrap':'front';syncVariants();syncStudioPromptFields();requestStudio(chosen);});
+  $('#detailCustomize').addEventListener('click',()=>{selectedPrint=chosen.id==='sds-128646'||chosen.id==='sds-138708'?'wrap':'front';syncVariants();syncStudioPromptFields();requestStudio(chosen);});
   $('#quickPromptForm').addEventListener('submit',e=>{e.preventDefault();let prompt=$('#quickPrompt').value.trim();chosenArt=detectArtwork(prompt);selectedPrint='front';syncVariants();syncStudioPromptFields();hasPreview=false;requestStudio(chosen,prompt);});
   $('#generateBtn').addEventListener('click',async()=>{
     // The blanket only supports a single-sided full-surface print. Never route it
