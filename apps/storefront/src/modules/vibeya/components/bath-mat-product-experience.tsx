@@ -21,12 +21,19 @@ export default function BathMatProductExperience({
       }
 
       if (event.data?.type === "vibeya:request-studio") {
-        const params = new URLSearchParams({ openStudio: "1" })
+        const selection: Record<string, string> = {}
         for (const key of ["product", "color", "size", "print", "areas", "prompt"]) {
           const value = event.data[key]
-          if (typeof value === "string" && value) params.set(key, value)
+          if (typeof value === "string" && value) selection[key] = value
         }
-        window.location.assign(`/${countryCode}?${params.toString()}#top`)
+
+        // Open the studio in this product page's existing iframe. A session
+        // check here can fail transiently and incorrectly close the experience;
+        // authentication is enforced when the customer submits a design.
+        frameRef.current?.contentWindow?.postMessage(
+          { type: "vibeya:open-studio", ...selection },
+          window.location.origin
+        )
         return
       }
 
