@@ -464,7 +464,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isApron && (!productReference || !productPrintAreaReference)) {
     return res.status(400).json({ error: "围裙白底底图或胸前印刷区域参考图缺失，请刷新页面后重新提交。" })
   }
-  if (productReference && (productReference.length > (isTankini || isBasketballUniform || isApron ? 2500000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+  if (productReference && (productReference.length > (isTankini || isBasketballUniform || isApron || isBathMat ? 2500000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
     return res.status(400).json({ error: isApron ? "围裙白底底图无效，请刷新页面后重新提交。" : isBasketballUniform ? "篮球服正面印刷区域参考图无效，请刷新页面后重新提交。" : isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : isShowerCurtain ? "浴帘底图无效，请重新选择尺寸后提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
   }
   if (productPrintAreaReference && (productPrintAreaReference.length > 2500000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
