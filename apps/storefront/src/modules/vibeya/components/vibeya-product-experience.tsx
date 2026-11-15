@@ -16,10 +16,27 @@ export default function VibeyaProductExperience({
   const frameRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
+    const frame = frameRef.current
+    if (!frame) return
+
+    const applyRequestedColor = () => {
+      const color =
+        initialColor || new URLSearchParams(window.location.search).get("color")
+      if (!color) return
+
+      frame.contentWindow?.postMessage(
+        {
+          type: "vibeya:set-route",
+          hash: `#product-${encodeURIComponent(productId)}?color=${encodeURIComponent(color)}`,
+        },
+        window.location.origin
+      )
+    }
+
     const handleMessage = (event: MessageEvent) => {
       if (
         event.origin !== window.location.origin ||
-        event.source !== frameRef.current?.contentWindow
+        event.source !== frame.contentWindow
       ) {
         return
       }
@@ -47,9 +64,13 @@ export default function VibeyaProductExperience({
       }
     }
 
+    frame.addEventListener("load", applyRequestedColor)
     window.addEventListener("message", handleMessage)
-    return () => window.removeEventListener("message", handleMessage)
-  }, [countryCode])
+    return () => {
+      frame.removeEventListener("load", applyRequestedColor)
+      window.removeEventListener("message", handleMessage)
+    }
+  }, [countryCode, initialColor, productId])
 
   const colorQuery = initialColor
     ? `?color=${encodeURIComponent(initialColor)}`
