@@ -6,7 +6,7 @@ import VibeyaHome from "./vibeya-home"
 
 const HOME_TITLE = "Custom Products & Personalized Gifts | VIBEYA"
 const HOME_DESCRIPTION =
-  "Create custom apparel, drinkware, blankets, shower curtains, and home decor online. Personalize a product, preview your design, and order one made for you."
+  "Create personalized gifts from a photo or AI prompt. Design custom apparel, drinkware, blankets, bath mats, and shower curtains, then preview and order online."
 
 export async function generateMetadata({
   params,
