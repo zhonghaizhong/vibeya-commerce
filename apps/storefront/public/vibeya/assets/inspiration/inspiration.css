@@ -200,7 +200,7 @@ body.customize-open{overflow:hidden;}
 
 /* Keep this spotlight compact on narrow screens; the shared flex CTA rule
    otherwise pushes its button down and leaves a large blank gap. */
-@media(max-width:980px){#featuredShowerCurtainResult{height:auto;min-height:0;align-self:start}#featuredShowerCurtainResult>.featured-text{align-self:start;min-height:0}#featuredShowerCurtainResult .actions{margin-top:0}}
+@media(max-width:980px){#featuredShowerCurtainResult{height:auto;min-height:0;align-self:start}#featuredShowerCurtainResult>.art-card-full{height:auto;aspect-ratio:1122/1402;align-self:start;min-height:0}#featuredShowerCurtainResult>.featured-text{align-self:start;min-height:0}#featuredShowerCurtainResult .actions{margin-top:0}}
 
 
 /* Match the shared VIBEYA storefront footer across menus. */
