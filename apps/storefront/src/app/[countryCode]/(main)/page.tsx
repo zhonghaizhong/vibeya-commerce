@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import { listProducts } from "@lib/data/products"
 import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
 import { toJsonLd } from "@lib/util/product-structured-data"
 import { retrieveCustomer } from "@lib/data/customer"
@@ -8,8 +9,10 @@ const HOME_TITLE = "Custom Products & Personalized Gifts | VIBEYA"
 const HOME_DESCRIPTION =
   "Create personalized gifts from a photo or AI prompt. Design custom apparel, drinkware, blankets, bath mats, and shower curtains, then preview and order online."
 
-// Keep the indexable shop list aligned with the product catalog in public/vibeya/index.html.
-const SHOP_ITEMS = [
+// Used only if the store catalog cannot be retrieved while rendering the page.
+type ShopItem = { name: string; handle: string }
+
+const SHOP_ITEMS_FALLBACK = [
   ["VIBEYA Custom Cotton Long Sleeve Tee", "vibeya-custom-cotton-long-sleeve-tee"],
   ["VIBEYA Washed Vintage Hooded Sweatshirt", "vibeya-washed-vintage-hooded-sweatshirt"],
   ["VIBEYA Custom Knitted Beanie", "vibeya-custom-knitted-beanie"],
@@ -62,6 +65,29 @@ export default async function Home({
   const customer = await retrieveCustomer().catch(() => null)
   const origin = await getSiteOrigin()
   const pageUrl = `${origin}/${countryCode}`
+  let shopItems: ShopItem[] = SHOP_ITEMS_FALLBACK.map(([name, handle]) => ({
+    name,
+    handle,
+  }))
+
+  try {
+    const {
+      response: { products },
+    } = await listProducts({
+      countryCode,
+      queryParams: { limit: 100, fields: "id,handle,title" },
+    })
+    const publishedShopItems = products
+      .filter((product) => product.handle && product.title)
+      .map((product) => ({ name: product.title, handle: product.handle }))
+
+    if (publishedShopItems.length) {
+      shopItems = publishedShopItems
+    }
+  } catch {
+    // Keep the existing fallback list when the store catalog is temporarily unavailable.
+  }
+
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -109,8 +135,8 @@ export default async function Home({
         name: "Custom Products & Personalized Gifts",
         description: HOME_DESCRIPTION,
         itemListOrder: "https://schema.org/ItemListUnordered",
-        numberOfItems: SHOP_ITEMS.length,
-        itemListElement: SHOP_ITEMS.map(([name, handle], index) => ({
+        numberOfItems: shopItems.length,
+        itemListElement: shopItems.map(({ name, handle }, index) => ({
           "@type": "ListItem",
           position: index + 1,
           name,
