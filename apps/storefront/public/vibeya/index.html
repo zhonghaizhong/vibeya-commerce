@@ -2258,7 +2258,7 @@ const blanket=chosen.id==='sds-97226';
   }
   function openProductById(id,color){
     const p=products.find(x=>x.id===id);if(!p)return;
-    if(p.catalogOnly){window.top.location.assign('/us/products/'+encodeURIComponent(p.handle));return;}
+    if(p.catalogOnly&&new URLSearchParams(location.search).get('standalone')!=='1'){window.top.location.assign('/us/products/'+encodeURIComponent(p.handle));return;}
       chosen=p;const requestedColor=id==='sds-128646'&&color==='NightGarden'?'White':color;selectedColor=p.colors?.includes(requestedColor)?requestedColor:(p.colors?.[0]||'Black');selectedColorConfirmed=p.colors?.length===1||p.colors?.includes(requestedColor);selectedSize=p.sizes?.length===1?p.sizes[0]:p.id==='sds-138708'||p.id==='vibeya-shower-curtain'||p.id==='sds-137892'||p.sizePrices?p.sizes[0]:'';selectedPrint=(id==='sds-128646'||id==='sds-138708')?'wrap':'front';if(id==='sds-233939')selectedUniformZones=uniformPrintZones.map(([zone])=>zone);$('#preserveOriginalDesign').checked=false;
     renderProductDetails();drawStudioVariantChoices();setGallery(0);syncVariants();location.hash='#product-'+id;
     if(location.hash==='#product-'+id){routeCatalog();}

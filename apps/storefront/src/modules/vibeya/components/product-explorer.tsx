@@ -32,6 +32,7 @@ function formatPrice(price: number, currency: string) {
 
 function ProductCard({ product, onSelect, countryCode = "us" }: ProductCardProps) {
   const [colorId, setColorId] = useState(product.colors[0]?.id ?? "")
+  const color = product.colors.find((option) => option.id === colorId) ?? product.colors[0]
 
   if (product.catalogOnly) {
     const href = `/${countryCode}/products/${encodeURIComponent(product.handle)}`
@@ -45,7 +46,20 @@ function ProductCard({ product, onSelect, countryCode = "us" }: ProductCardProps
               : <div className={styles.cardPlaceholder}>VIBEYA<br /><span>Product image coming soon</span></div>}
           </div>
         </a>
-        <p className={`${styles.cardVariant} card-color-caption`}>{product.category || "New arrival"}</p>
+        <div className={`${styles.swatches} card-color-options`} role="group" aria-label={`${product.short} colors`}>
+          {product.colors.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              className={`${styles.swatch} card-swatch ${colorId === option.id ? styles.swatchSelected : ""}`}
+              style={{ "--swatch-color": option.hex, "--card-swatch-color": option.hex } as CSSProperties}
+              onClick={() => setColorId(option.id)}
+              aria-label={`Preview ${option.name}`}
+              aria-pressed={colorId === option.id}
+            />
+          ))}
+        </div>
+        <p className={`${styles.cardVariant} card-color-caption`}>{product.variantSummary ?? `${color.name} · ${product.colors.length} colors · ${product.sizes[0]}–${product.sizes.at(-1)}`}</p>
         <a className={`${styles.cardInfo} product-card-info`} href={href} target="_top" aria-label={`View details for ${product.name}`}>
           <h3>{product.name}</h3>
           <p>{product.priceUnavailable ? "Price unavailable" : formatPrice(product.price, product.currency)}</p>
@@ -54,7 +68,6 @@ function ProductCard({ product, onSelect, countryCode = "us" }: ProductCardProps
     )
   }
 
-  const color = product.colors.find((option) => option.id === colorId) ?? product.colors[0]
   const canonicalProductHref = `/${countryCode}/products/${encodeURIComponent(product.handle)}`
   const singleEntryProduct = product.id === "sds-167256"
   const canonicalColorHref = `${canonicalProductHref}?color=${encodeURIComponent(color.id)}`
