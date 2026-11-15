@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
     const fieldIds=['productFilter','patternFilter','styleFilter'];
     const cards=[...document.querySelectorAll('[data-inspiration-feature]')];
     const labels={
-      product:{'long-sleeve':'Long Sleeve Tee',hoodie:'Hoodie',tumbler:'Custom 20 oz Tumbler','bath-mat':'Custom 3D Bath Mat',blanket:'Custom Flannel Throw Blanket',beanie:'Custom Knitted Beanie','shower-curtain':'Custom Shower Curtain',tankini:"Custom Women's Tankini Swimsuit",'basketball-uniform':"Kids' Basketball Jersey Set",apron:'Custom Apron'},
+      product:{'long-sleeve':'Long Sleeve Tee',hoodie:'Hoodie',tumbler:'20 oz Tumbler','bath-mat':'3D Bath Mat',blanket:'Flannel Throw Blanket',beanie:'Knitted Beanie','shower-curtain':'Shower Curtain',tankini:"Women's Tankini Swimsuit",'basketball-uniform':"Kids' Basketball Jersey Set",apron:'Apron'},
       pattern:{animals:'Animals & Creatures','botanical-celestial':'Botanical & Celestial',characters:'Characters & Humor','typography-sports':'Typography & Sports','food-kitchen':'Food & Kitchen',other:'Other Designs'},
       style:{streetwear:'Streetwear',nature:'Nature-Inspired',playful:'Playful & Whimsical',cozy:'Cozy & Cute','youth-sports':'Youth Sports',other:'Other Styles'}
     };
