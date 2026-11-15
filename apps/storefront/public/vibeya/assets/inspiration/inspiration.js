@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
     }catch(error){console.warn('Could not load inspiration-list feature cards',error);}
     for(let i=related.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[related[i],related[j]]=[related[j],related[i]];}
     const selected=related.slice(0,4);
-    moreCards.innerHTML=selected.map(x=>`<a class="related-card home-featured-inspo" data-inspiration="${safe(x.id)}" data-product="${safe(x.product)}" data-pattern="${safe(x.pattern)}" data-style="${safe(x.style)}" style="--artwork-extension:url('${safe(x.image)}')" href="${safe(x.slug)}" aria-label="Open ${safe(x.title)}"><img loading="lazy" src="${safe(x.image)}" alt="${safe(x.alt)}"></a>`).join('');
+    moreCards.innerHTML=selected.map(x=>`<a class="related-card home-featured-inspo" target="_top" data-inspiration="${safe(x.id)}" data-product="${safe(x.product)}" data-pattern="${safe(x.pattern)}" data-style="${safe(x.style)}" style="--artwork-extension:url('${safe(x.image)}')" href="${safe(x.slug)}" aria-label="Open ${safe(x.title)}"><img loading="lazy" src="${safe(x.image)}" alt="${safe(x.alt)}"></a>`).join('');
     moreSection.hidden=selected.length===0;
   }
   const countBadge=document.getElementById('marketCartCount');
@@ -153,12 +153,28 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const form=document.getElementById('inspirationFilters');
   if(form){
     const fieldIds=['productFilter','patternFilter','styleFilter'];
+    const cards=[...document.querySelectorAll('[data-inspiration-feature]')];
+    const labels={
+      product:{'long-sleeve':'Long Sleeve Tee',hoodie:'Hoodie',tumbler:'Custom 20 oz Tumbler','bath-mat':'Custom 3D Bath Mat',blanket:'Custom Flannel Throw Blanket',beanie:'Custom Knitted Beanie','shower-curtain':'Custom Shower Curtain',tankini:"Custom Women's Tankini Swimsuit",'basketball-uniform':"Kids' Basketball Jersey Set",apron:'Custom Apron'},
+      pattern:{skeleton:'Skeleton','botanical-celestial':'Botanical & Celestial',animal:'Animal',penguin:'Penguin',cat:'Cat','rubber-duck':'Rubber Duck','sleepy-sheep':'Sleepy Sheep', 'tomato-chef':'Tomato Chef',typography:'Typography','sports-typography':'Basketball Typography'},
+      style:{'street-graffiti':'Street Graffiti','nature-streetwear':'Nature-Inspired Streetwear','retro-whimsical':'Retro Whimsical','playful-whimsy':'Playful Whimsy','cozy-humor':'Cozy Humor','cozy-cute':'Cozy & Cute',funny:'Humorous',streetwear:'Retro Varsity Streetwear','youth-sports':'Youth Sports'}
+    };
+    const fieldOptions=[
+      {id:fieldIds[0],key:'product',all:'All Products'},
+      {id:fieldIds[1],key:'pattern',all:'All Patterns'},
+      {id:fieldIds[2],key:'style',all:'All Styles'}
+    ];
+    fieldOptions.forEach(({id,key,all})=>{
+      const select=document.getElementById(id);
+      const values=[...new Set(cards.map(card=>card.dataset[key]).filter(Boolean))];
+      const options=[new Option(all,'all'),...values.map(value=>new Option(labels[key][value]||value.replace(/-/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase()),value))];
+      select.replaceChildren(...options);
+    });
     const matches=(item,p,pat,s)=>!!item&&(p==='all'||item.product===p)&&(pat==='all'||item.pattern===pat)&&(s==='all'||item.style===s);
     const filter=()=>{
       const [p,pat,s]=fieldIds.map(id=>document.getElementById(id).value);
-      const featuredCards=[...document.querySelectorAll('[data-inspiration-feature]')];
-      featuredCards.forEach(card=>card.hidden=!matches({product:card.dataset.product,pattern:card.dataset.pattern,style:card.dataset.style},p,pat,s));
-      const featuredMatches=featuredCards.some(card=>!card.hidden);
+      cards.forEach(card=>card.hidden=!matches({product:card.dataset.product,pattern:card.dataset.pattern,style:card.dataset.style},p,pat,s));
+      const featuredMatches=cards.some(card=>!card.hidden);
       const cards=[...document.querySelectorAll('#moreInspirationCards .related-card')];
       cards.forEach(card=>card.hidden=!matches({product:card.dataset.product,pattern:card.dataset.pattern,style:card.dataset.style},p,pat,s));
       const relatedMatches=cards.some(card=>!card.hidden);

@@ -215,8 +215,16 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
     )
   }
 
-  const selectProduct = (product: { id: string }, color: string) =>
+  const selectProduct = (product: { id: string }, color: string) => {
+    if (product.id === "sds-138708") {
+      window.location.assign(
+        `/${countryCode}/products/vibeya-custom-3d-bath-mat?color=${encodeURIComponent(color)}`
+      )
+      return
+    }
+
     navigateTo(`#product-${product.id}?color=${encodeURIComponent(color)}`)
+  }
 
   return (
     <>

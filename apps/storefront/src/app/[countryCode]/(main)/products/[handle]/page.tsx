@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
+import BathMatProductExperience from "@modules/vibeya/components/bath-mat-product-experience"
 import { HttpTypes } from "@medusajs/types"
 import { isVariantInStock } from "@lib/util/inventory"
 import {
@@ -50,6 +51,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: "Custom Knitted Beanie | Personalize Your Cuff Print | VIBEYA",
       description:
         "Design a custom knitted beanie with your own print on the folded front cuff. Choose black, red, or gray, preview your personalized winter hat, and order online.",
+    },
+    "vibeya-custom-3d-bath-mat": {
+      title: "Custom Bath Mat with Photo Upload & AI Design | VIBEYA",
+      description:
+        "Upload a photo or describe your idea to create an AI-designed custom bath mat. Preview the full-surface print, choose from three sizes, and order online.",
     },
     "vibeya-custom-cotton-long-sleeve-tee": {
       title: "Custom Long Sleeve T-Shirt | VIBEYA",
@@ -159,8 +165,16 @@ export default async function ProductPage(props: Props) {
   }
 
   const origin = await getSiteOrigin()
+  const structuredProduct =
+    pricedProduct.handle === "vibeya-custom-3d-bath-mat"
+      ? {
+          ...pricedProduct,
+          description:
+            "Create a custom photo bath mat by uploading an image or describing an original design with a text prompt. Preview the full-surface print, choose from three sizes, and order online.",
+        }
+      : pricedProduct
   const structuredData = buildProductStructuredData({
-    product: pricedProduct,
+    product: structuredProduct,
     region,
     countryCode: params.countryCode,
     productUrl: `${origin}/${params.countryCode}/products/${pricedProduct.handle}`,
@@ -173,11 +187,15 @@ export default async function ProductPage(props: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
       />
-      <ProductTemplate
-        product={pricedProduct}
-        region={region}
-        countryCode={params.countryCode}
-      />
+      {pricedProduct.handle === "vibeya-custom-3d-bath-mat" ? (
+        <BathMatProductExperience countryCode={params.countryCode} />
+      ) : (
+        <ProductTemplate
+          product={pricedProduct}
+          region={region}
+          countryCode={params.countryCode}
+        />
+      )}
     </>
   )
 }
