@@ -1,5 +1,6 @@
 import { Metadata } from "next"
-import { listProducts } from "@lib/data/products"
+import { sdk } from "@lib/config"
+import { getVibeyaUsRegion } from "@lib/vibeya/region"
 import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
 import { toJsonLd } from "@lib/util/product-structured-data"
 import { retrieveCustomer } from "@lib/data/customer"
@@ -71,11 +72,15 @@ export default async function Home({
   }))
 
   try {
+    const region = await getVibeyaUsRegion()
+    if (!region) throw new Error("U.S. product catalog is unavailable")
+
     const {
-      response: { products },
-    } = await listProducts({
-      countryCode,
-      queryParams: { limit: 100, fields: "id,handle,title" },
+      products,
+    } = await sdk.store.product.list({
+      region_id: region.id,
+      limit: 100,
+      fields: "id,handle,title",
     })
     const publishedShopItems = products
       .filter((product) => product.handle && product.title)
