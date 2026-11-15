@@ -158,7 +158,8 @@
     .dialog-head{display:flex;justify-content:space-between;align-items:start;gap:18px;padding:27px 30px 20px;border-bottom:1px solid var(--edge);}
     .dialog-head h2{font-size:31px;line-height:1.05;letter-spacing:-.05em;margin:0;}
     .dialog-head p{margin:7px 0 0;color:var(--muted);font-size:13px;}
-    .close-btn{border:1px solid var(--edge);background:#fff;width:36px;height:36px;border-radius:50%;font-size:23px;line-height:1;flex:none;}
+    .close-btn{border:1px solid var(--edge);background:#fff;width:44px;height:44px;min-width:44px;min-height:44px;border-radius:50%;font-size:23px;line-height:1;flex:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+    .close-btn:focus-visible{outline:3px solid #9c60f2;outline-offset:2px;}
     .studio-body{display:grid;grid-template-columns:1fr 1.02fr;min-height:570px;}
     .studio-controls{padding:25px 30px 30px;}
     .studio-controls label{display:block;font-weight:900;font-size:13px;margin:0 0 10px;}
