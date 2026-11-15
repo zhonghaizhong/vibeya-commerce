@@ -22,6 +22,16 @@ const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string> | 
     Red: "vibeya/assets/products/sds-172647/red/beanie-print-area-guide.webp",
     Gray: "vibeya/assets/products/sds-172647/gray/beanie-print-area-guide.webp",
   },
+  "sds-233939": {
+    Black: "vibeya/assets/products/sds-233939/black/print-area-front.png",
+    White: "vibeya/assets/products/sds-233939/white/print-area-front.png",
+    Red: "vibeya/assets/products/sds-233939/red/print-area-front.png",
+    "Sapphire Blue": "vibeya/assets/products/sds-233939/blue/print-area-front.png",
+    "Pure yellow": "vibeya/assets/products/sds-233939/yellow/print-area-front.png",
+  },
+  "sds-275844": {
+    Black: "vibeya/assets/products/sds-275844/black/blank-front.png",
+  },
 }
 
 const PRODUCT_PRINT_AREA_REFERENCE_PATHS: Record<string, string | Record<string, string>> = {
@@ -31,6 +41,16 @@ const PRODUCT_PRINT_AREA_REFERENCE_PATHS: Record<string, string | Record<string,
     Pink: "vibeya/assets/products/mg8011024/pink/swimwear-front-print-area-guide.png",
     Blue: "vibeya/assets/products/mg8011024/blue/swimwear-front-print-area-guide.png",
     Cyan: "vibeya/assets/products/mg8011024/cyan/swimwear-front-print-area-guide.png",
+  },
+  "sds-233939": {
+    Black: "vibeya/assets/products/sds-233939/black/print-area-back.png",
+    White: "vibeya/assets/products/sds-233939/white/print-area-back.png",
+    Red: "vibeya/assets/products/sds-233939/red/print-area-back.png",
+    "Sapphire Blue": "vibeya/assets/products/sds-233939/blue/print-area-back.png",
+    "Pure yellow": "vibeya/assets/products/sds-233939/yellow/print-area-back.png",
+  },
+  "sds-275844": {
+    Black: "vibeya/assets/products/sds-275844/black/print-area-guide.png",
   },
 }
 

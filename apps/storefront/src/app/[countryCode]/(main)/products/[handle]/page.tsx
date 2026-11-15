@@ -61,6 +61,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       description:
         "Design your own women’s tankini swimsuit with a custom print. Choose a halter swim top and separate side-tie shorts in five colors, sizes S–XL.",
     },
+    "vibeya-custom-kids-basketball-uniform": {
+      title: "Custom Kids Basketball Jersey & Shorts | Design Your Own | VIBEYA",
+      description:
+        "Design a custom kids basketball uniform with a text prompt. Customize the jersey front, back, and shorts independently, then mix and match prints. Five colors, sizes 100–140 cm.",
+    },
   }
   const productSeo = seoContent[product.handle]
   const title = productSeo?.title ?? `${product.title} | ${STORE_NAME}`

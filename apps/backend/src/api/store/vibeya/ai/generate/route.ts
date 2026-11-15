@@ -310,12 +310,26 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const isBeanie = productId === "sds-172647"
   const isShowerCurtain = productId === "vibeya-shower-curtain"
   const isTankini = productId === "sds-137892"
-  const isFullSurfaceProduct = isBlanket || isBathMat || isShowerCurtain || isTankini
+  const isApron = productId === "sds-275844"
+  const isBasketballUniform = productId === "sds-233939"
+  const basketballZoneIds = ["jersey-front", "jersey-back", "shorts"] as const
+  const basketballZoneLabels: Record<typeof basketballZoneIds[number], string> = {
+    "jersey-front": "front jersey chest panel",
+    "jersey-back": "back jersey torso panel",
+    shorts: "the single marked leg panel on the front-facing shorts only",
+  }
+  const basketballSelectedZoneMatch = String(prompt).match(/VIBEYA_SELECTED_PRINT_ZONES:\s*([^\r\n]+)/i)
+  const basketballSelectedZones = basketballSelectedZoneMatch
+    ? [...new Set(basketballSelectedZoneMatch[1].split(",").map((zone) => zone.trim()).filter((zone): zone is typeof basketballZoneIds[number] =>
+        basketballZoneIds.includes(zone as typeof basketballZoneIds[number])))]
+    : [...basketballZoneIds]
+  const basketballUnselectedZones = basketballZoneIds.filter((zone) => !basketballSelectedZones.includes(zone))
+  const isFullSurfaceProduct = isBlanket || isBathMat || isShowerCurtain || isTankini || isBasketballUniform
   const size = typeof body?.size === "string" ? body.size : ""
   if (isShowerCurtain && !["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"].includes(size)) {
     return res.status(400).json({ error: "请选择有效的浴帘尺寸后重新生成。" })
   }
-  const printPlacement = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
+  const printPlacement = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
     ? body.printPlacement
     : "none"
   const isTumbler = productId === "sds-128646"
@@ -365,6 +379,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       name: "Custom Women's Two-Piece Tankini Swimsuit Set",
       colorAliases: { Black: "Black", Red: "Red", Pink: "Pink", Blue: "Blue", Cyan: "Cyan" },
     },
+    "sds-233939": {
+      name: "Custom Kids' Basketball Jersey and Shorts Set",
+      colorAliases: { Black: "Black", White: "White", Red: "Red", "Sapphire Blue": "Sapphire Blue", "Pure yellow": "Pure Yellow" },
+    },
+    "sds-275844": {
+      name: "Custom Prompt-Designed Apron",
+      colorAliases: { Black: "Black" },
+    },
   }
   const productConfig = products[productId]
   const colorKey = typeof body?.color === "string" ? body.color : ""
@@ -375,45 +397,45 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const references = rawReferences
   let productReference = typeof body?.productReference === "string" ? body.productReference : ""
   let productPrintAreaReference = typeof body?.productPrintAreaReference === "string" ? body.productPrintAreaReference : ""
-  if (isTankini || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
+  if (isTankini || isBasketballUniform || isApron || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
     try {
       productReference = await getVibeyaProductReference(productId, colorKey, typeof body?.size === "string" ? body.size : undefined)
     } catch (error) {
       console.error("Unable to load the VIBEYA product print reference", error)
-      return res.status(503).json({ error: isBeanie ? "帽子印刷区域参考图暂时无法读取，请稍后重试。" : "商品满印底板暂时无法读取，请稍后重试。" })
+      return res.status(503).json({ error: isApron ? "围裙白底底图暂时无法读取，请稍后重试。" : isBasketballUniform ? "篮球服正面印刷区域参考图暂时无法读取，请稍后重试。" : isBeanie ? "帽子印刷区域参考图暂时无法读取，请稍后重试。" : "商品满印底板暂时无法读取，请稍后重试。" })
     }
   }
-  if (isTankini) {
+  if (isTankini || isBasketballUniform || isApron) {
     try {
       productPrintAreaReference = await getVibeyaProductPrintAreaReference(productId, colorKey)
     } catch (error) {
       console.error("Unable to load the VIBEYA product print-area guide", error)
-      return res.status(503).json({ error: "泳衣印花区域参考图暂时无法读取，请稍后重试。" })
+      return res.status(503).json({ error: isApron ? "围裙胸前印刷区域参考图暂时无法读取，请稍后重试。" : isBasketballUniform ? "篮球服背面印刷区域参考图暂时无法读取，请稍后重试。" : "泳衣印花区域参考图暂时无法读取，请稍后重试。" })
     }
   }
   const preserveBaseComposite = typeof body?.preserveBaseComposite === "string" ? body.preserveBaseComposite : ""
   const preserveOriginalDesign = body?.preserveOriginalDesign === true
   const isWashedHoodie = productId === "vibeya-washed-hoodie"
   const isLongSleeveTee = productId === "sds-167256"
-  const placementGuideCount = isFullSurfaceProduct || isBeanie || printPlacement === "none" ? 0 : printPlacement === "both" ? 2 : 1
-  const artworkReferenceStart = isTumbler || isFullSurfaceProduct || isBeanie ? 0 : 2 + placementGuideCount
+  const placementGuideCount = isFullSurfaceProduct || isBeanie || isApron || printPlacement === "none" ? 0 : printPlacement === "both" ? 2 : 1
+  const artworkReferenceStart = isTumbler || isFullSurfaceProduct || isBeanie || isApron ? 0 : 2 + placementGuideCount
   const artworkReferenceNumbers = references.slice(artworkReferenceStart).map((_, index) => artworkReferenceStart + index + 1)
   const artworkReferenceLabel = artworkReferenceNumbers.length
     ? `Customer artwork reference${artworkReferenceNumbers.length > 1 ? "s" : ""}: image${artworkReferenceNumbers.length > 1 ? "s" : ""} ${artworkReferenceNumbers.join(", ")}.`
     : "No uploaded artwork reference was provided."
   const compositeReferenceNumber = preserveBaseComposite ? references.length + 1 : 0
-  const hasUploadedArtwork = isTumbler || isFullSurfaceProduct || isBeanie ? references.length > 0 : references.length > 2 + placementGuideCount
-  const uploadedArtworkReferences = isTumbler || isFullSurfaceProduct || isBeanie ? references : references.slice(2 + placementGuideCount)
-  const preserveArtworkAfterGeneration = preserveOriginalDesign && hasUploadedArtwork && !isFullSurfaceProduct && !isBeanie
+  const hasUploadedArtwork = isTumbler || isFullSurfaceProduct || isBeanie || isApron ? references.length > 0 : references.length > 2 + placementGuideCount
+  const uploadedArtworkReferences = isTumbler || isFullSurfaceProduct || isBeanie || isApron ? references : references.slice(2 + placementGuideCount)
+  const preserveArtworkAfterGeneration = preserveOriginalDesign && hasUploadedArtwork && !isFullSurfaceProduct && !isBeanie && !isApron
   if (preserveArtworkAfterGeneration && !isTumbler && !preserveBaseComposite) {
     return res.status(400).json({ error: "无法校准这款衣服的印刷区域，请重新选择商品颜色后再提交。" })
   }
-  const minimumReferences = isTumbler || isFullSurfaceProduct || isBeanie ? 0 : mode === "designed-product" ? 2 + placementGuideCount : 2
-  const maximumReferences = isTumbler || isFullSurfaceProduct || isBeanie ? 6 : minimumReferences + 6
+  const minimumReferences = isTumbler || isFullSurfaceProduct || isBeanie || isApron ? 0 : mode === "designed-product" ? 2 + placementGuideCount : 2
+  const maximumReferences = isTumbler || isFullSurfaceProduct || isBeanie || isApron ? 6 : minimumReferences + 6
   if (!isProviderResume && (references.length < minimumReferences || references.length > maximumReferences ||
     references.reduce((total, reference) => total + (typeof reference === "string" ? reference.length : 0), 0) > 300000 ||
     references.some((reference, index) =>
-      typeof reference !== "string" || reference.length > (isTumbler || isFullSurfaceProduct || isBeanie ? (preserveOriginalDesign ? 150000 : 36000) : index < 2 + placementGuideCount ? 14000 : preserveOriginalDesign ? 150000 : 36000) ||
+      typeof reference !== "string" || reference.length > (isTumbler || isFullSurfaceProduct || isBeanie || isApron ? (preserveOriginalDesign ? 150000 : 36000) : index < 2 + placementGuideCount ? 14000 : preserveOriginalDesign ? 150000 : 36000) ||
     !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(reference)
   ))) {
     return res.status(400).json({ error: "商品正反面图或印花区域参考图缺失，或参考图格式、数量、大小不符合要求。" })
@@ -436,11 +458,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isTankini && !isProviderResume && !productPrintAreaReference) {
     return res.status(400).json({ error: "泳衣印花位置参考图缺失，请刷新页面后重新提交。" })
   }
-  if (productReference && (productReference.length > (isTankini ? 2500000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
-    return res.status(400).json({ error: isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : isShowerCurtain ? "浴帘底图无效，请重新选择尺寸后提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
+  if (isBasketballUniform && (!productReference || !productPrintAreaReference)) {
+    return res.status(400).json({ error: "篮球服当前颜色的正反面印刷区域参考图缺失，请刷新页面后重新提交。" })
+  }
+  if (isApron && (!productReference || !productPrintAreaReference)) {
+    return res.status(400).json({ error: "围裙白底底图或胸前印刷区域参考图缺失，请刷新页面后重新提交。" })
+  }
+  if (productReference && (productReference.length > (isTankini || isBasketballUniform || isApron ? 2500000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+    return res.status(400).json({ error: isApron ? "围裙白底底图无效，请刷新页面后重新提交。" : isBasketballUniform ? "篮球服正面印刷区域参考图无效，请刷新页面后重新提交。" : isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : isShowerCurtain ? "浴帘底图无效，请重新选择尺寸后提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
   }
   if (productPrintAreaReference && (productPrintAreaReference.length > 2500000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
-    return res.status(400).json({ error: "泳衣印花位置参考图无效，请刷新页面后重新提交。" })
+    return res.status(400).json({ error: isApron ? "围裙胸前印刷区域参考图无效，请刷新页面后重新提交。" : isBasketballUniform ? "篮球服背面印刷区域参考图无效，请刷新页面后重新提交。" : "泳衣印花位置参考图无效，请刷新页面后重新提交。" })
   }
   if (preserveBaseComposite && (preserveBaseComposite.length > 150000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(preserveBaseComposite))) {
     return res.status(400).json({ error: "原创印花底图无效，请重新选择图片并提交。" })
@@ -470,7 +498,33 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     : preserveOriginalDesign
       ? "KEEP ORIGINAL DESIGN MODE (PRESERVE ON): Treat the complete uploaded image canvas as the locked artwork, including its background. Preserve every visible pixel, subject, wording, layout, colors, textures, and details; do not cut out, remove, replace, blur, recolor, rewrite, rearrange, redraw, or invent any part. If the image has transparency, preserve the transparent areas. Only uniformly scale the complete image and move it to fit inside the selected print area with margin. Do not crop any edge."
       : "PROMPT-LED ADAPTATION MODE (PRESERVE OFF): Treat the customer's written instructions as the primary requirements for the final artwork. Follow the requested subject, wording, colors, style, composition, scale, and placement closely. Use all uploaded images as visual references and keep the result strongly related to their subjects, mood, and recognizable visual cues; do not replace them with an unrelated concept. When the prompt asks for changes, adapt the references to satisfy those instructions. Keep all requested content together and fit it proportionally inside the printable area; do not crop any required content."
-  const safePrompt = isTankini
+  const safePrompt = isApron
+    ? [
+        `Create exactly ONE photorealistic e-commerce product image on a seamless pure white (#FFFFFF) background. Show one complete black apron front-facing, centered, upright, and fully visible, with natural fabric drape and subtle realistic folds so it looks dimensional without looking stuffed or overly full. Match the exact apron silhouette, proportions, black fabric, neck strap, adjustable buckle, waist ties, seams, panel layout, and texture shown in the blank product reference. Keep the full apron and straps inside the image with balanced white margins. No person, mannequin, hanger, room, props, labels, callouts, captions, decorative text, borders, watermark, or extra products.`,
+        `Image ${references.length + 1} is the authoritative clean blank apron reference. Preserve the apron exactly, including its bib, lower body panels, seams, straps, buckle, proportions, fabric texture, and white-background studio lighting. Image ${references.length + 2} is only a print-area guide for that same apron. Do not reproduce its white marker or alter the garment to match the guide.`,
+        `STRICT PRINT ZONE — APRON BIB ONLY: use the marked rectangle in image ${references.length + 2} to identify the one permitted print region on the upper chest bib. The complete requested artwork, including every letter, outline, shadow, glow, and decorative detail, must remain on the bib and fully inside that marked region. Do not print on the neck strap, buckle, waist ties, side edges, seams, lower apron panels, pockets, or white background. If the artwork would cross the marked boundary, uniformly reduce and reposition the complete design only as much as needed to fit. If no position is specified, center it on the bib at the largest size that fits. Never crop, stretch, fragment, or spill the design outside the bib.`,
+        hasUploadedArtwork
+          ? `${artworkReferenceLabel} Use the uploaded artwork as the design source on the bib. Follow the customer's written instructions closely and keep the artwork recognizable.`
+          : "Create original artwork for the bib by following the customer's written instructions closely.",
+        artworkHandlingInstruction,
+        `CUSTOMER DESIGN BRIEF: ${prompt}`,
+        "Render the artwork as realistic ink integrated into the apron fabric, following its texture, lighting, and gentle folds. Do not make it look like a sticker, decal, separate patch, or hard-edged overlay. Do not add VIBEYA branding, logos, watermarks, or extra text. Return one complete front-facing apron product photo on pure white.",
+      ].join("\n")
+    : isBasketballUniform
+    ? [
+        `Create exactly ONE photorealistic kids' basketball uniform product image on a seamless pure white (#FFFFFF) background, using the same clean product-only composition as the customer's layout reference. Match this exact arrangement: place the FRONT of the sleeveless jersey in the upper-left area and the BACK of the same jersey in the upper-right area, side by side at equal scale and height; place one front-facing pair of matching basketball shorts centered directly below the two jerseys. Keep the three garments fully visible, upright, evenly spaced, not touching or overlapping, and balanced within the square canvas with generous, even white margins. Do not arrange the garments in a row, stack the jerseys vertically, place the shorts off to one side, or crop any garment. Render all views in the selected ${productConfig.colorAliases[colorKey]} base color. This is for size ${size}; keep it recognizably children's apparel with realistic proportions. Preserve a conventional basketball jersey-and-shorts silhouette, stitched hems, armholes, crew neckline, side panels, and lightweight 100% polyester fabric. Do not turn it into a one-piece, adult-size uniform, football kit, or another garment. No person, mannequin, hanger, room, props, labels, callouts, arrows, captions, decorative text, borders, watermark, or extra products.`,
+        `AUTHORITATIVE CUSTOMER SELECTION — VIBEYA_SELECTED_PRINT_ZONES: ${basketballSelectedZones.join(", ")}. This allowlist overrides the design brief and every reference image. Apply artwork ONLY to ${basketballSelectedZones.map((zone) => basketballZoneLabels[zone]).join(" and ") || "no zone"}. Keep ${basketballUnselectedZones.map((zone) => basketballZoneLabels[zone]).join(", ") || "no other garment zone"} completely solid in the selected garment color, with absolutely no artwork, text, numbers, logos, stripes, accents, mirrored copies, or partial decorations. Never transfer, echo, coordinate, or duplicate a selected design onto an unselected area. A general design idea applies only to the selected zones.`,
+        `SELECTED-COLOR UNIFORM REFERENCE VIEWS: image ${references.length + 1} is the exact ${productConfig.colorAliases[colorKey]} uniform front guide; image ${references.length + 2} is its matching back guide. Use them as the authority for the selected fabric color, matching trim colors, garment cut, stitching, and exact product-specific print zones. The guides show placement placeholders and product arrangement; do not reproduce their white placeholders, duplicate views, or change the requested final three-part layout.`,
+        `HARD PRINT BOUNDARIES — the white rectangles in image ${references.length + 1} (jersey front and one shorts leg) and image ${references.length + 2} (jersey back) are separate closed print panels. Only the selected zone(s) listed in VIBEYA_SELECTED_PRINT_ZONES may be printed, and only inside their matching white rectangle. The jersey panels are limited to the central torso rectangle, never the full garment. The shorts panel is limited to the single marked leg; the opposite leg and shorts back have no printable area. Treat each rectangle's outer edge as a strict manufacturing cut-off, not a target for the artwork. Keep the complete visible artwork footprint—including tiny splashes, strokes, outlines, shadows, glow, and antialiased edges—at least 15% inside every edge of its matching rectangle (maximum 70% of the rectangle's width and height). If the composition is too large, reduce the complete composition uniformly and reposition it; preserve its design and requested placement as much as possible. For shorts, center the complete print in the lower-middle of the marked leg panel (visual center about 60% down from that panel's top), with clear unprinted fabric below the waistband and above the red hem/binding; never let ink touch or cross either seam or the red trim. Do not use detached splashes, streaks, lettering, or decorative fragments near or across the boundary. All unselected panels and all fabric outside selected rectangles remain plain in the selected base color. Never enlarge, extend, wrap, mirror, duplicate, or transfer artwork beyond its selected panel. Do not crop the returned image.`,
+        hasUploadedArtwork
+          ? `${artworkReferenceLabel} Treat uploaded images as visual references for the requested zone designs. Follow the written instructions for which artwork belongs on the jersey front, jersey back, or shorts.`
+          : "Create original artwork from the customer's written instructions, using distinct, clearly separated designs for each zone that is described.",
+        artworkHandlingInstruction,
+        `CUSTOMER DESIGN BRIEF — follow each area label independently and preserve the requested artwork, wording, color palette, and style: ${prompt}`,
+        `FINAL PRINT CHECK — ABSOLUTE EDGE SAFETY OVERRIDES THE CUSTOMER BRIEF: selected print zones are exactly ${basketballSelectedZones.join(", ")}. Verify every unselected zone (${basketballUnselectedZones.join(", ") || "none"}) has zero ink, lettering, logos, accents, or partial artwork. For every selected zone, inspect the entire outermost edge of the white guide box: no ink or effect may touch the box edge. Keep at least 15% clear fabric margin on all four sides, including around every letter, outline, shadow, glow, splatter, and tiny accent. If anything approaches that margin, shrink the whole print uniformly and recenter/reposition it before returning. When shorts are selected, verify the print sits in the lower-middle of the single marked leg panel, away from the waistband above and red hem below; the opposite leg and every red trim remain completely blank. Remove stray fragments that would otherwise sit outside the safe area; do not crop the product image. Confirm all white guide boxes disappear in the finished image.`,
+        "Render each print as sublimation ink integrated into the polyester fibers, following the fabric texture, seams, natural folds, lighting, and perspective. No pasted sticker, raised patch, hard rectangular border, fake panel, brand name, logo, watermark, or added presentation text. Text explicitly requested as part of the custom artwork is allowed only inside its selected print zone. Keep all ink on the selected fabric panels; do not print over neck binding, armhole binding, hems, seams, or the white photo background. Final composition must remain: front jersey upper left, back jersey upper right, matching shorts centered below, all fully visible on pure white with no labels or overlays. Output one complete product image only.",
+      ].join("\n")
+    : isTankini
     ? [
         `Create exactly ONE photorealistic square e-commerce product image on a pure white (#FFFFFF) background. Show the exact two-piece women's tankini from the CLEAN GARMENT REFERENCE: one ${productConfig.colorAliases[colorKey]} halter-neck swim top above one separate pair of matching ${productConfig.colorAliases[colorKey]} side-tie shorts below it. The top, shorts, halter straps, neck bow, and both side-tie cords must all be the same selected garment color; do not leave any cord black or recolor any piece differently. Both pieces are front-facing, fully visible, neatly arranged with the top clearly separated above the shorts. Preserve the reference's exact silhouette, neckline, neck ties, top length and hem, shorts rise and leg cut, side ties, seams, fabric texture, relative scale, alignment, and gap. Give the fabric gentle natural 3D volume and soft realistic folds with subtle studio shading so the pieces do not look collapsed or paper-flat; keep them only lightly shaped, never inflated, stuffed, stiff, or exaggerated. Do not rearrange, overlap, crop, simplify, or redesign either garment. Never turn it into a one-piece or another swimsuit style. No person, mannequin, hanger, room, pool, props, decoration, alternate views, collage, labels, or extra objects.`,
         `Image ${references.length + 1} is the CLEAN GARMENT REFERENCE and is the sole authority for the swimsuit pattern, construction, silhouette, two-piece arrangement, proportions, fabric, and studio presentation. It has no print-area marker: do not infer or invent the print location from it. Reproduce its garment exactly in the selected ${productConfig.colorAliases[colorKey]} color, including matching-color halter straps, neck bow, and side ties.`,

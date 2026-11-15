@@ -20,7 +20,25 @@ const DESIGN_GENERATION_PRODUCT_IDS = new Set([
   "sds-172647",
   "vibeya-shower-curtain",
   "sds-137892",
+  "sds-233939",
+  "sds-275844",
 ])
+const BASKETBALL_PRINT_ZONES = ["jersey-front", "jersey-back", "shorts"] as const
+
+const basketballPromptWithSelectedZones = (prompt: string, requestedZones: unknown): string => {
+  const fromBody = Array.isArray(requestedZones)
+    ? requestedZones.filter((zone): zone is typeof BASKETBALL_PRINT_ZONES[number] =>
+        typeof zone === "string" && BASKETBALL_PRINT_ZONES.includes(zone as typeof BASKETBALL_PRINT_ZONES[number]))
+    : []
+  const fromPrompt = prompt.match(/VIBEYA_SELECTED_PRINT_ZONES:\s*([^\r\n]+)/i)?.[1]
+    ?? prompt.match(/CUSTOMER-SELECTED PRINT ZONES[^:]*:\s*([^\r\n]+)/i)?.[1]
+  const parsedZones = fromPrompt?.split(",").map((zone) => zone.trim())
+    .filter((zone): zone is typeof BASKETBALL_PRINT_ZONES[number] =>
+      BASKETBALL_PRINT_ZONES.includes(zone as typeof BASKETBALL_PRINT_ZONES[number])) ?? []
+  const selectedZones = [...new Set(fromBody.length ? fromBody : parsedZones.length ? parsedZones : [...BASKETBALL_PRINT_ZONES])]
+  const cleanPrompt = prompt.replace(/(?:VIBEYA_SELECTED_PRINT_ZONES|CUSTOMER-SELECTED PRINT ZONES[^:]*):[^\r\n]+(?:\r?\n){0,2}/i, "").trim()
+  return `VIBEYA_SELECTED_PRINT_ZONES: ${selectedZones.join(", ")}\n\n${cleanPrompt}`
+}
 
 const serviceFor = (req: MedusaRequest) =>
   req.scope.resolve(VIBEYA_AI_JOBS_MODULE) as unknown as JobService
@@ -82,10 +100,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const isBeanie = productId === "sds-172647"
   const isShowerCurtain = productId === "vibeya-shower-curtain"
   const isTankini = productId === "sds-137892"
+  const isApron = productId === "sds-275844"
   if (isShowerCurtain && !["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"].includes(size)) {
     return res.status(400).json({ error: "Choose one of the available shower curtain sizes before creating your design." })
   }
-  if (isTankini || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
+  if (isTankini || isApron || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
     try {
       productReference = await getVibeyaProductReference(productId, color, size)
     } catch (error) {
@@ -93,12 +112,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(503).json({ error: isBeanie ? "The beanie print-area reference is not available right now. Please try again later." : "The product print reference is not available right now. Please try again later." })
     }
   }
-  if (isTankini) {
+  if (isTankini || isApron) {
     try {
       productPrintAreaReference = await getVibeyaProductPrintAreaReference(productId, color)
     } catch (error) {
       console.error("Unable to load the VIBEYA product print-area guide", error)
-      return res.status(503).json({ error: "The tankini print-area guide is not available right now. Please try again later." })
+      return res.status(503).json({ error: isApron ? "The apron print-area guide is not available right now. Please try again later." : "The tankini print-area guide is not available right now. Please try again later." })
     }
   }
   if (isTumbler && !productReference) {
@@ -113,15 +132,25 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isTankini && !productPrintAreaReference) {
     return res.status(400).json({ error: "The tankini print-area guide is missing. Refresh the page and try again." })
   }
-  if (productReference && (productReference.length > (isTankini ? 2500000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+  if (isApron && (!productReference || !productPrintAreaReference)) {
+    return res.status(400).json({ error: "The apron blank reference or bib print-area guide is missing. Refresh the page and try again." })
+  }
+  if (productReference && (productReference.length > (isTankini || isApron ? 2500000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
     return res.status(400).json({ error: "The product print-area reference is invalid. Refresh the page and try again." })
   }
   if (productPrintAreaReference && (productPrintAreaReference.length > 2500000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
     return res.status(400).json({ error: "The tankini print-area guide is invalid. Refresh the page and try again." })
   }
-  const placement = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini ? "front" : body?.printPlacement
-  const placementGuideCount = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
-  const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini ? 6 : 2 + placementGuideCount + 6
+  const isBasketballUniform = productId === "sds-233939"
+  const savedPrompt = isBasketballUniform
+    ? basketballPromptWithSelectedZones(prompt, body?.printZones)
+    : prompt
+  if (isBasketballUniform && Array.isArray(body?.printZones) && !body.printZones.some((zone) => BASKETBALL_PRINT_ZONES.includes(zone as typeof BASKETBALL_PRINT_ZONES[number]))) {
+    return res.status(400).json({ error: "Choose at least one valid basketball uniform print area." })
+  }
+  const placement = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement
+  const placementGuideCount = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform || isApron ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
+  const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform || isApron ? 6 : 2 + placementGuideCount + 6
   if (references.length > maximumReferences || references.some((item) => typeof item !== "string") || JSON.stringify(references).length > 300_000 || preserveBaseComposite.length > 150_000 || (preserveBaseComposite && !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(preserveBaseComposite))) {
     return res.status(400).json({ error: "The reference image is too large. Please compress it and try again." })
   }
@@ -134,7 +163,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     const job = await service.createVibeyaAiJobs({
       customer_id: customerId,
       status: "reservation_pending",
-      prompt: typeof body?.prompt === "string" ? body.prompt : "",
+      prompt: savedPrompt,
       product_id: productId,
       color,
       size,
