@@ -46,6 +46,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       description:
         "Shop VIBEYA’s 400g washed vintage hoodie with original double-sided artwork. Choose from six colors and sizes S–2XL. Free U.S. shipping.",
     },
+    "vibeya-custom-knitted-beanie": {
+      title: "Custom Knitted Beanie | Personalize Your Cuff Print | VIBEYA",
+      description:
+        "Design a custom knitted beanie with your own print on the folded front cuff. Choose black, red, or gray, preview your personalized winter hat, and order online.",
+    },
     "vibeya-custom-cotton-long-sleeve-tee": {
       title: "Custom Long Sleeve T-Shirt | VIBEYA",
       description:
