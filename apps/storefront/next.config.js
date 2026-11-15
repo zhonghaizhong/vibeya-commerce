@@ -25,6 +25,20 @@ const nextConfig = {
       },
     ]
   },
+  async redirects() {
+    return [
+      {
+        source: "/:countryCode/vibeya/inspiration",
+        destination: "/vibeya/inspiration/index.html",
+        permanent: true,
+      },
+      {
+        source: "/:countryCode/vibeya/inspiration/index.html",
+        destination: "/vibeya/inspiration/index.html",
+        permanent: true,
+      },
+    ]
+  },
   async rewrites() {
     return {
       beforeFiles: [
