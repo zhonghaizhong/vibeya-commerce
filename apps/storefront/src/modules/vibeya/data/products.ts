@@ -115,6 +115,11 @@ const apronGallery = Array.from(
   (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.png`
 )
 
+const metalPlaqueGallery = Array.from(
+  { length: 6 },
+  (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.png`
+)
+
 const longSleeveColors: VibeyaColor[] = [
   { id: "Black", name: "Black", hex: "#17171b", folder: "" },
   { id: "White", name: "White", hex: "#ffffff", folder: "white" },
@@ -481,6 +486,44 @@ export const vibeyaProducts: VibeyaProduct[] = [
       ["Black apron base", "The product base color shown here is black."],
     ],
   },
+  {
+    id: "mg8014061",
+    handle: "vibeya-custom-metal-bottle-cap-wall-sign",
+    catalogOnly: true,
+    catalogImage: "/vibeya/assets/products/mg8014061/black/01-carousel.png",
+    category: "Home & Bath",
+    name: "VIBEYA Custom Metal Bottle Cap Wall Sign",
+    short: "Custom round metal wall sign",
+    price: 16.99,
+    currency: "USD",
+    colors: [{ id: "Black", name: "Black", hex: "#17171b", folder: "black" }],
+    sizes: ["1 Piece", "2 Pieces", "3 Pieces"],
+    sizePrices: { "1 Piece": 16.99, "2 Pieces": 22.99, "3 Pieces": 28.99 },
+    sizeLabels: { "1 Piece": "1 Piece", "2 Pieces": "2 Pieces", "3 Pieces": "3 Pieces" },
+    defaultSize: "1 Piece",
+    gallery: metalPlaqueGallery,
+    eyebrow: "VIBEYA / CUSTOM WALL ART",
+    intro: "Describe your artwork with a text prompt or upload your own design, preview it on the plaque, and confirm before ordering. Choose a 1-, 2-, or 3-piece pack. Each plaque is 30 cm (11.8 in) across; the three-piece animal story shown in the gallery is a sample design.",
+    highlights: ["Prompt-to-preview custom design", "30 cm / 11.8 in diameter each", "Full-face UV print on metal", "Black scalloped bottle-cap edge"],
+    sizeGuide: "cm / in",
+    sizeRows: [],
+    sizeNote: "The gallery shows an example three-piece artwork set. Your selected pack quantity determines how many plaques are included.",
+    variantSummary: "Design with a prompt · Black · 1, 2, or 3 pieces",
+    colorOptionLabel: "Base color",
+    sizeOptionLabel: "Quantity",
+    measurementRows: [
+      ["Diameter (each)", "30 cm / 11.8 in"],
+      ["Material", "Metal"],
+      ["Printing", "Full-face UV direct print"],
+      ["Base color", "Black"],
+      ["Weight (1 piece)", "516 g"],
+    ],
+    services: [
+      ["Design from a prompt", "Describe your idea, preview the artwork on the plaque, and confirm it before ordering."],
+      ["Choose your pack", "Select 1, 2, or 3 metal plaques; each plaque is 30 cm in diameter."],
+      ["U.S. fulfillment", "Ships from U.S. warehouse locations."],
+    ],
+  },
 ]
 
 export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index = 0) {
@@ -505,6 +548,9 @@ export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index
   }
   if (product.id === "sds-275844") {
     return `/vibeya/assets/products/sds-275844/${color.folder}/${file}`
+  }
+  if (product.id === "mg8014061") {
+    return `/vibeya/assets/products/mg8014061/${color.folder}/${file}`
   }
   if (product.id === "sds-172647") {
     const colorGallery = color.id === "Black"

@@ -5,6 +5,7 @@ import { getRegion, listRegions } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
 import BathMatProductExperience from "@modules/vibeya/components/bath-mat-product-experience"
 import LongSleeveProductExperience from "@modules/vibeya/components/long-sleeve-product-experience"
+import StandaloneProductPage from "@modules/vibeya/components/standalone-product-page"
 import { HttpTypes } from "@medusajs/types"
 import { isVariantInStock } from "@lib/util/inventory"
 import {
@@ -80,6 +81,12 @@ const PRODUCT_SEO: Partial<
     name: "Custom Cooking Apron",
     description:
       "Create a personalized cooking apron from a text prompt. Preview it on a black apron with an adjustable neck strap and three divided pockets; one size.",
+  },
+  "vibeya-custom-metal-bottle-cap-wall-sign": {
+    title: "Custom Bottle Cap Wall Sign | Design & Preview | VIBEYA",
+    name: "Custom Metal Bottle Cap Wall Sign",
+    description:
+      "Design a custom bottle cap wall sign with a prompt or uploaded artwork. Preview your 30 cm metal wall art, then choose a 1, 2, or 3-piece pack.",
   },
 }
 
@@ -210,6 +217,19 @@ export default async function ProductPage(props: Props) {
     countryCode: params.countryCode,
     productUrl: `${origin}/${params.countryCode}/products/${pricedProduct.handle}`,
   })
+
+  if (pricedProduct.handle === "vibeya-custom-metal-bottle-cap-wall-sign") {
+    return (
+      <>
+        <ProductMetaTags product={pricedProduct} region={region} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
+        />
+        <StandaloneProductPage countryCode={params.countryCode} />
+      </>
+    )
+  }
 
   return (
     <>
