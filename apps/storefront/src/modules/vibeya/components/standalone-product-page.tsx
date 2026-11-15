@@ -1,51 +1,23 @@
-"use client"
-
-import { useRouter } from "next/navigation"
-import ProductExplorer from "./product-explorer"
-
-type StandaloneProductPageProps = {
-  countryCode: string
-}
-
-export default function StandaloneProductPage({ countryCode }: StandaloneProductPageProps) {
-  const router = useRouter()
-
-  const navigate = (hash: string) => {
-    router.push(`/${countryCode}${hash}`)
-  }
-
-  const customize = (selection: { product: string; color: string; size: string }) => {
-    const params = new URLSearchParams({
-      openStudio: "1",
-      product: selection.product,
-      color: selection.color,
-      size: selection.size,
-    })
-    router.push(`/${countryCode}?${params.toString()}#top`)
-  }
-
+export default function StandaloneProductPage() {
   return (
     <>
       <style>{`
-        body:has(.vibeya-product-detail-frame) > main > [data-vibeya-shell-announcement],
-        body:has(.vibeya-product-detail-frame) > main > header[data-vibeya-shell-nav],
-        body:has(.vibeya-product-detail-frame) > main > footer {
+        body:has(.vibeya-standalone-product-frame) > main > [data-vibeya-shell-announcement],
+        body:has(.vibeya-standalone-product-frame) > main > header[data-vibeya-shell-nav],
+        body:has(.vibeya-standalone-product-frame) > main > footer {
           display: none !important;
         }
-        body:has(.vibeya-product-detail-frame) > main {
+        body:has(.vibeya-standalone-product-frame) > main {
           min-height: 100vh;
           overflow: hidden;
         }
       `}</style>
-      <div className="vibeya-product-detail-frame">
-        <ProductExplorer
-          productId="mg8014061"
-          standaloneProduct
-          initialColor="Black"
-          onNavigate={navigate}
-          onCustomize={customize}
-        />
-      </div>
+      <iframe
+        className="vibeya-standalone-product-frame"
+        src="/vibeya/index.html?v=storefront-seo-copy-20261115-1#product-mg8014061?standalone=1"
+        title="Custom Metal Bottle Cap Wall Sign"
+        style={{ display: "block", width: "100%", height: "100vh", border: 0 }}
+      />
     </>
   )
 }

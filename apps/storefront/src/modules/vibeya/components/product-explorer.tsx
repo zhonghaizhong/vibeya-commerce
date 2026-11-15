@@ -12,7 +12,6 @@ import { useVibeyaMenu } from "../data/use-vibeya-menu"
 
 type ProductExplorerProps = {
   productId?: string
-  standaloneProduct?: boolean
   initialColor?: string
   onNavigate: (hash: string) => void
   onCustomize: (selection: { product: string; color: string; size: string }) => void
@@ -115,7 +114,7 @@ function ProductCard({ product, onSelect, countryCode = "us" }: ProductCardProps
 export function ProductCards({ onSelect, countryCode = "us" }: { onSelect: ProductCardProps["onSelect"]; countryCode?: string }) {
   const products = useVibeyaProducts()
   const ordered = [...products.filter((product) => product.catalogOnly), ...products.filter((product) => !product.catalogOnly)]
-  const pinned = ["mg8014061", "sds-137892", "sds-97226", "sds-233939", "sds-275844"]
+  const pinned = ["sds-137892", "sds-97226", "sds-233939", "sds-275844"]
     .map((id) => ordered.find((product) => product.id === id))
     .filter((product): product is VibeyaProduct => Boolean(product))
   const featured = [...pinned, ...ordered.filter((product) => !pinned.includes(product))].slice(0, 6)
@@ -241,10 +240,10 @@ function ProductDetail({
   )
 }
 
-export default function ProductExplorer({ productId, standaloneProduct = false, initialColor, onNavigate, onCustomize }: ProductExplorerProps) {
+export default function ProductExplorer({ productId, initialColor, onNavigate, onCustomize }: ProductExplorerProps) {
   const products = useVibeyaProducts()
   const navigation = useVibeyaMenu()
-  const selectedProduct = products.find((product) => product.id === productId && (standaloneProduct || !product.catalogOnly))
+  const selectedProduct = products.find((product) => product.id === productId && !product.catalogOnly)
   const onSelect = (product: VibeyaProduct, color: string) => onNavigate(`#product-${product.id}?color=${encodeURIComponent(color)}`)
 
   return (
