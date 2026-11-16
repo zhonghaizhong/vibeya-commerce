@@ -1105,6 +1105,25 @@
         colorOptionLabel:'Base color',
         sizeOptionLabel:'Quantity',
         variantSummary:'Design with a prompt · Black · 1, 2, or 3 pieces'
+      },
+      {
+        id:'mg8012002',
+        handle:'vibeya-custom-washed-denim-baseball-cap',
+        catalogOnly:true,
+        name:'VIBEYA Custom Washed Denim Baseball Cap',
+        short:'Custom washed denim baseball cap',
+        price:'$14.99 USD',
+        image:'assets/products/mg8012002/black/01-carousel.webp',
+        category:'Accessories',
+        supplier:'SDSDIY',
+        supplierId:'96763',
+        supplierUrl:'https://www.sdsdiy.com/portal/detail/96763',
+        asset:'assets/products/mg8012002/black/01-carousel.webp',
+        colors:['Black','Khaki','Gray'],
+        sizes:['One Size'],
+        colorOptionLabel:'Base color',
+        sizeOptionLabel:'Size',
+        variantSummary:'Design or upload artwork · 3 colors · One Size'
       }
    ];
   const inspirations=[{title:'Funny Skeleton — Lazy Mood',tags:['Funny','Skull','Streetwear'],prompt:'Front: A laid-back cartoon skeleton lounging in headphones and a purple hoodie with a coffee cup, cheeky expression, street graffiti lettering PROFESSIONAL PROCRASTINATOR. Back: ZERO TASKS TODAY in bold typography, with matching lime-and-purple doodles. Keep the designs connected in color and attitude.'}];
@@ -1125,6 +1144,7 @@
     if(product?.id==='sds-172647')return ({Black:'Black',Red:'Red',Gray:'Medium Gray'}[color]||color);
     if(product?.id==='sds-137892')return ({Black:'Black',Red:'Red',Pink:'Pink',Blue:'Blue',Cyan:'Cyan'}[color]||color);
     if(product?.id==='sds-233939')return ({Black:'Black',White:'White',Red:'Red','Sapphire Blue':'Sapphire Blue','Pure yellow':'Pure Yellow'}[color]||color);
+    if(product?.id==='mg8012002')return ({Black:'Washed Black',Khaki:'Washed Khaki',Gray:'Washed Gray'}[color]||color);
     return ({Black:'Black',White:'White',Red:'Red',Gray:'Heather Gray',LightGray:'Light Heather Gray',Cream:'Cream',Navy:'Navy'}[color]||color);
   }
   function designColorHex(product,color){
@@ -1280,7 +1300,7 @@
   const sizeLabel=(product,size)=>product?.sizeLabels?.[size]||size||'Select a size';
   const selectedProductPrice=(product,size)=>product?.sizePrices?.[size]??itemPrice(product);
   const usdPrice=value=>value===null||value===undefined?'':new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(value)+' USD';
-  const cardColorHex={Black:'#17171b',White:'#ffffff',Red:'#e52537',Pink:'#ec4c91',Blue:'#3859d7',Cyan:'#22c3d7',Gray:'#64666c',LightGray:'#d7d7d9',Cream:'#f2e4cf',Navy:'#283456','Sapphire Blue':'#315ad8','Pure yellow':'#ffe100'};
+  const cardColorHex={Black:'#252427',White:'#ffffff',Red:'#e52537',Pink:'#ec4c91',Blue:'#3859d7',Cyan:'#22c3d7',Gray:'#77797b',Khaki:'#aa936d',LightGray:'#d7d7d9',Cream:'#f2e4cf',Navy:'#283456','Sapphire Blue':'#315ad8','Pure yellow':'#ffe100'};
   const cardColorNames={Black:'Black',White:'White',Red:'Red',Gray:'Heather Gray',LightGray:'Light Heather Gray',Cream:'Cream',Navy:'Navy'};
   const productVariants={
     'sds-167256':{
@@ -1455,6 +1475,21 @@
         services:[['Design from a prompt','Describe an idea or upload artwork, then preview it on the sign before ordering.'],['Made personal','The gallery artwork is an example; create a different custom design.'],['Black metal base','Each sign has a black scalloped edge and a full-face print area.']],
         productDetails:'Round 30 cm (11.8 in) metal wall sign with a black scalloped bottle-cap edge. The entire front face is printed with UV artwork.',
         productionDetails:'Enter a design prompt or upload artwork, review the on-product preview, and confirm before ordering. Pack options include one, two, or three signs. Gallery artwork is a sample.'
+      }
+    },
+    'mg8012002':{
+      colors:{Black:['Washed Black','#252427'],Khaki:['Washed Khaki','#aa936d'],Gray:['Washed Gray','#77797b']},
+      image:(color)=>'assets/products/mg8012002/'+({Black:'black',Khaki:'khaki',Gray:'gray'}[color]||'black')+'/01-carousel.webp',
+      sizesLabel:'One Size',colorOptionLabel:'Base color',sizeOptionLabel:'Size',
+      details:{
+        title:'Custom Washed Denim Baseball Cap',eyebrow:'VIBEYA / CUSTOM ACCESSORIES',
+        intro:'Make a washed denim baseball cap your own. Upload artwork or describe a design with a prompt, preview the front print, then confirm before ordering. Choose black, khaki, or gray.',
+        highlights:['100% cotton washed denim','Prompt design or artwork upload','Front crown print area','Adjustable one-size fit'],
+        measurementRows:[['Material','100% cotton washed denim'],['Print area','Front crown only'],['Fit','Adjustable · approximately 55–59 cm'],['Brim','Approximately 7 cm']],
+        guide:'View product details (cm / in)',note:'One adjustable size. Supplier fit range is approximately 55–59 cm.',
+        services:[['Design your way','Describe an idea with a prompt or upload your own artwork.'],['Preview before ordering','Review the custom front print on the selected cap color before checkout.'],['Three washed colors','Choose black, khaki, or gray. Each color has its own gallery examples.']],
+        productDetails:'A 100% cotton washed denim baseball cap with a curved brim and adjustable one-size fit. Approximate fit range: 55–59 cm. The custom print area is on the front crown.',
+        productionDetails:'Describe a design with a prompt or upload your own artwork, review the front-crown preview on the selected cap color, and confirm before ordering. Carousel artwork is shown as a sample.'
       }
     }
   };
@@ -2102,15 +2137,17 @@
    const apronGalleryTitles=['Your Apron, Your Humor','Apron Details','Describe It, Preview It, Make It Yours','Made for Messy, Happy Kitchens','Built for Everyday Cooking','One Size for Daily Cooking'];
    const metalSignGalleryFiles=Array.from({length:6},(_,i)=>String(i+1).padStart(2,'0')+'-carousel.webp');
    const metalSignGalleryTitles=['A Custom Sign, Made Yours','Three Signs, One Playful Story','Design from a Prompt','A Conversation for Your Wall','Preview and Confirm Your Design','Metal Sign Details'];
+   const denimCapGalleryFiles=Array.from({length:6},(_,i)=>String(i+1).padStart(2,'0')+'-carousel.webp');
+   const denimCapGalleryTitles=['Your Cap, Your Custom Design','Washed Denim in Three Colors','Create Art for the Front Panel','Choose a Prompt or Upload Artwork','Preview Before You Order','Adjustable Everyday Fit'];
    const showerCurtainReferenceFiles={'36x70.8in':'36x70.8in.webp','60x70.8in':'60x70.8in.webp','70.8x70.8in':'70.8x70.8in.png','70.8x84in':'70.8x84in.webp'};
-   const galleryCount=()=>chosen.id==='sds-128646'?tumblerGalleryFiles.length:chosen.id==='sds-138708'?bathMatGalleryFiles.length:chosen.id==='sds-97226'?blanketGalleryFiles.length:chosen.id==='sds-172647'?beanieGalleryFiles.length:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryFiles.length:chosen.id==='sds-137892'?tankiniGalleryFiles.length:chosen.id==='sds-233939'?basketballGalleryFiles.length:chosen.id==='sds-275844'?apronGalleryFiles.length:chosen.id==='mg8014061'?metalSignGalleryFiles.length:galleryTitles.length;
-   const galleryTitleAt=i=>chosen.id==='sds-128646'?tumblerGalleryTitles[i]:chosen.id==='sds-138708'?bathMatGalleryTitles[i]:chosen.id==='sds-97226'?blanketGalleryTitles[i]:chosen.id==='sds-172647'?selectedColor==='Black'?(i===0?beanieGalleryTitles[1]:i===1?beanieGalleryTitles[0]:beanieGalleryTitles[i]):beanieGalleryTitles[i]:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryTitles[i]:chosen.id==='sds-137892'?tankiniGalleryTitles[i]:chosen.id==='sds-233939'?basketballGalleryTitles[i]:chosen.id==='sds-275844'?apronGalleryTitles[i]:chosen.id==='mg8014061'?metalSignGalleryTitles[i]:chosen.id==='vibeya-washed-hoodie'?hoodieGalleryTitles[i]:galleryTitles[i];
+   const galleryCount=()=>chosen.id==='sds-128646'?tumblerGalleryFiles.length:chosen.id==='sds-138708'?bathMatGalleryFiles.length:chosen.id==='sds-97226'?blanketGalleryFiles.length:chosen.id==='sds-172647'?beanieGalleryFiles.length:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryFiles.length:chosen.id==='sds-137892'?tankiniGalleryFiles.length:chosen.id==='sds-233939'?basketballGalleryFiles.length:chosen.id==='sds-275844'?apronGalleryFiles.length:chosen.id==='mg8014061'?metalSignGalleryFiles.length:chosen.id==='mg8012002'?denimCapGalleryFiles.length:galleryTitles.length;
+   const galleryTitleAt=i=>chosen.id==='sds-128646'?tumblerGalleryTitles[i]:chosen.id==='sds-138708'?bathMatGalleryTitles[i]:chosen.id==='sds-97226'?blanketGalleryTitles[i]:chosen.id==='sds-172647'?selectedColor==='Black'?(i===0?beanieGalleryTitles[1]:i===1?beanieGalleryTitles[0]:beanieGalleryTitles[i]):beanieGalleryTitles[i]:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryTitles[i]:chosen.id==='sds-137892'?tankiniGalleryTitles[i]:chosen.id==='sds-233939'?basketballGalleryTitles[i]:chosen.id==='sds-275844'?apronGalleryTitles[i]:chosen.id==='mg8014061'?metalSignGalleryTitles[i]:chosen.id==='mg8012002'?denimCapGalleryTitles[i]:chosen.id==='vibeya-washed-hoodie'?hoodieGalleryTitles[i]:galleryTitles[i];
   const galleryFiles=['01-brand-lifestyle.webp','02-make-it-personal.webp','03-cotton-comfort.webp','04-wear-it-your-way.webp','05-attention-to-detail.webp','06-idea-to-outfit.webp','07-make-it-yours.webp'];
   const colorGalleries={Black:galleryFiles,White:galleryFiles.map(f=>'white/'+f),Red:galleryFiles.map(f=>'red/'+f),Gray:galleryFiles.map(f=>'gray/'+f),LightGray:galleryFiles.map(f=>'light-gray/'+f),Cream:galleryFiles.map(f=>'cream/'+f),Navy:galleryFiles.map(f=>'navy/'+f)};
   const colorDisplayNames={Black:'Black',White:'White',Red:'Red',Gray:'Heather Gray',LightGray:'Light Heather Gray',Cream:'Cream',Navy:'Navy'};
   const hoodieColorNames={Black:'Washed Black',Gray:'Light Gray',Khaki:'Brown',Green:'Muted Green',Pink:'Pink',Purple:'Lavender'};
    const beanieColorNames={Black:'Black',Red:'Red',Gray:'Medium Gray'};
-   const colorLabel=(key)=>chosen.id==='sds-128646'?'White':chosen.id==='sds-138708'||chosen.id==='sds-97226'||chosen.id==='vibeya-shower-curtain'?'White':chosen.id==='sds-172647'?(beanieColorNames[key]||key):chosen.id==='vibeya-washed-hoodie'?(hoodieColorNames[key]||key):chosen.id==='sds-233939'?(key==='Pure yellow'?'Pure Yellow':key):(colorDisplayNames[key]||key);
+   const colorLabel=(key)=>chosen.id==='sds-128646'?'White':chosen.id==='sds-138708'||chosen.id==='sds-97226'||chosen.id==='vibeya-shower-curtain'?'White':chosen.id==='sds-172647'?(beanieColorNames[key]||key):chosen.id==='vibeya-washed-hoodie'?(hoodieColorNames[key]||key):chosen.id==='mg8012002'?({Black:'Washed Black',Khaki:'Washed Khaki',Gray:'Washed Gray'}[key]||key):chosen.id==='sds-233939'?(key==='Pure yellow'?'Pure Yellow':key):(colorDisplayNames[key]||key);
    let galleryIndex=0,selectedColor='Black',selectedColorConfirmed=false,selectedSize='',selectedPrint='front',selectedUniformZones=['jersey-front','jersey-back','shorts'];
    const uniformPrintZones=[['jersey-front','Jersey Front'],['jersey-back','Jersey Back'],['shorts','Shorts · One Leg Only']];
    const selectedUniformZoneLabel=()=>uniformPrintZones.filter(([id])=>selectedUniformZones.includes(id)).map(([,label])=>label).join(' + ')||'Choose at least one print area';
@@ -2130,7 +2167,7 @@
    }));
    const cleanProductReferences={'sds-167256':teeReferences,'vibeya-washed-hoodie':hoodieReferences};
    const blankProductReferenceSource=()=>cleanProductReferences[chosen.id]?.[selectedColor]||null;
-   const productReferenceSources=()=>{if(chosen.id==='sds-128646'||chosen.id==='sds-97226'||chosen.id==='sds-138708'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939'||chosen.id==='sds-275844'||chosen.id==='mg8014061')return [];const refs=blankProductReferenceSource();if(!refs)return null;const zones=selectedPrint==='both'?[refs.zoneFront,refs.zoneBack]:[selectedPrint==='back'?refs.zoneBack:refs.zoneFront];return [refs.front,refs.back,...zones];};
+   const productReferenceSources=()=>{if(chosen.id==='sds-128646'||chosen.id==='sds-97226'||chosen.id==='sds-138708'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939'||chosen.id==='sds-275844'||chosen.id==='mg8014061'||chosen.id==='mg8012002')return [];const refs=blankProductReferenceSource();if(!refs)return null;const zones=selectedPrint==='both'?[refs.zoneFront,refs.zoneBack]:[selectedPrint==='back'?refs.zoneBack:refs.zoneFront];return [refs.front,refs.back,...zones];};
    const blankProductPreviewSource=()=>blankProductReferenceSource()?.composite||null;
   const gallerySrc=(i,color=selectedColor)=>{
     let src;
@@ -2142,6 +2179,7 @@
     else if(chosen.id==='sds-233939')src='assets/products/sds-233939/'+(basketballColorFolders[color]||'black')+'/'+basketballGalleryFiles[i];
     else if(chosen.id==='sds-275844')src='assets/products/sds-275844/black/'+apronGalleryFiles[i];
     else if(chosen.id==='mg8014061')src='assets/products/mg8014061/black/'+metalSignGalleryFiles[i];
+    else if(chosen.id==='mg8012002')src='assets/products/mg8012002/'+({Black:'black',Khaki:'khaki',Gray:'gray'}[color]||'black')+'/'+denimCapGalleryFiles[i];
     else if(chosen.id==='sds-172647'){
       const files=color==='Black'?[beanieGalleryFiles[1],beanieGalleryFiles[0],...beanieGalleryFiles.slice(2)]:beanieGalleryFiles;
       src='assets/products/sds-172647/'+({Black:'black',Red:'red',Gray:'gray'}[color]||'black')+'/'+files[i]+(color==='Black'&&i<2?'?rev=2':'');
@@ -2165,7 +2203,7 @@
     $('#detailIntro').textContent=config.intro;
     $('#detailPrice').textContent=usdPrice(selectedProductPrice(chosen,selectedSize))||chosen.price;
     $('#detailPrice').removeAttribute('data-vibeya-price');
-    $('#detailShipping').textContent=chosen.id==='vibeya-shower-curtain'?'Shipping options will be confirmed at checkout':'Free U.S. shipping · U.S. addresses only';
+    $('#detailShipping').textContent=chosen.id==='vibeya-shower-curtain'||chosen.id==='mg8012002'?'Shipping options will be confirmed at checkout':'Free U.S. shipping · U.S. addresses only';
     $('#detailHighlights').innerHTML=config.highlights.map(x=>'<span>'+esc(x)+'</span>').join('');
     $('#detailColorOptions').setAttribute('aria-label','Choose '+chosen.short+' '+(colorOptionLabel||'color'));
     $('#detailColorOptions').previousElementSibling.querySelector('strong').textContent=colorOptionLabel||'Color';
@@ -2194,12 +2232,13 @@ const blanket=chosen.id==='sds-97226';
     const basketball=chosen.id==='sds-233939';
     const apron=chosen.id==='sds-275844';
     const wallSign=chosen.id==='mg8014061';
-    $('#detailPrintSection .variant-label strong').textContent=wallSign||apron?'Print area':basketball?'Print areas':chosen.id==='sds-138708'||blanket||showerCurtain?'Print coverage':'Print placement';
-    $('#detailPrints').innerHTML=wallSign?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Face</button>`:apron?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Front Bib Only</button>`:fullSurface?`<button type="button" class="variant-side" data-select-print="wrap" aria-pressed="${selectedPrint==='wrap'}">${chosen.id==='sds-138708'?'Full Surface':'Full Wrap'}</button>`:basketball?uniformPrintZones.map(([id,label])=>`<button type="button" class="variant-side" data-select-zone="${id}" aria-pressed="${selectedUniformZones.includes(id)}">${label}</button>`).join(''):blanket?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Surface · Front Only</button>`:showerCurtain?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Surface · Single Sided</button>`:beanie?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Folded Front Cuff Only</button>`:tankini?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Tankini Top · Front Only</button>`:`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Front Only</button><button type="button" class="variant-side" data-select-print="back" aria-pressed="${selectedPrint==='back'}">Back Only</button><button type="button" class="variant-side" data-select-print="both" aria-pressed="${selectedPrint==='both'}">Front + Back</button>`;
-    $('#detailPrintSection .option-helper').textContent=wallSign?'Describe a design with a written prompt or upload your artwork. Preview it across the full front face of the sign, then confirm before ordering.':apron?'Describe a design with a written prompt, preview it on the black apron, then order. Printing is shown on the front bib only.':basketball?'Select any combination of Jersey Front, Jersey Back, and Shorts. Each selected area can have its own design prompt; unselected areas stay in the base color.':tankini?'Describe or upload your print in AI Studio. The design is previewed on the front of the tankini top; the separate shorts stay in the selected solid color.':chosen.id==='sds-128646'?'Create a continuous design for the printable area around the cup, or upload your own artwork in AI Studio. The gallery art is only an example.':chosen.id==='sds-138708'?'The custom print covers the entire mat, including its rounded edges. Upload artwork or create a design in AI Studio.':blanket?'Upload or create your artwork. It prints across the blanket front to the edges; the reverse remains white.':showerCurtain?'One continuous print covers the full curtain face edge to edge. Choose a size, then create or upload your artwork in AI Studio.':beanie?'Upload your artwork or describe a new design. Printing is limited to the front of the folded cuff; the rest of the beanie stays plain.':'Choose one side or both. The gallery shows example prints for each color. Your own design can be added to either side in AI Studio.';
+    const denimCap=chosen.id==='mg8012002';
+    $('#detailPrintSection .variant-label strong').textContent=wallSign||apron||denimCap?'Print area':basketball?'Print areas':chosen.id==='sds-138708'||blanket||showerCurtain?'Print coverage':'Print placement';
+    $('#detailPrints').innerHTML=wallSign?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Face</button>`:denimCap?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Front Crown Only</button>`:apron?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Front Bib Only</button>`:fullSurface?`<button type="button" class="variant-side" data-select-print="wrap" aria-pressed="${selectedPrint==='wrap'}">${chosen.id==='sds-138708'?'Full Surface':'Full Wrap'}</button>`:basketball?uniformPrintZones.map(([id,label])=>`<button type="button" class="variant-side" data-select-zone="${id}" aria-pressed="${selectedUniformZones.includes(id)}">${label}</button>`).join(''):blanket?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Surface · Front Only</button>`:showerCurtain?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Surface · Single Sided</button>`:beanie?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Folded Front Cuff Only</button>`:tankini?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Tankini Top · Front Only</button>`:`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Front Only</button><button type="button" class="variant-side" data-select-print="back" aria-pressed="${selectedPrint==='back'}">Back Only</button><button type="button" class="variant-side" data-select-print="both" aria-pressed="${selectedPrint==='both'}">Front + Back</button>`;
+    $('#detailPrintSection .option-helper').textContent=denimCap?'Describe a design with a prompt or upload your own artwork. Preview it on the front crown only; the brim and side panels stay plain.':wallSign?'Describe a design with a written prompt or upload your artwork. Preview it across the full front face of the sign, then confirm before ordering.':apron?'Describe a design with a written prompt, preview it on the black apron, then order. Printing is shown on the front bib only.':basketball?'Select any combination of Jersey Front, Jersey Back, and Shorts. Each selected area can have its own design prompt; unselected areas stay in the base color.':tankini?'Describe or upload your print in AI Studio. The design is previewed on the front of the tankini top; the separate shorts stay in the selected solid color.':chosen.id==='sds-128646'?'Create a continuous design for the printable area around the cup, or upload your own artwork in AI Studio. The gallery art is only an example.':chosen.id==='sds-138708'?'The custom print covers the entire mat, including its rounded edges. Upload artwork or create a design in AI Studio.':blanket?'Upload or create your artwork. It prints across the blanket front to the edges; the reverse remains white.':showerCurtain?'One continuous print covers the full curtain face edge to edge. Choose a size, then create or upload your artwork in AI Studio.':beanie?'Upload your artwork or describe a new design. Printing is limited to the front of the folded cuff; the rest of the beanie stays plain.':'Choose one side or both. The gallery shows example prints for each color. Your own design can be added to either side in AI Studio.';
     $('#detailCustomize').innerHTML='✦&nbsp; START CUSTOMIZING <span>↗</span>';
-    $('#detailSalesNotice').textContent=wallSign?'Create a design from a prompt or upload artwork, preview it, and confirm before ordering. Pack prices: $16.99, $22.99, or $28.99.':apron?'Describe your design with a prompt, preview it, then order. $17.99 USD.':showerCurtain?'Price and ordering will be available after product setup is complete.': 'Create a design in AI Studio, then add the finished artwork to your bag. Free U.S. shipping.';
-    $('#detailGalleryNote').textContent=wallSign?'The three-sign animal scene is an example. Create your own artwork with a prompt or upload a design; the print covers each sign’s full front face.':apron?'Every gallery print is a sample. Describe your own design with a prompt and preview it on the black apron; the print is shown on the front bib.':basketball?'Every carousel print is an example. Create a custom jersey-front, jersey-back, and shorts design with a written prompt.':tankini?'Every print shown is a sample. Create your own print or upload artwork; the top is customized while the separate shorts stay plain.':chosen.id==='sds-128646'?'The cat-and-moon print is a sample. Create a new full-wrap design or upload your own artwork in AI Studio.':chosen.id==='sds-138708'?'The 3D Bubble Duck print is an example. Create or upload your own full-surface design in AI Studio.':blanket?'The artwork shown is a sample. Create or upload your own design for a full-front print that reaches the edges; the reverse stays white.':showerCurtain?'Choose a size to view its matching white curtain reference. The finished design will be a single-sided, full-bleed hanging product image.':beanie?'All displayed prints are examples. Create or upload your design for the folded front cuff; no other part of the beanie is printed.':'Example artwork shown. Create your own print on the front, back, or both sides.';
+    $('#detailSalesNotice').textContent=denimCap?'Create your cap with a prompt or uploaded artwork, preview it, then order. $14.99 USD.':wallSign?'Create a design from a prompt or upload artwork, preview it, and confirm before ordering. Pack prices: $16.99, $22.99, or $28.99.':apron?'Describe your design with a prompt, preview it, then order. $17.99 USD.':showerCurtain?'Price and ordering will be available after product setup is complete.': 'Create a design in AI Studio, then add the finished artwork to your bag. Free U.S. shipping.';
+    $('#detailGalleryNote').textContent=denimCap?'Carousel artwork is a sample. Create an original print with a prompt or upload your own artwork. Only the front crown is printed; every color has its own six-image gallery.':wallSign?'The three-sign animal scene is an example. Create your own artwork with a prompt or upload a design; the print covers each sign’s full front face.':apron?'Every gallery print is a sample. Describe your own design with a prompt and preview it on the black apron; the print is shown on the front bib.':basketball?'Every carousel print is an example. Create a custom jersey-front, jersey-back, and shorts design with a written prompt.':tankini?'Every print shown is a sample. Create your own print or upload artwork; the top is customized while the separate shorts stay plain.':chosen.id==='sds-128646'?'The cat-and-moon print is a sample. Create a new full-wrap design or upload your own artwork in AI Studio.':chosen.id==='sds-138708'?'The 3D Bubble Duck print is an example. Create or upload your own full-surface design in AI Studio.':blanket?'The artwork shown is a sample. Create or upload your own design for a full-front print that reaches the edges; the reverse stays white.':showerCurtain?'Choose a size to view its matching white curtain reference. The finished design will be a single-sided, full-bleed hanging product image.':beanie?'All displayed prints are examples. Create or upload your design for the folded front cuff; no other part of the beanie is printed.':'Example artwork shown. Create your own print on the front, back, or both sides.';
     $('#detailProductDetails').textContent=config.productDetails||'100% cotton, relaxed fit, crew neckline, long sleeves and custom artwork placement. Available in Black, White and Red, sizes XS–3XL.';
     $('#detailProductionDetails').textContent=config.productionDetails||'Made in the USA. Ships from the USA within 24 hours of order confirmation, according to current store fulfillment information. Delivery time depends on carrier and destination.';
     $('#detailThumbnails').innerHTML=Array.from({length:galleryCount()},(_,index)=>'<button type="button" class="detail-thumb" data-gallery-index="'+index+'" aria-label="View product image '+(index+1)+': '+esc(galleryTitleAt(index))+'" aria-pressed="'+(index===galleryIndex)+'"><img src="'+gallerySrc(index)+'" alt="" loading="lazy"></button>').join('');
@@ -2236,10 +2275,10 @@ const blanket=chosen.id==='sds-97226';
     $('#studioColorLabel').textContent=colorLabel(selectedColor);
     $('#detailColorHint').textContent=chosen.id==='sds-128646'?colorLabel(selectedColor)+' artwork':chosen.id==='mg8014061'?'Black metal base':colorLabel(selectedColor)+' · '+(chosen.colors?.length||7)+' colors available';
     $('#currentSizeLabel').textContent=sizeLabel(chosen,selectedSize);
-    $('#currentPrintLabel').textContent=chosen.id==='mg8014061'?'Full Face':chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
+    $('#currentPrintLabel').textContent=chosen.id==='mg8014061'?'Full Face':chosen.id==='mg8012002'?'Front Crown Only':chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
     $('#studioSizeLabel').textContent=sizeLabel(chosen,selectedSize);
     if(chosen.sizePrices)$('#detailPrice').textContent=usdPrice(selectedProductPrice(chosen,selectedSize));
-    $('#studioPrintLabel').textContent=chosen.id==='mg8014061'?'Full Face':chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
+    $('#studioPrintLabel').textContent=chosen.id==='mg8014061'?'Full Face':chosen.id==='mg8012002'?'Front Crown Only':chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
     document.querySelectorAll('[data-select-color]').forEach(b=>{
       b.setAttribute('aria-pressed',String(b.dataset.selectColor===selectedColor));
       b.classList.toggle('chosen',b.dataset.selectColor===selectedColor);
@@ -2250,7 +2289,9 @@ const blanket=chosen.id==='sds-97226';
   }
   function drawStudioVariantChoices(){
     const studioColors=chosen.colors||['Black','White','Red','Gray','LightGray','Cream','Navy'];
-    const studioColorHex=chosen.id==='vibeya-washed-hoodie'
+    const studioColorHex=chosen.id==='mg8012002'
+      ?{Black:'#252427',Khaki:'#aa936d',Gray:'#77797b'}
+      :chosen.id==='vibeya-washed-hoodie'
       ?{Khaki:'#79675a',Gray:'#c9c8c8',Black:'#28282a',Green:'#747d71',Pink:'#c95178',Purple:'#776b86'}
       :cardColorHex;
     $('#studioColorOptions').innerHTML=studioColors.map(key=>{
@@ -2259,15 +2300,15 @@ const blanket=chosen.id==='sds-97226';
     }).join('');
     const sizes=chosen.sizes||['XS','S','M','L','XL','2XL','3XL'];
     $('#studioSizes').innerHTML=sizes.map(s=>`<button type="button" class="studio-size" data-select-size="${s}">${esc(sizeLabel(chosen,s))}</button>`).join('');
-    $('#studioPrintLabel').parentElement.querySelector('strong').textContent=chosen.id==='sds-233939'?'Print areas':chosen.id==='sds-275844'||chosen.id==='mg8014061'?'Print area':'Print placement';
-     const placements=chosen.id==='sds-128646'||chosen.id==='sds-138708'?['wrap']:chosen.id==='sds-97226'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939'||chosen.id==='sds-275844'||chosen.id==='mg8014061'?['front']:['front','back','both'];
-     $('#studioPrints').innerHTML=chosen.id==='sds-233939'?uniformPrintZones.map(([id,label])=>`<button type="button" class="studio-print" data-select-zone="${id}" aria-pressed="${selectedUniformZones.includes(id)}">${label}</button>`).join(''):placements.map(k=>`<button type="button" class="studio-print" data-select-print="${k}">${chosen.id==='mg8014061'?'Full Face':chosen.id==='sds-97226'?'Full Surface · Front Only':chosen.id==='sds-138708'||chosen.id==='vibeya-shower-curtain'?'Full Surface · Single Sided':chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':printNames[k]}</button>`).join('');
+    $('#studioPrintLabel').parentElement.querySelector('strong').textContent=chosen.id==='sds-233939'?'Print areas':chosen.id==='sds-275844'||chosen.id==='mg8014061'||chosen.id==='mg8012002'?'Print area':'Print placement';
+     const placements=chosen.id==='sds-128646'||chosen.id==='sds-138708'?['wrap']:chosen.id==='sds-97226'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939'||chosen.id==='sds-275844'||chosen.id==='mg8014061'||chosen.id==='mg8012002'?['front']:['front','back','both'];
+     $('#studioPrints').innerHTML=chosen.id==='sds-233939'?uniformPrintZones.map(([id,label])=>`<button type="button" class="studio-print" data-select-zone="${id}" aria-pressed="${selectedUniformZones.includes(id)}">${label}</button>`).join(''):placements.map(k=>`<button type="button" class="studio-print" data-select-print="${k}">${chosen.id==='mg8014061'?'Full Face':chosen.id==='mg8012002'?'Front Crown Only':chosen.id==='sds-97226'?'Full Surface · Front Only':chosen.id==='sds-138708'||chosen.id==='vibeya-shower-curtain'?'Full Surface · Single Sided':chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':printNames[k]}</button>`).join('');
     syncVariants();
   }
   function openProductById(id,color){
     const p=products.find(x=>x.id===id);if(!p)return;
     if(p.catalogOnly&&new URLSearchParams(location.search).get('standalone')!=='1'){window.top.location.assign('/us/products/'+encodeURIComponent(p.handle));return;}
-      chosen=p;const requestedColor=id==='sds-128646'&&color==='NightGarden'?'White':color;selectedColor=p.colors?.includes(requestedColor)?requestedColor:(p.colors?.[0]||'Black');selectedColorConfirmed=p.colors?.length===1||p.colors?.includes(requestedColor);selectedSize=p.sizes?.length===1?p.sizes[0]:p.id==='sds-138708'||p.id==='vibeya-shower-curtain'||p.id==='sds-137892'||p.sizePrices?p.sizes[0]:'';selectedPrint=(id==='sds-128646'||id==='sds-138708')?'wrap':'front';if(id==='sds-233939')selectedUniformZones=uniformPrintZones.map(([zone])=>zone);$('#preserveOriginalDesign').checked=false;
+      chosen=p;const requestedColor=id==='sds-128646'&&color==='NightGarden'?'White':color;selectedColor=p.colors?.includes(requestedColor)?requestedColor:(p.colors?.[0]||'Black');selectedColorConfirmed=p.colors?.length===1||p.colors?.includes(requestedColor)||(p.id==='mg8012002'&&!requestedColor);selectedSize=p.sizes?.length===1?p.sizes[0]:p.id==='sds-138708'||p.id==='vibeya-shower-curtain'||p.id==='sds-137892'||p.sizePrices?p.sizes[0]:'';selectedPrint=(id==='sds-128646'||id==='sds-138708')?'wrap':'front';if(id==='sds-233939')selectedUniformZones=uniformPrintZones.map(([zone])=>zone);$('#preserveOriginalDesign').checked=false;
     renderProductDetails();drawStudioVariantChoices();setGallery(0);syncVariants();location.hash='#product-'+id;
     if(location.hash==='#product-'+id){routeCatalog();}
   }
@@ -2378,7 +2419,7 @@ const blanket=chosen.id==='sds-97226';
     b=e.target.closest('[data-select-print]');if(b){selectedPrint=b.dataset.selectPrint;studioViewMode='product';syncVariants();syncStudioPromptFields();hasPreview=false;drawPreview();return;}
     b=e.target.closest('[data-select-color]');if(b){
       const color=b.dataset.selectColor;
-      const allowed=chosen.id==='vibeya-washed-hoodie'||chosen.id==='sds-128646'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939'?chosen.colors?.includes(color):!!colorGalleries[color];
+      const allowed=chosen.id==='vibeya-washed-hoodie'||chosen.id==='sds-128646'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939'||chosen.id==='mg8012002'?chosen.colors?.includes(color):!!colorGalleries[color];
       if(!allowed)return;
       selectedColor=color;
       selectedColorConfirmed=true;

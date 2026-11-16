@@ -78,6 +78,11 @@ const PRODUCT_SEO: Partial<
     description:
       "Design a custom bottle cap wall sign with a prompt or uploaded artwork. Preview your 30 cm metal wall art, then choose a 1, 2, or 3-piece pack.",
   },
+  "vibeya-custom-washed-denim-baseball-cap": {
+    title: "Custom Denim Baseball Cap | Design Your Own | VIBEYA",
+    description:
+      "Create a custom washed denim baseball cap from your artwork or a design prompt. Preview the front print before ordering. Choose black, khaki, or gray.",
+  },
 }
 
 export const dynamic = "force-static"
@@ -208,7 +213,12 @@ export default async function ProductPage(props: Props) {
     productUrl: `${origin}/${params.countryCode}/products/${pricedProduct.handle}`,
   })
 
-  if (pricedProduct.handle === "vibeya-custom-metal-bottle-cap-wall-sign") {
+  if (
+    pricedProduct.handle === "vibeya-custom-metal-bottle-cap-wall-sign" ||
+    pricedProduct.handle === "vibeya-custom-washed-denim-baseball-cap"
+  ) {
+    const isDenimCap =
+      pricedProduct.handle === "vibeya-custom-washed-denim-baseball-cap"
     return (
       <>
         <ProductMetaTags product={pricedProduct} region={region} />
@@ -216,7 +226,13 @@ export default async function ProductPage(props: Props) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
         />
-        <StandaloneProductPage countryCode={params.countryCode} />
+        <StandaloneProductPage
+          countryCode={params.countryCode}
+          handle={pricedProduct.handle}
+          productId={isDenimCap ? "mg8012002" : "mg8014061"}
+          title={pricedProduct.title}
+          version={isDenimCap ? "denim-cap-20261116-1" : "metal-sign-flow-20261116-2"}
+        />
       </>
     )
   }

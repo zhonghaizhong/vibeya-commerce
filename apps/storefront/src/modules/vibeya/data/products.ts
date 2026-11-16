@@ -120,6 +120,11 @@ const metalPlaqueGallery = Array.from(
   (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.webp`
 )
 
+const denimCapGallery = Array.from(
+  { length: 6 },
+  (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.webp`
+)
+
 const longSleeveColors: VibeyaColor[] = [
   { id: "Black", name: "Black", hex: "#17171b", folder: "" },
   { id: "White", name: "White", hex: "#ffffff", folder: "white" },
@@ -524,6 +529,61 @@ export const vibeyaProducts: VibeyaProduct[] = [
       ["U.S. fulfillment", "Ships from U.S. warehouse locations."],
     ],
   },
+  {
+    id: "mg8012002",
+    handle: "vibeya-custom-washed-denim-baseball-cap",
+    catalogOnly: true,
+    catalogImage: "/vibeya/assets/products/mg8012002/black/01-carousel.webp",
+    category: "Accessories",
+    name: "VIBEYA Custom Washed Denim Baseball Cap",
+    short: "Custom washed denim baseball cap",
+    price: 14.99,
+    currency: "USD",
+    colors: [
+      { id: "Black", name: "Black", hex: "#252427", folder: "black" },
+      { id: "Khaki", name: "Khaki", hex: "#aa936d", folder: "khaki" },
+      { id: "Gray", name: "Gray", hex: "#77797b", folder: "gray" },
+    ],
+    sizes: ["One Size"],
+    sizeLabels: { "One Size": "One Size" },
+    defaultSize: "One Size",
+    gallery: denimCapGallery,
+    eyebrow: "VIBEYA / CUSTOM ACCESSORIES",
+    intro:
+      "Make a washed denim baseball cap your own. Upload artwork or describe a design with a prompt, preview the front print, then confirm before ordering. Choose black, khaki, or gray.",
+    highlights: [
+      "Design from a prompt or upload artwork",
+      "Washed cotton denim",
+      "Front crown print area",
+      "Adjustable one-size fit",
+    ],
+    sizeGuide: "cm / in",
+    sizeRows: [],
+    sizeNote: "One adjustable size. Supplier fit range is approximately 55–59 cm.",
+    variantSummary: "Design or upload artwork · 3 colors · One Size",
+    colorOptionLabel: "Base color",
+    sizeOptionLabel: "Size",
+    measurementRows: [
+      ["Material", "100% cotton washed denim"],
+      ["Print area", "Front crown only"],
+      ["Fit", "Adjustable · approximately 55–59 cm"],
+      ["Brim", "Approximately 7 cm"],
+    ],
+    services: [
+      [
+        "Design your way",
+        "Describe an idea with a prompt or upload your own artwork.",
+      ],
+      [
+        "Preview before ordering",
+        "Review the custom front print on the selected cap color before checkout.",
+      ],
+      [
+        "Three washed colors",
+        "Choose black, khaki, or gray. Each color has its own gallery examples.",
+      ],
+    ],
+  },
 ]
 
 export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index = 0) {
@@ -551,6 +611,9 @@ export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index
   }
   if (product.id === "mg8014061") {
     return `/vibeya/assets/products/mg8014061/${color.folder}/${file}`
+  }
+  if (product.id === "mg8012002") {
+    return `/vibeya/assets/products/mg8012002/${color.folder}/${file}`
   }
   if (product.id === "sds-172647") {
     const colorGallery = color.id === "Black"

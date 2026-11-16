@@ -17,7 +17,19 @@ type StudioSession = {
   temporarilyUnavailable?: boolean
 }
 
-export default function StandaloneProductPage({ countryCode }: { countryCode: string }) {
+export default function StandaloneProductPage({
+  countryCode,
+  handle = "vibeya-custom-metal-bottle-cap-wall-sign",
+  productId = "mg8014061",
+  title = "Custom Metal Bottle Cap Wall Sign",
+  version = "metal-sign-flow-20261116-2",
+}: {
+  countryCode: string
+  handle?: string
+  productId?: string
+  title?: string
+  version?: string
+}) {
   const frameRef = useRef<HTMLIFrameElement>(null)
   const [authOpen, setAuthOpen] = useState(false)
   const [authRedirectTo, setAuthRedirectTo] = useState<string>()
@@ -27,8 +39,8 @@ export default function StandaloneProductPage({ countryCode }: { countryCode: st
     for (const [key, value] of Object.entries(request)) {
       if (value) params.set(key, value)
     }
-    return `/${countryCode}/products/vibeya-custom-metal-bottle-cap-wall-sign?${params.toString()}`
-  }, [countryCode])
+    return `/${countryCode}/products/${handle}?${params.toString()}`
+  }, [countryCode, handle])
 
   const openStudio = useCallback((request: StudioRequest) => {
     frameRef.current?.contentWindow?.postMessage(
@@ -123,8 +135,8 @@ export default function StandaloneProductPage({ countryCode }: { countryCode: st
       <iframe
         ref={frameRef}
         className="vibeya-standalone-product-frame"
-        src="/vibeya/index.html?v=metal-sign-flow-20261116-2&standalone=1#product-mg8014061"
-        title="Custom Metal Bottle Cap Wall Sign"
+        src={`/vibeya/index.html?v=${encodeURIComponent(version)}&standalone=1#product-${encodeURIComponent(productId)}`}
+        title={title}
         onLoad={handleFrameLoad}
         style={{ display: "block", width: "100%", height: "100vh", border: 0 }}
       />

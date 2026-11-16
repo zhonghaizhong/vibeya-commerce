@@ -308,6 +308,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const isBlanket = productId === "sds-97226"
   const isBathMat = productId === "sds-138708"
   const isBeanie = productId === "sds-172647"
+  const isDenimCap = productId === "mg8012002"
   const isShowerCurtain = productId === "vibeya-shower-curtain"
   const isTankini = productId === "sds-137892"
   const isApron = productId === "sds-275844"
@@ -329,7 +330,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isShowerCurtain && !["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"].includes(size)) {
     return res.status(400).json({ error: "请选择有效的浴帘尺寸后重新生成。" })
   }
-  const printPlacement = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
+  const printPlacement = isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
     ? body.printPlacement
     : "none"
   const isTumbler = productId === "sds-128646"
@@ -387,6 +388,10 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       name: "Custom Prompt-Designed Apron",
       colorAliases: { Black: "Black" },
     },
+    "mg8012002": {
+      name: "Custom Washed Denim Baseball Cap",
+      colorAliases: { Black: "Washed Black", Khaki: "Washed Khaki", Gray: "Washed Gray" },
+    },
   }
   const productConfig = products[productId]
   const colorKey = typeof body?.color === "string" ? body.color : ""
@@ -397,12 +402,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const references = rawReferences
   let productReference = typeof body?.productReference === "string" ? body.productReference : ""
   let productPrintAreaReference = typeof body?.productPrintAreaReference === "string" ? body.productPrintAreaReference : ""
-  if (isTankini || isBasketballUniform || isApron || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
+  if (isTankini || isBasketballUniform || isApron || isDenimCap || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
     try {
       productReference = await getVibeyaProductReference(productId, colorKey, typeof body?.size === "string" ? body.size : undefined)
     } catch (error) {
       console.error("Unable to load the VIBEYA product print reference", error)
-      return res.status(503).json({ error: isApron ? "围裙白底底图暂时无法读取，请稍后重试。" : isBasketballUniform ? "篮球服正面印刷区域参考图暂时无法读取，请稍后重试。" : isBeanie ? "帽子印刷区域参考图暂时无法读取，请稍后重试。" : "商品满印底板暂时无法读取，请稍后重试。" })
+      return res.status(503).json({ error: isDenimCap ? "棒球帽正面印刷区域参考图暂时无法读取，请稍后重试。" : isApron ? "围裙白底底图暂时无法读取，请稍后重试。" : isBasketballUniform ? "篮球服正面印刷区域参考图暂时无法读取，请稍后重试。" : isBeanie ? "针织帽印刷区域参考图暂时无法读取，请稍后重试。" : "商品满印底板暂时无法读取，请稍后重试。" })
     }
   }
   if (isTankini || isBasketballUniform || isApron) {
@@ -417,25 +422,25 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const preserveOriginalDesign = body?.preserveOriginalDesign === true
   const isWashedHoodie = productId === "vibeya-washed-hoodie"
   const isLongSleeveTee = productId === "sds-167256"
-  const placementGuideCount = isFullSurfaceProduct || isBeanie || isApron || printPlacement === "none" ? 0 : printPlacement === "both" ? 2 : 1
-  const artworkReferenceStart = isTumbler || isFullSurfaceProduct || isBeanie || isApron ? 0 : 2 + placementGuideCount
+  const placementGuideCount = isFullSurfaceProduct || isBeanie || isDenimCap || isApron || printPlacement === "none" ? 0 : printPlacement === "both" ? 2 : 1
+  const artworkReferenceStart = isTumbler || isFullSurfaceProduct || isBeanie || isDenimCap || isApron ? 0 : 2 + placementGuideCount
   const artworkReferenceNumbers = references.slice(artworkReferenceStart).map((_, index) => artworkReferenceStart + index + 1)
   const artworkReferenceLabel = artworkReferenceNumbers.length
     ? `Customer artwork reference${artworkReferenceNumbers.length > 1 ? "s" : ""}: image${artworkReferenceNumbers.length > 1 ? "s" : ""} ${artworkReferenceNumbers.join(", ")}.`
     : "No uploaded artwork reference was provided."
   const compositeReferenceNumber = preserveBaseComposite ? references.length + 1 : 0
-  const hasUploadedArtwork = isTumbler || isFullSurfaceProduct || isBeanie || isApron ? references.length > 0 : references.length > 2 + placementGuideCount
-  const uploadedArtworkReferences = isTumbler || isFullSurfaceProduct || isBeanie || isApron ? references : references.slice(2 + placementGuideCount)
-  const preserveArtworkAfterGeneration = preserveOriginalDesign && hasUploadedArtwork && !isFullSurfaceProduct && !isBeanie && !isApron
+  const hasUploadedArtwork = isTumbler || isFullSurfaceProduct || isBeanie || isDenimCap || isApron ? references.length > 0 : references.length > 2 + placementGuideCount
+  const uploadedArtworkReferences = isTumbler || isFullSurfaceProduct || isBeanie || isDenimCap || isApron ? references : references.slice(2 + placementGuideCount)
+  const preserveArtworkAfterGeneration = preserveOriginalDesign && hasUploadedArtwork && !isFullSurfaceProduct && !isBeanie && !isDenimCap && !isApron
   if (preserveArtworkAfterGeneration && !isTumbler && !preserveBaseComposite) {
     return res.status(400).json({ error: "无法校准这款衣服的印刷区域，请重新选择商品颜色后再提交。" })
   }
-  const minimumReferences = isTumbler || isFullSurfaceProduct || isBeanie || isApron ? 0 : mode === "designed-product" ? 2 + placementGuideCount : 2
-  const maximumReferences = isTumbler || isFullSurfaceProduct || isBeanie || isApron ? 6 : minimumReferences + 6
+  const minimumReferences = isTumbler || isFullSurfaceProduct || isBeanie || isDenimCap || isApron ? 0 : mode === "designed-product" ? 2 + placementGuideCount : 2
+  const maximumReferences = isTumbler || isFullSurfaceProduct || isBeanie || isDenimCap || isApron ? 6 : minimumReferences + 6
   if (!isProviderResume && (references.length < minimumReferences || references.length > maximumReferences ||
     references.reduce((total, reference) => total + (typeof reference === "string" ? reference.length : 0), 0) > 300000 ||
     references.some((reference, index) =>
-      typeof reference !== "string" || reference.length > (isTumbler || isFullSurfaceProduct || isBeanie || isApron ? (preserveOriginalDesign ? 150000 : 36000) : index < 2 + placementGuideCount ? 14000 : preserveOriginalDesign ? 150000 : 36000) ||
+      typeof reference !== "string" || reference.length > (isTumbler || isFullSurfaceProduct || isBeanie || isDenimCap || isApron ? (preserveOriginalDesign ? 150000 : 36000) : index < 2 + placementGuideCount ? 14000 : preserveOriginalDesign ? 150000 : 36000) ||
     !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(reference)
   ))) {
     return res.status(400).json({ error: "商品正反面图或印花区域参考图缺失，或参考图格式、数量、大小不符合要求。" })
@@ -452,6 +457,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isShowerCurtain && !isProviderResume && !productReference) {
     return res.status(400).json({ error: "对应尺寸的浴帘底图缺失，请重新选择尺寸后提交。" })
   }
+  if (isDenimCap && !isProviderResume && !productReference) {
+    return res.status(400).json({ error: "棒球帽正面印花区域底图缺失，请刷新页面后重新提交。" })
+  }
   if (isTankini && !isProviderResume && !productReference) {
     return res.status(400).json({ error: "泳衣印花区域底图缺失，请刷新页面后重新提交。" })
   }
@@ -464,7 +472,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isApron && (!productReference || !productPrintAreaReference)) {
     return res.status(400).json({ error: "围裙白底底图或胸前印刷区域参考图缺失，请刷新页面后重新提交。" })
   }
-  if (productReference && (productReference.length > (isTankini || isBasketballUniform || isApron || isBathMat ? 2500000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+  if (productReference && (productReference.length > (isTankini || isBasketballUniform || isApron || isBathMat ? 2500000 : isDenimCap ? 120000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
     return res.status(400).json({ error: isApron ? "围裙白底底图无效，请刷新页面后重新提交。" : isBasketballUniform ? "篮球服正面印刷区域参考图无效，请刷新页面后重新提交。" : isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : isShowerCurtain ? "浴帘底图无效，请重新选择尺寸后提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
   }
   if (productPrintAreaReference && (productPrintAreaReference.length > 2500000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
@@ -509,6 +517,18 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         artworkHandlingInstruction,
         `CUSTOMER DESIGN BRIEF: ${prompt}`,
         "Render the artwork as realistic ink integrated into the apron fabric, following its texture, lighting, and gentle folds. Do not make it look like a sticker, decal, separate patch, or hard-edged overlay. Do not add VIBEYA branding, logos, watermarks, or extra text. Return one complete front-facing apron product photo on pure white.",
+      ].join("\n")
+    : isDenimCap
+    ? [
+        "Create exactly ONE photorealistic e-commerce product image on a seamless pure white (#FFFFFF) background. Show one complete washed denim baseball cap in a straight-on FRONT view, centered, upright, and fully visible, including the full curved brim. Use a clean product-only studio composition with even white margins. No person, mannequin, hanger, room, props, labels, callouts, captions, decorative text, borders, watermark, or extra products.",
+        `Product: a classic 100% cotton washed denim baseball cap, selected base color ${productConfig.colorAliases[colorKey]}, adjustable one size. Image ${references.length + 1} is the authoritative product and print-area guide for this exact cap color, front silhouette, seams, washed denim texture, proportions, and lighting. Preserve the guide's cap shape, brim, crown panels, stitching, eyelets, top button, and color.`,
+        `PRINT AREA LOCK — FRONT CROWN ONLY: the white curved horizontal panel on the center front crown in image ${references.length + 1} marks the ONLY printable area and its exact maximum boundary. Replace that white placeholder with the design. Match its curved top and bottom edges and rounded corners; fit the complete artwork inside with a clear fabric margin. Do not print on the brim, side panels, eyelets, crown button, seams outside the marked panel, rear closure, or background. If needed, uniformly scale down and center the complete design so every letter, outline, shadow, accent, and decorative mark stays inside the white guide; never crop, stretch, or expand the area.`,
+        hasUploadedArtwork
+          ? `${artworkReferenceLabel} Use the uploaded artwork as the design source on the front crown. Preserve its recognizable subject and follow the customer's written instructions.`
+          : "Create original artwork for the front crown by following the customer's written instructions closely.",
+        artworkHandlingInstruction,
+        `CUSTOMER DESIGN BRIEF: ${prompt}`,
+        "Render the artwork as realistic direct print integrated with the washed denim weave, following the curved crown surface, fabric grain, seams, lighting, and perspective naturally. It must not look like a sticker, decal, embroidery, raised patch, or pasted-on sheet. Do not add branding, logos, watermarks, or extra text. Keep every surface outside the white curved crown panel plain and unprinted. Output exactly one complete front-view cap product image.",
       ].join("\n")
     : isBasketballUniform
     ? [
