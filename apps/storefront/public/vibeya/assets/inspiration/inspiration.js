@@ -9,16 +9,16 @@ document.addEventListener('DOMContentLoaded',async()=>{
     const fieldIds=['productFilter','patternFilter','styleFilter'];
     const cards=[...document.querySelectorAll('[data-inspiration-feature]')];
     const labels={
-      product:{'long-sleeve':'Long Sleeve Tee',hoodie:'Hoodie',tumbler:'20 oz Tumbler','bath-mat':'3D Bath Mat',blanket:'Flannel Throw Blanket',beanie:'Knitted Beanie','shower-curtain':'Shower Curtain',tankini:"Women's Tankini Swimsuit",'basketball-uniform':"Kids' Basketball Jersey Set",apron:'Apron','metal-sign':'Custom Metal Wall Sign'},
+      product:{'long-sleeve':'Long Sleeve Tee',hoodie:'Hoodie',tumbler:'20 oz Tumbler','bath-mat':'3D Bath Mat',blanket:'Flannel Throw Blanket',beanie:'Knitted Beanie','shower-curtain':'Shower Curtain',tankini:"Women's Tankini Swimsuit",'basketball-uniform':"Kids' Basketball Jersey Set",apron:'Apron','baseball-cap':'Washed Denim Baseball Cap','metal-sign':'Custom Metal Wall Sign'},
       pattern:{animals:'Animals & Creatures','botanical-celestial':'Botanical & Celestial',characters:'Characters & Humor','typography-sports':'Typography & Sports','food-kitchen':'Food & Kitchen',other:'Other Designs'},
       style:{streetwear:'Streetwear',nature:'Nature-Inspired',playful:'Playful & Whimsical',cozy:'Cozy & Cute','youth-sports':'Youth Sports',other:'Other Styles'}
     };
     const facetGroups={
-      pattern:{animal:'animals',penguin:'animals',cat:'animals','rubber-duck':'animals',raccoon:'animals','botanical-celestial':'botanical-celestial',skeleton:'characters','sleepy-sheep':'characters',typography:'typography-sports','sports-typography':'typography-sports','tomato-chef':'food-kitchen'},
-      style:{'street-graffiti':'streetwear',streetwear:'streetwear','nature-streetwear':'nature','retro-whimsical':'playful','playful-whimsy':'playful','retro-bar':'playful',funny:'playful','cozy-humor':'cozy','cozy-cute':'cozy','youth-sports':'youth-sports'}
+      pattern:{animal:'animals',penguin:'animals',cat:'animals','rubber-duck':'animals',raccoon:'animals','botanical-celestial':'botanical-celestial',skeleton:'characters','sleepy-sheep':'characters',typography:'typography-sports','sports-typography':'typography-sports','tomato-chef':'food-kitchen',flag:'other'},
+      style:{'street-graffiti':'streetwear',streetwear:'streetwear','retro-americana':'streetwear','nature-streetwear':'nature','retro-whimsical':'playful','playful-whimsy':'playful','retro-bar':'playful',funny:'playful','cozy-humor':'cozy','cozy-cute':'cozy','youth-sports':'youth-sports'}
     };
     const productGroupLabels={'apparel-accessories':'Apparel & Accessories','home-drinkware':'Home & Drinkware','home-decor':'Home Decor',other:'Other Products'};
-    const productGroups={'long-sleeve':'apparel-accessories',hoodie:'apparel-accessories',beanie:'apparel-accessories',tankini:'apparel-accessories','basketball-uniform':'apparel-accessories',apron:'apparel-accessories',tumbler:'home-drinkware','bath-mat':'home-drinkware',blanket:'home-drinkware','shower-curtain':'home-drinkware','metal-sign':'home-decor'};
+    const productGroups={'long-sleeve':'apparel-accessories',hoodie:'apparel-accessories',beanie:'apparel-accessories',tankini:'apparel-accessories','basketball-uniform':'apparel-accessories',apron:'apparel-accessories','baseball-cap':'apparel-accessories',tumbler:'home-drinkware','bath-mat':'home-drinkware',blanket:'home-drinkware','shower-curtain':'home-drinkware','metal-sign':'home-decor'};
     const facetValue=(key,value)=>key==='product'?value:(facetGroups[key]?.[value]||'other');
     const fieldOptions=[
       {id:fieldIds[0],key:'product',all:'All Products'},
@@ -76,9 +76,9 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const articleId=new URLSearchParams(location.search).get('inspiration')||document.body.dataset.inspirationId||'funny-skeleton';
   const current=catalog.find(x=>x.id===articleId)||(isGenericStory?undefined:catalog[0]);
   const storyLabels={
-    product:{'long-sleeve':'Custom Long Sleeve Tee',hoodie:'Washed Vintage Hoodie',tumbler:'20 oz Stainless Steel Tumbler','bath-mat':'Custom 3D Bath Mat',beanie:'Custom Knitted Beanie','shower-curtain':'Custom Shower Curtain',tankini:"Custom Women's Tankini Swimsuit Set",'metal-sign':'Custom Metal Bottle Cap Wall Sign'},
-    pattern:{skeleton:'Humorous Skeleton','botanical-celestial':'Botanical & Celestial',animal:'Animal Print',penguin:'Deadpan Penguin Face',cat:'Cats, Bathtub & Bubbles','rubber-duck':'Duck Bubble Trouble',raccoon:'Raccoon Bar Crew',typography:'Sleepy Cat & Bold Typography'},
-    style:{'street-graffiti':'Street Graffiti / Chill Mood','nature-streetwear':'Nature-Inspired Streetwear','retro-whimsical':'Retro Whimsical','playful-whimsy':'Playful Bathroom Decor','retro-bar':'Retro Bar Humor','cozy-cute':'Cozy, Cute & Playful',streetwear:'Retro Varsity Streetwear',funny:'Funny Graphic Swimwear'}
+    product:{'long-sleeve':'Custom Long Sleeve Tee',hoodie:'Washed Vintage Hoodie',tumbler:'20 oz Stainless Steel Tumbler','bath-mat':'Custom 3D Bath Mat',beanie:'Custom Knitted Beanie','shower-curtain':'Custom Shower Curtain',tankini:"Custom Women's Tankini Swimsuit Set",'baseball-cap':'Custom Washed Denim Baseball Cap','metal-sign':'Custom Metal Bottle Cap Wall Sign'},
+    pattern:{skeleton:'Humorous Skeleton','botanical-celestial':'Botanical & Celestial',animal:'Animal Print',penguin:'Deadpan Penguin Face',cat:'Cats, Bathtub & Bubbles','rubber-duck':'Duck Bubble Trouble',raccoon:'Raccoon Bar Crew',typography:'Sleepy Cat & Bold Typography',flag:'Vintage American Flag'},
+    style:{'street-graffiti':'Street Graffiti / Chill Mood','nature-streetwear':'Nature-Inspired Streetwear','retro-whimsical':'Retro Whimsical','playful-whimsy':'Playful Bathroom Decor','retro-bar':'Retro Bar Humor','retro-americana':'Retro Americana Streetwear','cozy-cute':'Cozy, Cute & Playful',streetwear:'Streetwear / Americana',funny:'Funny Graphic Swimwear'}
   };
   const storyMeta=document.querySelector('.story-meta');
   if(isGenericStory&&current){

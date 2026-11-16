@@ -30,6 +30,7 @@ const INDEXABLE_CONTENT_PATHS = [
   "/vibeya/inspiration/custom-kids-basketball-jersey-set.html",
   "/vibeya/inspiration/sauce-boss-custom-cooking-apron.html",
   "/vibeya/inspiration/raccoon-bar-crew-custom-metal-wall-sign.html",
+  "/vibeya/inspiration/stars-stripes-custom-denim-baseball-cap.html",
 ]
 const PAGE_SIZE = 200
 
