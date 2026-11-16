@@ -1232,8 +1232,8 @@
     if(!count){host.innerHTML='';return;}
     const guidance=[
       {label:'Design instruction · 1 sign',placeholder:'Describe the artwork for your sign…',hint:'One prompt creates one printed design.'},
-      {label:'Design instruction · 2 signs',placeholder:'Describe the two sign designs and how they should match or differ…',hint:'One prompt guides both signs. Mention whether you want matching artwork or two coordinated designs.'},
-      {label:'Design instruction · 3 signs',placeholder:'Describe the three sign designs and how they should work together…',hint:'One prompt guides all three signs. Describe the subjects and how the designs should match or differ.'}
+      {label:'Design instruction · 2 signs',placeholder:'Left: describe this sign…\nRight: describe this sign…',hint:'Label each design “Left” or “Right”. The preview follows these positions exactly.'},
+      {label:'Design instruction · 3 signs',placeholder:'Top: describe this sign…\nLower left: describe this sign…\nLower right: describe this sign…',hint:'Label each design “Top”, “Lower left”, or “Lower right”. The preview follows these positions exactly.'}
     ][count-1];
     host.innerHTML=`<label style="display:block;margin:10px 0;padding:12px;border:1px solid #e5d8f3;border-radius:12px;background:#fff"><strong>${guidance.label}</strong><textarea rows="4" data-metal-sign-prompt placeholder="${guidance.placeholder}" style="display:block;width:100%;margin-top:8px">${esc(metalSignDesignPrompt)}</textarea><small style="display:block;margin-top:8px;color:#746d7c;line-height:1.5">${guidance.hint}</small></label>`;
   }

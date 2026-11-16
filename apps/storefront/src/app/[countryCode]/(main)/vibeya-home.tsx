@@ -77,7 +77,7 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
 
     const currentParams = new URLSearchParams(window.location.search)
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "metal-sign-exact-pack-count-20261117-4")
+    forwardedParams.set("v", "metal-sign-position-lock-20261117-5")
     for (const key of ["viewCart", "openStudio", "openSearch", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
       const value = currentParams.get(key)
       if (value) forwardedParams.set(key, value)
@@ -263,7 +263,7 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
       <iframe
         ref={frameRef}
         className="vibeya-theme-frame"
-        src="/vibeya/index.html?v=metal-sign-exact-pack-count-20261117-4"
+        src="/vibeya/index.html?v=metal-sign-position-lock-20261117-5"
         title="VIBEYA storefront"
         onLoad={addAccountLink}
         style={{
