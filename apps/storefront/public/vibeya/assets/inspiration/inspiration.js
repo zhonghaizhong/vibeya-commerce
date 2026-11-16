@@ -165,16 +165,33 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const customizeFrame=document.getElementById('customizeFrame');
   let customizeOpener=null;
   let customizeAllowed=false;
+  let customizeFrameOrigin='';
+  let customizeOpenRequest=0;
+  let customizeCloseButton=customizeDialog?.querySelector('[data-close-customize]');
+  customizeCloseButton?.classList.add('customize-close');
+  if(customizeDialog&&!customizeCloseButton){
+    customizeCloseButton=document.createElement('button');
+    customizeCloseButton.type='button';
+    customizeCloseButton.className='customize-close';
+    customizeCloseButton.dataset.closeCustomize='';
+    customizeCloseButton.setAttribute('aria-label','Close design studio');
+    customizeCloseButton.textContent='×';
+    customizeDialog.appendChild(customizeCloseButton);
+  }
   const closeCustomize=()=>{
+    customizeOpenRequest++;
     if(!customizeOverlay||customizeOverlay.hidden)return;
     customizeOverlay.hidden=true;document.body.classList.remove('customize-open');
+    customizeAllowed=false;customizeFrameOrigin='';
     if(customizeFrame)customizeFrame.removeAttribute('src');
     customizeDialog?.classList.remove('is-loaded');
     customizeOpener?.focus({preventScroll:true});customizeOpener=null;
   };
   const openCustomize=async button=>{
     if(!customizeOverlay||!customizeFrame)return;
+    const requestId=++customizeOpenRequest;
     const session=await fetch('/api/vibeya/session',{credentials:'same-origin',cache:'no-store'}).then(response=>response.ok?response.json():null).catch(()=>null);
+    if(requestId!==customizeOpenRequest)return;
     if(!session?.authenticated){
       const studioUrl=new URL(window.VIBEYA_CUSTOMIZE_URL||'../index.html?inspiration=funny-skeleton&embeddedStudio=1',location.href);
       const params=studioUrl.searchParams;
@@ -186,16 +203,20 @@ document.addEventListener('DOMContentLoaded',async()=>{
     customizeAllowed=true;
     customizeOpener=button;customizeDialog?.classList.remove('is-loaded');
     customizeOverlay.hidden=false;document.body.classList.add('customize-open');
-    customizeFrame.src=window.VIBEYA_CUSTOMIZE_URL||'../index.html?inspiration=funny-skeleton&embeddedStudio=1';
+    const studioUrl=new URL(window.VIBEYA_CUSTOMIZE_URL||'../index.html?inspiration=funny-skeleton&embeddedStudio=1',location.href);
+    customizeFrameOrigin=studioUrl.origin;
+    customizeFrame.src=studioUrl.href;
+    customizeCloseButton?.focus({preventScroll:true});
   };
   document.querySelectorAll('[data-open-customize]').forEach(button=>button.addEventListener('click',()=>openCustomize(button)));
   customizeFrame?.addEventListener('load',()=>customizeDialog?.classList.add('is-loaded'));
+  customizeCloseButton?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();closeCustomize();});
   customizeOverlay?.addEventListener('click',e=>{if(e.target===customizeOverlay)closeCustomize();});
   window.addEventListener('message',e=>{
     if(e.source!==customizeFrame?.contentWindow)return;
-    if(/^https?:$/.test(location.protocol)&&e.origin!==location.origin)return;
+    if(customizeFrameOrigin&&customizeFrameOrigin!=='null'&&e.origin!==customizeFrameOrigin)return;
     if(e.data?.type==='vibeya:request-studio'&&customizeAllowed){
-      customizeFrame.contentWindow?.postMessage({type:'vibeya:open-studio',product:e.data.product,color:e.data.color,size:e.data.size,print:e.data.print,prompt:e.data.prompt},location.origin);
+      customizeFrame.contentWindow?.postMessage({type:'vibeya:open-studio',product:e.data.product,color:e.data.color,size:e.data.size,print:e.data.print,prompt:e.data.prompt},customizeFrameOrigin||'*');
       return;
     }
     if(e.data?.type==='vibeya:close-embedded-studio')closeCustomize();

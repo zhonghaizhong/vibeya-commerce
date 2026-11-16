@@ -25,6 +25,9 @@ body.customize-open{overflow:hidden;}
 .customize-overlay{position:fixed;inset:0;z-index:110;display:flex;justify-content:center;align-items:center;padding:clamp(8px,2vw,20px);background:rgba(22,13,36,.7);backdrop-filter:blur(5px);}
 .customize-dialog{width:min(1240px,100%);height:min(92dvh,900px);position:relative;border-radius:24px;overflow:hidden;background:#fffdfa;box-shadow:0 25px 95px #140a2566;}
 .customize-dialog iframe{display:block;width:100%;height:100%;border:0;background:#fffdfa;}
+.customize-close{position:absolute;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));z-index:5;display:grid;place-items:center;width:44px;height:44px;padding:0;border:1px solid #e4d8ed;border-radius:50%;background:#fffdfa;color:#21152f;font:500 25px/1 system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 12px #2411391a;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.customize-close:hover{background:#f5edfb;border-color:#c9a9eb;}
+.customize-close:focus-visible{outline:3px solid #9c60f2;outline-offset:2px;}
 .studio-frame-loading{position:absolute;inset:0;display:grid;place-items:center;background:#fffdfa;color:#2c1551;font-weight:800;font-size:15px;pointer-events:none;}
 .customize-dialog.is-loaded .studio-frame-loading{display:none;}
 @media(max-width:780px){.customize-overlay{padding:0}.customize-dialog{height:100dvh;width:100%;border-radius:0}}
@@ -186,6 +189,7 @@ body.customize-open{overflow:hidden;}
 .inspiration-feature-grid>#featuredShowerCurtainResult>.art-card.art-card-full{background:#eadcf8}
 .inspiration-feature-grid>#featuredShowerCurtainResult>.art-card.art-card-full:before{display:block;inset:-18px;background-image:var(--artwork-extension);background-size:cover;background-position:center;filter:blur(16px) saturate(.96);opacity:.78;transform:scale(1.08)}
 .inspiration-feature-grid>.story-spotlight>.art-card.art-card-full img{inset:0;width:100%;height:100%;object-fit:contain;object-position:center;border-radius:0;transform:none}
+#featuredTankiniResult>.art-card.art-card-full img{object-fit:cover;object-position:center;transform:scale(1.025)}
 .inspiration-feature-grid>.story-spotlight>.featured-text{min-width:0;align-self:stretch;border:0;border-radius:0;background:transparent;box-shadow:none;padding:16px;gap:8px}
 .inspiration-feature-grid>.story-spotlight .featured-text h2{font-size:clamp(19px,1.7vw,25px);line-height:1.04;letter-spacing:-.7px}
 .inspiration-feature-grid>.story-spotlight .featured-text p{font-size:11px;line-height:1.42}
