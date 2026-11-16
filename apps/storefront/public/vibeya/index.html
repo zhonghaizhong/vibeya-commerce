@@ -1230,9 +1230,14 @@
     const promptGroup=$('#studioPrompt').closest('.studio-prompt-group');
     promptGroup.hidden=Boolean(count);
     if(!count){host.innerHTML='';return;}
-    host.innerHTML=Array.from({length:count},(_,index)=>`<label style="display:block;margin:10px 0;padding:12px;border:1px solid #e5d8f3;border-radius:12px;background:#fff"><strong>Piece ${index+1} · Full Face</strong><textarea rows="3" data-metal-sign-prompt="${index}" placeholder="Describe this sign's artwork…" style="display:block;width:100%;margin-top:8px">${esc(metalSignDesignPrompts[index]||'')}</textarea></label>`).join('');
+    const guidance=[
+      {label:'Design instruction · 1 sign',placeholder:'Describe the artwork for your sign…',hint:'One prompt creates one printed design.'},
+      {label:'Design instruction · 2 signs',placeholder:'Describe the two sign designs and how they should match or differ…',hint:'One prompt guides both signs. Mention whether you want matching artwork or two coordinated designs.'},
+      {label:'Design instruction · 3 signs',placeholder:'Describe the three sign designs and how they should work together…',hint:'One prompt guides all three signs. Describe the subjects and how the designs should match or differ.'}
+    ][count-1];
+    host.innerHTML=`<label style="display:block;margin:10px 0;padding:12px;border:1px solid #e5d8f3;border-radius:12px;background:#fff"><strong>${guidance.label}</strong><textarea rows="4" data-metal-sign-prompt placeholder="${guidance.placeholder}" style="display:block;width:100%;margin-top:8px">${esc(metalSignDesignPrompt)}</textarea><small style="display:block;margin-top:8px;color:#746d7c;line-height:1.5">${guidance.hint}</small></label>`;
   }
-  document.addEventListener('input',event=>{const field=event.target.closest('[data-metal-sign-prompt]');if(field)metalSignDesignPrompts[Number(field.dataset.metalSignPrompt)]=field.value;});
+  document.addEventListener('input',event=>{const field=event.target.closest('[data-metal-sign-prompt]');if(field)metalSignDesignPrompt=field.value;});
   function syncStudioPromptFields(){
     const variants={
       none:{mode:'No print',hint:'Choose a print placement to continue.',guide:'Only the print is customized.',placeholder:'Describe the image, colors, or text…'},
@@ -1275,14 +1280,12 @@
       :'Adapt the references to match your instructions.';
   }
   function getRelevantPrompts(){
-    const all=chosen.id==='mg8014061'?metalSignDesignPrompts.slice(0,Math.max(1,Number.parseInt(selectedSize,10)||1)).map((prompt,index)=>`Piece ${index+1}: ${prompt.trim()}`).join('\n\n'):$('#studioPrompt').value.trim();
+    const all=chosen.id==='mg8014061'?metalSignDesignPrompt.trim():$('#studioPrompt').value.trim();
     return {all,front:all,back:all,link:''};
   }
   function validateStudioInstructions(){
     if(chosen.id==='mg8014061'){
-      const requiredCount=Math.max(1,Math.min(3,Number.parseInt(selectedSize,10)||1));
-      const missing=metalSignDesignPrompts.slice(0,requiredCount).findIndex(prompt=>!prompt.trim());
-      if(missing>=0){toast(`Add a design instruction for Piece ${missing+1}.`);$('#metalSignDesignSlots [data-metal-sign-prompt="'+missing+'"]').focus();return false;}
+      if(!metalSignDesignPrompt.trim()){toast('Describe the artwork for your selected sign pack.');$('#metalSignDesignSlots [data-metal-sign-prompt]').focus();return false;}
     }
     if($('#preserveOriginalDesign').checked&&uploadedReferences.length>1){
       toast('To keep one original design recognizable, upload a single artwork image. Turn this option off to combine multiple references.');
@@ -2183,7 +2186,7 @@
   const hoodieColorNames={Black:'Washed Black',Gray:'Light Gray',Khaki:'Brown',Green:'Muted Green',Pink:'Pink',Purple:'Lavender'};
    const beanieColorNames={Black:'Black',Red:'Red',Gray:'Medium Gray'};
    const colorLabel=(key)=>chosen.id==='sds-128646'?'White':chosen.id==='sds-138708'||chosen.id==='sds-97226'||chosen.id==='vibeya-shower-curtain'?'White':chosen.id==='sds-172647'?(beanieColorNames[key]||key):chosen.id==='vibeya-washed-hoodie'?(hoodieColorNames[key]||key):chosen.id==='mg8012002'?({Black:'Washed Black',Khaki:'Washed Khaki',Gray:'Washed Gray'}[key]||key):chosen.id==='sds-233939'?(key==='Pure yellow'?'Pure Yellow':key):(colorDisplayNames[key]||key);
-   let galleryIndex=0,selectedColor='Black',selectedColorConfirmed=false,selectedSize='',selectedPrint='front',selectedUniformZones=['jersey-front','jersey-back','shorts'],metalSignDesignPrompts=['','',''];
+   let galleryIndex=0,selectedColor='Black',selectedColorConfirmed=false,selectedSize='',selectedPrint='front',selectedUniformZones=['jersey-front','jersey-back','shorts'],metalSignDesignPrompt='';
    const uniformPrintZones=[['jersey-front','Jersey Front'],['jersey-back','Jersey Back'],['shorts','Shorts · One Leg Only']];
    const selectedUniformZoneLabel=()=>uniformPrintZones.filter(([id])=>selectedUniformZones.includes(id)).map(([,label])=>label).join(' + ')||'Choose at least one print area';
    const uniformPromptFor=(prompt)=>`VIBEYA_SELECTED_PRINT_ZONES: ${selectedUniformZones.join(', ')}\n\nOnly these selected zones may receive artwork. This selection overrides any conflicting placement wording in the design brief. Keep every unselected garment area completely plain in the selected base color.\n\n${prompt||''}`;

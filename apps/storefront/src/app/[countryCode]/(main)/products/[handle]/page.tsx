@@ -231,7 +231,7 @@ export default async function ProductPage(props: Props) {
           handle={pricedProduct.handle}
           productId={isDenimCap ? "mg8012002" : "mg8014061"}
           title={pricedProduct.title}
-          version={isDenimCap ? "denim-cap-20261116-1" : "metal-sign-single-print-area-20261117-2"}
+          version={isDenimCap ? "denim-cap-20261116-1" : "metal-sign-single-prompt-20261117-3"}
         />
       </>
     )

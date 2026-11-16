@@ -77,7 +77,7 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
 
     const currentParams = new URLSearchParams(window.location.search)
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "metal-sign-single-print-area-20261117-2")
+    forwardedParams.set("v", "metal-sign-single-prompt-20261117-3")
     for (const key of ["viewCart", "openStudio", "openSearch", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
       const value = currentParams.get(key)
       if (value) forwardedParams.set(key, value)
@@ -263,7 +263,7 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
       <iframe
         ref={frameRef}
         className="vibeya-theme-frame"
-        src="/vibeya/index.html?v=metal-sign-single-print-area-20261117-2"
+        src="/vibeya/index.html?v=metal-sign-single-prompt-20261117-3"
         title="VIBEYA storefront"
         onLoad={addAccountLink}
         style={{
