@@ -1903,7 +1903,7 @@
     return data.cart;
   }
   function hideCart(){$('#drawerOverlay').classList.remove('open');$('#cartDrawer').classList.remove('open');syncLock();}
-  function renderProductCards(){if(document.body.dataset.reactProductCards==='true')return;const ordered=[...catalogProducts.filter(p=>p.catalogOnly),...catalogProducts.filter(p=>!p.catalogOnly)],tankini=ordered.find(p=>p.id==='sds-137892'),blanket=ordered.find(p=>p.id==='sds-97226'),basketball=ordered.find(p=>p.handle==='vibeya-custom-kids-basketball-uniform'),pinned=[tankini,blanket,basketball].filter(Boolean),featured=[...pinned,...ordered.filter(p=>!pinned.includes(p))].slice(0,6);$('#productCards').innerHTML=featured.map(productHTML).join('');}
+  function renderProductCards(){if(document.body.dataset.reactProductCards==='true')return;const ordered=[...catalogProducts.filter(p=>p.catalogOnly),...catalogProducts.filter(p=>!p.catalogOnly)],tankini=ordered.find(p=>p.id==='sds-137892'),blanket=ordered.find(p=>p.id==='sds-97226'),basketball=ordered.find(p=>p.handle==='vibeya-custom-kids-basketball-uniform'),pinned=[tankini,blanket,basketball].filter(Boolean),featured=[...pinned,...ordered.filter(p=>!pinned.includes(p))];$('#productCards').innerHTML=featured.map(productHTML).join('');}
   async function renderInspo(){
     const bundledCatalog=Array.isArray(window.VIBEYA_INSPIRATION_CATALOG)?window.VIBEYA_INSPIRATION_CATALOG:[];
     let catalog=[...bundledCatalog];
