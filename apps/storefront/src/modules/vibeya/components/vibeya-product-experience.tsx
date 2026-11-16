@@ -80,7 +80,7 @@ export default function VibeyaProductExperience({
     <div className="vibeya-product-experience">
       <iframe
         ref={frameRef}
-        src={`/vibeya/index.html?v=canonical-product-detail-20261116-gallery-color-fix#product-${encodeURIComponent(productId)}${colorQuery}`}
+        src={`/vibeya/index.html?v=canonical-product-detail-curtain-gallery-fix-20261116-1#product-${encodeURIComponent(productId)}${colorQuery}`}
         title="VIBEYA custom product details and design studio"
       />
       <style>{`
