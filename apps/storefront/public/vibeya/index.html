@@ -1498,7 +1498,7 @@
       const href='/us/products/'+encodeURIComponent(p.handle);
       const image=p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">`:'<div class="catalog-product-placeholder"><strong>VIBEYA</strong><span>Product image coming soon</span></div>';
       const colors=Array.isArray(p.colors)?p.colors:[];
-      const colorHex={black:'#17171b',white:'#fff',red:'#e52d3d',pink:'#c95178',blue:'#315ad8','sapphire blue':'#315ad8',yellow:'#ffe100','pure yellow':'#ffe100',gray:'#77777b',grey:'#77777b','heather gray':'#77777b','light gray':'#d7d7d9',cream:'#f2e4cf',navy:'#283456',green:'#74846a',purple:'#776b86',lavender:'#9b83bd',brown:'#79675a'};
+       const colorHex={black:'#17171b',white:'#fff',red:'#e52d3d',pink:'#c95178',blue:'#315ad8','sapphire blue':'#315ad8',yellow:'#ffe100','pure yellow':'#ffe100',gray:'#77777b',grey:'#77777b','heather gray':'#77777b','light gray':'#d7d7d9',cream:'#f2e4cf',khaki:'#aa936d',tan:'#aa936d',navy:'#283456',green:'#74846a',purple:'#776b86',lavender:'#9b83bd',brown:'#79675a'};
       const colorSwatches=colors.map(color=>`<span class="card-swatch" style="--card-swatch-color:${colorHex[String(color).toLowerCase()]||'#c9c8c8'}" aria-hidden="true"></span>`).join('');
       const swatchRow=colors.length?`<div class="card-color-options" role="img" aria-label="Available colors: ${esc(colors.join(', '))}">${colorSwatches}</div>`:'<div class="card-color-options" aria-hidden="true"></div>';
       const caption=colors.length?`${colors[0]} · ${colors.length} ${colors.length===1?'color':'colors'}${p.sizes?.length?` · ${p.sizes.length} options`:''}`:p.category||'New arrival';
