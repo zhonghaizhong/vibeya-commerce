@@ -42,7 +42,7 @@ function ProductCard({ product, onSelect, countryCode = "us" }: ProductCardProps
           <span className={`${styles.cardArrow} card-plus`} aria-hidden="true">↗</span>
           <div className="photo">
             {product.catalogImage
-              ? <img className={styles.cardImage} src={product.catalogImage} alt={product.name} loading="lazy" />
+              ? <img className={styles.cardImage} src={product.handle === "vibeya-custom-washed-denim-baseball-cap" ? product.catalogImage.replace(/\/(?:black|khaki|gray)\/01-carousel\.webp(?=[?#]|$)/i, `/${color.folder}/01-carousel.webp`) : product.catalogImage} alt={`${color.name} ${product.name}`} loading="lazy" />
               : <div className={styles.cardPlaceholder}>VIBEYA<br /><span>Product image coming soon</span></div>}
           </div>
         </a>

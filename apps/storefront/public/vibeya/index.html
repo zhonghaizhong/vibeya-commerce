@@ -1495,12 +1495,20 @@
   };
   function renderProductCard(p){
     if(p.catalogOnly){
-      const href='/us/products/'+encodeURIComponent(p.handle);
-      const image=p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">`:'<div class="catalog-product-placeholder"><strong>VIBEYA</strong><span>Product image coming soon</span></div>';
+      const href=marketPath('products/'+encodeURIComponent(p.handle));
       const colors=Array.isArray(p.colors)?p.colors:[];
-       const colorHex={black:'#17171b',white:'#fff',red:'#e52d3d',pink:'#c95178',blue:'#315ad8','sapphire blue':'#315ad8',yellow:'#ffe100','pure yellow':'#ffe100',gray:'#77777b',grey:'#77777b','heather gray':'#77777b','light gray':'#d7d7d9',cream:'#f2e4cf',khaki:'#aa936d',tan:'#aa936d',navy:'#283456',green:'#74846a',purple:'#776b86',lavender:'#9b83bd',brown:'#79675a'};
-      const colorSwatches=colors.map(color=>`<span class="card-swatch" style="--card-swatch-color:${colorHex[String(color).toLowerCase()]||'#c9c8c8'}" aria-hidden="true"></span>`).join('');
-      const swatchRow=colors.length?`<div class="card-color-options" role="img" aria-label="Available colors: ${esc(colors.join(', '))}">${colorSwatches}</div>`:'<div class="card-color-options" aria-hidden="true"></div>';
+      const colorHex={black:'#17171b',white:'#fff',red:'#e52d3d',pink:'#c95178',blue:'#315ad8','sapphire blue':'#315ad8',yellow:'#ffe100','pure yellow':'#ffe100',gray:'#77777b',grey:'#77777b','heather gray':'#77777b','light gray':'#d7d7d9',cream:'#f2e4cf',navy:'#283456',green:'#74846a',purple:'#776b86',lavender:'#9b83bd',brown:'#79675a'};
+      const supportsColorPreview=p.handle==='vibeya-custom-washed-denim-baseball-cap';
+      const imageForColor=color=>{
+        if(!p.image||!supportsColorPreview)return p.image||'';
+        const folder=String(color||'').toLowerCase();
+        return p.image.replace(/\/(?:black|khaki|gray)\/01-carousel\.webp(?=[?#]|$)/i,`/${folder}/01-carousel.webp`);
+      };
+      const image=p.image?`<img data-catalog-card-image src="${esc(imageForColor(colors[0]))}" alt="${esc(colors[0]||p.name)} ${esc(p.name)}" loading="lazy">`:'<div class="catalog-product-placeholder"><strong>VIBEYA</strong><span>Product image coming soon</span></div>';
+      const colorSwatches=colors.map((color,index)=>supportsColorPreview
+        ? `<button type="button" class="card-swatch" data-catalog-color="${esc(color)}" data-catalog-image="${esc(imageForColor(color))}" style="--card-swatch-color:${colorHex[String(color).toLowerCase()]||'#c9c8c8'}" aria-label="Preview ${esc(color)}" title="${esc(color)}" aria-pressed="${index===0}"></button>`
+        : `<span class="card-swatch" style="--card-swatch-color:${colorHex[String(color).toLowerCase()]||'#c9c8c8'}" aria-hidden="true"></span>`).join('');
+      const swatchRow=colors.length?`<div class="card-color-options" role="${supportsColorPreview?'group':'img'}" aria-label="Available colors: ${esc(colors.join(', '))}">${colorSwatches}</div>`:'<div class="card-color-options" aria-hidden="true"></div>';
       const caption=colors.length?`${colors[0]} · ${colors.length} ${colors.length===1?'color':'colors'}${p.sizes?.length?` · ${p.sizes.length} options`:''}`:p.category||'New arrival';
       return `<article class="product-card" aria-label="${esc(p.name)}"><a class="product-card-media catalog-product-link" href="${href}" target="_top" aria-label="View ${esc(p.name)}"><span class="card-plus" aria-hidden="true">↗</span><div class="photo">${image}</div></a>${swatchRow}<div class="card-color-caption">${esc(caption)}</div><a class="product-card-info catalog-product-link" href="${href}" target="_top"><h3>${esc(p.name)}</h3><p>${esc(p.price||'Price unavailable')}</p></a></article>`;
     }
@@ -2174,7 +2182,7 @@
     if(chosen.id==='sds-128646')src='assets/products/sds-128646/'+tumblerGalleryFiles[i];
     else if(chosen.id==='sds-138708')src='assets/products/sds-138708/'+bathMatGalleryFiles[i];
     else if(chosen.id==='sds-97226')src='assets/products/sds-97226/'+blanketGalleryFiles[i];
-    else if(chosen.id==='vibeya-shower-curtain')src='/vibeya/assets/products/mg8014087/'+showerCurtainGalleryFiles[i];
+    else if(chosen.id==='vibeya-shower-curtain')src='/vibeya/assets/products/mg8014087/'+showerCurtainGalleryFiles[i]+'?v=20261116-gallery';
     else if(chosen.id==='sds-137892')src='assets/products/mg8011024/'+(tankiniColorFolders[color]||'black')+'/'+tankiniGalleryFiles[i];
     else if(chosen.id==='sds-233939')src='assets/products/sds-233939/'+(basketballColorFolders[color]||'black')+'/'+basketballGalleryFiles[i];
     else if(chosen.id==='sds-275844')src='assets/products/sds-275844/black/'+apronGalleryFiles[i];
@@ -2388,6 +2396,14 @@ const blanket=chosen.id==='sds-97226';
     let tag=e.target.closest('[data-product-tag]');if(tag){productTag=tag.dataset.productTag;paintProducts();return;}
     tag=e.target.closest('[data-idea-tag]');if(tag){ideaTag=tag.dataset.ideaTag;ideaVisible=9;paintIdeas();return;}
 
+    let catalogColorSwatch=e.target.closest('[data-catalog-color]');if(catalogColorSwatch){
+      const card=catalogColorSwatch.closest('.product-card'),image=card.querySelector('[data-catalog-card-image]'),color=catalogColorSwatch.dataset.catalogColor;
+      card.querySelectorAll('[data-catalog-color]').forEach(button=>button.setAttribute('aria-pressed',String(button===catalogColorSwatch)));
+      if(image){image.src=catalogColorSwatch.dataset.catalogImage;image.alt=color+' '+card.querySelector('.product-card-info h3').textContent;}
+      const caption=card.querySelector('.card-color-caption'),suffix=caption.textContent.split('·').slice(1).join('·').trim();
+      caption.textContent=color+(suffix?' · '+suffix:'');
+      return;
+    }
     let colorSwatch=e.target.closest('[data-card-color]');if(colorSwatch){
       const card=colorSwatch.closest('.product-card'),product=products.find(p=>p.id===card.dataset.productId);
       if(!product)return;
