@@ -39,6 +39,38 @@ export const buildProductStructuredData = ({
   const optionTitles = new Map(
     (product.options ?? []).map((option) => [option.id, option.title])
   )
+  const getVariantAttributes = (variant: HttpTypes.StoreProductVariant) => {
+    const attributes = (variant.options ?? [])
+      .map((value) => ({
+        name:
+          value.option?.title ||
+          optionTitles.get(value.option_id ?? ""),
+        value: value.value,
+      }))
+      .filter((attribute) => attribute.name && attribute.value)
+
+    const getAttribute = (name: string) =>
+      attributes.find(
+        (attribute) => attribute.name?.trim().toLowerCase() === name
+      )?.value
+
+    return {
+      color: getAttribute("color") || getAttribute("colour"),
+      size: getAttribute("size"),
+      additionalProperty: attributes.map((attribute) => ({
+        "@type": "PropertyValue",
+        name: attribute.name,
+        value: attribute.value,
+      })),
+    }
+  }
+  const schemaPropertyByOption = new Map([
+    ["color", "https://schema.org/color"],
+    ["colour", "https://schema.org/color"],
+    ["size", "https://schema.org/size"],
+    ["pattern", "https://schema.org/pattern"],
+    ["material", "https://schema.org/material"],
+  ])
 
   const buildOffer = (variant: HttpTypes.StoreProductVariant, url: string) => ({
     "@type": "Offer",
@@ -65,16 +97,28 @@ export const buildProductStructuredData = ({
   const variants = getPricedVariants(product)
 
   if (variants.length <= 1) {
+    const variant = variants[0]
+    const attributes = variant ? getVariantAttributes(variant) : undefined
+    const variantImages = variant
+      ? [
+          ...(variant.images ?? []).map((image) => image.url),
+          variant.thumbnail,
+        ].filter((image): image is string => Boolean(image))
+      : []
+
     return {
       "@context": "https://schema.org",
       "@type": "Product",
       name: product.title,
       description,
-      image: images,
+      image: variantImages.length ? variantImages : undefined,
       brand,
-      sku: variants[0]?.sku || undefined,
+      sku: variant?.sku || undefined,
+      color: attributes?.color,
+      size: attributes?.size,
+      additionalProperty: attributes?.additionalProperty,
       url: productUrl,
-      offers: variants[0] ? buildOffer(variants[0], productUrl) : undefined,
+      offers: variant ? buildOffer(variant, productUrl) : undefined,
     }
   }
 
@@ -83,23 +127,37 @@ export const buildProductStructuredData = ({
     "@type": "ProductGroup",
     name: product.title,
     description,
-    image: images,
+    image: images.length ? images : undefined,
     brand,
     url: productUrl,
     productGroupID: product.id,
-    variesBy: (product.options ?? []).map((option) => option.title),
+    variesBy: Array.from(
+      new Set(
+        (product.options ?? [])
+          .map((option) =>
+            schemaPropertyByOption.get(option.title.trim().toLowerCase())
+          )
+          .filter((property): property is string => Boolean(property))
+      )
+    ),
     hasVariant: variants.map((variant) => {
       const variantUrl = `${productUrl}?v_id=${variant.id}`
+      const attributes = getVariantAttributes(variant)
+      const variantImages = [
+        ...(variant.images ?? []).map((image) => image.url),
+        variant.thumbnail,
+        ...images,
+      ].filter((image): image is string => Boolean(image))
+
       return {
         "@type": "Product",
         name: `${product.title} - ${variant.title}`,
+        description,
         sku: variant.sku || undefined,
-        image: variant.images?.[0]?.url || images[0],
-        additionalProperty: (variant.options ?? []).map((value) => ({
-          "@type": "PropertyValue",
-          name: optionTitles.get(value.option_id ?? ""),
-          value: value.value,
-        })),
+        image: variantImages.length ? variantImages : undefined,
+        color: attributes.color,
+        size: attributes.size,
+        additionalProperty: attributes.additionalProperty,
         offers: buildOffer(variant, variantUrl),
       }
     }),
