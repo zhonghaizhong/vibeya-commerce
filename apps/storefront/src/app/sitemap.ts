@@ -29,6 +29,7 @@ const INDEXABLE_CONTENT_PATHS = [
   "/vibeya/inspiration/deadpan-penguin-custom-tankini.html",
   "/vibeya/inspiration/custom-kids-basketball-jersey-set.html",
   "/vibeya/inspiration/sauce-boss-custom-cooking-apron.html",
+  "/vibeya/inspiration/raccoon-bar-crew-custom-metal-wall-sign.html",
 ]
 const PAGE_SIZE = 200
 
