@@ -2,6 +2,7 @@
 
 import AuthModal from "./auth-modal"
 import { ProductCards } from "@modules/vibeya/components/product-explorer"
+import { useRouter } from "next/navigation"
 import { createPortal } from "react-dom"
 import { useCallback, useEffect, useRef, useState, type SyntheticEvent } from "react"
 
@@ -22,6 +23,7 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
   const [studioLayer, setStudioLayer] = useState(false)
   const [homeCardsTarget, setHomeCardsTarget] = useState<HTMLElement | null>(null)
   const frameRef = useRef<HTMLIFrameElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     if (!isAuthenticated) return
@@ -68,9 +70,14 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
   }, [])
 
   useEffect(() => {
+    if (window.location.hash.startsWith("#product-mg8014061")) {
+      router.replace(`/${countryCode}/products/vibeya-custom-metal-bottle-cap-wall-sign`)
+      return
+    }
+
     const currentParams = new URLSearchParams(window.location.search)
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "market-all-products-1")
+    forwardedParams.set("v", "metal-sign-single-print-area-20261117-2")
     for (const key of ["viewCart", "openStudio", "openSearch", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
       const value = currentParams.get(key)
       if (value) forwardedParams.set(key, value)
@@ -97,7 +104,7 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
     const homeUrl = `/vibeya/index.html${query ? `?${query}` : ""}${hash}`
     const frame = frameRef.current
     if (frame && frame.getAttribute("src") !== homeUrl) frame.src = homeUrl
-  }, [isAuthenticated])
+  }, [countryCode, isAuthenticated, router])
 
   useEffect(() => {
     const frame = frameRef.current
@@ -256,7 +263,7 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
       <iframe
         ref={frameRef}
         className="vibeya-theme-frame"
-        src="/vibeya/index.html?v=storefront-shop-market-path-fix-20261116-1"
+        src="/vibeya/index.html?v=metal-sign-single-print-area-20261117-2"
         title="VIBEYA storefront"
         onLoad={addAccountLink}
         style={{

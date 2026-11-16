@@ -312,6 +312,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const isShowerCurtain = productId === "vibeya-shower-curtain"
   const isTankini = productId === "sds-137892"
   const isApron = productId === "sds-275844"
+  const isMetalWallSign = productId === "mg8014061"
   const isBasketballUniform = productId === "sds-233939"
   const basketballZoneIds = ["jersey-front", "jersey-back", "shorts"] as const
   const basketballZoneLabels: Record<typeof basketballZoneIds[number], string> = {
@@ -325,8 +326,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         basketballZoneIds.includes(zone as typeof basketballZoneIds[number])))]
     : [...basketballZoneIds]
   const basketballUnselectedZones = basketballZoneIds.filter((zone) => !basketballSelectedZones.includes(zone))
-  const isFullSurfaceProduct = isBlanket || isBathMat || isShowerCurtain || isTankini || isBasketballUniform
+  const isFullSurfaceProduct = isBlanket || isBathMat || isShowerCurtain || isTankini || isBasketballUniform || isMetalWallSign
   const size = typeof body?.size === "string" ? body.size : ""
+  if (isMetalWallSign && !["1 Piece", "2 Pieces", "3 Pieces"].includes(size)) {
+    return res.status(400).json({ error: "请选择有效的金属画件数后重新生成。" })
+  }
   if (isShowerCurtain && !["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"].includes(size)) {
     return res.status(400).json({ error: "请选择有效的浴帘尺寸后重新生成。" })
   }
@@ -392,6 +396,10 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       name: "Custom Washed Denim Baseball Cap",
       colorAliases: { Black: "Washed Black", Khaki: "Washed Khaki", Gray: "Washed Gray" },
     },
+    "mg8014061": {
+      name: "Custom Metal Bottle Cap Wall Sign",
+      colorAliases: { Black: "Black" },
+    },
   }
   const productConfig = products[productId]
   const colorKey = typeof body?.color === "string" ? body.color : ""
@@ -402,12 +410,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const references = rawReferences
   let productReference = typeof body?.productReference === "string" ? body.productReference : ""
   let productPrintAreaReference = typeof body?.productPrintAreaReference === "string" ? body.productPrintAreaReference : ""
-  if (isTankini || isBasketballUniform || isApron || isDenimCap || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
+  if (isTankini || isBasketballUniform || isApron || isDenimCap || isMetalWallSign || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
     try {
       productReference = await getVibeyaProductReference(productId, colorKey, typeof body?.size === "string" ? body.size : undefined)
     } catch (error) {
       console.error("Unable to load the VIBEYA product print reference", error)
-      return res.status(503).json({ error: isDenimCap ? "棒球帽正面印刷区域参考图暂时无法读取，请稍后重试。" : isApron ? "围裙白底底图暂时无法读取，请稍后重试。" : isBasketballUniform ? "篮球服正面印刷区域参考图暂时无法读取，请稍后重试。" : isBeanie ? "针织帽印刷区域参考图暂时无法读取，请稍后重试。" : "商品满印底板暂时无法读取，请稍后重试。" })
+      return res.status(503).json({ error: isMetalWallSign ? "金属画底图暂时无法读取，请稍后重试。" : isDenimCap ? "棒球帽正面印刷区域参考图暂时无法读取，请稍后重试。" : isApron ? "围裙白底底图暂时无法读取，请稍后重试。" : isBasketballUniform ? "篮球服正面印刷区域参考图暂时无法读取，请稍后重试。" : isBeanie ? "针织帽印刷区域参考图暂时无法读取，请稍后重试。" : "商品满印底板暂时无法读取，请稍后重试。" })
     }
   }
   if (isTankini || isBasketballUniform || isApron) {
@@ -460,6 +468,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isDenimCap && !isProviderResume && !productReference) {
     return res.status(400).json({ error: "棒球帽正面印花区域底图缺失，请刷新页面后重新提交。" })
   }
+  if (isMetalWallSign && !isProviderResume && !productReference) {
+    return res.status(400).json({ error: "金属画底图缺失，请刷新页面后重新提交。" })
+  }
   if (isTankini && !isProviderResume && !productReference) {
     return res.status(400).json({ error: "泳衣印花区域底图缺失，请刷新页面后重新提交。" })
   }
@@ -472,7 +483,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isApron && (!productReference || !productPrintAreaReference)) {
     return res.status(400).json({ error: "围裙白底底图或胸前印刷区域参考图缺失，请刷新页面后重新提交。" })
   }
-  if (productReference && (productReference.length > (isTankini || isBasketballUniform || isApron || isBathMat ? 2500000 : isDenimCap ? 120000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+  if (productReference && (productReference.length > (isTankini || isBasketballUniform || isApron || isBathMat || isMetalWallSign ? 2500000 : isDenimCap ? 120000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
     return res.status(400).json({ error: isApron ? "围裙白底底图无效，请刷新页面后重新提交。" : isBasketballUniform ? "篮球服正面印刷区域参考图无效，请刷新页面后重新提交。" : isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : isShowerCurtain ? "浴帘底图无效，请重新选择尺寸后提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
   }
   if (productPrintAreaReference && (productPrintAreaReference.length > 2500000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
@@ -529,6 +540,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         artworkHandlingInstruction,
         `CUSTOMER DESIGN BRIEF: ${prompt}`,
         "Render the artwork as realistic direct print integrated with the washed denim weave, following the curved crown surface, fabric grain, seams, lighting, and perspective naturally. It must not look like a sticker, decal, embroidery, raised patch, or pasted-on sheet. Do not add branding, logos, watermarks, or extra text. Keep every surface outside the white curved crown panel plain and unprinted. Output exactly one complete front-view cap product image.",
+      ].join("\n")
+    : isMetalWallSign
+    ? [
+        `Create a pure-white-background product preview showing exactly ${size.startsWith("3") ? "three" : size.startsWith("2") ? "two" : "one"} round metal bottle-cap wall sign${size.startsWith("1") ? "" : "s"}. Use the supplied blank sign reference as the exact product template. Preserve its black scalloped metal rim, circular white print face, proportions, and clean white background. Arrange three signs in a balanced triangle, two signs side-by-side, or one sign centered, matching the selected piece count.`,
+        `The supplied reference image contains three separate blank full-face print areas. Treat them as Piece 1 (top), Piece 2 (lower left), and Piece 3 (lower right). Replace only the white circular face(s) corresponding to the selected quantity with the matching artwork instructions below. Preserve every black rim and keep the rest of the white background clean.`,
+        `PIECE-SPECIFIC DESIGN BRIEF: ${prompt}. Each Piece N instruction belongs only on its matching sign. Never merge the designs, repeat one design across all signs, or place artwork outside the circular white face.`,
+        hasUploadedArtwork ? `${artworkReferenceLabel} Use uploaded artwork only for the piece or pieces specified in the written brief.` : "Create original artwork separately for each numbered piece using its own instruction.",
+        "Render each design as direct UV print on the metal face, following its circular shape and subtle surface lighting. Keep the art inside the circular face, do not cover the black scalloped rim, and do not make the print look like a sticker or paper insert. Do not add logos, watermarks, captions, or extra signs. Output one finished product preview only.",
       ].join("\n")
     : isBasketballUniform
     ? [

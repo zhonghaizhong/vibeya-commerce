@@ -22,6 +22,7 @@ const DESIGN_GENERATION_PRODUCT_IDS = new Set([
   "sds-137892",
   "sds-233939",
   "sds-275844",
+  "mg8014061",
   "mg8012002",
 ])
 const BASKETBALL_PRINT_ZONES = ["jersey-front", "jersey-back", "shorts"] as const

@@ -885,6 +885,7 @@
       <div class="studio-sizes" id="studioSizes"></div>
         <div class="studio-variant-row"><strong>Print placement</strong><span id="studioPrintLabel">No print</span></div>
       <div class="studio-prints" id="studioPrints"></div>
+      <div id="metalSignDesignSlots" hidden></div>
     </div>
 <div class="studio-step-heading"><label>02 / Describe your idea</label><div class="studio-background-reminder" role="note"><span class="studio-background-reminder-icon" aria-hidden="true">✦</span><span><strong>Background:</strong> None by default. To add one, name its color and style (e.g., “solid lavender”).</span></div></div>
         <p class="studio-step-hint" id="studioPromptHelper">Describe the print. Your product stays unchanged.</p>
@@ -1103,7 +1104,7 @@
         colors:['Black'],
         sizes:['1 Piece','2 Pieces','3 Pieces'],
         colorOptionLabel:'Base color',
-        sizeOptionLabel:'Quantity',
+        sizeOptionLabel:'Size',
         variantSummary:'Design with a prompt · Black · 1, 2, or 3 pieces'
       },
       {
@@ -1222,6 +1223,16 @@
     basketball:'Jersey front: Create a bold basketball graphic with a dynamic player silhouette, court lines, and the number 24. Jersey back: Use a coordinated but distinct name-and-number layout with the same colors and visual style. Shorts: Add matching side-panel artwork and a small basketball detail. Keep all three designs balanced, readable, and printed on the fabric only.'
   };
   const studioActiveInput=()=>$('#studioPrompt');
+  function syncMetalSignDesignSlots(){
+    const host=$('#metalSignDesignSlots');if(!host)return;
+    const count=chosen.id==='mg8014061'?Math.max(1,Math.min(3,Number.parseInt(selectedSize,10)||1)):0;
+    host.hidden=!count;
+    const promptGroup=$('#studioPrompt').closest('.studio-prompt-group');
+    promptGroup.hidden=Boolean(count);
+    if(!count){host.innerHTML='';return;}
+    host.innerHTML=Array.from({length:count},(_,index)=>`<label style="display:block;margin:10px 0;padding:12px;border:1px solid #e5d8f3;border-radius:12px;background:#fff"><strong>Piece ${index+1} · Full Face</strong><textarea rows="3" data-metal-sign-prompt="${index}" placeholder="Describe this sign's artwork…" style="display:block;width:100%;margin-top:8px">${esc(metalSignDesignPrompts[index]||'')}</textarea></label>`).join('');
+  }
+  document.addEventListener('input',event=>{const field=event.target.closest('[data-metal-sign-prompt]');if(field)metalSignDesignPrompts[Number(field.dataset.metalSignPrompt)]=field.value;});
   function syncStudioPromptFields(){
     const variants={
       none:{mode:'No print',hint:'Choose a print placement to continue.',guide:'Only the print is customized.',placeholder:'Describe the image, colors, or text…'},
@@ -1241,6 +1252,7 @@
     $('#studioPromptHelper').textContent=v.hint;
     $('#studioPromptExample').textContent=v.guide;
     $('#studioPrompt').placeholder=v.placeholder;
+    syncMetalSignDesignSlots();
     $('#studioOutputNote').textContent=chosen.id==='sds-128646'?'Your three-view white tumbler product image will appear in My Designs.':chosen.id==='sds-138708'?'Your full-surface bath mat product image will appear in My Designs.':chosen.id==='sds-97226'?'Your full-front printed blanket, hanging from two hooks, will appear in My Designs.':chosen.id==='vibeya-shower-curtain'?'Your full-surface printed shower curtain, hanging against a white background, will appear in My Designs.':chosen.id==='sds-172647'?'Your beanie preview will appear in My Designs with front and back views; print stays inside the front cuff area only.':chosen.id==='sds-233939'?`Your basketball set will be customized on: ${selectedUniformZoneLabel()}.`:'Your generated design will appear in My Designs.';
   }
   function renderStudioReferences(){
@@ -1263,10 +1275,15 @@
       :'Adapt the references to match your instructions.';
   }
   function getRelevantPrompts(){
-    const all=$('#studioPrompt').value.trim();
+    const all=chosen.id==='mg8014061'?metalSignDesignPrompts.slice(0,Math.max(1,Number.parseInt(selectedSize,10)||1)).map((prompt,index)=>`Piece ${index+1}: ${prompt.trim()}`).join('\n\n'):$('#studioPrompt').value.trim();
     return {all,front:all,back:all,link:''};
   }
   function validateStudioInstructions(){
+    if(chosen.id==='mg8014061'){
+      const requiredCount=Math.max(1,Math.min(3,Number.parseInt(selectedSize,10)||1));
+      const missing=metalSignDesignPrompts.slice(0,requiredCount).findIndex(prompt=>!prompt.trim());
+      if(missing>=0){toast(`Add a design instruction for Piece ${missing+1}.`);$('#metalSignDesignSlots [data-metal-sign-prompt="'+missing+'"]').focus();return false;}
+    }
     if($('#preserveOriginalDesign').checked&&uploadedReferences.length>1){
       toast('To keep one original design recognizable, upload a single artwork image. Turn this option off to combine multiple references.');
       return false;
@@ -1475,7 +1492,7 @@
     'mg8014061':{
       colors:{Black:['Black','#17171b']},
       image:()=> 'assets/products/mg8014061/black/01-carousel.webp',
-      sizesLabel:'1, 2, or 3 pieces',colorOptionLabel:'Base color',sizeOptionLabel:'Quantity',
+      sizesLabel:'1, 2, or 3 pieces',colorOptionLabel:'Base color',sizeOptionLabel:'Size',
       details:{
         title:'Custom Metal Bottle Cap Wall Sign',eyebrow:'VIBEYA / CUSTOM HOME',
         intro:'Create a round metal wall sign with a written prompt or your uploaded artwork. Preview the design and confirm before ordering. Choose a 1-, 2-, or 3-piece pack; each sign is 30 cm (11.8 in) across.',
@@ -2166,7 +2183,7 @@
   const hoodieColorNames={Black:'Washed Black',Gray:'Light Gray',Khaki:'Brown',Green:'Muted Green',Pink:'Pink',Purple:'Lavender'};
    const beanieColorNames={Black:'Black',Red:'Red',Gray:'Medium Gray'};
    const colorLabel=(key)=>chosen.id==='sds-128646'?'White':chosen.id==='sds-138708'||chosen.id==='sds-97226'||chosen.id==='vibeya-shower-curtain'?'White':chosen.id==='sds-172647'?(beanieColorNames[key]||key):chosen.id==='vibeya-washed-hoodie'?(hoodieColorNames[key]||key):chosen.id==='mg8012002'?({Black:'Washed Black',Khaki:'Washed Khaki',Gray:'Washed Gray'}[key]||key):chosen.id==='sds-233939'?(key==='Pure yellow'?'Pure Yellow':key):(colorDisplayNames[key]||key);
-   let galleryIndex=0,selectedColor='Black',selectedColorConfirmed=false,selectedSize='',selectedPrint='front',selectedUniformZones=['jersey-front','jersey-back','shorts'];
+   let galleryIndex=0,selectedColor='Black',selectedColorConfirmed=false,selectedSize='',selectedPrint='front',selectedUniformZones=['jersey-front','jersey-back','shorts'],metalSignDesignPrompts=['','',''];
    const uniformPrintZones=[['jersey-front','Jersey Front'],['jersey-back','Jersey Back'],['shorts','Shorts · One Leg Only']];
    const selectedUniformZoneLabel=()=>uniformPrintZones.filter(([id])=>selectedUniformZones.includes(id)).map(([,label])=>label).join(' + ')||'Choose at least one print area';
    const uniformPromptFor=(prompt)=>`VIBEYA_SELECTED_PRINT_ZONES: ${selectedUniformZones.join(', ')}\n\nOnly these selected zones may receive artwork. This selection overrides any conflicting placement wording in the design brief. Keep every unselected garment area completely plain in the selected base color.\n\n${prompt||''}`;
@@ -2293,10 +2310,14 @@ const blanket=chosen.id==='sds-97226';
     $('#studioColorLabel').textContent=colorLabel(selectedColor);
     $('#detailColorHint').textContent=chosen.id==='sds-128646'?colorLabel(selectedColor)+' artwork':chosen.id==='mg8014061'?'Black metal base':colorLabel(selectedColor)+' · '+(chosen.colors?.length||7)+' colors available';
     $('#currentSizeLabel').textContent=sizeLabel(chosen,selectedSize);
-    $('#currentPrintLabel').textContent=chosen.id==='mg8014061'?'Full Face':chosen.id==='mg8012002'?'Front Crown Only':chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
+    $('#currentPrintLabel').textContent=chosen.id==='mg8014061'?`${sizeLabel(chosen,selectedSize)} · Full Face`:chosen.id==='mg8012002'?'Front Crown Only':chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
     $('#studioSizeLabel').textContent=sizeLabel(chosen,selectedSize);
     if(chosen.sizePrices)$('#detailPrice').textContent=usdPrice(selectedProductPrice(chosen,selectedSize));
-    $('#studioPrintLabel').textContent=chosen.id==='mg8014061'?'Full Face':chosen.id==='mg8012002'?'Front Crown Only':chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
+    $('#studioPrintLabel').textContent=chosen.id==='mg8014061'?`${sizeLabel(chosen,selectedSize)} · Full Face`:chosen.id==='mg8012002'?'Front Crown Only':chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
+    if(chosen.id==='mg8014061'){
+      $('#detailPrints').innerHTML=`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Face</button>`;
+      $('#studioPrints').innerHTML=`<button type="button" class="studio-print" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Face</button>`;
+    }
     document.querySelectorAll('[data-select-color]').forEach(b=>{
       b.setAttribute('aria-pressed',String(b.dataset.selectColor===selectedColor));
       b.classList.toggle('chosen',b.dataset.selectColor===selectedColor);
@@ -2304,6 +2325,7 @@ const blanket=chosen.id==='sds-97226';
     document.querySelectorAll('[data-select-size]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.selectSize===selectedSize)));
     document.querySelectorAll('[data-select-print]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.selectPrint===selectedPrint)));
     document.querySelectorAll('[data-select-zone]').forEach(b=>b.setAttribute('aria-pressed',String(selectedUniformZones.includes(b.dataset.selectZone))));
+    syncMetalSignDesignSlots();
   }
   function drawStudioVariantChoices(){
     const studioColors=chosen.colors||['Black','White','Red','Gray','LightGray','Cream','Navy'];
@@ -2317,7 +2339,7 @@ const blanket=chosen.id==='sds-97226';
       return `<button class="color-choice" type="button" data-select-color="${key}" style="--studio-swatch:${studioColorHex[key]||'#ccc'}" aria-pressed="${key===selectedColor}" aria-label="${esc(label)}" title="${esc(label)}"><span class="studio-color-dot"></span></button>`;
     }).join('');
     const sizes=chosen.sizes||['XS','S','M','L','XL','2XL','3XL'];
-    $('#studioSizes').innerHTML=sizes.map(s=>`<button type="button" class="studio-size" data-select-size="${s}">${esc(sizeLabel(chosen,s))}</button>`).join('');
+    $('#studioSizes').innerHTML=sizes.map(s=>`<button type="button" class="studio-size" data-select-size="${s}" aria-pressed="${s===selectedSize}">${esc(sizeLabel(chosen,s))}</button>`).join('');
     $('#studioPrintLabel').parentElement.querySelector('strong').textContent=chosen.id==='sds-233939'?'Print areas':chosen.id==='sds-275844'||chosen.id==='mg8014061'||chosen.id==='mg8012002'?'Print area':'Print placement';
      const placements=chosen.id==='sds-128646'||chosen.id==='sds-138708'?['wrap']:chosen.id==='sds-97226'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939'||chosen.id==='sds-275844'||chosen.id==='mg8014061'||chosen.id==='mg8012002'?['front']:['front','back','both'];
      $('#studioPrints').innerHTML=chosen.id==='sds-233939'?uniformPrintZones.map(([id,label])=>`<button type="button" class="studio-print" data-select-zone="${id}" aria-pressed="${selectedUniformZones.includes(id)}">${label}</button>`).join(''):placements.map(k=>`<button type="button" class="studio-print" data-select-print="${k}">${chosen.id==='mg8014061'?'Full Face':chosen.id==='mg8012002'?'Front Crown Only':chosen.id==='sds-97226'?'Full Surface · Front Only':chosen.id==='sds-138708'||chosen.id==='vibeya-shower-curtain'?'Full Surface · Single Sided':chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':printNames[k]}</button>`).join('');
