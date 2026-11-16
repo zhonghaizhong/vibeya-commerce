@@ -32,6 +32,8 @@ const catalogColorHex: Record<string, string> = {
   "heather gray": "#77777b",
   "light gray": "#d7d7d9",
   cream: "#f2e4cf",
+  khaki: "#aa936d",
+  tan: "#aa936d",
   navy: "#283456",
   green: "#74846a",
   purple: "#776b86",
