@@ -1130,6 +1130,16 @@
   const inlineIdeaAssets={0:'assets/inspiration/skeleton-illustration.webp'};
   const asset=i=>inlineIdeaAssets[i];
   const $=s=>document.querySelector(s);
+  const marketCountryCode=()=>{
+    const queryCountry=new URLSearchParams(location.search).get('country');
+    if(queryCountry)return queryCountry.toLowerCase();
+    try{
+      const routeCountry=window.parent.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i)?.[1];
+      if(routeCountry)return routeCountry.toLowerCase();
+    }catch{}
+    return 'us';
+  };
+  const marketPath=path=>`/${encodeURIComponent(marketCountryCode())}/${String(path||'').replace(/^\/+/, '')}`;
   if(window.parent===window){fetch('/api/vibeya/session',{credentials:'same-origin',cache:'no-store'}).then(response=>{if(!response.ok)throw new Error('Session check unavailable');return response.json();}).then(session=>{const authenticated=Boolean(session?.authenticated);document.body.dataset.vibeyaAuth=authenticated?'authenticated':'guest';const label=authenticated?'Account':'Sign in';document.querySelectorAll('.account-link,.account-menu-link,.sign-in-link').forEach(link=>{link.textContent=label;link.setAttribute('aria-label',authenticated?'Account':'Sign in or register');});}).catch(()=>{});}
   let chosen=products[0],chosenArt=0,hasPreview=false,saved=[],generatedArtworkDataUrl=null,designCreditsRemaining=null,designGenerationInProgress=false,currentDesignJobId=null;
   const activeGenerationRequests=new Set();

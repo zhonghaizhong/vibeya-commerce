@@ -256,7 +256,7 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
       <iframe
         ref={frameRef}
         className="vibeya-theme-frame"
-        src="/vibeya/index.html?v=storefront-shop-seo-all-products-20261116-2"
+        src="/vibeya/index.html?v=storefront-shop-market-path-fix-20261116-1"
         title="VIBEYA storefront"
         onLoad={addAccountLink}
         style={{
