@@ -44,6 +44,9 @@ for attempt in $(seq 1 60); do
   backend_status="$(docker inspect --format '{{.State.Health.Status}}' "$backend_id" 2>/dev/null || true)"
   storefront_status="$(docker inspect --format '{{.State.Health.Status}}' "$storefront_id" 2>/dev/null || true)"
   if [[ "$backend_status" == "healthy" && "$storefront_status" == "healthy" ]]; then
+    # Re-run after the live backend is healthy so the published product is
+    # available through the Store API before this revision is marked deployed.
+    "${compose[@]}" run --rm backend pnpm exec medusa exec ./src/scripts/seed-vibeya-custom-denim-cap.ts
     install -d -m 0755 "$STATE_DIR"
     printf '%s\n' "$target_revision" > "$DEPLOYED_REVISION_FILE"
     echo "Deployment healthy at $target_revision"
