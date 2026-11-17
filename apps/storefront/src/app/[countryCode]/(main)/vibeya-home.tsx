@@ -328,7 +328,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       <iframe
         ref={frameRef}
         className="vibeya-theme-frame"
-        src={`/vibeya/index.html?v=inspiration-links-20261117-1&country=${encodeURIComponent(countryCode.toLowerCase())}&locale=${encodeURIComponent(marketLocale)}${standaloneProductId ? `&standalone=1${standaloneHash}` : ""}`}
+        src={`/vibeya/index.html?v=inspiration-category-links-20261117-1&country=${encodeURIComponent(countryCode.toLowerCase())}&locale=${encodeURIComponent(marketLocale)}${standaloneProductId ? `&standalone=1${standaloneHash}` : ""}`}
         title="VIBEYA storefront"
         onLoad={addAccountLink}
         style={{
