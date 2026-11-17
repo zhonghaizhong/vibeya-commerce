@@ -83,11 +83,35 @@ export default function StandaloneProductPage({
     const handleFrameMessage = async (event: MessageEvent) => {
       if (
         event.origin !== window.location.origin ||
-        event.source !== frameRef.current?.contentWindow ||
-        event.data?.type !== "vibeya:request-studio"
+        event.source !== frameRef.current?.contentWindow
       ) {
         return
       }
+
+      if (event.data?.type === "vibeya:route" && typeof event.data.hash === "string") {
+        if (event.data.hash.startsWith("#product-") && typeof event.data.handle === "string") {
+          const selectedId = event.data.hash.slice("#product-".length)
+          if (selectedId !== productId) {
+            const query = new URLSearchParams()
+            if (typeof event.data.color === "string" && event.data.color) query.set("color", event.data.color)
+            const queryString = query.toString()
+            window.location.assign(`/${countryCode}/products/${encodeURIComponent(event.data.handle)}${queryString ? `?${queryString}` : ""}`)
+          }
+          return
+        }
+
+        if (event.data.hash === "#inspiration") {
+          window.location.assign("/vibeya/inspiration/index.html")
+          return
+        }
+
+        if (["#top", "#shop", "#create", "#how-it-works", "#my-designs"].includes(event.data.hash)) {
+          window.location.assign(`/${countryCode}${event.data.hash}`)
+          return
+        }
+      }
+
+      if (event.data?.type !== "vibeya:request-studio") return
 
       const request: StudioRequest = {}
       for (const key of ["product", "color", "size", "print", "areas", "prompt"] as const) {
@@ -117,7 +141,7 @@ export default function StandaloneProductPage({
 
     window.addEventListener("message", handleFrameMessage)
     return () => window.removeEventListener("message", handleFrameMessage)
-  }, [getStudioUrl, openStudio])
+  }, [countryCode, getStudioUrl, openStudio, productId])
 
   return (
     <>

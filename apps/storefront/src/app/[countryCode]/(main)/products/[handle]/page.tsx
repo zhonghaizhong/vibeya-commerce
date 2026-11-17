@@ -30,6 +30,7 @@ const VIBEYA_DETAIL_IDS: Record<string, string> = {
   "vibeya-custom-womens-tankini-swimsuit-set": "sds-137892",
   "vibeya-custom-kids-basketball-uniform": "sds-233939",
   "vibeya-custom-metal-bottle-cap-wall-sign": "mg8014061",
+  "vibeya-custom-washed-denim-baseball-cap": "mg8012002",
 }
 
 type Props = {

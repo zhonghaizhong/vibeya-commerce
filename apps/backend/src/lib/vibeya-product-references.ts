@@ -24,6 +24,11 @@ const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string> | 
     Red: "vibeya/assets/products/sds-172647/red/beanie-print-area-guide.webp",
     Gray: "vibeya/assets/products/sds-172647/gray/beanie-print-area-guide.webp",
   },
+  "mg8012002": {
+    Black: "vibeya/assets/products/mg8012002/black/print-area-guide.webp",
+    Khaki: "vibeya/assets/products/mg8012002/khaki/print-area-guide.webp",
+    Gray: "vibeya/assets/products/mg8012002/gray/print-area-guide.webp",
+  },
   "sds-233939": {
     Black: "vibeya/assets/products/sds-233939/black/print-area-front.png",
     White: "vibeya/assets/products/sds-233939/white/print-area-front.png",

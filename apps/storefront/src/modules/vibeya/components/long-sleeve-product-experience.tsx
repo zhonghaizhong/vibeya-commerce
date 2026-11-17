@@ -75,7 +75,7 @@ export default function LongSleeveProductExperience({
     <div className="long-sleeve-product-experience">
       <iframe
         ref={frameRef}
-        src="/vibeya/index.html?v=canonical-long-sleeve-product#product-sds-167256?color=Black"
+        src="/vibeya/index.html?standalone=1&v=independent-pages-20261117-1#product-sds-167256?color=Black"
         title="Custom long sleeve T-shirt product details and design studio"
       />
       <style>{`
