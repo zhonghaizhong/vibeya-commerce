@@ -1388,7 +1388,7 @@
   const selectedProductPrice=(product,size)=>product?.marketPrice??product?.sizePrices?.[size]??itemPrice(product);
   const usdPrice=value=>value===null||value===undefined?'':new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(value)+' USD';
   const selectedMarketPrice=product=>{const value=selectedProductPrice(product,selectedSize);if(value===null||value===undefined)return '';const currency=product?.marketCurrency||'USD';return new Intl.NumberFormat('en-US',{style:'currency',currency}).format(value)+' '+currency;};
-  const cardColorHex={Black:'#17171b',White:'#ffffff',Red:'#e52537',Pink:'#ec4c91',Blue:'#3859d7',Cyan:'#22c3d7',Gray:'#64666c',LightGray:'#d7d7d9',Cream:'#f2e4cf',Navy:'#283456','Sapphire Blue':'#315ad8','Pure yellow':'#ffe100'};
+   const cardColorHex={Black:'#17171b',White:'#ffffff',Red:'#e52537',Pink:'#ec4c91',Blue:'#3859d7',Cyan:'#22c3d7',Gray:'#64666c',LightGray:'#d7d7d9',Cream:'#f2e4cf',Navy:'#283456','Sapphire Blue':'#315ad8','Pure yellow':'#ffe100',Khaki:'#a99a78'};
   const cardColorNames={Black:'Black',White:'White',Red:'Red',Gray:'Heather Gray',LightGray:'Light Heather Gray',Cream:'Cream',Navy:'Navy'};
   const productVariants={
     'sds-167256':{
@@ -2398,10 +2398,10 @@ const blanket=chosen.id==='sds-97226';
     $('#studioColorLabel').textContent=colorLabel(selectedColor);
     $('#detailColorHint').textContent=chosen.id==='sds-128646'?colorLabel(selectedColor)+' artwork':chosen.id==='mg8014061'?'Black metal base':colorLabel(selectedColor)+' · '+(chosen.colors?.length||7)+' colors available';
     $('#currentSizeLabel').textContent=sizeLabel(chosen,selectedSize);
-    $('#currentPrintLabel').textContent=chosen.id==='mg8014061'?`${sizeLabel(chosen,selectedSize)} · Full Face`:chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
+    $('#currentPrintLabel').textContent=chosen.id==='mg8014061'?`${sizeLabel(chosen,selectedSize)} · Full Face`:chosen.id==='mg8012002'?'Front Crown Only':chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
     $('#studioSizeLabel').textContent=sizeLabel(chosen,selectedSize);
     if(chosen.sizePrices||chosen.id==='sds-63823')$('#detailPrice').textContent=chosen.id==='sds-63823'?selectedMarketPrice(chosen):usdPrice(selectedProductPrice(chosen,selectedSize));
-    $('#studioPrintLabel').textContent=chosen.id==='mg8014061'?`${sizeLabel(chosen,selectedSize)} · Full Face`:chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':chosen.id==='sds-63823'?'Complete Set · Top + Shorts':chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
+    $('#studioPrintLabel').textContent=chosen.id==='mg8014061'?`${sizeLabel(chosen,selectedSize)} · Full Face`:chosen.id==='mg8012002'?'Front Crown Only':chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':chosen.id==='sds-63823'?'Complete Set · Top + Shorts':chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
     document.querySelectorAll('[data-select-color]').forEach(b=>{
       b.setAttribute('aria-pressed',String(b.dataset.selectColor===selectedColor));
       b.classList.toggle('chosen',b.dataset.selectColor===selectedColor);
@@ -2417,7 +2417,9 @@ const blanket=chosen.id==='sds-97226';
   }
   function drawStudioVariantChoices(){
     const studioColors=chosen.colors||['Black','White','Red','Gray','LightGray','Cream','Navy'];
-    const studioColorHex=chosen.id==='vibeya-washed-hoodie'
+    const studioColorHex=chosen.id==='mg8012002'
+      ?{Black:'#252528',Khaki:'#a99a78',Gray:'#77777b'}
+      :chosen.id==='vibeya-washed-hoodie'
       ?{Khaki:'#79675a',Gray:'#c9c8c8',Black:'#28282a',Green:'#747d71',Pink:'#c95178',Purple:'#776b86'}
       :cardColorHex;
     $('#studioColorOptions').innerHTML=studioColors.map(key=>{
@@ -2426,9 +2428,9 @@ const blanket=chosen.id==='sds-97226';
     }).join('');
     const sizes=chosen.sizes||['XS','S','M','L','XL','2XL','3XL'];
     $('#studioSizes').innerHTML=sizes.map(s=>`<button type="button" class="studio-size" data-select-size="${s}">${esc(sizeLabel(chosen,s))}</button>`).join('');
-    $('#studioPrintLabel').parentElement.querySelector('strong').textContent=chosen.id==='sds-233939'?'Print areas':chosen.id==='sds-275844'||chosen.id==='mg8014061'?'Print area':'Print placement';
-     const placements=chosen.id==='sds-128646'||chosen.id==='sds-138708'?['wrap']:chosen.id==='sds-63823'?['both']:chosen.id==='sds-97226'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939'||chosen.id==='sds-275844'||chosen.id==='mg8014061'?['front']:['front','back','both'];
-     $('#studioPrints').innerHTML=chosen.id==='sds-233939'?uniformPrintZones.map(([id,label])=>`<button type="button" class="studio-print" data-select-zone="${id}" aria-pressed="${selectedUniformZones.includes(id)}">${label}</button>`).join(''):placements.map(k=>`<button type="button" class="studio-print" data-select-print="${k}">${chosen.id==='sds-63823'?'Both Pieces · Complete Set':chosen.id==='mg8014061'?'Full Face':chosen.id==='sds-97226'?'Full Surface · Front Only':chosen.id==='sds-138708'||chosen.id==='vibeya-shower-curtain'?'Full Surface · Single Sided':chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':printNames[k]}</button>`).join('');
+    $('#studioPrintLabel').parentElement.querySelector('strong').textContent=chosen.id==='sds-233939'?'Print areas':chosen.id==='sds-275844'||chosen.id==='mg8014061'||chosen.id==='mg8012002'?'Print area':'Print placement';
+     const placements=chosen.id==='sds-128646'||chosen.id==='sds-138708'?['wrap']:chosen.id==='sds-63823'?['both']:chosen.id==='sds-97226'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939'||chosen.id==='sds-275844'||chosen.id==='mg8014061'||chosen.id==='mg8012002'?['front']:['front','back','both'];
+     $('#studioPrints').innerHTML=chosen.id==='sds-233939'?uniformPrintZones.map(([id,label])=>`<button type="button" class="studio-print" data-select-zone="${id}" aria-pressed="${selectedUniformZones.includes(id)}">${label}</button>`).join(''):placements.map(k=>`<button type="button" class="studio-print" data-select-print="${k}" aria-pressed="${selectedPrint===k}">${chosen.id==='sds-63823'?'Both Pieces · Complete Set':chosen.id==='mg8014061'?'Full Face':chosen.id==='mg8012002'?'Front Crown Only':chosen.id==='sds-97226'?'Full Surface · Front Only':chosen.id==='sds-138708'||chosen.id==='vibeya-shower-curtain'?'Full Surface · Single Sided':chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':printNames[k]}</button>`).join('');
     syncVariants();
   }
   function openProductById(id,color){
@@ -2553,7 +2555,7 @@ const blanket=chosen.id==='sds-97226';
     b=e.target.closest('[data-select-print]');if(b){selectedPrint=b.dataset.selectPrint;studioViewMode='product';syncVariants();syncStudioPromptFields();hasPreview=false;drawPreview();return;}
     b=e.target.closest('[data-select-color]');if(b){
       const color=b.dataset.selectColor;
-      const allowed=chosen.id==='vibeya-washed-hoodie'||chosen.id==='sds-128646'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939'?chosen.colors?.includes(color):!!colorGalleries[color];
+      const allowed=chosen.id==='vibeya-washed-hoodie'||chosen.id==='sds-128646'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939'||chosen.id==='mg8012002'?chosen.colors?.includes(color):!!colorGalleries[color];
       if(!allowed)return;
       selectedColor=color;
       selectedColorConfirmed=true;
