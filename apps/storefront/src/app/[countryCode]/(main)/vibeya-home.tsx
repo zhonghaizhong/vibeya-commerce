@@ -23,6 +23,7 @@ function getStudioReturnUrl(countryCode: string, request: StudioRequest) {
 
 export default function VibeyaHome({ countryCode, locale, isAuthenticated, standaloneProductId, standaloneColor, standaloneSize, standaloneRoute, listing }: { countryCode: string; locale?: string | null; isAuthenticated: boolean; standaloneProductId?: string; standaloneColor?: string; standaloneSize?: string; standaloneRoute?: string; listing?: ProductListing }) {
   const marketLocale = getMarketLocale(countryCode, locale ?? undefined)
+  const isListingPage = Boolean(listing)
   const standaloneHash = standaloneProductId
     ? `#product-${standaloneProductId}?color=${encodeURIComponent(standaloneColor || "Black")}${standaloneSize ? `&size=${encodeURIComponent(standaloneSize)}` : ""}`
     : standaloneRoute || "#top"
@@ -208,7 +209,10 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       }
       if (event.data?.type === "vibeya:route" && typeof event.data.hash === "string") {
         if (standaloneProductId && event.data.hash.startsWith(`#product-${standaloneProductId}`)) return
-        if (standaloneRoute === "#shop" && event.data.hash === "#shop") return
+        if (
+          (standaloneRoute === "#shop" || isListingPage) &&
+          event.data.hash === "#shop"
+        ) return
         if (standaloneRoute === "#shop" && event.data.hash === "#top") {
           router.push(`/${countryCode.toLowerCase()}/`)
           return
@@ -278,7 +282,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       window.removeEventListener("popstate", syncFromHistory)
       window.removeEventListener("hashchange", syncFromHistory)
     }
-  }, [countryCode, isAuthenticated, router, standaloneProductId, standaloneHash, standaloneRoute])
+  }, [countryCode, isAuthenticated, isListingPage, router, standaloneProductId, standaloneHash, standaloneRoute])
 
   const addAccountLink = useCallback(
     (event: SyntheticEvent<HTMLIFrameElement>) => {
