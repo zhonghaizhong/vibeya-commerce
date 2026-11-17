@@ -1,6 +1,5 @@
 import { sdk } from "@lib/config"
 import { getCartId } from "@lib/data/cookies"
-import { getVibeyaUsRegion } from "@lib/vibeya/region"
 import { activateCart, MAX_LINE_ITEM_QUANTITY } from "@lib/util/server-cart"
 import { vibeyaProducts } from "@modules/vibeya/data/products"
 import { HttpTypes } from "@medusajs/types"
@@ -53,8 +52,8 @@ export async function POST(request: NextRequest) {
   if (!body || typeof body !== "object") return jsonError("Invalid cart item")
 
   const countryCode = String(body.countryCode ?? "us").toLowerCase()
-  if (countryCode !== "us") {
-    return jsonError("VIBEYA products are currently available only in the United States", 400)
+  if (!["us", "ca", "mx", "jp"].includes(countryCode)) {
+    return jsonError("This VIBEYA product is not available in this market", 400)
   }
 
   const productConfig = vibeyaProducts.find((product) => product.id === String(body.product ?? ""))
@@ -67,8 +66,14 @@ export async function POST(request: NextRequest) {
     Math.max(Number.parseInt(String(body.quantity ?? 1), 10) || 1, 1),
     MAX_LINE_ITEM_QUANTITY
   )
-  const region = await getVibeyaUsRegion()
-  if (!region) return jsonError("U.S. checkout is unavailable", 503)
+  const { regions } = await sdk.client.fetch<{ regions: HttpTypes.StoreRegion[] }>(
+    "/store/regions",
+    { cache: "no-store" }
+  )
+  const region = regions.find((candidate) =>
+    candidate.countries?.some((country) => country.iso_2?.toLowerCase() === countryCode)
+  )
+  if (!region) return jsonError("Checkout is unavailable for this market", 503)
 
   try {
     const { products } = await sdk.store.product.list({
@@ -119,7 +124,8 @@ export async function POST(request: NextRequest) {
     let cartId = await getCartId()
     if (cartId) {
       try {
-        await loadCart(cartId)
+        const existingCart = await loadCart(cartId)
+        if (existingCart.region_id !== region.id) cartId = undefined
       } catch {
         // A completed or stale cart cookie should not block a new purchase.
         cartId = undefined

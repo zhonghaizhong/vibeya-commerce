@@ -497,6 +497,36 @@ export const vibeyaProducts: VibeyaProduct[] = [
     ],
   },
   {
+    id: "sds-63823",
+    handle: "vibeya-custom-womens-yoga-set",
+    catalogOnly: true,
+    catalogImage: "/vibeya/assets/products/sds-63823/us/01-carousel.webp",
+    category: "Apparel",
+    name: "VIBEYA Custom Women's Yoga Set",
+    short: "Custom women's yoga set",
+    price: 19.99,
+    currency: "USD",
+    colors: [{ id: "White", name: "White", hex: "#ffffff", folder: "white" }],
+    sizes: ["XS", "S", "M", "L", "XL", "2XL"],
+    defaultSize: "M",
+    gallery: Array.from({ length: 6 }, (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.webp`),
+    eyebrow: "VIBEYA / CUSTOM ACTIVEWEAR",
+    intro: "Create one coordinated print for the complete two-piece yoga set. Upload your artwork or describe a design with a prompt, preview it across the crop top and shorts, then confirm before ordering. The top and shorts are customized and sold together.",
+    highlights: ["Matching crop top and mid-thigh shorts", "One coordinated design across both pieces", "Upload artwork or design from a prompt", "Sizes XS–2XL"],
+    sizeGuide: "cm",
+    sizeRows: [],
+    sizeNote: "Supplier measurements may vary by 1–2 cm.",
+    variantSummary: "One custom design for top + shorts · White · Sizes XS–2XL",
+    colorOptionLabel: "Base color",
+    sizeOptionLabel: "Size",
+    measurementRows: [["Set", "Crop top + mid-thigh shorts"], ["Material", "77% polyester · 23% spandex"], ["Print", "Coordinated full set"], ["Base color", "White"]],
+    services: [
+      ["Design the complete set", "One artwork direction is applied across the crop top and shorts together."],
+      ["Preview before ordering", "Review the coordinated print placement before confirming your custom set."],
+      ["Free shipping", "Available in the United States, Canada, Japan, and Mexico."],
+    ],
+  },
+  {
     id: "mg8014061",
     handle: "vibeya-custom-metal-bottle-cap-wall-sign",
     catalogOnly: true,
@@ -591,8 +621,11 @@ export const vibeyaProducts: VibeyaProduct[] = [
   },
 ]
 
-export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index = 0) {
+export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index = 0, countryCode = "us") {
   const file = product.gallery[index] ?? product.gallery[0]
+  if (product.id === "sds-63823") {
+    return `/vibeya/assets/products/sds-63823/${countryCode}/${file}`
+  }
   if (product.id === "sds-128646") {
     return `/vibeya/assets/products/sds-128646/${file}`
   }

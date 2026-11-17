@@ -311,6 +311,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const isDenimCap = productId === "mg8012002"
   const isShowerCurtain = productId === "vibeya-shower-curtain"
   const isTankini = productId === "sds-137892"
+  const isYogaSet = productId === "sds-63823" || productId === "63823"
   const isApron = productId === "sds-275844"
   const isMetalWallSign = productId === "mg8014061"
   const isBasketballUniform = productId === "sds-233939"
@@ -326,7 +327,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         basketballZoneIds.includes(zone as typeof basketballZoneIds[number])))]
     : [...basketballZoneIds]
   const basketballUnselectedZones = basketballZoneIds.filter((zone) => !basketballSelectedZones.includes(zone))
-  const isFullSurfaceProduct = isBlanket || isBathMat || isShowerCurtain || isTankini || isBasketballUniform || isMetalWallSign
+  const isFullSurfaceProduct = isBlanket || isBathMat || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isMetalWallSign
   const size = typeof body?.size === "string" ? body.size : ""
   if (isMetalWallSign && !["1 Piece", "2 Pieces", "3 Pieces"].includes(size)) {
     return res.status(400).json({ error: "请选择有效的金属画件数后重新生成。" })
@@ -334,7 +335,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isShowerCurtain && !["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"].includes(size)) {
     return res.status(400).json({ error: "请选择有效的浴帘尺寸后重新生成。" })
   }
-  const printPlacement = isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
+  const printPlacement = isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isApron ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
     ? body.printPlacement
     : "none"
   const isTumbler = productId === "sds-128646"
@@ -384,6 +385,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       name: "Custom Women's Two-Piece Tankini Swimsuit Set",
       colorAliases: { Black: "Black", Red: "Red", Pink: "Pink", Blue: "Blue", Cyan: "Cyan" },
     },
+    "sds-63823": {
+      name: "Custom Women's Two-Piece Yoga Set",
+      colorAliases: { White: "White", Black: "Black", Red: "Red", Pink: "Pink", Blue: "Blue", "Light Blue": "Light Blue", Green: "Green", "Light Green": "Light Green", Purple: "Purple", Yellow: "Yellow", Gray: "Gray", Grey: "Gray", Navy: "Navy" },
+    },
+    "63823": {
+      name: "Custom Women's Two-Piece Yoga Set",
+      colorAliases: { White: "White", Black: "Black", Red: "Red", Pink: "Pink", Blue: "Blue", "Light Blue": "Light Blue", Green: "Green", "Light Green": "Light Green", Purple: "Purple", Yellow: "Yellow", Gray: "Gray", Grey: "Gray", Navy: "Navy" },
+    },
     "sds-233939": {
       name: "Custom Kids' Basketball Jersey and Shorts Set",
       colorAliases: { Black: "Black", White: "White", Red: "Red", "Sapphire Blue": "Sapphire Blue", "Pure yellow": "Pure Yellow" },
@@ -410,12 +419,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const references = rawReferences
   let productReference = typeof body?.productReference === "string" ? body.productReference : ""
   let productPrintAreaReference = typeof body?.productPrintAreaReference === "string" ? body.productPrintAreaReference : ""
-  if (isTankini || isBasketballUniform || isApron || isDenimCap || isMetalWallSign || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
+  if (isTankini || isYogaSet || isBasketballUniform || isApron || isDenimCap || isMetalWallSign || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
     try {
       productReference = await getVibeyaProductReference(productId, colorKey, typeof body?.size === "string" ? body.size : undefined)
     } catch (error) {
       console.error("Unable to load the VIBEYA product print reference", error)
-      return res.status(503).json({ error: isMetalWallSign ? "金属画底图暂时无法读取，请稍后重试。" : isDenimCap ? "棒球帽正面印刷区域参考图暂时无法读取，请稍后重试。" : isApron ? "围裙白底底图暂时无法读取，请稍后重试。" : isBasketballUniform ? "篮球服正面印刷区域参考图暂时无法读取，请稍后重试。" : isBeanie ? "针织帽印刷区域参考图暂时无法读取，请稍后重试。" : "商品满印底板暂时无法读取，请稍后重试。" })
+      return res.status(503).json({ error: isYogaSet ? "瑜伽服正反面底图暂时无法读取，请稍后重试。" : isMetalWallSign ? "金属画底图暂时无法读取，请稍后重试。" : isDenimCap ? "棒球帽正面印刷区域参考图暂时无法读取，请稍后重试。" : isApron ? "围裙白底底图暂时无法读取，请稍后重试。" : isBasketballUniform ? "篮球服正面印刷区域参考图暂时无法读取，请稍后重试。" : isBeanie ? "针织帽印刷区域参考图暂时无法读取，请稍后重试。" : "商品满印底板暂时无法读取，请稍后重试。" })
     }
   }
   if (isTankini || isBasketballUniform || isApron) {
@@ -483,8 +492,8 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isApron && (!productReference || !productPrintAreaReference)) {
     return res.status(400).json({ error: "围裙白底底图或胸前印刷区域参考图缺失，请刷新页面后重新提交。" })
   }
-  if (productReference && (productReference.length > (isTankini || isBasketballUniform || isApron || isBathMat || isMetalWallSign ? 2500000 : isDenimCap ? 120000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
-    return res.status(400).json({ error: isApron ? "围裙白底底图无效，请刷新页面后重新提交。" : isBasketballUniform ? "篮球服正面印刷区域参考图无效，请刷新页面后重新提交。" : isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : isShowerCurtain ? "浴帘底图无效，请重新选择尺寸后提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
+  if (productReference && (productReference.length > (isYogaSet || isTankini || isBasketballUniform || isApron || isBathMat || isMetalWallSign ? 2500000 : isDenimCap ? 120000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+    return res.status(400).json({ error: isYogaSet ? "瑜伽服正反面底图无效，请刷新页面后重新提交。" : isApron ? "围裙白底底图无效，请刷新页面后重新提交。" : isBasketballUniform ? "篮球服正面印刷区域参考图无效，请刷新页面后重新提交。" : isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : isShowerCurtain ? "浴帘底图无效，请重新选择尺寸后提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
   }
   if (productPrintAreaReference && (productPrintAreaReference.length > 2500000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
     return res.status(400).json({ error: isApron ? "围裙胸前印刷区域参考图无效，请刷新页面后重新提交。" : isBasketballUniform ? "篮球服背面印刷区域参考图无效，请刷新页面后重新提交。" : "泳衣印花位置参考图无效，请刷新页面后重新提交。" })
@@ -528,7 +537,19 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     : metalSignCount === 2
     ? "LEFT = Left / Piece 1; RIGHT = Right / Piece 2."
     : "CENTER = the only sign."
-  const safePrompt = isApron
+  const safePrompt = isYogaSet
+    ? [
+        `Create exactly ONE photorealistic product preview on a seamless pure white background. Show a coordinated women's two-piece yoga set as four separate garment views in the same layout as the authoritative reference: crop top front at upper left, crop top back at upper right, shorts front at lower left, shorts back at lower right. Keep all four views equally scaled, aligned, fully visible, and clearly separated.`,
+        `Image ${references.length + 1} is the exact blank yoga set reference. Preserve the crop-top and shorts silhouettes, their proportions, front/back orientation, black binding around the top neckline and armholes, the single internal underbust seam, and the smooth lower top band. Keep the shorts' wide waistband and leg hems; do not add center-front, center-back, or crotch construction seams where the reference has none.`,
+        `CUSTOM PRINT LOCK — the top and shorts are two separately assigned design areas within one coordinated product set. Read any explicit "Top", "Crop top", "Shorts", or "Bottom" section in the customer brief as a binding garment assignment. Apply the Top/Crop top instruction only to the front and back crop-top fabric; apply the Shorts/Bottom instruction only to the front and back shorts fabric. Never swap, merge, copy, or move a design between the top and shorts. If the customer gives distinct artwork, colors, motifs, or placement for each garment, preserve those differences exactly. If the brief gives only one garment-specific instruction, follow it only for that garment and create a visually compatible but distinct treatment for the other garment without reusing the specified artwork. Apply each garment's assigned design consistently to its front and back views. Do not leave a garment or view blank unless explicitly requested; do not print on the black binding, seams, or white background. Keep the underbust seam, smooth lower band, waistband, and hems visible and correctly constructed.`,
+        hasUploadedArtwork
+          ? `${artworkReferenceLabel} Use the uploaded artwork as the print design on the whole set. Preserve its recognizable composition and colors.`
+          : "Create original artwork that follows the customer's garment-by-garment brief. Maintain a coherent overall palette only where compatible; preserve intentionally different designs, motifs, colors, and compositions assigned to the top versus shorts.",
+        artworkHandlingInstruction,
+        `CUSTOMER DESIGN BRIEF: ${prompt}`,
+        "Render the design as realistic fabric printing integrated with the knit texture, natural folds, stitching, and studio lighting. Avoid a sticker, decal, patch, embroidery, or flat pasted-on look. Do not add text, logos, labels, extra garments, people, mannequins, or props unless specifically requested. Return one clean white-background image showing all four garment views.",
+      ].join("\n")
+    : isApron
     ? [
         `Create exactly ONE photorealistic e-commerce product image on a seamless pure white (#FFFFFF) background. Show one complete black apron front-facing, centered, upright, and fully visible, with natural fabric drape and subtle realistic folds so it looks dimensional without looking stuffed or overly full. Match the exact apron silhouette, proportions, black fabric, neck strap, adjustable buckle, waist ties, seams, panel layout, and texture shown in the blank product reference. Keep the full apron and straps inside the image with balanced white margins. No person, mannequin, hanger, room, props, labels, callouts, captions, decorative text, borders, watermark, or extra products.`,
         `Image ${references.length + 1} is the authoritative clean blank apron reference. Preserve the apron exactly, including its bib, lower body panels, seams, straps, buckle, proportions, fabric texture, and white-background studio lighting. Image ${references.length + 2} is only a print-area guide for that same apron. Do not reproduce its white marker or alter the garment to match the guide.`,

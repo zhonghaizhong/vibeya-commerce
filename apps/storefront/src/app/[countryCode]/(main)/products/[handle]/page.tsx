@@ -2,11 +2,13 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
+import { retrieveCustomer } from "@lib/data/customer"
 import ProductTemplate from "@modules/products/templates"
 import StandaloneProductPage from "@modules/vibeya/components/standalone-product-page"
 import VibeyaProductExperience from "@modules/vibeya/components/vibeya-product-experience"
 import { vibeyaProducts } from "@modules/vibeya/data/products"
 import { HttpTypes } from "@medusajs/types"
+import VibeyaHome from "../../vibeya-home"
 import { isVariantInStock } from "@lib/util/inventory"
 import {
   buildProductStructuredData,
@@ -67,6 +69,11 @@ const PRODUCT_SEO: Partial<
     title: "Custom Kids Basketball Jersey and Shorts Set | VIBEYA",
     description:
       "Create a custom kids basketball jersey set with a text prompt. Design the jersey front, back, and shorts separately; five colors, sizes 100–140 cm.",
+  },
+  "vibeya-custom-womens-yoga-set": {
+    title: "Custom Women's Yoga Set | Design Matching Top & Shorts | VIBEYA",
+    description:
+      "Create a custom women's yoga set with one coordinated print across the crop top and shorts. Upload artwork or design with a prompt, preview, and choose sizes XS–2XL.",
   },
   "vibeya-custom-prompt-design-apron": {
     title: "Custom Apron Design | Personalized Cooking Apron | VIBEYA",
@@ -213,12 +220,44 @@ export default async function ProductPage(props: Props) {
     productUrl: `${origin}/${params.countryCode}/products/${pricedProduct.handle}`,
   })
 
+  if (pricedProduct.handle === "vibeya-custom-womens-yoga-set") {
+    const queryValue = (key: string) => {
+      const value = searchParams?.[key]
+      return Array.isArray(value) ? value[0] : value
+    }
+    const selectedVariant = pricedProduct.variants?.find(
+      (variant) => variant.id === queryValue("v_id")
+    )
+    const variantSize = selectedVariant?.options?.find(
+      (option) => option.option?.title?.toLowerCase() === "size"
+    )?.value
+    const initialSize = queryValue("size") || variantSize || "M"
+    const colorParam = queryValue("color")
+    const customer = await retrieveCustomer().catch(() => null)
+
+    return (
+      <>
+        <ProductMetaTags product={pricedProduct} region={region} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
+        />
+        <VibeyaHome
+          countryCode={params.countryCode}
+          isAuthenticated={Boolean(customer)}
+          standaloneProductId="sds-63823"
+          standaloneColor={colorParam || "White"}
+          standaloneSize={initialSize}
+        />
+      </>
+    )
+  }
+
   if (
     pricedProduct.handle === "vibeya-custom-metal-bottle-cap-wall-sign" ||
     pricedProduct.handle === "vibeya-custom-washed-denim-baseball-cap"
   ) {
-    const isDenimCap =
-      pricedProduct.handle === "vibeya-custom-washed-denim-baseball-cap"
+    const isDenimCap = pricedProduct.handle === "vibeya-custom-washed-denim-baseball-cap"
     return (
       <>
         <ProductMetaTags product={pricedProduct} region={region} />
