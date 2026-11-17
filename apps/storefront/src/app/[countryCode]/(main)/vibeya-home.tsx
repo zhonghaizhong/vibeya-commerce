@@ -88,7 +88,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
 
     const currentParams = new URLSearchParams(window.location.search)
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "metal-sign-single-prompt-20261117-3")
+    forwardedParams.set("v", "metal-sign-single-prompt-20261117-4")
     forwardedParams.set("country", countryCode.toLowerCase())
     forwardedParams.set("locale", marketLocale)
     if (standaloneProductId) forwardedParams.set("standalone", "1")
@@ -303,7 +303,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       <iframe
         ref={frameRef}
         className="vibeya-theme-frame"
-        src={`/vibeya/index.html?v=metal-sign-single-prompt-20261117-3&country=${encodeURIComponent(countryCode.toLowerCase())}&locale=${encodeURIComponent(marketLocale)}${standaloneProductId ? `&standalone=1${standaloneHash}` : ""}`}
+        src={`/vibeya/index.html?v=metal-sign-single-prompt-20261117-4&country=${encodeURIComponent(countryCode.toLowerCase())}&locale=${encodeURIComponent(marketLocale)}${standaloneProductId ? `&standalone=1${standaloneHash}` : ""}`}
         title="VIBEYA storefront"
         onLoad={addAccountLink}
         style={{
