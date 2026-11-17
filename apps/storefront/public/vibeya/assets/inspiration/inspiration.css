@@ -85,8 +85,10 @@ body.customize-open{overflow:hidden;}
 .article-aside .aside-actions { display:grid; grid-template-columns:1fr 1fr; align-items:stretch; gap:8px; }
 .article-aside .aside-actions .btn { padding:12px 9px; font-size:12px; line-height:1.35; min-width:0; flex:auto; white-space:normal; }
 .inspiration-detail-aside { width:100%; max-width:320px; margin-left:auto; grid-template-columns:minmax(0,1fr)!important; align-items:start; }
-.inspiration-detail-aside > img { width:100%; height:auto!important; max-width:320px; max-height:320px; aspect-ratio:1/1; }
+.inspiration-detail-aside > img { display:block; width:100%; height:auto!important; max-width:320px; max-height:320px; aspect-ratio:1/1; object-fit:contain!important; object-position:center; padding:8px; background:#f5effa; }
 .inspiration-detail-aside .aside-actions { grid-template-columns:1fr!important; }
+.customize-dialog { position:relative; }
+.customize-dialog > [data-close-customize] { position:absolute; top:12px; right:12px; z-index:3; }
 @media(max-width:640px) {
  .article-gallery { min-height:0!important; }
  .gallery-stage { aspect-ratio:4/3; height:auto!important; min-height:0!important; }
