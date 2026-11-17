@@ -83,6 +83,49 @@ document.addEventListener('DOMContentLoaded',async()=>{
     }
     link.href=url.href;
   });
+  const defaultStudioOptions={
+    'funny-skeleton':['sds-167256','Black','front'],
+    'hoodie-orbit-bloom':['vibeya-washed-hoodie','Purple','front'],
+    'midnight-cat-cafe':['sds-128646','White','wrap'],
+    'duck-bubble-trouble':['sds-138708','White','wrap'],
+    'no-nightmares-blanket':['sds-97226','White','wrap'],
+    'low-battery-club-beanie':['sds-172647','Black','front'],
+    'cat-bubble-cats-shower-curtain':['vibeya-shower-curtain','White','front'],
+    'deadpan-penguin-tankini':['sds-137892','Black','front'],
+    'never-stop-kids-basketball':['sds-233939','Red','front'],
+    'sauce-boss-apron':['sds-275844','Black','front'],
+    'raccoon-bar-crew':['mg8014061','Black','front'],
+    'stars-stripes-denim-cap':['mg8012002','Black','front'],
+    'yoga-animals-set':['sds-63823','White','both']
+  };
+  const studioUrl=new URL(window.VIBEYA_CUSTOMIZE_URL||'/vibeya/index.html',location.href);
+  const navStudioUrl=document.querySelector('header .nav-ai[href]');
+  const navStudioParams=navStudioUrl?new URL(navStudioUrl.href,location.href).searchParams:null;
+  const defaults=defaultStudioOptions[current?.id];
+  if(!window.VIBEYA_CUSTOMIZE_URL&&navStudioParams){
+    for(const key of ['product','color','size','print','areas','prompt'])if(navStudioParams.has(key))studioUrl.searchParams.set(key,navStudioParams.get(key));
+  }
+  if(defaults&&!studioUrl.searchParams.has('product')){
+    studioUrl.searchParams.set('product',defaults[0]);
+    studioUrl.searchParams.set('color',defaults[1]);
+    studioUrl.searchParams.set('print',defaults[2]);
+  }
+  if(current?.id==='yoga-animals-set'&&!studioUrl.searchParams.has('size'))studioUrl.searchParams.set('size','M');
+  studioUrl.pathname='/vibeya/index.html';
+  studioUrl.hash='';
+  studioUrl.searchParams.set('country',marketCountry);
+  studioUrl.searchParams.set('locale',marketLocale);
+  studioUrl.searchParams.set('openStudio','1');
+  studioUrl.searchParams.set('embeddedStudio','1');
+  if(current?.id)studioUrl.searchParams.set('inspiration',current.id);
+  window.VIBEYA_CUSTOMIZE_URL=studioUrl.href;
+  const customizeLabels={'en-US':'Customize This Product →','en-CA':'Customize This Product →','ja-JP':'この商品をカスタマイズ →','es-MX':'Personaliza este producto →','fr-CA':'Personnaliser ce produit →'};
+  const asideCaptionLabels={'en-US':'The design at a glance','en-CA':'The design at a glance','ja-JP':'デザインのポイント','es-MX':'El diseño de un vistazo','fr-CA':'Aperçu du design'};
+  document.querySelectorAll('[data-open-customize]').forEach(button=>{
+    button.textContent=customizeLabels[marketLocale]||customizeLabels['en-US'];
+    button.setAttribute('aria-label',button.textContent.replace(/\s*→$/,''));
+  });
+  document.querySelectorAll('.inspiration-detail-aside .aside-caption').forEach(label=>{label.textContent=asideCaptionLabels[marketLocale]||asideCaptionLabels['en-US'];});
   const storyLabelsEnglish={
     product:{'long-sleeve':'Custom Long Sleeve Tee',hoodie:'Washed Vintage Hoodie',tumbler:'20 oz Stainless Steel Tumbler','bath-mat':'Custom 3D Bath Mat',beanie:'Custom Knitted Beanie','shower-curtain':'Custom Shower Curtain',tankini:"Custom Women's Tankini Swimsuit Set"},
     pattern:{skeleton:'Humorous Skeleton','botanical-celestial':'Botanical & Celestial',animal:'Animal Print',penguin:'Deadpan Penguin Face',cat:'Cats, Bathtub & Bubbles','rubber-duck':'Duck Bubble Trouble',typography:'Sleepy Cat & Bold Typography'},
@@ -96,11 +139,14 @@ document.addEventListener('DOMContentLoaded',async()=>{
     const summary=document.getElementById('storySummary');if(summary)summary.textContent=current.summary||'Explore the idea behind this design, then make a version that feels like you.';
     const image=document.getElementById('storyHeroImage');
     if(image){const source=current.image||current.cardImage||'';image.src=/^(https?:)?\//.test(source)?new URL(source,location.origin).href:`../assets/inspiration/${encodeURIComponent(source)}`;image.alt=`${current.title} design inspiration`;}
+    const printImage=document.getElementById('storyPrintImage');
+    if(printImage){const source=current.printImage||current.image||current.cardImage||'';printImage.src=/^(https?:)?\//.test(source)?new URL(source,location.origin).href:`../assets/inspiration/${encodeURIComponent(source)}`;printImage.alt=`${current.title} print artwork`}
+    const glance=document.getElementById('storyGlanceText');
+    if(glance){glance.textContent=marketLocale==='ja-JP'?'商品に使われている印刷デザイン。色や配置をカスタマイズできます。':marketLocale==='es-MX'?'Diseño de impresión usado en el producto. Personaliza los colores y la ubicación.':'The print artwork used on this product. Customize the colors and placement to make it yours.';}
     const tags=document.getElementById('storyTags');if(tags)tags.innerHTML=(current.tags||[]).map(tag=>`<span class="chip">${safe(tag)}</span>`).join('');
     for(const [key,id] of [['product','storyProduct'],['pattern','storyPattern'],['style','storyStyle']]){const node=document.getElementById(id);if(node)node.textContent=activeStoryLabels[key]?.[current[key]]||current[key]||'';}
     const body=document.getElementById('storyBody');if(body){body.replaceChildren(...String(current.articleBody||'').split(/\n\s*\n/).map(text=>text.trim()).filter(Boolean).map(text=>{const p=document.createElement('p');p.textContent=text;return p;}));body.hidden=!current.articleBody;}
-    const yogaProductOptions=current.id==='yoga-animals-set'?'&product=sds-63823&color=White&size=M&print=both':'';
-    window.VIBEYA_CUSTOMIZE_URL=`/vibeya/index.html?country=${encodeURIComponent(marketCountry)}&locale=${encodeURIComponent(marketLocale)}&openStudio=1&embeddedStudio=1${yogaProductOptions}&inspiration=${encodeURIComponent(current.id)}`;
+    window.VIBEYA_CUSTOMIZE_URL=studioUrl.href;
   }else if(isGenericStory){
     document.title='Design story unavailable | VIBEYA';
     const spotlight=document.querySelector('.story-spotlight');if(spotlight)spotlight.hidden=true;
@@ -194,31 +240,22 @@ document.addEventListener('DOMContentLoaded',async()=>{
     customizeDialog?.classList.remove('is-loaded');
     customizeOpener?.focus({preventScroll:true});customizeOpener=null;
   };
-  const openCustomize=async button=>{
+  const openCustomize=button=>{
     if(!customizeOverlay||!customizeFrame)return;
-    const session=await fetch('/api/vibeya/session',{credentials:'same-origin',cache:'no-store'}).then(response=>response.ok?response.json():null).catch(()=>null);
-    if(!session?.authenticated){
-      const studioUrl=new URL(window.VIBEYA_CUSTOMIZE_URL||'../index.html?inspiration=funny-skeleton&embeddedStudio=1',location.href);
-      const params=studioUrl.searchParams;
-      params.delete('embeddedStudio');
-      params.set('openStudio','1');
-      params.set('locale',marketLocale);
-      window.location.assign(`/${marketCountry}?${params.toString()}#top`);
-      return;
-    }
     customizeAllowed=true;
     customizeOpener=button;customizeDialog?.classList.remove('is-loaded');
     customizeOverlay.hidden=false;document.body.classList.add('customize-open');
     customizeFrame.src=window.VIBEYA_CUSTOMIZE_URL||'../index.html?inspiration=funny-skeleton&embeddedStudio=1';
   };
   document.querySelectorAll('[data-open-customize]').forEach(button=>button.addEventListener('click',()=>openCustomize(button)));
+  document.querySelectorAll('[data-close-customize]').forEach(button=>button.addEventListener('click',closeCustomize));
   customizeFrame?.addEventListener('load',()=>customizeDialog?.classList.add('is-loaded'));
   customizeOverlay?.addEventListener('click',e=>{if(e.target===customizeOverlay)closeCustomize();});
   window.addEventListener('message',e=>{
     if(e.source!==customizeFrame?.contentWindow)return;
     if(/^https?:$/.test(location.protocol)&&e.origin!==location.origin)return;
     if(e.data?.type==='vibeya:request-studio'&&customizeAllowed){
-      customizeFrame.contentWindow?.postMessage({type:'vibeya:open-studio',product:e.data.product,color:e.data.color,size:e.data.size,print:e.data.print,prompt:e.data.prompt},location.origin);
+      customizeFrame.contentWindow?.postMessage({type:'vibeya:open-studio',product:e.data.product,color:e.data.color,size:e.data.size,print:e.data.print,areas:e.data.areas,prompt:e.data.prompt},location.origin);
       return;
     }
     if(e.data?.type==='vibeya:close-embedded-studio')closeCustomize();
