@@ -404,12 +404,11 @@ export async function placeOrder(cartId?: string) {
  * @param regionId
  * @param countryCode
  */
-export async function updateRegion(countryCode: string, currentPath: string) {
+export async function updateRegion(countryCode: string) {
   const normalizedCountryCode = countryCode.toLowerCase()
   if (!isSupportedMarketCountry(normalizedCountryCode)) {
     throw new Error("This shipping destination is not supported.")
   }
-
   const cartId = await getCartId()
   const region = await getRegion(normalizedCountryCode)
 
@@ -438,7 +437,7 @@ export async function updateRegion(countryCode: string, currentPath: string) {
     path: "/",
   })
 
-  redirect(`/${normalizedCountryCode}${currentPath}`)
+  redirect(`/${normalizedCountryCode}`)
 }
 
 export async function listCartOptions() {
