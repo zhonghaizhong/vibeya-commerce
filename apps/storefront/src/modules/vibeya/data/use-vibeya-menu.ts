@@ -29,7 +29,7 @@ const DEFAULT_MENU: VibeyaMenuItem[] = [
 export function getVibeyaMenuHref(item: VibeyaMenuItem): string {
   switch (item.target) {
     case "home": return "/"
-    case "shop": return "/#shop"
+    case "shop": return "/products"
     case "create": return "/?openStudio=1"
     case "inspiration": return "/vibeya/inspiration/index.html"
     case "how-it-works": return "/#how-it-works"

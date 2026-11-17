@@ -87,8 +87,15 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
     }
 
     const currentParams = new URLSearchParams(window.location.search)
+    if (!standaloneProductId && window.location.hash === "#shop") {
+      const locale = currentParams.get("locale")
+      const destination = new URL(`/${countryCode.toLowerCase()}/products`, window.location.origin)
+      if (locale) destination.searchParams.set("locale", locale)
+      router.replace(`${destination.pathname}${destination.search}`, { scroll: false })
+      return
+    }
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "independent-pages-20261117-3")
+    forwardedParams.set("v", "independent-shop-route-20261117-4")
     forwardedParams.set("country", countryCode.toLowerCase())
     forwardedParams.set("locale", marketLocale)
     if (standaloneProductId) forwardedParams.set("standalone", "1")
@@ -181,6 +188,8 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
         void updateLocale(nextLocale)
           .catch(() => undefined)
           .then(() => updateRegion(nextCountry))
+          .then(() => router.push(`/${nextCountry}/`))
+          .catch(() => undefined)
         return
       }
       if (event.data?.type === "vibeya:change-language" && typeof event.data.locale === "string") {
@@ -205,13 +214,20 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
             if (typeof event.data.color === "string" && event.data.color) target.searchParams.set("color", event.data.color)
             const currentLocale = new URLSearchParams(window.location.search).get("locale")
             if (currentLocale) target.searchParams.set("locale", currentLocale)
-            window.location.replace(target.href)
+            router.push(`${target.pathname}${target.search}`)
           } else if (event.data.hash === "#product-mg8014061") {
             router.replace(`/${countryCode}/products/vibeya-custom-metal-bottle-cap-wall-sign`)
           }
           return
         }
         const incomingHash = event.data.hash
+        if (incomingHash === "#shop") {
+          const destination = new URL(`/${countryCode.toLowerCase()}/products`, window.location.origin)
+          const locale = typeof event.data.locale === "string" ? event.data.locale : marketLocale
+          if (locale) destination.searchParams.set("locale", locale)
+          router.push(`${destination.pathname}${destination.search}`)
+          return
+        }
         if (incomingHash === "#inspiration") {
           const normalizedCountry = countryCode.toLowerCase()
           const inspirationPath = normalizedCountry === "us"
@@ -220,18 +236,20 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
           const target = new URL(inspirationPath, window.location.origin)
           const locale = typeof event.data.locale === "string" ? event.data.locale : marketLocale
           if (locale) target.searchParams.set("locale", locale)
-          window.location.assign(`${target.pathname}${target.search}`)
+          router.push(`${target.pathname}${target.search}`)
           return
         }
         if (
           standaloneProductId &&
           ["#top", "#shop", "#create", "#how-it-works", "#my-designs"].includes(incomingHash)
         ) {
-          const target = new URL(`/${countryCode.toLowerCase()}/`, window.location.origin)
+          const targetPath = incomingHash === "#shop"
+            ? `/${countryCode.toLowerCase()}/products`
+            : `/${countryCode.toLowerCase()}/`
+          const target = new URL(targetPath, window.location.origin)
           const locale = new URLSearchParams(window.location.search).get("locale")
           if (locale) target.searchParams.set("locale", locale)
-          if (incomingHash !== "#top") target.hash = incomingHash
-          window.location.assign(`${target.pathname}${target.search}${target.hash}`)
+          router.push(`${target.pathname}${target.search}${target.hash}`)
           return
         }
         if (incomingHash && incomingHash !== window.location.hash) {
@@ -291,7 +309,8 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       frameWindow?.vibeyaSetNavigationLocale?.(localeKey)
 
       document!.querySelectorAll<HTMLAnchorElement>("[data-store-route]").forEach((policyLink) => {
-        policyLink.href = `/${countryCode}/${policyLink.dataset.storeRoute}`
+        const target = policyLink.dataset.storeRoute
+        policyLink.href = target === "home" ? `/${countryCode}/` : `/${countryCode}/${target}`
       })
 
       frame.contentWindow?.postMessage(
@@ -303,14 +322,6 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
     },
     [countryCode, isAuthenticated, marketLocale, mountProductCards, standaloneProductId, standaloneHash]
   )
-
-  const navigateTo = (hash: string) => {
-    window.history.pushState(null, "", hash)
-    frameRef.current?.contentWindow?.postMessage(
-      { type: "vibeya:set-route", hash },
-      window.location.origin
-    )
-  }
 
   return (
     <>
@@ -328,7 +339,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       <iframe
         ref={frameRef}
         className="vibeya-theme-frame"
-        src={`/vibeya/index.html?v=how-it-works-modal-20261117-1&country=${encodeURIComponent(countryCode.toLowerCase())}&locale=${encodeURIComponent(marketLocale)}${standaloneProductId ? `&standalone=1${standaloneHash}` : ""}`}
+        src={`/vibeya/index.html?v=independent-shop-route-20261117-4&country=${encodeURIComponent(countryCode.toLowerCase())}&locale=${encodeURIComponent(marketLocale)}${standaloneProductId ? `&standalone=1${standaloneHash}` : ""}`}
         title="VIBEYA storefront"
         onLoad={addAccountLink}
         style={{

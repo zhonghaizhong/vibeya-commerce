@@ -131,11 +131,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           }
         })
 
+    const hasAvailableProducts = products.some((item) => item.id && availableIds.has(item.id))
     return [
       ...STATIC_PATHS.map((path) => ({
         url: `${base}${path || "/"}`,
         alternates: { languages: alternateUrls(path, countryCodes) },
       })),
+      ...(hasAvailableProducts
+        ? [{
+            url: `${base}/products`,
+            alternates: { languages: alternateUrls("/products", countryCodes.filter((marketCountry) => (productsByCountry.get(marketCountry)?.size ?? 0) > 0)) },
+          }]
+        : []),
       ...productEntries,
       ...contentEntries("categories", categories),
       ...contentEntries("collections", collections),

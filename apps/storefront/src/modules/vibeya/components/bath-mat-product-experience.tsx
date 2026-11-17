@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
 
 type BathMatProductExperienceProps = {
   countryCode: string
@@ -10,6 +11,7 @@ export default function BathMatProductExperience({
   countryCode,
 }: BathMatProductExperienceProps) {
   const frameRef = useRef<HTMLIFrameElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -42,15 +44,17 @@ export default function BathMatProductExperience({
         typeof event.data.hash === "string" &&
         ["#top", "#shop"].includes(event.data.hash)
       ) {
-        const target = new URL(`/${countryCode}/`, window.location.origin)
-        if (event.data.hash !== "#top") target.hash = event.data.hash
-        window.location.assign(`${target.pathname}${target.search}${target.hash}`)
+        const targetPath = event.data.hash === "#shop"
+          ? `/${countryCode}/products`
+          : `/${countryCode}/`
+        const target = new URL(targetPath, window.location.origin)
+        router.push(`${target.pathname}${target.search}${target.hash}`)
       }
     }
 
     window.addEventListener("message", handleMessage)
     return () => window.removeEventListener("message", handleMessage)
-  }, [countryCode])
+  }, [countryCode, router])
 
   return (
     <div className="bath-mat-product-experience">

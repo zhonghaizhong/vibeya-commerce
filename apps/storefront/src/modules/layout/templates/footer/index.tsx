@@ -41,7 +41,7 @@ export default function Footer({ countryCode }: { countryCode: string }) {
             <li>
               <LocalizedClientLink
                 className="hover:text-[#8f60ed]"
-                href="/#shop"
+                href="/products"
               >
                 {text("footerShopAll", "Shop all")}
               </LocalizedClientLink>

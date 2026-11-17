@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import AuthModal from "../../../app/[countryCode]/(main)/auth-modal"
 
 type StudioRequest = {
@@ -31,6 +32,7 @@ export default function StandaloneProductPage({
   version?: string
 }) {
   const frameRef = useRef<HTMLIFrameElement>(null)
+  const router = useRouter()
   const [authOpen, setAuthOpen] = useState(false)
   const [authRedirectTo, setAuthRedirectTo] = useState<string>()
 
@@ -95,7 +97,7 @@ export default function StandaloneProductPage({
             const query = new URLSearchParams()
             if (typeof event.data.color === "string" && event.data.color) query.set("color", event.data.color)
             const queryString = query.toString()
-            window.location.assign(`/${countryCode}/products/${encodeURIComponent(event.data.handle)}${queryString ? `?${queryString}` : ""}`)
+            router.push(`/${countryCode}/products/${encodeURIComponent(event.data.handle)}${queryString ? `?${queryString}` : ""}`)
           }
           return
         }
@@ -107,14 +109,16 @@ export default function StandaloneProductPage({
             : `/${countryCode}/inspiration/`
           const target = new URL(inspirationPath, window.location.origin)
           if (locale) target.searchParams.set("locale", locale)
-          window.location.assign(`${target.pathname}${target.search}`)
+          router.push(`${target.pathname}${target.search}`)
           return
         }
 
         if (["#top", "#shop", "#create", "#how-it-works", "#my-designs"].includes(event.data.hash)) {
-          const target = new URL(`/${countryCode}/`, window.location.origin)
-          if (event.data.hash !== "#top") target.hash = event.data.hash
-          window.location.assign(`${target.pathname}${target.search}${target.hash}`)
+          const targetPath = event.data.hash === "#shop"
+            ? `/${countryCode}/products`
+            : `/${countryCode}/`
+          const target = new URL(targetPath, window.location.origin)
+          router.push(`${target.pathname}${target.search}${target.hash}`)
           return
         }
       }
@@ -149,7 +153,7 @@ export default function StandaloneProductPage({
 
     window.addEventListener("message", handleFrameMessage)
     return () => window.removeEventListener("message", handleFrameMessage)
-  }, [countryCode, getStudioUrl, openStudio, productId])
+  }, [countryCode, getStudioUrl, openStudio, productId, router])
 
   return (
     <>

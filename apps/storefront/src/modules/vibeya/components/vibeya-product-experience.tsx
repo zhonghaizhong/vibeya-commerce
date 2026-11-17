@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
 
 type VibeyaProductExperienceProps = {
   countryCode: string
@@ -14,6 +15,7 @@ export default function VibeyaProductExperience({
   initialColor,
 }: VibeyaProductExperienceProps) {
   const frameRef = useRef<HTMLIFrameElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     const frame = frameRef.current
@@ -60,9 +62,11 @@ export default function VibeyaProductExperience({
         typeof event.data.hash === "string" &&
         ["#top", "#shop"].includes(event.data.hash)
       ) {
-        const target = new URL(`/${countryCode}/`, window.location.origin)
-        if (event.data.hash !== "#top") target.hash = event.data.hash
-        window.location.assign(`${target.pathname}${target.search}${target.hash}`)
+        const targetPath = event.data.hash === "#shop"
+          ? `/${countryCode}/products`
+          : `/${countryCode}/`
+        const target = new URL(targetPath, window.location.origin)
+        router.push(`${target.pathname}${target.search}${target.hash}`)
       }
     }
 
@@ -72,7 +76,7 @@ export default function VibeyaProductExperience({
       frame.removeEventListener("load", applyRequestedColor)
       window.removeEventListener("message", handleMessage)
     }
-  }, [countryCode, initialColor, productId])
+  }, [countryCode, initialColor, productId, router])
 
   const colorQuery = initialColor
     ? `?color=${encodeURIComponent(initialColor)}`

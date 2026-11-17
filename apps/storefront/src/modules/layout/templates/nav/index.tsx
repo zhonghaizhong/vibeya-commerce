@@ -55,6 +55,8 @@ export default function Nav({ countryCode, currentLocale }: NavProps) {
     startTransition(async () => {
       await updateLocale(getMarketDefaultLocale(nextCountry)).catch(() => undefined)
       await updateRegion(nextCountry)
+      router.push(`/${nextCountry}/`)
+      router.refresh()
     })
   }
   const changeLanguage = (locale: string) => {

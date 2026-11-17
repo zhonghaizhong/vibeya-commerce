@@ -20,7 +20,7 @@ const EmptyCartMessage = ({ countryCode }: { countryCode: string }) => {
         {marketCopy?.emptyCart ?? "You don't have anything in your cart. Let's change that, use the link below to start browsing our products."}
       </Text>
       <div>
-        <InteractiveLink href="/#shop">{marketCopy?.explore ?? "Explore VIBEYA"}</InteractiveLink>
+        <InteractiveLink href="/products">{marketCopy?.explore ?? "Explore VIBEYA"}</InteractiveLink>
       </div>
     </div>
   )

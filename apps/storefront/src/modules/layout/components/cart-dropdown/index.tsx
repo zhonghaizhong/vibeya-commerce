@@ -238,7 +238,7 @@ const CartDropdown = ({
                   </div>
                   <span>Your shopping bag is empty.</span>
                   <div>
-                    <LocalizedClientLink href="/#shop">
+                    <LocalizedClientLink href="/products">
                       <>
                         <span className="sr-only">Go to VIBEYA products</span>
                         <Button onClick={close}>Explore VIBEYA</Button>

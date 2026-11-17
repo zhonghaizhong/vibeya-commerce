@@ -58,7 +58,7 @@ export default function LongSleeveProductExperience({
         typeof event.data.hash === "string" &&
         ["#top", "#shop"].includes(event.data.hash)
       ) {
-        router.push(`/${countryCode}${event.data.hash}`)
+        router.push(event.data.hash === "#shop" ? `/${countryCode}/products` : `/${countryCode}/`)
       }
     }
 
