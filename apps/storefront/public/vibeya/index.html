@@ -1604,7 +1604,7 @@
     if(p.catalogOnly){
       const href=marketPath('products/'+encodeURIComponent(p.handle));
       const colors=Array.isArray(p.colors)?p.colors:[];
-      const colorHex={black:'#17171b',white:'#fff',red:'#e52d3d',pink:'#c95178',blue:'#315ad8','sapphire blue':'#315ad8',yellow:'#ffe100','pure yellow':'#ffe100',gray:'#77777b',grey:'#77777b','heather gray':'#77777b','light gray':'#d7d7d9',cream:'#f2e4cf',navy:'#283456',green:'#74846a',purple:'#776b86',lavender:'#9b83bd',brown:'#79675a'};
+      const colorHex={black:'#17171b',white:'#fff',red:'#e52d3d',pink:'#c95178',blue:'#315ad8','sapphire blue':'#315ad8',yellow:'#ffe100','pure yellow':'#ffe100',khaki:'#aa936d',gray:'#77777b',grey:'#77777b','heather gray':'#77777b','light gray':'#d7d7d9',cream:'#f2e4cf',navy:'#283456',green:'#74846a',purple:'#776b86',lavender:'#9b83bd',brown:'#79675a'};
       const supportsColorPreview=p.handle==='vibeya-custom-washed-denim-baseball-cap';
       const imageForColor=color=>{
         if(!p.image||!supportsColorPreview)return p.image||'';
