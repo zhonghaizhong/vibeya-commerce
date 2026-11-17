@@ -86,7 +86,7 @@ export default function VibeyaHome({
 
     const currentParams = new URLSearchParams(window.location.search)
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "category-seo-20261117-1")
+    forwardedParams.set("v", "category-seo-20261117-2")
     for (const key of ["viewCart", "openStudio", "openSearch", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
       const value = currentParams.get(key)
       if (value) forwardedParams.set(key, value)
@@ -291,7 +291,7 @@ export default function VibeyaHome({
       <iframe
         ref={frameRef}
         className="vibeya-theme-frame"
-        src="/vibeya/index.html?v=category-seo-20261117-1"
+        src="/vibeya/index.html?v=category-seo-20261117-2"
         title="VIBEYA storefront"
         onLoad={addAccountLink}
         style={{
