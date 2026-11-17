@@ -39,12 +39,28 @@
 
   const navigateWith = (nextCountry, nextLocale) => {
     const next = new URL(window.location.href)
-    if (/^\/(?:us|ca|mx|jp)\/inspiration\//i.test(next.pathname)) {
-      next.pathname = nextCountry === "us" ? "/vibeya/inspiration/index.html" : `/${nextCountry}/inspiration/`
+    const localizedStory = next.pathname.match(/^\/(us|ca|mx|jp)\/inspiration\/([^/]+)\/?$/i)
+    const genericStory = next.pathname.toLowerCase() === "/vibeya/inspiration/story.html"
+      ? next.searchParams.get("inspiration")
+      : null
+    const storySlug = localizedStory?.[2]?.toLowerCase() === "animal-yoga-set" || genericStory === "yoga-animals-set"
+      ? "animal-yoga-set"
+      : null
+
+    if (storySlug) {
+      next.pathname = nextCountry === "us"
+        ? "/vibeya/inspiration/animal-yoga-set.html"
+        : `/${nextCountry}/inspiration/${storySlug}`
+      next.search = ""
       next.hash = ""
+    } else {
+      if (/^\/(?:us|ca|mx|jp)\/inspiration\//i.test(next.pathname) || genericStory) {
+        next.pathname = nextCountry === "us" ? "/vibeya/inspiration/index.html" : `/${nextCountry}/inspiration/`
+        next.hash = ""
+      }
+      next.searchParams.set("country", nextCountry)
+      next.searchParams.set("locale", nextLocale)
     }
-    next.searchParams.set("country", nextCountry)
-    next.searchParams.set("locale", nextLocale)
     window.location.assign(next.href)
   }
 

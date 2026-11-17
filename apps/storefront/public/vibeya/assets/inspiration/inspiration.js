@@ -49,9 +49,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
     if(!marketCatalogLoaded||!entry||excludedIds.has(entry.id)||entry.published===false){section.hidden=true;section.dataset.destinationUnavailable='true';return;}
     if(entry.summary){const description=section.querySelector('.featured-text > p');if(description)description.textContent=entry.summary;}
     if(localizedMarket&&entry.title){const heading=section.querySelector('.featured-text h2');if(heading)heading.textContent=entry.title;const chips=section.querySelector('.featured-text .chips');if(chips)chips.replaceChildren(...(entry.tags||[]).map(tag=>{const chip=document.createElement('span');chip.className='chip';chip.textContent=tag;return chip;}));const rows=section.querySelectorAll('.featured-text .detail-row');for(const [index,key] of ['product','pattern','style'].entries()){const row=rows[index];if(!row)continue;const strong=row.querySelector('strong');const value=row.querySelector('span');if(strong)strong.textContent=marketPhrase(key[0].toUpperCase()+key.slice(1));if(value)value.textContent=storyLabels[key]?.[entry[key]]||entry[key]||'';}const spotlight=section.querySelector('.featured-text .pill-label');if(spotlight)spotlight.textContent=marketPhrase('DESIGN SPOTLIGHT');const action=section.querySelector('.featured-text .actions a');if(action){action.textContent=marketPhrase('Read the Design Story →');action.href=marketContext(`/vibeya/inspiration/story.html?inspiration=${encodeURIComponent(entry.id)}`);}}
-    if(entry.id==='yoga-animals-set'){
-      link.href=marketCountry==='us'?'/vibeya/inspiration/animal-yoga-set.html':`/${marketCountry}/inspiration/animal-yoga-set`;
-    }else if(link&&entry.marketUrls?.[marketCountry])link.href=entry.marketUrls[marketCountry];
+    if(link&&entry.marketUrls?.[marketCountry])link.href=entry.marketUrls[marketCountry];
     if((localizedMarket||entry.useManagedImage)&&entry.image){const image=section.querySelector('.art-card img');if(image){image.src=/^(https?:)?\//.test(entry.image)?new URL(entry.image,location.origin).href:`../assets/inspiration/${encodeURIComponent(entry.image)}`;image.alt=`${entry.title} inspiration`;}}
   });
   document.querySelectorAll('.inspiration-feature-grid .art-card-full img').forEach(image=>{
@@ -65,12 +63,14 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const current=catalog.find(x=>x.id===articleId)||(isGenericStory||hasExplicitStory?undefined:catalog[0]);
   const isInspirationListingPage=!!document.getElementById('inspirationFilters');
   if(!isInspirationListingPage&&!current){location.replace(marketContext('/vibeya/inspiration/index.html'));return;}
-  if(localizedMarket&&current&&!isGenericStory&&!isInspirationListingPage){location.replace(marketContext(`/vibeya/inspiration/story.html?inspiration=${encodeURIComponent(current.id)}`));return;}
+  const marketStoryUrl=current?.marketUrls?.[marketCountry];
+  if(isGenericStory&&marketStoryUrl){location.replace(marketStoryUrl);return;}
   document.querySelectorAll('a[href]').forEach(link=>{
     const url=new URL(link.href,location.href);
     if(localizedMarket&&url.pathname.includes('/vibeya/inspiration/')){
       const slug=url.pathname.split('/').pop()||'';
       const target=slug==='story.html'?catalog.find(entry=>entry.id===url.searchParams.get('inspiration')):catalog.find(entry=>entry.slug===slug);
+      if(target?.marketUrls?.[marketCountry]){link.href=target.marketUrls[marketCountry];return;}
       if(target?.translations?.[marketLocale]?.title&&target.translations[marketLocale].summary&&target.translations[marketLocale].articleBody&&target.translations[marketLocale].image&&target.translations[marketLocale].cardImage){url.pathname='/vibeya/inspiration/story.html';url.searchParams.set('inspiration',target.id);}
     }
     if(/^\/(us|ca|jp|mx)(\/|$)/.test(url.pathname)){
