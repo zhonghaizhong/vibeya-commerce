@@ -17,6 +17,21 @@ import { getMarketAlternateUrls, getMarketLocale, getMarketLocaleUrl } from "@li
 import { retrieveCustomer } from "@lib/data/customer"
 import VibeyaHome from "../../vibeya-home"
 
+const VIBEYA_DETAIL_IDS: Record<string, string> = {
+  "vibeya-custom-cotton-long-sleeve-tee": "sds-167256",
+  "vibeya-washed-vintage-hooded-sweatshirt": "vibeya-washed-hoodie",
+  "vibeya-custom-knitted-beanie": "sds-172647",
+  "vibeya-custom-20oz-stainless-steel-tumbler": "sds-128646",
+  "vibeya-custom-3d-bath-mat": "sds-138708",
+  "vibeya-custom-flannel-throw-blanket": "sds-97226",
+  "vibeya-custom-prompt-design-apron": "sds-275844",
+  "vibeya-custom-shower-curtain": "vibeya-shower-curtain",
+  "vibeya-custom-womens-yoga-set": "sds-63823",
+  "vibeya-custom-womens-tankini-swimsuit-set": "sds-137892",
+  "vibeya-custom-kids-basketball-uniform": "sds-233939",
+  "vibeya-custom-metal-bottle-cap-wall-sign": "mg8014061",
+}
+
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
   searchParams: Promise<{ locale?: string; v_id?: string; size?: string; color?: string; openStudio?: string; print?: string }>
@@ -203,47 +218,22 @@ export default async function ProductPage(props: Props) {
     productUrl: `${origin}/${params.countryCode}/products/${pricedProduct.handle}`,
   })
 
-  if (params.handle === "vibeya-custom-womens-yoga-set") {
-    const queryValue = (key: "v_id" | "size" | "color") => searchParams?.[key]
-    const selectedVariant = pricedProduct.variants?.find((variant) => variant.id === queryValue("v_id"))
-    const variantSize = selectedVariant?.options?.find((option) => option.option?.title?.toLowerCase() === "size")?.value
-    const initialSize = queryValue("size") || variantSize || "M"
-    const customer = await retrieveCustomer().catch(() => null)
-
+  const vibeyaProductId = VIBEYA_DETAIL_IDS[pricedProduct.handle]
+  if (!vibeyaProductId) {
     return (
       <>
         <ProductMetaTags product={pricedProduct} region={region} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }} />
-        <VibeyaHome
-          countryCode={params.countryCode}
-          locale={searchParams.locale}
-          isAuthenticated={Boolean(customer)}
-          standaloneProductId="sds-63823"
-          standaloneColor={queryValue("color") || "White"}
-          standaloneSize={initialSize}
-        />
-      </>
-    )
-  }
-  if (params.handle === "vibeya-custom-metal-bottle-cap-wall-sign") {
-    const customer = await retrieveCustomer().catch(() => null)
-    return (
-      <>
-        <ProductMetaTags product={pricedProduct} region={region} />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
-        />
-        <VibeyaHome
-          countryCode={params.countryCode}
-          locale={searchParams.locale}
-          isAuthenticated={Boolean(customer)}
-          standaloneProductId="mg8014061"
-        />
+        <ProductTemplate product={pricedProduct} region={region} countryCode={params.countryCode} />
       </>
     )
   }
 
+  const selectedVariant = pricedProduct.variants?.find((variant) => variant.id === searchParams.v_id)
+  const variantOption = (pattern: RegExp) => selectedVariant?.options?.find((option) => pattern.test(option.option?.title ?? ""))?.value
+  const initialColor = searchParams.color || variantOption(/color|colour|base color/i)
+  const initialSize = searchParams.size || variantOption(/size|quantity|pack/i) || (params.handle === "vibeya-custom-womens-yoga-set" ? "M" : undefined)
+  const customer = await retrieveCustomer().catch(() => null)
   return (
     <>
       <ProductMetaTags product={pricedProduct} region={region} />
@@ -251,10 +241,13 @@ export default async function ProductPage(props: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
       />
-      <ProductTemplate
-        product={pricedProduct}
-        region={region}
+      <VibeyaHome
         countryCode={params.countryCode}
+        locale={searchParams.locale}
+        isAuthenticated={Boolean(customer)}
+        standaloneProductId={vibeyaProductId}
+        standaloneColor={initialColor}
+        standaloneSize={initialSize}
       />
     </>
   )
