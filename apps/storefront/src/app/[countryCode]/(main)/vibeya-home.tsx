@@ -95,7 +95,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       return
     }
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "independent-shop-route-20261117-5")
+    forwardedParams.set("v", "independent-shop-route-20261118-yoga-locale-gallery-1")
     forwardedParams.set("country", countryCode.toLowerCase())
     forwardedParams.set("locale", marketLocale)
     if (standaloneProductId || standaloneRoute) forwardedParams.set("standalone", "1")

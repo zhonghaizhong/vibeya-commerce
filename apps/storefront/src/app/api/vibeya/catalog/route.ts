@@ -11,7 +11,6 @@ export async function GET(request: NextRequest) {
   const countryCode = (request.nextUrl.searchParams.get("country_code") || "us").toLowerCase()
   const locale = getMarketLocale(countryCode, request.nextUrl.searchParams.get("locale") || undefined)
   // Canada is currently English-only, so use the English product image set.
-  // The Canadian image set is reserved for a future French-Canadian launch.
   const mediaCountryCode = countryCode === "ca" && locale === "en-CA" ? "us" : countryCode
   try {
     const market = await getVibeyaMarket(countryCode)
@@ -28,7 +27,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       region: { id: region.id, currency_code: region.currency_code },
       products: products.filter((product) => market.product_ids.includes(product.id)).map((product) => {
-        const marketImages = market.localized_media?.[product.id]?.[mediaCountryCode] ?? []
+        const yogaGalleryFiles = [
+          "01-carousel.webp",
+          "02-carousel.webp",
+          "03-carousel-v2.webp",
+          "04-carousel-v2.webp",
+          "05-carousel-v2.webp",
+          "06-carousel.webp",
+        ]
+        const yogaMediaCountry = ["ca", "jp", "mx"].includes(mediaCountryCode) ? mediaCountryCode : "us"
+        const marketImages = product.id === "sds-63823"
+          ? yogaGalleryFiles.map((file) => `/vibeya/assets/products/sds-63823/${yogaMediaCountry}/${file}`)
+          : market.localized_media?.[product.id]?.[mediaCountryCode] ?? []
         const localProduct = vibeyaProducts.find((entry) => entry.handle === product.handle)
         const localImage = localProduct?.colors[0]
           ? getVibeyaImage(localProduct, localProduct.colors[0])
