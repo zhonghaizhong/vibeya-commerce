@@ -1895,7 +1895,7 @@
     }
     return null;
   }
-  function routeCatalog(){
+  function routeCatalog(renderRoute=true){
     const [key,routeQuery='']=location.hash.slice(1).split('?');
     if(key.startsWith('product-')){
       const product=products.find(p=>p.id===key.slice(8));
@@ -1912,7 +1912,7 @@
         const nextColor=product.colors?.includes(requestedColor)?requestedColor:sameProduct&&product.colors?.includes(selectedColor)?selectedColor:(product.colors?.[0]||'Black');
         const nextSize=product.sizes?.includes(requestedSize)?requestedSize:sameProduct&&product.sizes?.includes(selectedSize)?selectedSize:(product.sizePrices?product.sizes?.[0]||'':'');
       chosen=product;selectedColor=nextColor;selectedColorConfirmed=product.colors?.length===1||!!product.colors?.includes(requestedColor);selectedSize=nextSize;if(!sameProduct){selectedPrint=product.id==='sds-128646'?'wrap':'front';if(product.id==='sds-233939')selectedUniformZones=uniformPrintZones.map(([id])=>id);}
-        renderProductDetails();drawStudioVariantChoices();setGallery(0);syncVariants();
+        if(renderRoute){renderProductDetails();drawStudioVariantChoices();setGallery(0);syncVariants();}
       }
     }
     document.body.dataset.view=key==='shop'?'shop':key==='ideas'?'ideas':key==='my-designs'?'designs':key.startsWith('product-')?'product':'home';
@@ -2465,6 +2465,7 @@ const blanket=chosen.id==='sds-97226';
   }
 
   products[0].asset=gallerySrc(0);
+  routeCatalog(false);
   renderProductDetails();
   syncBackendCatalog();
   drawStudioVariantChoices();
