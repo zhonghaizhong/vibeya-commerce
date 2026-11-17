@@ -3,6 +3,7 @@ import { Radio, RadioGroup } from "@headlessui/react"
 import { setShippingMethod } from "@lib/data/cart"
 import { calculatePriceForShippingOption } from "@lib/data/fulfillment"
 import { convertToLocale } from "@lib/util/money"
+import { getFreeShippingLabel } from "@lib/util/market-ui-copy"
 import { CheckCircleSolid, Loader } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
 import ErrorMessage from "@modules/checkout/components/error-message"
@@ -14,17 +15,12 @@ import { useEffect, useState } from "react"
 
 const PICKUP_OPTION_ON = "__PICKUP_ON"
 const PICKUP_OPTION_OFF = "__PICKUP_OFF"
-
-function carrierLabel(name?: string | null) {
-  const normalized = name?.toLowerCase() ?? ""
-  if (normalized.includes("usps")) return "USPS"
-  if (normalized.includes("gofo")) return "GOFO Parcel"
-  return null
-}
+const FREE_SHIPPING_OPTION = "__FREE_SHIPPING"
 
 type ShippingProps = {
   cart: HttpTypes.StoreCart
   availableShippingMethods: HttpTypes.StoreCartShippingOption[] | null
+  countryCode: string
 }
 
 function formatAddress(address: HttpTypes.StoreCartAddress) {
@@ -56,6 +52,7 @@ function formatAddress(address: HttpTypes.StoreCartAddress) {
 const Shipping: React.FC<ShippingProps> = ({
   cart,
   availableShippingMethods,
+  countryCode,
 }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingPrices, setIsLoadingPrices] = useState(true)
@@ -84,24 +81,20 @@ const Shipping: React.FC<ShippingProps> = ({
     (sm) => (sm as unknown as { service_zone?: { fulfillment_set?: { type?: string; location?: { address: HttpTypes.StoreCartAddress } } } }).service_zone?.fulfillment_set?.type === "pickup"
   )
 
-  // Each fulfillment location exposes its own option for the same carrier.
-  // Customers only need to choose the carrier once, so show one representative
-  // option per carrier while preserving the active option when editing delivery.
-  const shippingMethodsByCarrier = new Map<string, HttpTypes.StoreCartShippingOption>()
-  for (const option of _shippingMethods ?? []) {
-    const carrier = carrierLabel(option.name)
-    if (!carrier) continue
-
-    const currentOption = shippingMethodsByCarrier.get(carrier)
-    if (!currentOption || option.id === shippingMethodId) {
-      shippingMethodsByCarrier.set(carrier, option)
-    }
-  }
-  const visibleShippingMethods = Array.from(shippingMethodsByCarrier.entries())
-    .sort(([first], [second]) => first === "USPS" ? -1 : second === "USPS" ? 1 : first.localeCompare(second))
-  const selectedCarrier = carrierLabel(
-    (_shippingMethods ?? []).find((option) => option.id === shippingMethodId)?.name
+  // Present a single localized free-shipping choice while retaining the
+  // selected Medusa option internally for fulfillment and carrier handling.
+  const selectedShippingOption = (_shippingMethods ?? []).find(
+    (option) => option.id === shippingMethodId
   )
+  const defaultShippingOption =
+    selectedShippingOption ??
+    (_shippingMethods ?? []).find((option) => !option.insufficient_inventory) ??
+    _shippingMethods?.[0]
+  const visibleShippingMethods = defaultShippingOption
+    ? [[FREE_SHIPPING_OPTION, defaultShippingOption] as const]
+    : []
+  const selectedCarrier = selectedShippingOption ? FREE_SHIPPING_OPTION : null
+  const freeShippingLabel = getFreeShippingLabel(countryCode)
 
   const hasPickupOptions = !!_pickupMethods?.length
 
@@ -264,9 +257,8 @@ const Shipping: React.FC<ShippingProps> = ({
                 <RadioGroup
                   value={selectedCarrier}
                   onChange={(v) => {
-                    if (v) {
-                      const option = shippingMethodsByCarrier.get(v)
-                      if (option) return handleSetShippingMethod(option.id, "shipping")
+                    if (v === FREE_SHIPPING_OPTION && defaultShippingOption) {
+                      return handleSetShippingMethod(defaultShippingOption.id, "shipping")
                     }
                   }}
                 >
@@ -294,7 +286,7 @@ const Shipping: React.FC<ShippingProps> = ({
                       >
                         <div className="flex items-center gap-x-4">
                           <MedusaRadio checked={carrier === selectedCarrier} />
-                          <span className="text-base-regular">{carrier}</span>
+                          <span className="text-base-regular">{freeShippingLabel}</span>
                         </div>
                         <span className="justify-self-end text-ui-fg-base">
                           {option.price_type === "flat" ? (
@@ -415,7 +407,7 @@ const Shipping: React.FC<ShippingProps> = ({
                   Method
                 </Text>
                 <Text className="txt-medium text-ui-fg-subtle">
-                  {carrierLabel(cart.shipping_methods!.at(-1)!.name) ?? cart.shipping_methods!.at(-1)!.name}{" "}
+                  {getFreeShippingLabel(countryCode)}{" "}
                   {convertToLocale({
                     amount: cart.shipping_methods!.at(-1)!.amount!,
                     currency_code: cart?.currency_code,
