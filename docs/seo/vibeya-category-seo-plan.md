@@ -15,7 +15,7 @@ Reviewed 2026-11-17. U.S. storefront only.
 
 | Category | Canonical URL | Products | Search intent assigned to product pages |
 | --- | --- | --- | --- |
-| Custom Clothing | `/us/categories/custom-clothing` | Long sleeve tee, washed hoodie, women's tankini, kids' basketball uniform, women's yoga set | custom shirts, custom hoodie, custom tankini swimsuit, custom kids basketball jersey, custom yoga set |
+| Custom Clothing | `/us/categories/custom-clothing` | Long sleeve tee, washed hoodie, women's tankini, kids' basketball uniform | custom shirts, custom hoodie, custom tankini swimsuit, custom kids basketball jersey |
 | Custom Tumblers | `/us/categories/custom-tumblers` | 20 oz stainless steel tumbler | custom tumbler, personalized tumbler |
 | Custom Home & Bath | `/us/categories/custom-home-bath` | 3D bath mat, flannel throw blanket, shower curtain | custom bath mat, custom blanket, custom shower curtain |
 | Custom Kitchen & Dining | `/us/categories/custom-kitchen-dining` | Custom apron | custom apron, personalized apron |

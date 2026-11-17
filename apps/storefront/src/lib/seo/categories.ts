@@ -17,7 +17,6 @@ export const PRODUCT_CATEGORY_GROUPS: readonly ProductCategoryGroup[] = [
       "vibeya-washed-vintage-hooded-sweatshirt",
       "vibeya-custom-womens-tankini-swimsuit-set",
       "vibeya-custom-kids-basketball-uniform",
-      "vibeya-custom-womens-yoga-set",
     ],
     legacyHandles: ["shirts", "apparel"],
   },
