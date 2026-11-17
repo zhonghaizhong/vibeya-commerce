@@ -148,6 +148,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "sds-167256",
     handle: "vibeya-custom-cotton-long-sleeve-tee",
+    category: "Custom Clothing",
     name: "VIBEYA Custom Cotton Long Sleeve Tee",
     short: "Cotton long sleeve tee",
     price: 19.99,
@@ -174,6 +175,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "vibeya-washed-hoodie",
     handle: "vibeya-washed-vintage-hooded-sweatshirt",
+    category: "Custom Clothing",
     name: "VIBEYA Washed Vintage Hooded Sweatshirt",
     short: "Washed vintage hoodie",
     price: 29.99,
@@ -199,7 +201,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "sds-172647",
     handle: "vibeya-custom-knitted-beanie",
-    category: "Apparel",
+    category: "Custom Hats",
     name: "VIBEYA Custom Knitted Beanie",
     short: "Custom knitted beanie",
     price: 14.99,
@@ -236,6 +238,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "sds-128646",
     handle: "vibeya-custom-20oz-stainless-steel-tumbler",
+    category: "Custom Tumblers",
     name: "VIBEYA Custom 20 oz Stainless Steel Tumbler",
     short: "Custom 20 oz tumbler",
     price: 19.99,
@@ -267,6 +270,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "sds-138708",
     handle: "vibeya-custom-3d-bath-mat",
+    category: "Custom Home & Bath",
     name: "VIBEYA Custom 3D Optical Illusion Bath Mat",
     short: "Custom 3D bath mat",
     price: 19.99,
@@ -304,6 +308,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "sds-97226",
     handle: "vibeya-custom-flannel-throw-blanket",
+    category: "Custom Home & Bath",
     name: "VIBEYA Custom Flannel Throw Blanket",
     short: "Custom flannel throw blanket",
     price: 14.99,
@@ -343,7 +348,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "vibeya-shower-curtain",
     handle: "vibeya-custom-shower-curtain",
-    category: "Home & Bath",
+    category: "Custom Home & Bath",
     name: "VIBEYA Custom Shower Curtain",
     short: "Custom shower curtain",
     price: 17.99,
@@ -383,7 +388,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "sds-137892",
     handle: "vibeya-custom-womens-tankini-swimsuit-set",
-    category: "Apparel",
+    category: "Custom Clothing",
     name: "VIBEYA Custom Women's Tankini Swimsuit Set",
     short: "Custom women's tankini swimsuit",
     price: 19.99,
@@ -421,7 +426,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "sds-233939",
     handle: "vibeya-custom-kids-basketball-uniform",
-    category: "Apparel",
+    category: "Custom Clothing",
     name: "VIBEYA Custom Kids' Basketball Uniform",
     short: "Custom kids' basketball jersey and shorts set",
     price: 19.99,
@@ -460,7 +465,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "sds-275844",
     handle: "vibeya-custom-prompt-design-apron",
-    category: "Kitchen & Dining",
+    category: "Custom Kitchen & Dining",
     name: "VIBEYA Custom Prompt-Designed Apron",
     short: "Custom black cooking apron",
     price: 17.99,
@@ -496,7 +501,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
     handle: "vibeya-custom-metal-bottle-cap-wall-sign",
     catalogOnly: true,
     catalogImage: "/vibeya/assets/products/mg8014061/black/01-carousel.webp",
-    category: "Home & Bath",
+    category: "Custom Wall Decor",
     name: "VIBEYA Custom Metal Bottle Cap Wall Sign",
     short: "Custom round metal wall sign",
     price: 16.99,
@@ -534,14 +539,14 @@ export const vibeyaProducts: VibeyaProduct[] = [
     handle: "vibeya-custom-washed-denim-baseball-cap",
     catalogOnly: true,
     catalogImage: "/vibeya/assets/products/mg8012002/black/01-carousel.webp",
-    category: "Accessories",
+    category: "Custom Hats",
     name: "VIBEYA Custom Washed Denim Baseball Cap",
     short: "Custom washed denim baseball cap",
     price: 14.99,
     currency: "USD",
     colors: [
       { id: "Black", name: "Black", hex: "#252427", folder: "black" },
-      { id: "Khaki", name: "Khaki", hex: "#b89b73", folder: "khaki" },
+      { id: "Khaki", name: "Khaki", hex: "#aa936d", folder: "khaki" },
       { id: "Gray", name: "Gray", hex: "#77797b", folder: "gray" },
     ],
     sizes: ["One Size"],

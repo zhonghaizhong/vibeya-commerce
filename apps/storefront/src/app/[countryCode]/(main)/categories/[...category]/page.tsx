@@ -1,74 +1,62 @@
 import { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 
-import { getCategoryByHandle } from "@lib/data/categories"
-import CategoryTemplate from "@modules/categories/templates"
-import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
-import { parseOptionValueIds } from "@lib/util/product-option-filters"
+import { retrieveCustomer } from "@lib/data/customer"
 import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
+import VibeyaHome from "../../vibeya-home"
+import {
+  getProductCategoryGroup,
+  isProductCategoryIndexable,
+} from "@lib/seo/categories"
 
 type Props = {
   params: Promise<{ category: string[]; countryCode: string }>
-  searchParams: Promise<
-    Record<string, string | string[] | undefined> & {
-      sortBy?: SortOptions
-      page?: string
-      optionValueIds?: string | string[]
-    }
-  >
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const params = await props.params
-  try {
-    const productCategory = await getCategoryByHandle(params.category)
-    const origin = await getSiteOrigin()
-    const path = `/categories/${params.category.map(encodeURIComponent).join("/")}`
-    const title = `${productCategory.name} | ${STORE_NAME}`
-    const description =
-      productCategory.description?.trim().slice(0, 160) ||
-      `Shop ${productCategory.name.toLowerCase()} at VIBEYA. Discover original graphic apparel, made to order with free U.S. shipping.`
+  const { category, countryCode } = await props.params
+  const group = getProductCategoryGroup(category.at(-1) ?? "")
+  if (!group) notFound()
 
-    return {
-      title,
-      description,
-      robots: {
-        index: (productCategory.products?.length ?? 0) > 0 || (productCategory.category_children?.length ?? 0) > 0,
-        follow: true,
-      },
-      alternates: { canonical: `${origin}/${params.countryCode}${path}` },
-      openGraph: {
-        type: "website",
-        title,
-        description,
-        url: `${origin}/${params.countryCode}${path}`,
-        siteName: STORE_NAME,
-      },
-    }
-  } catch {
-    notFound()
+  const origin = await getSiteOrigin()
+  const canonical = `${origin}/${countryCode}/categories/${group.slug}`
+  const indexed = isProductCategoryIndexable(group.slug)
+
+  return {
+    title: `${group.label} | ${STORE_NAME}`,
+    description: group.description,
+    robots: { index: indexed, follow: true },
+    alternates: { canonical },
+    openGraph: {
+      type: "website",
+      title: `${group.label} | ${STORE_NAME}`,
+      description: group.description,
+      url: canonical,
+      siteName: STORE_NAME,
+    },
   }
 }
 
 export default async function CategoryPage(props: Props) {
-  const searchParams = await props.searchParams
-  const params = await props.params
-  const { sortBy, page } = searchParams
-  const optionValueIds = parseOptionValueIds(searchParams)
+  const { category, countryCode } = await props.params
+  const handle = category.at(-1) ?? ""
+  const group = getProductCategoryGroup(handle)
+  if (!group) notFound()
 
-  const productCategory = await getCategoryByHandle(params.category)
-
-  if (!productCategory) {
-    notFound()
+  if (category.join("/") !== group.slug) {
+    permanentRedirect(`/${countryCode}/categories/${group.slug}`)
   }
 
+  const customer = await retrieveCustomer().catch(() => null)
   return (
-    <CategoryTemplate
-      category={productCategory}
-      sortBy={sortBy}
-      page={page}
-      countryCode={params.countryCode}
-      optionValueIds={optionValueIds}
+    <VibeyaHome
+      countryCode={countryCode}
+      isAuthenticated={Boolean(customer)}
+      listing={{
+        category: group.label,
+        title: group.label,
+        handles: [...group.productHandles],
+      }}
     />
   )
 }

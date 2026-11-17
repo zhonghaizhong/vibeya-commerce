@@ -6,6 +6,7 @@ import {
   listCountryCodes,
 } from "@lib/util/site"
 import type { MetadataRoute } from "next"
+import { PRODUCT_CATEGORY_GROUPS } from "@lib/seo/categories"
 
 export const dynamic = "force-dynamic"
 
@@ -63,6 +64,12 @@ type Entry = {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const categoryRoutes = new Set(
+    PRODUCT_CATEGORY_GROUPS.flatMap((group) => [
+      group.slug,
+      ...group.legacyHandles,
+    ])
+  )
   const query = { fields: "handle,updated_at", limit: PAGE_SIZE }
 
   const [origin, regions, products, categories, collections] =
@@ -103,7 +110,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...toEntries(
         base,
         "categories",
-        categories.filter((category) => (category.products?.length ?? 0) > 0 || (category.category_children?.length ?? 0) > 0)
+        categories.filter((category) =>
+          category.handle &&
+          !categoryRoutes.has(category.handle) &&
+          ((category.products?.length ?? 0) > 0 || (category.category_children?.length ?? 0) > 0)
+        )
       ),
       ...toEntries(
         base,

@@ -264,7 +264,7 @@
     .catalog-search-wrap input{border:none;background:transparent;flex:1;min-width:0;outline:none;color:var(--ink);font-size:14px;}
     .catalog-select{background:#fff;border:1.5px solid #dfd7e1;border-radius:14px;padding:14px 16px;min-height:52px;color:var(--ink);font-weight:800;font-size:13px;min-width:170px;}
     .catalog-chips{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 25px;}
-    .catalog-chip{background:#f8f5f9;border:1px solid #e6ddeb;border-radius:50px;padding:11px 17px;font-weight:800;font-size:12px;color:var(--ink);}
+    .catalog-chip{display:inline-block;text-decoration:none;background:#f8f5f9;border:1px solid #e6ddeb;border-radius:50px;padding:11px 17px;font-weight:800;font-size:12px;color:var(--ink);}
     .catalog-chip.active{background:var(--lime);border-color:var(--lime);}
     .catalog-status{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px;font-size:12px;color:var(--muted);}
     .catalog-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;}
@@ -942,7 +942,7 @@
       name:'VIBEYA Custom Cotton Long Sleeve Tee',
       short:'Cotton long sleeve tee',
       price:'$19.99 USD',
-      category:'Apparel',
+      category:'Custom Clothing',
       supplier:'SDS',
       supplierId:'167256',
       supplierUrl:'https://www.sdsdiy.com/portal/detail/167256',
@@ -956,7 +956,7 @@
        name:'VIBEYA Washed Vintage Hooded Sweatshirt',
        short:'Washed vintage hoodie',
        price:'$29.99 USD',
-       category:'Apparel',
+       category:'Custom Clothing',
        supplier:'SDSDIY',
        supplierId:'174750',
        supplierUrl:'https://www.sdsdiy.com/portal/detail/174750',
@@ -970,7 +970,7 @@
         name:'VIBEYA Custom Knitted Beanie',
         short:'Custom knitted beanie',
         price:'$14.99 USD',
-        category:'Apparel',
+        category:'Custom Hats',
         supplier:'SDSDIY',
         supplierId:'172647',
         supplierUrl:'https://www.sdsdiy.com/portal/detail/172647',
@@ -985,7 +985,7 @@
         name:'VIBEYA Custom 20 oz Stainless Steel Tumbler',
         short:'Custom 20 oz tumbler',
         price:'$19.99 USD',
-        category:'Drinkware',
+        category:'Custom Tumblers',
         supplier:'SDSDIY',
         supplierId:'128646',
         supplierUrl:'https://www.sdsdiy.com/portal/detail/128646',
@@ -1000,7 +1000,7 @@
        name:'VIBEYA Custom 3D Optical Illusion Bath Mat',
        short:'Custom 3D bath mat',
        price:'$19.99 USD',
-       category:'Home & Bath',
+       category:'Custom Home & Bath',
        supplier:'SDSDIY',
        supplierId:'138708',
        supplierUrl:'https://www.sdsdiy.com/portal/detail/138708',
@@ -1017,7 +1017,7 @@
        name:'VIBEYA Custom Flannel Throw Blanket',
        short:'Custom flannel throw blanket',
        price:'$14.99 USD',
-       category:'Home & Bath',
+       category:'Custom Home & Bath',
        supplier:'SDSDIY',
        supplierId:'97226',
        supplierUrl:'https://www.sdsdiy.com/portal/detail/97226',
@@ -1034,7 +1034,7 @@
         name:'VIBEYA Custom Prompt-Designed Apron',
         short:'Custom black cooking apron',
         price:'$17.99',
-        category:'Kitchen & Dining',
+        category:'Custom Kitchen & Dining',
         supplier:'SDSDIY',
         supplierId:'275844',
         supplierUrl:'https://www.sdsdiy.com/portal/detail/275844',
@@ -1050,7 +1050,7 @@
        name:'VIBEYA Custom Shower Curtain',
        short:'Custom shower curtain',
        price:'$17.99 USD',
-       category:'Home & Bath',
+       category:'Custom Home & Bath',
        supplier:'VIBEYA',
        asset:'assets/products/vibeya-shower-curtain/36x70.8in.webp',
        colors:['White'],
@@ -1064,7 +1064,7 @@
        name:'VIBEYA Custom Women’s Tankini Swimsuit Set',
        short:'Custom women’s tankini swimsuit',
        price:'$19.99 USD',
-       category:'Apparel',
+        category:'Custom Clothing',
        supplier:'SDSDIY',
        supplierId:'137892',
        supplierUrl:'https://www.sdsdiy.com/portal/detail/137892',
@@ -1078,7 +1078,7 @@
        name:"VIBEYA Custom Kids' Basketball Uniform",
        short:'Custom kids’ basketball jersey and shorts set',
        price:'$19.99 USD',
-       category:'Apparel',
+        category:'Custom Clothing',
        supplier:'SDSDIY',
        supplierId:'233939',
        supplierUrl:'https://www.sdsdiy.com/portal/detail/233939',
@@ -1096,7 +1096,7 @@
         price:'$16.99 USD',
         image:'assets/products/mg8014061/black/01-carousel.webp',
         sizePrices:{'1 Piece':16.99,'2 Pieces':22.99,'3 Pieces':28.99},
-        category:'Home & Bath',
+        category:'Custom Wall Decor',
         supplier:'SDSDIY',
         supplierId:'124106',
         supplierUrl:'https://www.sdsdiy.com/portal/detail/124106',
@@ -1115,7 +1115,7 @@
         short:'Custom washed denim baseball cap',
         price:'$14.99 USD',
         image:'assets/products/mg8012002/black/01-carousel.webp',
-        category:'Accessories',
+        category:'Custom Hats',
         supplier:'SDSDIY',
         supplierId:'96763',
         supplierUrl:'https://www.sdsdiy.com/portal/detail/96763',
@@ -1323,9 +1323,16 @@
   // Both libraries are driven by data arrays, not hand-written page cards.
   // More items can be added without expanding the homepage or changing navigation.
   const catalogProducts=[...products];
-  let productTags=['All Products', ...new Set(catalogProducts.map(p=>p.category))];
+  const listingParams=new URLSearchParams(location.search);
+  const listingScoped=listingParams.get('listingScoped')==='1';
+  const listingCategory=listingParams.get('listingCategory')||'';
+  const listingTitle=listingParams.get('listingTitle')||'';
+  const allowedProductHandles=new Set((listingParams.get('listingHandles')||'').split(',').filter(Boolean));
+  const productCategoryOrder=['Custom Clothing','Custom Tumblers','Custom Home & Bath','Custom Kitchen & Dining','Custom Hats','Custom Wall Decor','New arrivals'];
+  let productTags=['All Products',...productCategoryOrder.filter(category=>category!=='New arrivals'||catalogProducts.some(product=>product.category===category))];
   const ideaTags=['All Inspiration','Animals','Cute','Funny','Nature','Retro','Art','Space'];
-  let productTag='All Products',ideaTag='All Inspiration',ideaVisible=9;
+  let productTag=productTags.includes(listingCategory)?listingCategory:'All Products',ideaTag='All Inspiration',ideaVisible=9;
+  if(listingTitle){const categoryCopy={'Custom Clothing':'Explore custom clothing, from personalized shirts and hoodies to team gear and swimwear. Upload artwork or describe a design, preview it, and order online.','Custom Tumblers':'Design a custom tumbler with your photo, artwork, or a written prompt. Preview the full-wrap design before ordering.','Custom Home & Bath':'Explore custom bath mats, shower curtains, and throw blankets. Upload your image or describe a design, preview it, and order online.','Custom Kitchen & Dining':'Create a custom apron from your photo, artwork, or design prompt. Preview your printed design before ordering.','Custom Hats':'Design a custom hat, from a knitted beanie to a washed denim baseball cap. Upload artwork or describe your idea, then preview it before ordering.','Custom Wall Decor':'Create a custom metal wall sign with your artwork, photo, or design prompt. Preview it before ordering.'};const heading=$('#shop .catalog-hero h2'),crumb=$('#shop .catalog-crumb'),lead=$('#shop .catalog-hero p'),search=$('#productSearch');if(heading)heading.textContent=listingTitle.toUpperCase();if(crumb)crumb.textContent=`HOME / ${listingTitle.toUpperCase()}`;if(lead)lead.textContent=categoryCopy[listingTitle]||`Explore ${listingTitle.toLowerCase()} from VIBEYA. Upload artwork or describe a design, preview it before ordering.`;if(search)search.setAttribute('aria-label',`Search ${listingTitle.toLowerCase()} products`);}
   const itemPrice=p=>{const v=(p.price.match(/[\d.]+/)||[])[0];return v===undefined?null:Number(v);};
   const sizeLabel=(product,size)=>product?.sizeLabels?.[size]||size||'Select a size';
   const selectedProductPrice=(product,size)=>product?.sizePrices?.[size]??itemPrice(product);
@@ -1557,9 +1564,10 @@
   const productHTML=renderProductCard;
   function paintChips(id,all,selected,attr){$(id).innerHTML=all.map(cat=>`<button type="button" class="catalog-chip ${cat===selected?'active':''}" ${attr}="${esc(cat)}" aria-pressed="${cat===selected}">${esc(cat)}</button>`).join('');}
   function paintProducts(){
-    paintChips('#productFilters',productTags,productTag,'data-product-tag');
+    const visibleTags=['All Products',...productCategoryOrder.filter(category=>category!=='New arrivals'||catalogProducts.some(product=>product.category===category))];
+    if(listingScoped){const categorySlugs={'Custom Clothing':'custom-clothing','Custom Tumblers':'custom-tumblers','Custom Home & Bath':'custom-home-bath','Custom Kitchen & Dining':'custom-kitchen-dining','Custom Hats':'custom-hats','Custom Wall Decor':'custom-wall-decor'};$('#productFilters').innerHTML=visibleTags.map(category=>{const href=category==='All Products'?marketPath('')+'#shop':marketPath('categories/'+categorySlugs[category])+'#shop';return `<a class="catalog-chip ${category===productTag?'active':''}" href="${esc(href)}" target="_top" ${category===productTag?'aria-current="page"':''}>${esc(category)}</a>`;}).join('');}else{paintChips('#productFilters',visibleTags,productTag,'data-product-tag');}
     let q=$('#productSearch').value.toLowerCase().trim();
-    let matches=catalogProducts.filter(p=>(productTag==='All Products'||p.category===productTag)&&[p.name,p.short,p.category].some(t=>String(t||'').toLowerCase().includes(q)));
+    let matches=catalogProducts.filter(p=>(!listingScoped||allowedProductHandles.has(p.handle))&&(productTag==='All Products'||p.category===productTag)&&[p.name,p.short,p.category].some(t=>String(t||'').toLowerCase().includes(q)));
     const order=$('#productSort').value;
     if(order==='az')matches.sort((a,b)=>a.name.localeCompare(b.name));
     if(order==='low')matches.sort((a,b)=>(itemPrice(a)??Infinity)-(itemPrice(b)??Infinity));

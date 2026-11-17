@@ -2,6 +2,7 @@
 
 import AuthModal from "./auth-modal"
 import { ProductCards } from "@modules/vibeya/components/product-explorer"
+import { vibeyaProducts } from "@modules/vibeya/data/products"
 import { useRouter } from "next/navigation"
 import { createPortal } from "react-dom"
 import { useCallback, useEffect, useRef, useState, type SyntheticEvent } from "react"
@@ -17,7 +18,15 @@ function getStudioReturnUrl(countryCode: string, request: StudioRequest) {
   return `/${countryCode}?${params.toString()}#top`
 }
 
-export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCode: string; isAuthenticated: boolean }) {
+export default function VibeyaHome({
+  countryCode,
+  isAuthenticated,
+  listing,
+}: {
+  countryCode: string
+  isAuthenticated: boolean
+  listing?: { category: string; title: string; handles: string[] }
+}) {
   const [authOpen, setAuthOpen] = useState(false)
   const [authRedirectTo, setAuthRedirectTo] = useState<string>()
   const [studioLayer, setStudioLayer] = useState(false)
@@ -77,10 +86,16 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
 
     const currentParams = new URLSearchParams(window.location.search)
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "metal-sign-position-lock-20261117-5")
+    forwardedParams.set("v", "category-seo-20261117-1")
     for (const key of ["viewCart", "openStudio", "openSearch", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
       const value = currentParams.get(key)
       if (value) forwardedParams.set(key, value)
+    }
+    if (listing) {
+      forwardedParams.set("listingScoped", "1")
+      forwardedParams.set("listingCategory", listing.category)
+      forwardedParams.set("listingTitle", listing.title)
+      forwardedParams.set("listingHandles", listing.handles.join(","))
     }
     if (currentParams.get("openStudio") === "1" && !isAuthenticated) {
       setAuthRedirectTo(`${window.location.pathname}${window.location.search}${window.location.hash}`)
@@ -88,7 +103,11 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
       forwardedParams.delete("openStudio")
     }
 
-    const hash = [
+    const hash = listing
+      ? window.location.hash.startsWith("#product-")
+        ? window.location.hash
+        : "#shop"
+      : [
       "#top",
       "#shop",
       "#create",
@@ -97,14 +116,14 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
       "#my-designs",
     ].includes(window.location.hash)
       ? window.location.hash
-      : window.location.hash.startsWith("#product-")
-        ? window.location.hash
-        : ""
+        : window.location.hash.startsWith("#product-")
+          ? window.location.hash
+          : ""
     const query = forwardedParams.toString()
     const homeUrl = `/vibeya/index.html${query ? `?${query}` : ""}${hash}`
     const frame = frameRef.current
     if (frame && frame.getAttribute("src") !== homeUrl) frame.src = homeUrl
-  }, [countryCode, isAuthenticated, router])
+  }, [countryCode, isAuthenticated, listing, router])
 
   useEffect(() => {
     const frame = frameRef.current
@@ -152,6 +171,15 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
         return
       }
       if (event.data?.type === "vibeya:route" && typeof event.data.hash === "string") {
+        if (listing && event.data.hash.startsWith("#product-")) {
+          const productId = event.data.hash.slice("#product-".length).split("?")[0]
+          const product = vibeyaProducts.find((entry) => entry.id === productId)
+          if (product) {
+            const color = typeof event.data.color === "string" ? `?color=${encodeURIComponent(event.data.color)}` : ""
+            window.location.assign(`/${countryCode}/products/${encodeURIComponent(product.handle)}${color}`)
+            return
+          }
+        }
         if (event.data.hash === "#product-sds-138708") {
           const color = typeof event.data.color === "string" ? event.data.color : "White"
           window.location.assign(
@@ -177,7 +205,7 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
 
     const syncFromHistory = () => {
       frameRef.current?.contentWindow?.postMessage(
-        { type: "vibeya:set-route", hash: window.location.hash || "#top" },
+        { type: "vibeya:set-route", hash: window.location.hash || (listing ? "#shop" : "#top") },
         window.location.origin
       )
     }
@@ -190,7 +218,7 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
       window.removeEventListener("popstate", syncFromHistory)
       window.removeEventListener("hashchange", syncFromHistory)
     }
-  }, [countryCode, isAuthenticated])
+  }, [countryCode, isAuthenticated, listing])
 
   const addAccountLink = useCallback(
     (event: SyntheticEvent<HTMLIFrameElement>) => {
@@ -219,13 +247,13 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
       })
 
       frame.contentWindow?.postMessage(
-        { type: "vibeya:set-route", hash: window.location.hash || "#top" },
+        { type: "vibeya:set-route", hash: window.location.hash || (listing ? "#shop" : "#top") },
         window.location.origin
       )
 
       mountProductCards()
     },
-    [countryCode, isAuthenticated, mountProductCards]
+    [countryCode, isAuthenticated, listing, mountProductCards]
   )
 
   const navigateTo = (hash: string) => {
@@ -263,7 +291,7 @@ export default function VibeyaHome({ countryCode, isAuthenticated }: { countryCo
       <iframe
         ref={frameRef}
         className="vibeya-theme-frame"
-        src="/vibeya/index.html?v=metal-sign-position-lock-20261117-5"
+        src="/vibeya/index.html?v=category-seo-20261117-1"
         title="VIBEYA storefront"
         onLoad={addAccountLink}
         style={{

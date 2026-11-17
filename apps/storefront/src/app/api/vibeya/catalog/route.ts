@@ -1,5 +1,6 @@
 import { sdk } from "@lib/config"
 import { getVibeyaUsRegion } from "@lib/vibeya/region"
+import { getProductCategoryLabel } from "@lib/seo/categories"
 import { NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic"
@@ -49,7 +50,12 @@ export async function GET() {
           subtitle: product.subtitle,
           description: product.description,
           image: product.thumbnail ?? product.images?.[0]?.url ?? null,
-          category: product.categories?.[0]?.name ?? product.type?.value ?? "New arrivals",
+          category: getProductCategoryLabel(
+            product.handle ?? "",
+            product.categories?.[0]?.handle ??
+              product.categories?.[0]?.name ??
+              product.type?.value
+          ),
           colors: Array.from(colors),
           sizes: Array.from(sizes),
           size_prices: sizePrices,
