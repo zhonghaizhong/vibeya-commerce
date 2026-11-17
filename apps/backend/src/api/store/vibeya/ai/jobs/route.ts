@@ -12,6 +12,8 @@ type JobService = {
   listVibeyaAiJobs(filters: Record<string, unknown>, config?: Record<string, unknown>): Promise<any[]>
 }
 const DESIGN_GENERATION_PRODUCT_IDS = new Set([
+  "sds-63823",
+  "63823",
   "sds-167256",
   "vibeya-washed-hoodie",
   "sds-128646",
@@ -107,7 +109,8 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isShowerCurtain && !["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"].includes(size)) {
     return res.status(400).json({ error: "Choose one of the available shower curtain sizes before creating your design." })
   }
-  if (isTankini || isApron || isDenimCap || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
+  const isYogaSet = productId === "sds-63823" || productId === "63823"
+  if (isYogaSet || isTankini || isApron || isDenimCap || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
     try {
       productReference = await getVibeyaProductReference(productId, color, size)
     } catch (error) {
@@ -138,7 +141,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isApron && (!productReference || !productPrintAreaReference)) {
     return res.status(400).json({ error: "The apron blank reference or bib print-area guide is missing. Refresh the page and try again." })
   }
-  if (productReference && (productReference.length > (isTankini || isApron ? 2500000 : isBathMat ? 300000 : isDenimCap ? 120000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+  if (productReference && (productReference.length > (isYogaSet || isTankini || isApron ? 2500000 : isBathMat ? 300000 : isDenimCap ? 120000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
     return res.status(400).json({ error: "The product print-area reference is invalid. Refresh the page and try again." })
   }
   if (productPrintAreaReference && (productPrintAreaReference.length > 2500000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
@@ -151,9 +154,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isBasketballUniform && Array.isArray(body?.printZones) && !body.printZones.some((zone) => BASKETBALL_PRINT_ZONES.includes(zone as typeof BASKETBALL_PRINT_ZONES[number]))) {
     return res.status(400).json({ error: "Choose at least one valid basketball uniform print area." })
   }
-  const placement = isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement
-  const placementGuideCount = isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
-  const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? 6 : 2 + placementGuideCount + 6
+  const placement = isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isApron ? "front" : body?.printPlacement
+  const placementGuideCount = isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isApron ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
+  const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isApron ? 6 : 2 + placementGuideCount + 6
   if (references.length > maximumReferences || references.some((item) => typeof item !== "string") || JSON.stringify(references).length > 300_000 || preserveBaseComposite.length > 150_000 || (preserveBaseComposite && !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(preserveBaseComposite))) {
     return res.status(400).json({ error: "The reference image is too large. Please compress it and try again." })
   }

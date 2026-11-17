@@ -55,7 +55,8 @@ export function useVibeyaProducts() {
 
   useEffect(() => {
     let active = true
-    fetch("/api/vibeya/catalog", { credentials: "same-origin", cache: "no-store" })
+    const countryCode = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i)?.[1] ?? "us"
+    fetch(`/api/vibeya/catalog?countryCode=${encodeURIComponent(countryCode)}`, { credentials: "same-origin", cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
       .then((data: { products?: CatalogProduct[] } | null) => {
         if (!active || !data?.products) return
@@ -65,6 +66,7 @@ export function useVibeyaProducts() {
             if (!remote) return product
             return {
               ...product,
+              catalogImage: remote.image ?? product.catalogImage,
               price: typeof remote.price === "number" && Number.isFinite(remote.price) ? remote.price : product.price,
               sizePrices: remote.size_prices && Object.keys(remote.size_prices).length ? remote.size_prices : product.sizePrices,
               currency: remote.currency_code?.toUpperCase() ?? product.currency,

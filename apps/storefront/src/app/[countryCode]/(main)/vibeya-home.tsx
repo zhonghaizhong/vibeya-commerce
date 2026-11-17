@@ -22,10 +22,16 @@ export default function VibeyaHome({
   countryCode,
   isAuthenticated,
   listing,
+  standaloneProductId,
+  standaloneColor,
+  standaloneSize,
 }: {
   countryCode: string
   isAuthenticated: boolean
   listing?: { category: string; title: string; handles: string[] }
+  standaloneProductId?: string
+  standaloneColor?: string
+  standaloneSize?: string
 }) {
   const [authOpen, setAuthOpen] = useState(false)
   const [authRedirectTo, setAuthRedirectTo] = useState<string>()
@@ -33,6 +39,9 @@ export default function VibeyaHome({
   const [homeCardsTarget, setHomeCardsTarget] = useState<HTMLElement | null>(null)
   const frameRef = useRef<HTMLIFrameElement>(null)
   const router = useRouter()
+  const standaloneHash = standaloneProductId
+    ? `#product-${standaloneProductId}?color=${encodeURIComponent(standaloneColor || "White")}${standaloneSize ? `&size=${encodeURIComponent(standaloneSize)}` : ""}`
+    : ""
 
   useEffect(() => {
     if (!isAuthenticated) return
@@ -70,23 +79,27 @@ export default function VibeyaHome({
   const mountProductCards = useCallback(() => {
     const frameDocument = frameRef.current?.contentDocument
     const productCards = frameDocument?.querySelector<HTMLElement>("#productCards")
+    if (standaloneProductId) {
+      frameRef.current?.contentWindow?.postMessage({ type: "vibeya:set-route", hash: standaloneHash }, window.location.origin)
+    }
     if (!frameDocument || !productCards) return
     if (frameDocument.body.dataset.reactProductCards !== "true") {
       productCards.replaceChildren()
       frameDocument.body.dataset.reactProductCards = "true"
     }
     setHomeCardsTarget(productCards)
-  }, [])
+  }, [standaloneHash, standaloneProductId])
 
   useEffect(() => {
-    if (window.location.hash.startsWith("#product-mg8014061")) {
+    if (!standaloneProductId && window.location.hash.startsWith("#product-mg8014061")) {
       router.replace(`/${countryCode}/products/vibeya-custom-metal-bottle-cap-wall-sign`)
       return
     }
 
     const currentParams = new URLSearchParams(window.location.search)
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "category-seo-20261117-2")
+    forwardedParams.set("country", countryCode.toLowerCase())
+    forwardedParams.set("v", "yoga-set-reference-20261117-1")
     for (const key of ["viewCart", "openStudio", "openSearch", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
       const value = currentParams.get(key)
       if (value) forwardedParams.set(key, value)
@@ -103,7 +116,9 @@ export default function VibeyaHome({
       forwardedParams.delete("openStudio")
     }
 
-    const hash = listing
+    const hash = standaloneProductId
+      ? standaloneHash
+      : listing
       ? window.location.hash.startsWith("#product-")
         ? window.location.hash
         : "#shop"
@@ -123,7 +138,7 @@ export default function VibeyaHome({
     const homeUrl = `/vibeya/index.html${query ? `?${query}` : ""}${hash}`
     const frame = frameRef.current
     if (frame && frame.getAttribute("src") !== homeUrl) frame.src = homeUrl
-  }, [countryCode, isAuthenticated, listing, router])
+  }, [countryCode, isAuthenticated, listing, router, standaloneProductId, standaloneHash])
 
   useEffect(() => {
     const frame = frameRef.current
@@ -205,7 +220,7 @@ export default function VibeyaHome({
 
     const syncFromHistory = () => {
       frameRef.current?.contentWindow?.postMessage(
-        { type: "vibeya:set-route", hash: window.location.hash || (listing ? "#shop" : "#top") },
+        { type: "vibeya:set-route", hash: window.location.hash || (standaloneProductId ? standaloneHash : listing ? "#shop" : "#top") },
         window.location.origin
       )
     }
@@ -218,7 +233,7 @@ export default function VibeyaHome({
       window.removeEventListener("popstate", syncFromHistory)
       window.removeEventListener("hashchange", syncFromHistory)
     }
-  }, [countryCode, isAuthenticated, listing])
+  }, [countryCode, isAuthenticated, listing, standaloneHash, standaloneProductId])
 
   const addAccountLink = useCallback(
     (event: SyntheticEvent<HTMLIFrameElement>) => {
@@ -247,13 +262,13 @@ export default function VibeyaHome({
       })
 
       frame.contentWindow?.postMessage(
-        { type: "vibeya:set-route", hash: window.location.hash || (listing ? "#shop" : "#top") },
+        { type: "vibeya:set-route", hash: window.location.hash || (standaloneProductId ? standaloneHash : listing ? "#shop" : "#top") },
         window.location.origin
       )
 
       mountProductCards()
     },
-    [countryCode, isAuthenticated, listing, mountProductCards]
+    [countryCode, isAuthenticated, mountProductCards, standaloneHash, standaloneProductId]
   )
 
   const navigateTo = (hash: string) => {
@@ -291,8 +306,8 @@ export default function VibeyaHome({
       <iframe
         ref={frameRef}
         className="vibeya-theme-frame"
-        src="/vibeya/index.html?v=category-seo-20261117-2"
-        title="VIBEYA storefront"
+        src={`/vibeya/index.html?country=${encodeURIComponent(countryCode)}&v=yoga-set-reference-20261117-1${standaloneProductId ? standaloneHash : ""}`}
+        title={standaloneProductId ? "VIBEYA product detail" : "VIBEYA storefront"}
         onLoad={addAccountLink}
         style={{
           display: "block",

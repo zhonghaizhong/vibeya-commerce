@@ -1,15 +1,26 @@
 import { sdk } from "@lib/config"
-import { getVibeyaUsRegion } from "@lib/vibeya/region"
 import { getProductCategoryLabel } from "@lib/seo/categories"
-import { NextResponse } from "next/server"
+import { HttpTypes } from "@medusajs/types"
+import { NextRequest, NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
-export async function GET() {
-  const region = await getVibeyaUsRegion()
+export async function GET(request: NextRequest) {
+  const countryCode = (request.nextUrl.searchParams.get("countryCode") ?? "us").toLowerCase()
+  if (!["us", "ca", "mx", "jp"].includes(countryCode)) {
+    return NextResponse.json({ error: "This VIBEYA catalog is not available in this market" }, { status: 400 })
+  }
+
+  const { regions } = await sdk.client.fetch<{ regions: HttpTypes.StoreRegion[] }>(
+    "/store/regions",
+    { cache: "no-store" }
+  )
+  const region = regions.find((candidate) =>
+    candidate.countries?.some((country) => country.iso_2?.toLowerCase() === countryCode)
+  )
   if (!region) {
-    return NextResponse.json({ error: "U.S. catalog is unavailable" }, { status: 503 })
+    return NextResponse.json({ error: "Catalog is unavailable for this market" }, { status: 503 })
   }
 
   try {
