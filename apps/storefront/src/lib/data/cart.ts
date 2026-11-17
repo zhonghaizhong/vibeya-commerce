@@ -2,8 +2,10 @@
 
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
+import { isSupportedMarketCountry } from "@lib/vibeya/markets"
 import { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
+import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import {
   getAuthHeaders,
@@ -403,8 +405,13 @@ export async function placeOrder(cartId?: string) {
  * @param countryCode
  */
 export async function updateRegion(countryCode: string, currentPath: string) {
+  const normalizedCountryCode = countryCode.toLowerCase()
+  if (!isSupportedMarketCountry(normalizedCountryCode)) {
+    throw new Error("This shipping destination is not supported.")
+  }
+
   const cartId = await getCartId()
-  const region = await getRegion(countryCode)
+  const region = await getRegion(normalizedCountryCode)
 
   if (!region) {
     throw new Error(`Region not found for country code: ${countryCode}`)
@@ -422,7 +429,16 @@ export async function updateRegion(countryCode: string, currentPath: string) {
   const productsCacheTag = await getCacheTag("products")
   revalidateTag(productsCacheTag, { expire: 0 })
 
-  redirect(`/${countryCode}${currentPath}`)
+  const cookieStore = await cookies()
+  cookieStore.set("vibeya_destination_country", normalizedCountryCode, {
+    maxAge: 60 * 60 * 24 * 365,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  })
+
+  redirect(`/${normalizedCountryCode}${currentPath}`)
 }
 
 export async function listCartOptions() {

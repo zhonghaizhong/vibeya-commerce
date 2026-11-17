@@ -2,13 +2,16 @@ import { clx } from "@modules/common/components/ui"
 
 import { getProductPrice } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
+import { getProductMarketCopy } from "@modules/products/market-copy"
 
 export default function ProductPrice({
   product,
   variant,
+  countryCode = "us",
 }: {
   product: HttpTypes.StoreProduct
   variant?: HttpTypes.StoreProductVariant
+  countryCode?: string
 }) {
   const { cheapestPrice, variantPrice } = getProductPrice({
     product,
@@ -16,6 +19,7 @@ export default function ProductPrice({
   })
 
   const selectedPrice = variant ? variantPrice : cheapestPrice
+  const marketCopy = getProductMarketCopy(countryCode)
 
   if (!selectedPrice) {
     return <div className="block w-32 h-9 bg-gray-100 animate-pulse" />
@@ -28,7 +32,7 @@ export default function ProductPrice({
           "text-ui-fg-interactive": selectedPrice.price_type === "sale",
         })}
       >
-        {!variant && "From "}
+        {!variant && (marketCopy ? `${marketCopy.from} ` : "From ")}
         <span
           data-testid="product-price"
           data-value={selectedPrice.calculated_price_number}

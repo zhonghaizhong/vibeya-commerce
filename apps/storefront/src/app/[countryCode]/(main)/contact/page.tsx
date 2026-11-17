@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
 import { PolicyPage } from "@modules/policies/templates"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { getMarketUiCopy } from "@lib/util/market-ui-copy"
 
 export async function generateMetadata({
   params,
@@ -10,8 +11,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { countryCode } = await params
   const origin = await getSiteOrigin()
-  const title = "VIBEYA Customer Support"
-  const description =
+  const marketCopy = getMarketUiCopy(countryCode)
+  const title = marketCopy?.contactMeta ?? "VIBEYA Customer Support"
+  const description = marketCopy?.contactDescription ??
     "Contact VIBEYA for help with a custom apparel order, delivery, damaged items, or product questions."
 
   return {
@@ -28,30 +30,41 @@ export async function generateMetadata({
   }
 }
 
-export default function ContactPage() {
+export default async function ContactPage({ params }: { params: Promise<{ countryCode: string }> }) {
+  const { countryCode } = await params
+  const marketCopy = getMarketUiCopy(countryCode)
   return (
-    <PolicyPage title="We're here to help">
-      <p>
-        Need help with a custom item or delivery? Reply to your order
-        confirmation email and include your order number and a short description
-        of the issue.
-      </p>
-      <p>
-        If your item arrived damaged or different from what you ordered, please
-        include a clear photo so we can review it.
-      </p>
+    <PolicyPage title={marketCopy?.contactTitle ?? "We're here to help"} countryCode={countryCode}>
+      {marketCopy ? (
+        <>
+          <p>{marketCopy.contactIntro}</p>
+          <p>{marketCopy.contactPhoto}</p>
+        </>
+      ) : (
+        <>
+          <p>
+            Need help with a custom item or delivery? Reply to your order
+            confirmation email and include your order number and a short description
+            of the issue.
+          </p>
+          <p>
+            If your item arrived damaged or different from what you ordered, please
+            include a clear photo so we can review it.
+          </p>
+        </>
+      )}
       <div className="flex flex-wrap gap-4 pt-2">
         <LocalizedClientLink
           href="/account/orders"
           className="rounded-full bg-[#dcfc60] px-5 py-3 text-sm font-bold text-[#160d24]"
         >
-          View my orders
+          {marketCopy?.viewOrders ?? "View my orders"}
         </LocalizedClientLink>
         <LocalizedClientLink
           href="/"
           className="rounded-full border border-[#e9e3ea] bg-white px-5 py-3 text-sm font-bold text-[#160d24]"
         >
-          Back to VIBEYA
+          {marketCopy?.backStore ?? "Back to VIBEYA"}
         </LocalizedClientLink>
       </div>
     </PolicyPage>

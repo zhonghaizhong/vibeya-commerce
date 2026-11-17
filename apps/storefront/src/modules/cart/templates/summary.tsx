@@ -7,6 +7,8 @@ import Divider from "@modules/common/components/divider"
 import DiscountCode from "@modules/checkout/components/discount-code"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
+import { useParams } from "next/navigation"
+import { getMarketUiCopy } from "@lib/util/market-ui-copy"
 
 type SummaryProps = {
   cart: HttpTypes.StoreCart
@@ -24,11 +26,13 @@ function getCheckoutStep(cart: HttpTypes.StoreCart) {
 
 const Summary = ({ cart }: SummaryProps) => {
   const step = getCheckoutStep(cart)
+  const { countryCode } = useParams<{ countryCode?: string }>()
+  const marketCopy = getMarketUiCopy(countryCode)
 
   return (
     <div className="flex flex-col gap-y-4">
       <Heading level="h2" className="vibeya-cart-summary-title text-[2rem] leading-[2.75rem]">
-        Summary
+        {marketCopy?.summary ?? "Summary"}
       </Heading>
       <DiscountCode cart={cart} />
       <Divider />
@@ -37,7 +41,7 @@ const Summary = ({ cart }: SummaryProps) => {
         href={"/checkout?step=" + step}
         data-testid="checkout-button"
       >
-        <Button className="vibeya-checkout-button w-full h-12">Go to checkout</Button>
+        <Button className="vibeya-checkout-button w-full h-12">{marketCopy?.checkoutButton ?? "Go to checkout"}</Button>
       </LocalizedClientLink>
     </div>
   )

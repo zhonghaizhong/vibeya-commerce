@@ -2,6 +2,8 @@ import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Badge, Container, Heading, Text } from "@medusajs/ui"
 import { useCallback, useEffect, useState } from "react"
 
+type LocalizedInspiration = { title: string; summary: string; articleBody: string; tags: string[]; image: string; cardImage: string }
+
 type Inspiration = {
   id: string
   title: string
@@ -17,6 +19,8 @@ type Inspiration = {
   tags: string[]
   published: boolean
   homeFeatured: boolean
+  countryCodes: string[]
+  translations?: Partial<Record<"ja-JP" | "es-MX", LocalizedInspiration>>
 }
 
 const inputClass = "mt-1 w-full rounded-md border border-ui-border-base bg-ui-bg-field px-3 py-2 text-sm text-ui-fg-base outline-none focus:border-ui-border-interactive"
@@ -25,7 +29,7 @@ const emptyEntry = (items: Inspiration[]): Inspiration => {
   let suffix = 1
   let id = "new-inspiration"
   while (items.some((item) => item.id === id)) id = `new-inspiration-${++suffix}`
-  return { id, title: "", slug: `story.html?inspiration=${id}`, image: "", cardImage: "", summary: "", articleBody: "", useManagedImage: true, product: "", pattern: "", style: "", tags: [], published: false, homeFeatured: false }
+  return { id, title: "", slug: `story.html?inspiration=${id}`, image: "", cardImage: "", summary: "", articleBody: "", useManagedImage: true, product: "", pattern: "", style: "", tags: [], published: false, homeFeatured: false, countryCodes: ["us"] }
 }
 
 const StoreContentPage = () => {
@@ -70,6 +74,20 @@ const StoreContentPage = () => {
   }, [isDirty])
 
   const update = (index: number, patch: Partial<Inspiration>) => { if (!saving) setItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item)) }
+  const updateTranslation = (index: number, locale: "ja-JP" | "es-MX", patch: Partial<LocalizedInspiration>) => {
+    const item = items[index]
+    const current = item?.translations?.[locale] ?? { title: "", summary: "", articleBody: "", tags: [], image: "", cardImage: "" }
+    update(index, { translations: { ...item?.translations, [locale]: { ...current, ...patch } } })
+  }
+  const translationComplete = (copy?: LocalizedInspiration) => Boolean(copy?.title.trim() && copy.summary.trim() && copy.articleBody.trim() && copy.tags.length && copy.image.trim() && copy.cardImage.trim())
+  const missingMarketTranslation = (item: Inspiration) => {
+    const countries = item.countryCodes?.length ? item.countryCodes : ["us"]
+    if (countries.includes("jp") && !translationComplete(item.translations?.["ja-JP"])) return "日语"
+    if (countries.includes("mx") && !translationComplete(item.translations?.["es-MX"])) return "西班牙语"
+    if (countries.includes("*") && !translationComplete(item.translations?.["ja-JP"])) return "日语"
+    if (countries.includes("*") && !translationComplete(item.translations?.["es-MX"])) return "西班牙语"
+    return ""
+  }
   const visibleItems = items.map((item, index) => ({ item, index })).filter(({ item }) => {
     const query = search.trim().toLowerCase()
     const matchesSearch = !query || [item.title, item.id, item.product, item.pattern, item.style, ...item.tags].some((value) => value.toLowerCase().includes(query))
@@ -98,6 +116,29 @@ const StoreContentPage = () => {
       setUploading("")
     }
   }
+  const uploadLocalizedImage = async (index: number, locale: "ja-JP" | "es-MX", field: "image" | "cardImage", file?: File) => {
+    if (!file) return
+    if (!file.type.startsWith("image/")) { setError("请选择图片文件。"); return }
+    if (file.size > 10 * 1024 * 1024) { setError("图片不能超过 10 MB。"); return }
+    const key = `${index}-${locale}-${field}`
+    setUploading(key)
+    setError("")
+    setMessage("")
+    try {
+      const form = new FormData()
+      form.append("files", file)
+      const response = await fetch("/admin/uploads", { method: "POST", credentials: "same-origin", body: form })
+      const data = await response.json()
+      const url = data.files?.[0]?.url
+      if (!response.ok || typeof url !== "string") throw new Error(data.message || data.error || "图片上传失败。")
+      updateTranslation(index, locale, { [field]: url })
+      setMessage("图片上传成功，保存灵感内容后生效。")
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "图片上传失败。")
+    } finally {
+      setUploading("")
+    }
+  }
   const save = async () => {
     if (!hasLoaded) { setError("灵感列表尚未成功读取，请先重新读取后再保存。"); return }
     setMessage("")
@@ -107,6 +148,8 @@ const StoreContentPage = () => {
     if (new Set(ids).size !== ids.length) { setError("灵感编号不能重复，请修改重复的编号后再保存。"); return }
     const incomplete = items.find((item) => item.published && (!item.title.trim() || !item.image.trim() || !item.cardImage.trim() || (item.slug.startsWith("story.html?") && !item.summary.trim())))
     if (incomplete) { setError(`“${incomplete.title || "新灵感"}”已设为发布，请补全标题、卡片图片、专题主图和文章介绍。`); return }
+    const missingTranslation = items.find((item) => item.published && missingMarketTranslation(item))
+    if (missingTranslation) { setError(`“${missingTranslation.title || "新灵感"}”已面向对应国家发布，请补全${missingMarketTranslation(missingTranslation)}标题、介绍、正文和标签。`); return }
     const mismatchedStory = items.find((item) => item.slug.startsWith("story.html?") && item.slug !== `story.html?inspiration=${item.id}`)
     if (mismatchedStory) { setError(`“${mismatchedStory.title || "新灵感"}”的文章地址需要与内部编号保持一致。`); return }
     setSaving(true)
@@ -194,6 +237,29 @@ const StoreContentPage = () => {
               <label className={labelClass}>详细正文<textarea className={inputClass} rows={6} value={item.articleBody} onChange={(event) => update(index, { articleBody: event.target.value })} placeholder="介绍设计灵感、图案特点或适合的商品" /></label>
             </section>
 
+            <section className="flex flex-col gap-4 border-t border-ui-border-base pt-5">
+              <div><Heading level="h3">日本与墨西哥文案</Heading><Text size="small" className="mt-1 text-ui-fg-subtle">只有发布到 JP 或 MX 时才要求对应语言完整；未翻译的灵感不会显示在当地站点。</Text></div>
+              {([ ["ja-JP", "日本語（日本）", "jp"], ["es-MX", "Español（México）", "mx"] ] as const).map(([locale, label, country]) => {
+                const copy = item.translations?.[locale] ?? { title: "", summary: "", articleBody: "", tags: [], image: "", cardImage: "" }
+                const assigned = item.countryCodes?.includes(country) || item.countryCodes?.includes("*")
+                return <fieldset key={locale} className="flex flex-col gap-3 rounded-lg border border-ui-border-base p-4">
+                  <legend className="px-1 text-sm font-semibold text-ui-fg-base">{label}{assigned && item.published ? <span className="ml-2 text-ui-fg-warning">{translationComplete(copy) ? "已完成" : "发布前必填"}</span> : null}</legend>
+                  <label className={labelClass}>标题<input className={inputClass} value={copy.title} onChange={(event) => updateTranslation(index, locale, { title: event.target.value })} /></label>
+                  <label className={labelClass}>简短介绍<textarea className={inputClass} rows={2} value={copy.summary} onChange={(event) => updateTranslation(index, locale, { summary: event.target.value })} /></label>
+                  <label className={labelClass}>详细正文<textarea className={inputClass} rows={4} value={copy.articleBody} onChange={(event) => updateTranslation(index, locale, { articleBody: event.target.value })} /></label>
+                  <label className={labelClass}>标签（逗号分隔）<input className={inputClass} value={copy.tags.join(", ")} onChange={(event) => updateTranslation(index, locale, { tags: event.target.value.split(",").map((tag) => tag.trim()).filter(Boolean) })} /></label>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {([ ["cardImage", "当地卡片图片"], ["image", "当地文章主图"] ] as const).map(([field, fieldLabel]) => <div key={field}>
+                      <label className={labelClass}>{fieldLabel}<input className={inputClass} value={copy[field]} onChange={(event) => updateTranslation(index, locale, { [field]: event.target.value })} placeholder="上传当地语言图片或粘贴图片地址" /></label>
+                      <input className="mt-2 block w-full text-sm text-ui-fg-subtle" type="file" accept="image/*" aria-label={`上传${label}${fieldLabel}`} disabled={saving || uploading === `${index}-${locale}-${field}`} onChange={(event) => { void uploadLocalizedImage(index, locale, field, event.target.files?.[0]); event.currentTarget.value = "" }} />
+                      {uploading === `${index}-${locale}-${field}` && <Text size="small">正在上传…</Text>}
+                      {copy[field] && <img className="mt-3 max-h-40 max-w-full rounded-lg border border-ui-border-base object-contain" src={copy[field]} alt={`${label}${fieldLabel}预览`} />}
+                    </div>)}
+                  </div>
+                </fieldset>
+              })}
+            </section>
+
             <section className="flex flex-col gap-3 border-t border-ui-border-base pt-5">
               <div><Heading level="h3">分类与展示</Heading><Text size="small" className="mt-1 text-ui-fg-subtle">分类用于灵感筛选；首页只会从已发布且选为首页候选的内容中随机展示。</Text></div>
               <div className="grid gap-4 md:grid-cols-3">
@@ -202,6 +268,7 @@ const StoreContentPage = () => {
                 <label className={labelClass}>设计风格<input className={inputClass} value={item.style} onChange={(event) => update(index, { style: event.target.value })} placeholder="例如 streetwear" /></label>
               </div>
               <label className={labelClass}>标签（英文逗号分隔）<input className={inputClass} value={item.tags.join(", ")} onChange={(event) => update(index, { tags: event.target.value.split(",").map((tag) => tag.trim()).filter(Boolean) })} placeholder="funny, cozy, gift" /></label>
+              <label className={labelClass}>可配送国家（ISO 两位代码，逗号分隔；* 表示所有国家）<input className={inputClass} value={(item.countryCodes?.length ? item.countryCodes : ["us"]).join(", ")} onChange={(event) => update(index, { countryCodes: event.target.value.split(",").map((code) => code.trim().toLowerCase()).filter(Boolean) })} placeholder="us, jp" /></label>
               <div className="flex flex-col gap-3 rounded-lg bg-ui-bg-subtle p-4">
                 <label className="flex items-center gap-2 text-sm text-ui-fg-base"><input type="checkbox" checked={item.published} onChange={(event) => update(index, { published: event.target.checked })} />发布到灵感页</label>
                 <label className="flex items-center gap-2 text-sm text-ui-fg-base"><input type="checkbox" checked={item.homeFeatured} onChange={(event) => update(index, { homeFeatured: event.target.checked })} />允许首页随机展示</label>

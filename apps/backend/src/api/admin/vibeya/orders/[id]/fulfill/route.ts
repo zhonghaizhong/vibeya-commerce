@@ -29,6 +29,9 @@ export const POST = async (req: MedusaRequest<RequestBody>, res: MedusaResponse)
     const location = locations[0] as any
     if (!order) return res.status(404).json({ error: "没有找到这个订单。" })
     if (!location) return res.status(400).json({ error: "所选发货仓库不存在，请刷新后重试。" })
+    if (location.metadata?.vibeya_origin_address_pending === true) {
+      return res.status(400).json({ error: "该商品的中国实际发货地址尚未确认，暂不能从此仓库创建发货单。" })
+    }
 
     const fulfilled = new Map<string, number>()
     for (const fulfillment of order.fulfillments ?? []) {

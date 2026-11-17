@@ -1,57 +1,63 @@
 import { Metadata } from "next"
-import { sdk } from "@lib/config"
-import { getVibeyaUsRegion } from "@lib/vibeya/region"
 import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
 import { toJsonLd } from "@lib/util/product-structured-data"
 import { retrieveCustomer } from "@lib/data/customer"
 import VibeyaHome from "./vibeya-home"
+import { getMarketAlternateUrls, getMarketLocale, getMarketLocaleUrl } from "@lib/util/market-locale"
+import { SUPPORTED_MARKET_COUNTRIES } from "@lib/vibeya/markets"
 
 const HOME_TITLE = "Custom Products & Personalized Gifts | VIBEYA"
 const HOME_DESCRIPTION =
-  "Create personalized gifts from a photo or AI prompt. Design custom apparel, drinkware, blankets, bath mats, and shower curtains, then preview and order online."
-
-// Used only if the store catalog cannot be retrieved while rendering the page.
-type ShopItem = { name: string; handle: string }
-
-const SHOP_ITEMS_FALLBACK = [
-  ["VIBEYA Custom Cotton Long Sleeve Tee", "vibeya-custom-cotton-long-sleeve-tee"],
-  ["VIBEYA Washed Vintage Hooded Sweatshirt", "vibeya-washed-vintage-hooded-sweatshirt"],
-  ["VIBEYA Custom Knitted Beanie", "vibeya-custom-knitted-beanie"],
-  ["VIBEYA Custom 20 oz Stainless Steel Tumbler", "vibeya-custom-20oz-stainless-steel-tumbler"],
-  ["VIBEYA Custom 3D Optical Illusion Bath Mat", "vibeya-custom-3d-bath-mat"],
-  ["VIBEYA Custom Flannel Throw Blanket", "vibeya-custom-flannel-throw-blanket"],
-  ["VIBEYA Custom Prompt-Designed Apron", "vibeya-custom-prompt-design-apron"],
-  ["VIBEYA Custom Shower Curtain", "vibeya-custom-shower-curtain"],
-  ["VIBEYA Custom Women’s Tankini Swimsuit Set", "vibeya-custom-womens-tankini-swimsuit-set"],
-  ["VIBEYA Custom Kids' Basketball Uniform", "vibeya-custom-kids-basketball-uniform"],
-  ["VIBEYA Custom Metal Bottle Cap Wall Sign", "vibeya-custom-metal-bottle-cap-wall-sign"],
-] as const
+  "Create custom apparel, drinkware, blankets, shower curtains, and home decor online. Personalize a product, preview your design, and order one made for you."
+const LOCALIZED_HOME_COPY: Record<string, { title: string; description: string }> = {
+  "en-CA": {
+    title: "Custom Products & Personalized Gifts in Canada | VIBEYA",
+    description: "Create custom apparel, drinkware, blankets, shower curtains, and home decor in Canada. Preview your design and order a personalized product made for you.",
+  },
+  "ja-JP": {
+    title: "オリジナル商品・パーソナライズギフト | VIBEYA",
+    description: "アパレル、ドリンクウェア、ブランケット、シャワーカーテンなどをカスタマイズ。デザインをプレビューして、自分だけの商品を注文できます。",
+  },
+  "es-MX": {
+    title: "Productos personalizados y regalos | VIBEYA",
+    description: "Personaliza ropa, vasos, mantas, cortinas de baño y decoración. Previsualiza tu diseño y pide un producto hecho para ti.",
+  },
+  "fr-CA": {
+    title: "Produits personnalisés et cadeaux | VIBEYA",
+    description: "Personnalisez des vêtements, verres, couvertures, rideaux de douche et articles déco. Prévisualisez votre création et commandez un produit unique.",
+  },
+}
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ countryCode: string }>
+  searchParams: Promise<{ locale?: string }>
 }): Promise<Metadata> {
-  const { countryCode } = await params
+  const [{ countryCode }, search] = await Promise.all([params, searchParams])
   const origin = await getSiteOrigin()
-  const canonical = `${origin}/${countryCode}`
+  const locale = getMarketLocale(countryCode, search.locale)
+  const copy = LOCALIZED_HOME_COPY[locale] ?? { title: HOME_TITLE, description: HOME_DESCRIPTION }
+  const canonical = getMarketLocaleUrl(origin, countryCode, "", locale)
+  const alternates = getMarketAlternateUrls(origin, "", [...SUPPORTED_MARKET_COUNTRIES])
 
   return {
-    title: HOME_TITLE,
-    description: HOME_DESCRIPTION,
-    alternates: { canonical },
+    title: copy.title,
+    description: copy.description,
+    alternates: { canonical, languages: alternates },
     openGraph: {
       type: "website",
-      title: HOME_TITLE,
-      description: HOME_DESCRIPTION,
+      title: copy.title,
+      description: copy.description,
       url: canonical,
       siteName: STORE_NAME,
       images: ["/opengraph-image.jpg"],
     },
     twitter: {
       card: "summary_large_image",
-      title: HOME_TITLE,
-      description: HOME_DESCRIPTION,
+      title: copy.title,
+      description: copy.description,
       images: ["/twitter-image.jpg"],
     },
   }
@@ -59,40 +65,16 @@ export async function generateMetadata({
 
 export default async function Home({
   params,
+  searchParams,
 }: {
   params: Promise<{ countryCode: string }>
+  searchParams: Promise<{ locale?: string }>
 }) {
-  const { countryCode } = await params
+  const [{ countryCode }, search] = await Promise.all([params, searchParams])
   const customer = await retrieveCustomer().catch(() => null)
+  const locale = getMarketLocale(countryCode, search.locale)
   const origin = await getSiteOrigin()
   const pageUrl = `${origin}/${countryCode}`
-  let shopItems: ShopItem[] = SHOP_ITEMS_FALLBACK.map(([name, handle]) => ({
-    name,
-    handle,
-  }))
-
-  try {
-    const region = await getVibeyaUsRegion()
-    if (!region) throw new Error("U.S. product catalog is unavailable")
-
-    const {
-      products,
-    } = await sdk.store.product.list({
-      region_id: region.id,
-      limit: 100,
-      fields: "id,handle,title",
-    })
-    const publishedShopItems = products
-      .filter((product) => product.handle && product.title)
-      .map((product) => ({ name: product.title, handle: product.handle }))
-
-    if (publishedShopItems.length) {
-      shopItems = publishedShopItems
-    }
-  } catch {
-    // Keep the existing fallback list when the store catalog is temporarily unavailable.
-  }
-
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -132,21 +114,6 @@ export default async function Home({
         description: HOME_DESCRIPTION,
         isPartOf: { "@id": `${origin}/#website` },
         about: { "@id": `${origin}/#organization` },
-        hasPart: { "@id": `${pageUrl}#shop` },
-      },
-      {
-        "@type": "ItemList",
-        "@id": `${pageUrl}#shop`,
-        name: "Custom Products & Personalized Gifts",
-        description: HOME_DESCRIPTION,
-        itemListOrder: "https://schema.org/ItemListUnordered",
-        numberOfItems: shopItems.length,
-        itemListElement: shopItems.map(({ name, handle }, index) => ({
-          "@type": "ListItem",
-          position: index + 1,
-          name,
-          url: `${origin}/${countryCode}/products/${encodeURIComponent(handle)}`,
-        })),
       },
     ],
   }
@@ -157,7 +124,7 @@ export default async function Home({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
       />
-      <VibeyaHome countryCode={countryCode} isAuthenticated={Boolean(customer)} />
+      <VibeyaHome countryCode={countryCode} locale={locale} isAuthenticated={Boolean(customer)} />
     </>
   )
 }

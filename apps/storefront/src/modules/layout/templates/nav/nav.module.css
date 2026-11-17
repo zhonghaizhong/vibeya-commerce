@@ -85,6 +85,44 @@
   display: none;
 }
 
+.marketControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 2px;
+}
+
+.marketControl {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1px solid #e9e3ea;
+  border-radius: 999px;
+  background: #fffdfa;
+  color: #625c69;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.marketControl select {
+  min-width: 0;
+  max-width: 112px;
+  padding: 0 14px 0 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #160d24;
+  font: inherit;
+  cursor: pointer;
+}
+
+.marketControl select:disabled {
+  cursor: wait;
+}
+
 .actions {
   display: flex;
   flex: 0 0 auto;
@@ -152,7 +190,7 @@
   }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 1100px) {
   .topnav {
     width: min(100% - 36px, 1440px);
     height: 66px;
@@ -165,6 +203,11 @@
     right: -18px;
     left: -18px;
     display: none;
+    max-height: calc(100vh - 100px);
+    max-height: calc(100dvh - 100px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     align-items: stretch;
     flex-direction: column;
     gap: 12px;
@@ -196,6 +239,27 @@
 
   .accountMenuLink {
     display: block;
+  }
+
+  .marketControls {
+    align-items: stretch;
+    flex-direction: column;
+    margin: 4px 0;
+  }
+
+  .marketControl {
+    width: 100%;
+    justify-content: space-between;
+    min-height: 48px;
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+
+  .marketControl select {
+    flex: 0 1 auto;
+    width: auto;
+    max-width: min(62vw, 240px);
+    text-align: right;
   }
 
   .accountLink {

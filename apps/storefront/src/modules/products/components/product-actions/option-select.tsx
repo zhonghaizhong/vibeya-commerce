@@ -1,6 +1,7 @@
 import { HttpTypes } from "@medusajs/types"
 import { clx } from "@modules/common/components/ui"
 import React from "react"
+import { getProductMarketCopy, translateProductOption, translateProductOptionValue } from "@modules/products/market-copy"
 
 type OptionSelectProps = {
   option: HttpTypes.StoreProductOption
@@ -9,6 +10,7 @@ type OptionSelectProps = {
   title: string
   name: string
   disabled: boolean
+  countryCode?: string
   "data-testid"?: string
 }
 
@@ -20,12 +22,14 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
   name,
   "data-testid": dataTestId,
   disabled,
+  countryCode = "us",
 }) => {
   const filteredOptions = (option.values ?? []).map((v) => v.value)
+  const marketCopy = getProductMarketCopy(countryCode)
 
   return (
     <fieldset className="flex flex-col gap-y-3" disabled={disabled}>
-      <legend className="text-sm mb-3">Select {title}</legend>
+      <legend className="text-sm mb-3">{marketCopy ? `${marketCopy.select} ${translateProductOption(countryCode, title)}` : `Select ${title}`}</legend>
       <div
         className="flex flex-wrap justify-between gap-2"
         data-testid={dataTestId}
@@ -55,7 +59,7 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
                 )}
                 data-testid="option-button"
               >
-                {v}
+                {translateProductOptionValue(countryCode, title, v)}
               </label>
             </div>
           )

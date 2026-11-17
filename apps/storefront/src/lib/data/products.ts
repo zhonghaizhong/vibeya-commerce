@@ -7,11 +7,13 @@ import { HttpTypes } from "@medusajs/types"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { getRegion, retrieveRegion } from "./regions"
+import { getVibeyaMarket } from "@lib/vibeya/region"
 
 type ProductListQueryParams = (HttpTypes.FindParams &
   HttpTypes.StoreProductListParams) & {
   options?: string[]
   option_value_id?: string | string[]
+  locale?: string
 }
 
 export const listProducts = async ({
@@ -52,6 +54,23 @@ export const listProducts = async ({
     }
   }
 
+  let marketProductIds: string[] | undefined
+  let localizedMedia: Record<string, string[]> = {}
+  if (countryCode) {
+    const market = await getVibeyaMarket(countryCode).catch(() => null)
+    if (!market?.region) {
+      return { response: { products: [], count: 0 }, nextPage: null, queryParams }
+    }
+    marketProductIds = market.product_ids
+    localizedMedia = Object.fromEntries(Object.entries(market.localized_media ?? {})
+      .map(([productId, byCountry]) => [productId, byCountry[countryCode.toLowerCase()]] as const)
+      .filter((entry): entry is [string, string[]] => Array.isArray(entry[1])))
+    if (queryParams?.id) {
+      const requestedIds = Array.isArray(queryParams.id) ? queryParams.id : [queryParams.id]
+      marketProductIds = marketProductIds.filter((id) => requestedIds.includes(id))
+    }
+  }
+
   const headers = {
     ...(await getAuthHeaders()),
   }
@@ -72,6 +91,7 @@ export const listProducts = async ({
           fields:
             "+thumbnail,*images,*variants.calculated_price,+variants.inventory_quantity,+variants.thumbnail,*variants.images,*variants.options,+metadata,+tags,",
           ...queryParams,
+          ...(marketProductIds ? { id: marketProductIds } : {}),
         },
         headers,
         next,
@@ -83,7 +103,14 @@ export const listProducts = async ({
 
       return {
         response: {
-          products,
+        products: products.map((product) => {
+          const marketImages = localizedMedia[product.id]
+          return marketImages?.length ? {
+            ...product,
+            thumbnail: marketImages[0],
+            images: marketImages.map((url, index) => ({ id: `${product.id}-market-${index}`, url })) as HttpTypes.StoreProductImage[],
+          } : product
+        }),
           count,
         },
         nextPage: nextPage,

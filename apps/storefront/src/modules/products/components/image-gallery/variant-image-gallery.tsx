@@ -28,8 +28,10 @@ const getImagesForVariant = (
  */
 const VariantImageGallery = ({
   product,
+  countryCode = "us",
 }: {
   product: HttpTypes.StoreProduct
+  countryCode?: string
 }) => {
   const searchParams = useSearchParams()
   const [isMounted, setIsMounted] = useState(false)
@@ -42,7 +44,7 @@ const VariantImageGallery = ({
     [product, variantId]
   )
 
-  return <ImageGallery images={images} />
+  return <ImageGallery images={images} countryCode={countryCode} />
 }
 
 export default VariantImageGallery

@@ -37,6 +37,28 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (incompletePublished) {
     return res.status(400).json({ error: `“${incompletePublished.title || "新灵感"}”已设为发布，请补全标题、卡片图片、专题主图和文章介绍。` })
   }
+  const missingMarketTranslation = inspirations.find((entry) => {
+    if (!entry.published) return false
+    const countries = entry.countryCodes ?? ["us"]
+    const requires = (country: string) => countries.includes(country) || countries.includes("*")
+    const complete = (locale: "ja-JP" | "es-MX") => {
+      const copy = entry.translations?.[locale]
+      return Boolean(copy?.title.trim() && copy.summary.trim() && copy.articleBody.trim() && copy.tags.length && copy.image.trim() && copy.cardImage.trim())
+    }
+    return (requires("jp") && !complete("ja-JP")) || (requires("mx") && !complete("es-MX"))
+  })
+  if (missingMarketTranslation) {
+    const countries = missingMarketTranslation.countryCodes ?? ["us"]
+    const requiresJapan = countries.includes("jp") || countries.includes("*")
+    const requiresMexico = countries.includes("mx") || countries.includes("*")
+    const complete = (locale: "ja-JP" | "es-MX") => {
+      const copy = missingMarketTranslation.translations?.[locale]
+      return Boolean(copy?.title.trim() && copy.summary.trim() && copy.articleBody.trim() && copy.tags.length && copy.image.trim() && copy.cardImage.trim())
+    }
+    const missing = [requiresJapan && !complete("ja-JP") ? "日语" : "", requiresMexico && !complete("es-MX") ? "西班牙语" : ""].filter(Boolean)
+    const localeLabel = missing.length ? missing.join("和") : "对应语言"
+    return res.status(400).json({ error: `“${missingMarketTranslation.title || "新灵感"}”已面向对应国家发布，请补全${localeLabel}标题、介绍、正文和标签。` })
+  }
   const mismatchedStory = inspirations.find((entry) => entry.slug.startsWith("story.html?") && entry.slug !== `story.html?inspiration=${entry.id}`)
   if (mismatchedStory) {
     return res.status(400).json({ error: `“${mismatchedStory.title || "新灵感"}”的文章地址需要与内部编号保持一致。` })

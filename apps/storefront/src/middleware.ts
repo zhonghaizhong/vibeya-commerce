@@ -1,5 +1,6 @@
 import { HttpTypes } from "@medusajs/types"
 import { NextRequest, NextResponse } from "next/server"
+import { isSupportedMarketCountry } from "./lib/vibeya/markets"
 
 const BACKEND_URL =
   process.env.MEDUSA_INTERNAL_BACKEND_URL || process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
@@ -8,6 +9,7 @@ const DEFAULT_REGION = process.env.NEXT_PUBLIC_DEFAULT_REGION || "us"
 const AUTH_COOKIE_NAME = "_medusa_jwt"
 const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
 const AUTH_REFRESH_WINDOW_SECONDS = 60 * 60 * 24 * 7
+const DESTINATION_COUNTRY_COOKIE = "vibeya_destination_country"
 
 const regionMapCache = {
   regionMap: new Map<string, HttpTypes.StoreRegion>(),
@@ -67,7 +69,7 @@ async function getRegionMap(cacheId: string) {
 
   if (
     !regionMap.keys().next().value ||
-    regionMapUpdated < Date.now() - 3600 * 1000
+    regionMapUpdated < Date.now() - 5 * 60 * 1000
   ) {
     // Fetch regions from Medusa. We can't use the JS client here because middleware is running on Edge and the client needs a Node environment.
     const response = await fetch(`${BACKEND_URL}/store/regions`, {
@@ -97,7 +99,10 @@ async function getRegionMap(cacheId: string) {
     // Create a map of country codes to regions.
     regions.forEach((region: HttpTypes.StoreRegion) => {
       region.countries?.forEach((c) => {
-        regionMapCache.regionMap.set(c.iso_2 ?? "", region)
+        const countryCode = c.iso_2?.toLowerCase()
+        if (isSupportedMarketCountry(countryCode)) {
+          regionMapCache.regionMap.set(countryCode, region)
+        }
       })
     })
 
@@ -108,26 +113,35 @@ async function getRegionMap(cacheId: string) {
 }
 
 /**
- * Resolves the country code from the URL, falling back to the store default.
- * Not IP-based, so crawlers and AI agents get a stable redirect.
+ * Keeps explicit market URLs and customer choices stable. On a first visit,
+ * use a trusted CDN country header as a suggestion, then fall back to the US.
  */
 async function getCountryCode(
   request: NextRequest,
   regionMap: Map<string, HttpTypes.StoreRegion | number>
 ) {
-  let countryCode
-
   const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
-
-  if (urlCountryCode && regionMap.has(urlCountryCode)) {
-    countryCode = urlCountryCode
-  } else if (regionMap.has(DEFAULT_REGION)) {
-    countryCode = DEFAULT_REGION
-  } else if (regionMap.keys().next().value) {
-    countryCode = regionMap.keys().next().value
+  if (isSupportedMarketCountry(urlCountryCode) && regionMap.has(urlCountryCode)) {
+    return urlCountryCode
   }
 
-  return countryCode
+  const selectedCountry = request.cookies.get(DESTINATION_COUNTRY_COOKIE)?.value?.toLowerCase()
+  if (isSupportedMarketCountry(selectedCountry) && regionMap.has(selectedCountry)) {
+    return selectedCountry
+  }
+
+  const geoCountry = [
+    request.headers.get("cf-ipcountry"),
+    request.headers.get("x-vercel-ip-country"),
+    request.headers.get("cloudfront-viewer-country"),
+    request.headers.get("x-country-code"),
+  ].find((value) => isSupportedMarketCountry(value))?.toLowerCase()
+  if (geoCountry && regionMap.has(geoCountry)) return geoCountry
+
+  if (isSupportedMarketCountry(DEFAULT_REGION) && regionMap.has(DEFAULT_REGION)) {
+    return DEFAULT_REGION
+  }
+  return regionMap.keys().next().value
 }
 
 /**
@@ -157,13 +171,15 @@ export async function middleware(request: NextRequest) {
   const country = countryCode || DEFAULT_REGION
   const firstPathSegment = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
   const urlHasCountry = firstPathSegment === country.toLowerCase()
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set("x-vibeya-country-code", country)
 
   // Serve the default region at "/" instead of redirecting, so agents and
   // crawlers get the storefront content directly from the root URL.
   if (urlHasCountry || request.nextUrl.pathname === "/") {
     const response = urlHasCountry
-      ? NextResponse.next()
-      : NextResponse.rewrite(new URL(`/${country}`, request.url))
+      ? NextResponse.next({ request: { headers: requestHeaders } })
+      : NextResponse.rewrite(new URL(`/${country}`, request.url), { request: { headers: requestHeaders } })
     if (!cacheIdCookie) {
       response.cookies.set("_medusa_cache_id", cacheId, {
         maxAge: 60 * 60 * 24,

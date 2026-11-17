@@ -1,5 +1,6 @@
 import { convertToLocale } from "@lib/util/money"
 import { formatDayRange, StorePolicies } from "@lib/util/store-policies"
+import { getMarketUiCopy } from "@lib/util/market-ui-copy"
 
 export const formatShippingRate = (rate: number, currencyCode: string) =>
   rate === 0
@@ -8,33 +9,38 @@ export const formatShippingRate = (rate: number, currencyCode: string) =>
 
 export const PolicyPage = ({
   title,
+  countryCode,
   children,
 }: {
   title: string
+  countryCode?: string
   children: React.ReactNode
-}) => (
-  <div
-    className="mx-auto w-full max-w-7xl px-5 py-10 text-[#160d24] small:px-10 small:py-14"
-    data-testid="policy-page"
-  >
-    <div className="grid gap-8 small:grid-cols-[.8fr_1.2fr] small:items-start">
-      <header className="rounded-[28px] bg-[#160d24] p-7 text-white small:sticky small:top-28 small:p-9">
-        <p className="mb-3 text-xs font-bold uppercase tracking-[.18em] text-[#dcfc60]">
-          VIBEYA / CUSTOMER CARE
-        </p>
-        <h1 className="font-display text-4xl font-black tracking-[-.06em]">
-          {title}
-        </h1>
-        <p className="mt-4 text-sm leading-6 text-white/70">
-          Clear information about shopping with VIBEYA.
-        </p>
-      </header>
-      <div className="flex flex-col gap-5 rounded-[28px] border border-[#e9e3ea] bg-white p-6 text-sm leading-7 text-[#625c69] small:p-9">
-        {children}
+}) => {
+  const marketCopy = getMarketUiCopy(countryCode)
+  return (
+    <div
+      className="mx-auto w-full max-w-7xl px-5 py-10 text-[#160d24] small:px-10 small:py-14"
+      data-testid="policy-page"
+    >
+      <div className="grid gap-8 small:grid-cols-[.8fr_1.2fr] small:items-start">
+        <header className="rounded-[28px] bg-[#160d24] p-7 text-white small:sticky small:top-28 small:p-9">
+          <p className="mb-3 text-xs font-bold uppercase tracking-[.18em] text-[#dcfc60]">
+            {marketCopy?.policyEyebrow ?? "VIBEYA / CUSTOMER CARE"}
+          </p>
+          <h1 className="font-display text-4xl font-black tracking-[-.06em]">
+            {title}
+          </h1>
+          <p className="mt-4 text-sm leading-6 text-white/70">
+            {marketCopy?.policyIntro ?? "Clear information about shopping with VIBEYA."}
+          </p>
+        </header>
+        <div className="flex flex-col gap-5 rounded-[28px] border border-[#e9e3ea] bg-white p-6 text-sm leading-7 text-[#625c69] small:p-9">
+          {children}
+        </div>
       </div>
     </div>
-  </div>
-)
+  )
+}
 
 export const PoliciesUnavailable = () => (
   <p className="text-[#625c69]">

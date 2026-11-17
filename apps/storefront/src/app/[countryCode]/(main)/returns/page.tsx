@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
 import { PolicyPage } from "@modules/policies/templates"
+import { getMarketUiCopy } from "@lib/util/market-ui-copy"
 
 export async function generateMetadata({
   params,
@@ -9,8 +10,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { countryCode } = await params
   const origin = await getSiteOrigin()
-  const title = "Custom Order & Return Policy"
-  const description =
+  const marketCopy = getMarketUiCopy(countryCode)
+  const title = marketCopy?.returnsMeta ?? "Custom Order & Return Policy"
+  const description = marketCopy?.returnsDescription ??
     "Read VIBEYA’s policy for returns, exchanges, and help with damaged or incorrect made-to-order clothing."
 
   return {
@@ -27,7 +29,18 @@ export async function generateMetadata({
   }
 }
 
-export default function ReturnsPage() {
+export default async function ReturnsPage({ params }: { params: Promise<{ countryCode: string }> }) {
+  const { countryCode } = await params
+  const marketCopy = getMarketUiCopy(countryCode)
+  if (marketCopy) {
+    return (
+      <PolicyPage title={marketCopy.returnsTitle} countryCode={countryCode}>
+        <p>{marketCopy.madeToOrder}</p>
+        <p>{marketCopy.noChangeReturns}</p>
+        <p>{marketCopy.damagedOrder}</p>
+      </PolicyPage>
+    )
+  }
   return (
     <PolicyPage title="Custom order policy">
       <p>

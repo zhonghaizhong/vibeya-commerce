@@ -2,13 +2,17 @@ import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
 import AccountCard from "../account-card"
+import { getMarketUiCopy } from "@lib/util/market-ui-copy"
 
 type OverviewProps = {
   customer: HttpTypes.StoreCustomer | null
   orders: HttpTypes.StoreOrder[] | null
+  countryCode: string
 }
 
-const Overview = ({ customer, orders }: OverviewProps) => {
+const Overview = ({ customer, orders, countryCode }: OverviewProps) => {
+  const marketCopy = getMarketUiCopy(countryCode)
+  const locale = countryCode === "jp" ? "ja-JP" : countryCode === "mx" ? "es-MX" : "en-US"
   const firstName = customer?.first_name?.trim()
   const recentOrders = orders?.slice(0, 4) ?? []
   const addressCount = customer?.addresses?.length ?? 0
@@ -20,25 +24,24 @@ const Overview = ({ customer, orders }: OverviewProps) => {
         <div className="pointer-events-none absolute -bottom-20 right-1/3 h-40 w-40 rounded-full bg-[#dcfc60]/20 blur-3xl" />
         <div className="relative z-10 max-w-2xl">
           <p className="mb-4 text-xs font-bold uppercase tracking-[.2em] text-[#dcfc60]">
-            WELCOME BACK
+            {marketCopy?.welcomeBack ?? "WELCOME BACK"}
           </p>
           <h2
             className="font-display text-4xl font-black tracking-[-.06em] small:text-5xl"
             data-testid="welcome-message"
             data-value={customer?.first_name}
           >
-            {firstName ? `Hello, ${firstName}.` : "Hello, creator."}
+            {firstName ? `${marketCopy?.helloPrefix ?? "Hello, "}${firstName}.` : marketCopy?.helloCreator ?? "Hello, creator."}
           </h2>
           <p className="mt-4 max-w-xl text-sm leading-6 text-white/70">
-            Your ideas, your orders, your VIBEYA. Keep everything you love in
-            one place.
+            {marketCopy?.accountTagline ?? "Your ideas, your orders, your VIBEYA. Keep everything you love in one place."}
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <LocalizedClientLink
               href="/"
               className="inline-flex min-h-12 items-center rounded-full bg-[#dcfc60] px-6 text-sm font-extrabold text-[#160d24] transition-transform hover:-translate-y-0.5"
             >
-              Explore the store{" "}
+              {marketCopy?.exploreStore ?? "Explore the store"}{" "}
               <span className="ml-2" aria-hidden="true">
                 ↗
               </span>
@@ -62,37 +65,37 @@ const Overview = ({ customer, orders }: OverviewProps) => {
 
       <div className="grid grid-cols-1 gap-4 small:grid-cols-3">
         <SummaryCard
-          eyebrow="PROFILE"
+          eyebrow={marketCopy?.profile ?? "PROFILE"}
           value={`${getProfileCompletion(customer)}%`}
-          detail="of your account completed"
+          detail={marketCopy?.profileCompleted ?? "of your account completed"}
           href="/account/profile"
-          action="Complete your profile"
+          action={marketCopy?.completeProfile ?? "Complete your profile"}
           accent="bg-[#f1e5ff]"
           testId="customer-profile-completion"
         />
         <SummaryCard
-          eyebrow="ORDERS"
+          eyebrow={marketCopy?.orders ?? "ORDERS"}
           value={String(orders?.length ?? 0)}
           detail={
             orders?.length
-              ? "orders placed with VIBEYA"
-              : "Your next favorite starts here"
+              ? marketCopy?.ordersPlaced ?? "orders placed with VIBEYA"
+              : marketCopy?.nextFavorite ?? "Your next favorite starts here"
           }
           href="/account/orders"
-          action="View orders"
+          action={marketCopy?.viewOrders ?? "View orders"}
           accent="bg-[#dcfc60]"
           testId="orders-count"
         />
         <SummaryCard
-          eyebrow="ADDRESSES"
+          eyebrow={marketCopy?.addresses ?? "ADDRESSES"}
           value={String(addressCount)}
           detail={
             addressCount === 1
-              ? "saved delivery address"
-              : "saved delivery addresses"
+              ? marketCopy?.savedAddress ?? "saved delivery address"
+              : marketCopy?.savedAddress ?? "saved delivery addresses"
           }
           href="/account/addresses?add=1"
-          action={addressCount ? "Manage addresses" : "Add an address"}
+          action={addressCount ? marketCopy?.manageAddresses ?? "Manage addresses" : marketCopy?.addAddress ?? "Add an address"}
           accent="bg-[#dcfc60]"
           testId="addresses-count"
         />
@@ -102,10 +105,10 @@ const Overview = ({ customer, orders }: OverviewProps) => {
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="mb-1 text-[11px] font-bold uppercase tracking-[.18em] text-[#8f60ed]">
-              YOUR HISTORY
+              {marketCopy?.yourHistory ?? "YOUR HISTORY"}
             </p>
             <h3 className="font-display text-2xl font-extrabold tracking-[-.04em]">
-              Recent orders
+              {marketCopy?.recentOrders ?? "Recent orders"}
             </h3>
           </div>
           {recentOrders.length > 0 && (
@@ -113,7 +116,7 @@ const Overview = ({ customer, orders }: OverviewProps) => {
               href="/account/orders"
               className="text-sm font-bold text-[#7251b4] hover:text-[#160d24]"
             >
-              All orders ↗
+              {marketCopy?.allOrders ?? "All orders"} ↗
             </LocalizedClientLink>
           )}
         </div>
@@ -138,13 +141,13 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                       data-testid="order-id"
                       data-value={order.display_id}
                     >
-                      Order #{order.display_id}
+                      {marketCopy?.orderPrefix ?? "Order #"}{order.display_id}
                     </p>
                     <p
                       className="mt-1 text-xs text-[#77717d]"
                       data-testid="order-created-date"
                     >
-                      {new Date(order.created_at).toLocaleDateString("en-US", {
+                      {new Date(order.created_at).toLocaleDateString(locale, {
                         month: "long",
                         day: "numeric",
                         year: "numeric",
@@ -181,9 +184,9 @@ const Overview = ({ customer, orders }: OverviewProps) => {
             >
               ✳
             </span>
-            <p className="font-bold">No orders just yet</p>
+            <p className="font-bold">{marketCopy?.noOrders ?? "No orders just yet"}</p>
             <p className="mt-1 text-sm text-[#77717d]">
-              When you find something you love, it will show up here.
+              {marketCopy?.noOrdersDetail ?? "When you find something you love, it will show up here."}
             </p>
           </div>
         )}

@@ -1,5 +1,14 @@
 export const VIBEYA_INSPIRATIONS_METADATA_KEY = "vibeya_inspirations"
 
+export type LocalizedVibeyaInspiration = {
+  title: string
+  summary: string
+  articleBody: string
+  tags: string[]
+  image: string
+  cardImage: string
+}
+
 export type VibeyaInspiration = {
   id: string
   title: string
@@ -15,6 +24,9 @@ export type VibeyaInspiration = {
   tags: string[]
   published: boolean
   homeFeatured: boolean
+  /** ISO-2 destination countries; '*' keeps legacy content available everywhere. */
+  countryCodes?: string[]
+  translations?: Partial<Record<"ja-JP" | "es-MX", LocalizedVibeyaInspiration>>
 }
 
 export const DEFAULT_VIBEYA_INSPIRATIONS: VibeyaInspiration[] = [
@@ -40,6 +52,32 @@ export function normalizeVibeyaInspirations(value: unknown): VibeyaInspiration[]
       && typeof entry.product === "string" && typeof entry.pattern === "string" && typeof entry.style === "string"
       && Array.isArray(entry.tags) && entry.tags.every((tag) => typeof tag === "string")
       && typeof entry.published === "boolean" && typeof entry.homeFeatured === "boolean"
-  }).map((entry) => ({ ...entry, summary: typeof entry.summary === "string" ? entry.summary.trim().slice(0, 3000) : "", articleBody: typeof entry.articleBody === "string" ? entry.articleBody.trim().slice(0, 12000) : "", useManagedImage: entry.useManagedImage === true, title: entry.title.trim().slice(0, 160), tags: entry.tags.map((tag) => tag.trim().slice(0, 50)).filter(Boolean).slice(0, 20) }))
+  }).map((entry) => {
+    const rawTranslations = entry.translations && typeof entry.translations === "object" ? entry.translations as Record<string, unknown> : {}
+    const translations: NonNullable<VibeyaInspiration["translations"]> = {}
+    for (const locale of ["ja-JP", "es-MX"] as const) {
+      const copy = rawTranslations[locale] && typeof rawTranslations[locale] === "object" ? rawTranslations[locale] as Record<string, unknown> : undefined
+      if (!copy) continue
+      const localizedTags = Array.isArray(copy.tags) ? copy.tags.filter((tag): tag is string => typeof tag === "string").map((tag) => tag.trim().slice(0, 50)).filter(Boolean).slice(0, 20) : []
+      translations[locale] = {
+        title: typeof copy.title === "string" ? copy.title.trim().slice(0, 160) : "",
+        summary: typeof copy.summary === "string" ? copy.summary.trim().slice(0, 3000) : "",
+        articleBody: typeof copy.articleBody === "string" ? copy.articleBody.trim().slice(0, 12000) : "",
+        tags: localizedTags,
+        image: typeof copy.image === "string" ? copy.image.trim().slice(0, 2000) : "",
+        cardImage: typeof copy.cardImage === "string" ? copy.cardImage.trim().slice(0, 2000) : "",
+      }
+    }
+    return {
+      ...entry,
+      summary: typeof entry.summary === "string" ? entry.summary.trim().slice(0, 3000) : "",
+      articleBody: typeof entry.articleBody === "string" ? entry.articleBody.trim().slice(0, 12000) : "",
+      useManagedImage: entry.useManagedImage === true,
+      title: entry.title.trim().slice(0, 160),
+      tags: entry.tags.map((tag) => tag.trim().slice(0, 50)).filter(Boolean).slice(0, 20),
+      countryCodes: Array.isArray(entry.countryCodes) ? [...new Set(entry.countryCodes.map((code) => String(code).trim().toLowerCase()).filter((code) => code === "*" || /^[a-z]{2}$/.test(code)))].slice(0, 100) : ["us"],
+      translations,
+    }
+  })
   return entries
 }

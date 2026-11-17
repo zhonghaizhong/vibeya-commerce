@@ -8,8 +8,10 @@
     "medusa-storefront"
   ],
   "scripts": {
-    "dev": "next dev -p 8000",
-    "build": "next build",
+    "dev": "node scripts/generate-market-translations.mjs && next dev -p 8000",
+    "build": "node scripts/check-market-translations.mjs && node scripts/generate-market-translations.mjs && next build",
+    "check:market-translations": "node scripts/check-market-translations.mjs",
+    "generate:market-translations": "node scripts/generate-market-translations.mjs",
     "start": "next start -p 8000",
     "lint": "eslint .",
     "analyze": "ANALYZE=true next build"

@@ -2,19 +2,25 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import ChevronDown from "@modules/common/icons/chevron-down"
 import Nav from "@modules/layout/templates/nav"
 import { Metadata } from "next"
+import { getLocale } from "@lib/data/locale-actions"
+import { getMarketUiCopy } from "@lib/util/market-ui-copy"
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default function CheckoutLayout({
+export default async function CheckoutLayout({
   children,
+  params,
 }: {
   children: React.ReactNode
+  params: Promise<{ countryCode: string }>
 }) {
+  const [{ countryCode }, currentLocale] = await Promise.all([params, getLocale()])
+  const marketCopy = getMarketUiCopy(countryCode)
   return (
     <div className="relative min-h-screen w-full bg-[#fffdfa]">
-      <Nav />
+      <Nav countryCode={countryCode} currentLocale={currentLocale} />
       <div className="border-b border-[#e9e3ea] bg-[#f8f1ff]">
         <nav className="content-container flex h-12 items-center justify-between">
           <LocalizedClientLink
@@ -23,9 +29,9 @@ export default function CheckoutLayout({
             data-testid="back-to-cart-link"
           >
             <ChevronDown className="rotate-90" size={15} />
-            <span>Back to cart</span>
+            <span>{marketCopy?.backToCart ?? "Back to cart"}</span>
           </LocalizedClientLink>
-          <span className="text-xs font-bold uppercase tracking-[0.16em] text-[#796a84]">Secure checkout</span>
+          <span className="text-xs font-bold uppercase tracking-[0.16em] text-[#796a84]">{marketCopy?.secureCheckout ?? "Secure checkout"}</span>
         </nav>
       </div>
       <div className="relative" data-testid="checkout-container">

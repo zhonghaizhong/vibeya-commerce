@@ -1,31 +1,24 @@
 import { sdk } from "@lib/config"
-import { getProductCategoryLabel } from "@lib/seo/categories"
-import { HttpTypes } from "@medusajs/types"
+import { getVibeyaMarket } from "@lib/vibeya/region"
+import { getMarketLocale } from "@lib/util/market-locale"
 import { NextRequest, NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
 export async function GET(request: NextRequest) {
-  const countryCode = (request.nextUrl.searchParams.get("countryCode") ?? "us").toLowerCase()
-  if (!["us", "ca", "mx", "jp"].includes(countryCode)) {
-    return NextResponse.json({ error: "This VIBEYA catalog is not available in this market" }, { status: 400 })
-  }
-
-  const { regions } = await sdk.client.fetch<{ regions: HttpTypes.StoreRegion[] }>(
-    "/store/regions",
-    { cache: "no-store" }
-  )
-  const region = regions.find((candidate) =>
-    candidate.countries?.some((country) => country.iso_2?.toLowerCase() === countryCode)
-  )
-  if (!region) {
-    return NextResponse.json({ error: "Catalog is unavailable for this market" }, { status: 503 })
-  }
-
+  const countryCode = (request.nextUrl.searchParams.get("country_code") || "us").toLowerCase()
+  const locale = getMarketLocale(countryCode, request.nextUrl.searchParams.get("locale") || undefined)
+  // Canada is currently English-only, so use the English product image set.
+  // The Canadian image set is reserved for a future French-Canadian launch.
+  const mediaCountryCode = countryCode === "ca" && locale === "en-CA" ? "us" : countryCode
   try {
+    const market = await getVibeyaMarket(countryCode)
+    if (!market.region) return NextResponse.json({ error: `No sales region is configured for ${countryCode}.` }, { status: 404 })
+    const region = market.region
     const { products } = await sdk.store.product.list({
       region_id: region.id,
+      ...(locale ? { locale } : {}),
       limit: 100,
       fields:
         "id,handle,title,subtitle,description,thumbnail,*images,*categories,*type,*options,*variants,*variants.options,*variants.calculated_price",
@@ -33,7 +26,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       region: { id: region.id, currency_code: region.currency_code },
-      products: products.map((product) => {
+      products: products.filter((product) => market.product_ids.includes(product.id)).map((product) => {
+        const marketImages = market.localized_media?.[product.id]?.[mediaCountryCode] ?? []
         const colors = new Set<string>()
         const sizes = new Set<string>()
         const sizePrices: Record<string, number> = {}
@@ -60,13 +54,9 @@ export async function GET(request: NextRequest) {
           title: product.title,
           subtitle: product.subtitle,
           description: product.description,
-          image: product.thumbnail ?? product.images?.[0]?.url ?? null,
-          category: getProductCategoryLabel(
-            product.handle ?? "",
-            product.categories?.[0]?.handle ??
-              product.categories?.[0]?.name ??
-              product.type?.value
-          ),
+          image: marketImages[0] ?? product.thumbnail ?? product.images?.[0]?.url ?? null,
+          market_images: marketImages,
+          category: product.categories?.[0]?.name ?? product.type?.value ?? "New arrivals",
           colors: Array.from(colors),
           sizes: Array.from(sizes),
           size_prices: sizePrices,

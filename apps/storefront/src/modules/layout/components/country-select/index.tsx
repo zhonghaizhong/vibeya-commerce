@@ -14,6 +14,7 @@ import { StateType } from "@lib/hooks/use-toggle-state"
 import { useParams, usePathname } from "next/navigation"
 import { updateRegion } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
+import { SUPPORTED_MARKET_COUNTRIES } from "@lib/vibeya/markets"
 
 type CountryOption = {
   country: string
@@ -45,6 +46,7 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
       })
       .flat()
       .filter((o): o is CountryOption => !!o)
+      .filter((option) => SUPPORTED_MARKET_COUNTRIES.includes(option.country.toLowerCase() as (typeof SUPPORTED_MARKET_COUNTRIES)[number]))
       .sort((a, b) => a.label.localeCompare(b.label))
   }, [regions])
 

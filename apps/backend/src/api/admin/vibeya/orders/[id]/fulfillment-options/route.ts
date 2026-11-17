@@ -40,6 +40,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
 
     const productIds = [...new Set(remaining.map((item: any) => item.product_id).filter(Boolean))]
     const candidates = locations.filter((location: any) => {
+      if (location.metadata?.vibeya_origin_address_pending === true) return false
       const assigned = location.metadata?.[PRODUCT_IDS_METADATA_KEY]
       return Array.isArray(assigned) && productIds.length > 0 && productIds.every((id) => assigned.includes(id))
     }).map((location: any) => ({

@@ -9,6 +9,7 @@ import ProductInfo from "@modules/products/templates/product-info"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
+import { getProductMarketCopy } from "@modules/products/market-copy"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -25,6 +26,15 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
     return notFound()
   }
 
+  const marketCopy = getProductMarketCopy(countryCode)
+  const displayProduct = marketCopy
+    ? {
+        ...product,
+        title: marketCopy.title(product.handle, product.title),
+        description: marketCopy.description(product.handle, product.description),
+      }
+    : product
+
   return (
     <>
       <div
@@ -32,15 +42,15 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         data-testid="product-container"
       >
         <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-6">
-          <ProductInfo product={product} />
-          <ProductTabs product={product} />
+          <ProductInfo product={displayProduct} countryCode={countryCode} />
+          <ProductTabs product={displayProduct} countryCode={countryCode} />
         </div>
         <div className="block w-full relative">
-          <VariantImageGallery product={product} />
+          <VariantImageGallery product={displayProduct} countryCode={countryCode} />
         </div>
         <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-12">
           <ProductOnboardingCta />
-          <ProductActions product={product} region={region} />
+          <ProductActions product={displayProduct} region={region} countryCode={countryCode} />
         </div>
       </div>
       <div

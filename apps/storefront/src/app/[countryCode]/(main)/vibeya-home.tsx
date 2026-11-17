@@ -1,8 +1,10 @@
 "use client"
 
 import AuthModal from "./auth-modal"
+import { updateRegion } from "@lib/data/cart"
+import { updateLocale } from "@lib/data/locale-actions"
+import { getMarketDefaultLocale, getMarketLocale } from "@lib/util/market-locale"
 import { ProductCards } from "@modules/vibeya/components/product-explorer"
-import { vibeyaProducts } from "@modules/vibeya/data/products"
 import { useRouter } from "next/navigation"
 import { createPortal } from "react-dom"
 import { useCallback, useEffect, useRef, useState, type SyntheticEvent } from "react"
@@ -18,30 +20,17 @@ function getStudioReturnUrl(countryCode: string, request: StudioRequest) {
   return `/${countryCode}?${params.toString()}#top`
 }
 
-export default function VibeyaHome({
-  countryCode,
-  isAuthenticated,
-  listing,
-  standaloneProductId,
-  standaloneColor,
-  standaloneSize,
-}: {
-  countryCode: string
-  isAuthenticated: boolean
-  listing?: { category: string; title: string; handles: string[] }
-  standaloneProductId?: string
-  standaloneColor?: string
-  standaloneSize?: string
-}) {
+export default function VibeyaHome({ countryCode, locale, isAuthenticated, standaloneProductId, standaloneColor, standaloneSize }: { countryCode: string; locale?: string | null; isAuthenticated: boolean; standaloneProductId?: string; standaloneColor?: string; standaloneSize?: string }) {
+  const marketLocale = getMarketLocale(countryCode, locale ?? undefined)
+  const standaloneHash = standaloneProductId
+    ? `#product-${standaloneProductId}?color=${encodeURIComponent(standaloneColor || "Black")}${standaloneSize ? `&size=${encodeURIComponent(standaloneSize)}` : ""}`
+    : "#top"
   const [authOpen, setAuthOpen] = useState(false)
   const [authRedirectTo, setAuthRedirectTo] = useState<string>()
   const [studioLayer, setStudioLayer] = useState(false)
   const [homeCardsTarget, setHomeCardsTarget] = useState<HTMLElement | null>(null)
   const frameRef = useRef<HTMLIFrameElement>(null)
   const router = useRouter()
-  const standaloneHash = standaloneProductId
-    ? `#product-${standaloneProductId}?color=${encodeURIComponent(standaloneColor || "White")}${standaloneSize ? `&size=${encodeURIComponent(standaloneSize)}` : ""}`
-    : ""
 
   useEffect(() => {
     if (!isAuthenticated) return
@@ -98,17 +87,12 @@ export default function VibeyaHome({
 
     const currentParams = new URLSearchParams(window.location.search)
     const forwardedParams = new URLSearchParams()
+    forwardedParams.set("v", "metal-sign-single-prompt-20261117-3")
     forwardedParams.set("country", countryCode.toLowerCase())
-    forwardedParams.set("v", "yoga-set-reference-20261117-1")
+    forwardedParams.set("locale", marketLocale)
     for (const key of ["viewCart", "openStudio", "openSearch", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
       const value = currentParams.get(key)
       if (value) forwardedParams.set(key, value)
-    }
-    if (listing) {
-      forwardedParams.set("listingScoped", "1")
-      forwardedParams.set("listingCategory", listing.category)
-      forwardedParams.set("listingTitle", listing.title)
-      forwardedParams.set("listingHandles", listing.handles.join(","))
     }
     if (currentParams.get("openStudio") === "1" && !isAuthenticated) {
       setAuthRedirectTo(`${window.location.pathname}${window.location.search}${window.location.hash}`)
@@ -118,10 +102,6 @@ export default function VibeyaHome({
 
     const hash = standaloneProductId
       ? standaloneHash
-      : listing
-      ? window.location.hash.startsWith("#product-")
-        ? window.location.hash
-        : "#shop"
       : [
       "#top",
       "#shop",
@@ -131,14 +111,14 @@ export default function VibeyaHome({
       "#my-designs",
     ].includes(window.location.hash)
       ? window.location.hash
-        : window.location.hash.startsWith("#product-")
-          ? window.location.hash
-          : ""
+      : window.location.hash.startsWith("#product-")
+        ? window.location.hash
+      : ""
     const query = forwardedParams.toString()
     const homeUrl = `/vibeya/index.html${query ? `?${query}` : ""}${hash}`
     const frame = frameRef.current
     if (frame && frame.getAttribute("src") !== homeUrl) frame.src = homeUrl
-  }, [countryCode, isAuthenticated, listing, router, standaloneProductId, standaloneHash])
+  }, [countryCode, isAuthenticated, marketLocale, router, standaloneProductId, standaloneHash])
 
   useEffect(() => {
     const frame = frameRef.current
@@ -185,28 +165,37 @@ export default function VibeyaHome({
         setStudioLayer(false)
         return
       }
+      if (event.data?.type === "vibeya:change-destination" && typeof event.data.countryCode === "string") {
+        const nextCountry = event.data.countryCode.toLowerCase()
+        if (!["us", "ca", "jp", "mx"].includes(nextCountry) || nextCountry === countryCode.toLowerCase()) return
+        const currentPath = window.location.pathname.replace(new RegExp(`^/${countryCode.toLowerCase()}(?=/|$)`), "")
+        const nextLocale = getMarketDefaultLocale(nextCountry)
+        const search = new URLSearchParams(window.location.search)
+        search.set("locale", nextLocale)
+        // Changing the market must not be blocked by a stale cart's locale update.
+        void updateLocale(nextLocale)
+          .catch(() => undefined)
+          .then(() => updateRegion(nextCountry, `${currentPath}?${search.toString()}${window.location.hash}`))
+        return
+      }
+      if (event.data?.type === "vibeya:change-language" && typeof event.data.locale === "string") {
+        const nextLocale = getMarketLocale(countryCode, event.data.locale)
+        if (nextLocale !== event.data.locale) return
+        // The URL is the source of truth for visible copy; keep language switching
+        // responsive even if synchronizing an existing cart locale fails.
+        void updateLocale(nextLocale)
+          .catch(() => undefined)
+          .then(() => {
+            const nextUrl = new URL(window.location.href)
+            nextUrl.searchParams.set("locale", nextLocale)
+            router.replace(`${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`, { scroll: false })
+          })
+        return
+      }
       if (event.data?.type === "vibeya:route" && typeof event.data.hash === "string") {
-        if (listing && event.data.hash.startsWith("#product-")) {
-          const productId = event.data.hash.slice("#product-".length).split("?")[0]
-          const product = vibeyaProducts.find((entry) => entry.id === productId)
-          if (product) {
-            const color = typeof event.data.color === "string" ? `?color=${encodeURIComponent(event.data.color)}` : ""
-            window.location.assign(`/${countryCode}/products/${encodeURIComponent(product.handle)}${color}`)
-            return
-          }
-        }
-        if (event.data.hash === "#product-sds-138708") {
-          const color = typeof event.data.color === "string" ? event.data.color : "White"
-          window.location.assign(
-            `/${countryCode}/products/vibeya-custom-3d-bath-mat?color=${encodeURIComponent(color)}`
-          )
-          return
-        }
-        if (event.data.hash === "#product-sds-167256") {
-          const color = typeof event.data.color === "string" ? event.data.color : "Black"
-          window.location.replace(
-            `/${countryCode}/products/vibeya-custom-cotton-long-sleeve-tee?color=${encodeURIComponent(color)}`
-          )
+        if (standaloneProductId && event.data.hash.startsWith(`#product-${standaloneProductId}`)) return
+        if (event.data.hash.startsWith("#product-mg8014061") && !standaloneProductId) {
+          router.push(`/${countryCode}/products/vibeya-custom-metal-bottle-cap-wall-sign`)
           return
         }
         const incomingHash = event.data.hash.startsWith("#product-") && typeof event.data.color === "string"
@@ -220,7 +209,7 @@ export default function VibeyaHome({
 
     const syncFromHistory = () => {
       frameRef.current?.contentWindow?.postMessage(
-        { type: "vibeya:set-route", hash: window.location.hash || (standaloneProductId ? standaloneHash : listing ? "#shop" : "#top") },
+        { type: "vibeya:set-route", hash: window.location.hash || (standaloneProductId ? standaloneHash : "#top") },
         window.location.origin
       )
     }
@@ -233,7 +222,7 @@ export default function VibeyaHome({
       window.removeEventListener("popstate", syncFromHistory)
       window.removeEventListener("hashchange", syncFromHistory)
     }
-  }, [countryCode, isAuthenticated, listing, standaloneHash, standaloneProductId])
+  }, [countryCode, isAuthenticated, router, standaloneProductId, standaloneHash])
 
   const addAccountLink = useCallback(
     (event: SyntheticEvent<HTMLIFrameElement>) => {
@@ -242,11 +231,20 @@ export default function VibeyaHome({
       if (!document) return
 
       document.body.dataset.vibeyaAuth = isAuthenticated ? "authenticated" : "guest"
+      const labelsByLocale: Record<string, { account: string; signIn: string }> = {
+        "en-US": { account: "Account", signIn: "Sign in" },
+        "en-CA": { account: "Account", signIn: "Sign in" },
+        "ja-JP": { account: "アカウント", signIn: "ログイン" },
+        "es-MX": { account: "Cuenta", signIn: "Iniciar sesión" },
+      }
+      const localeKey = marketLocale
+      const authLabels = labelsByLocale[localeKey]
       document.querySelectorAll<HTMLAnchorElement>(".account-link, .account-menu-link, .sign-in-link").forEach((link) => {
         link.href = `/${countryCode}/account`
         link.target = "_top"
-        link.textContent = isAuthenticated ? "Account" : "Sign in"
-        link.setAttribute("aria-label", isAuthenticated ? "Account" : "Sign in or register")
+        const label = link.classList.contains("sign-in-link") && !isAuthenticated ? authLabels.signIn : authLabels.account
+        link.textContent = label
+        link.setAttribute("aria-label", label)
         if (!isAuthenticated && link.dataset.authGate !== "bound") {
           link.dataset.authGate = "bound"
           link.addEventListener("click", (clickEvent) => {
@@ -256,19 +254,21 @@ export default function VibeyaHome({
           })
         }
       })
+      const frameWindow = frame.contentWindow as (Window & { vibeyaSetNavigationLocale?: (value: string) => void }) | null
+      frameWindow?.vibeyaSetNavigationLocale?.(localeKey)
 
       document!.querySelectorAll<HTMLAnchorElement>("[data-store-route]").forEach((policyLink) => {
         policyLink.href = `/${countryCode}/${policyLink.dataset.storeRoute}`
       })
 
       frame.contentWindow?.postMessage(
-        { type: "vibeya:set-route", hash: window.location.hash || (standaloneProductId ? standaloneHash : listing ? "#shop" : "#top") },
+        { type: "vibeya:set-route", hash: window.location.hash || (standaloneProductId ? standaloneHash : "#top") },
         window.location.origin
       )
 
       mountProductCards()
     },
-    [countryCode, isAuthenticated, mountProductCards, standaloneHash, standaloneProductId]
+    [countryCode, isAuthenticated, marketLocale, mountProductCards, standaloneProductId, standaloneHash]
   )
 
   const navigateTo = (hash: string) => {
@@ -279,16 +279,10 @@ export default function VibeyaHome({
     )
   }
 
-  const selectProduct = (product: { id: string }, color: string) => {
-    if (product.id === "sds-138708") {
-      window.location.assign(
-        `/${countryCode}/products/vibeya-custom-3d-bath-mat?color=${encodeURIComponent(color)}`
-      )
-      return
-    }
-
-    navigateTo(`#product-${product.id}?color=${encodeURIComponent(color)}`)
-  }
+  const selectProduct = (product: { id: string }, color: string) =>
+    product.id === "mg8014061"
+      ? router.push(`/${countryCode}/products/vibeya-custom-metal-bottle-cap-wall-sign`)
+      : navigateTo(`#product-${product.id}?color=${encodeURIComponent(color)}`)
 
   return (
     <>
@@ -306,8 +300,8 @@ export default function VibeyaHome({
       <iframe
         ref={frameRef}
         className="vibeya-theme-frame"
-        src={`/vibeya/index.html?country=${encodeURIComponent(countryCode)}&v=yoga-set-reference-20261117-1${standaloneProductId ? standaloneHash : ""}`}
-        title={standaloneProductId ? "VIBEYA product detail" : "VIBEYA storefront"}
+        src={`/vibeya/index.html?country=${encodeURIComponent(countryCode.toLowerCase())}&locale=${encodeURIComponent(marketLocale)}&v=metal-sign-single-prompt-20261117-3${standaloneProductId ? standaloneHash : ""}`}
+        title="VIBEYA storefront"
         onLoad={addAccountLink}
         style={{
           display: "block",
@@ -321,7 +315,7 @@ export default function VibeyaHome({
         }}
       />
       {homeCardsTarget && createPortal(
-        <ProductCards onSelect={selectProduct} countryCode={countryCode} />,
+        <ProductCards onSelect={selectProduct} countryCode={countryCode} locale={marketLocale} />,
         homeCardsTarget
       )}
       {authOpen && <AuthModal countryCode={countryCode} onClose={closeAuth} redirectTo={authRedirectTo} />}

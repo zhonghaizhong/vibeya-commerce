@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { vibeyaProducts } from "./products"
+import { vibeyaProducts, type VibeyaProduct } from "./products"
 
 type CatalogProduct = {
   id?: string
@@ -10,6 +10,7 @@ type CatalogProduct = {
   subtitle?: string | null
   description?: string | null
   image?: string | null
+  market_images?: string[]
   category?: string
   price?: number | null
   currency_code?: string
@@ -32,8 +33,6 @@ const catalogColorHex: Record<string, string> = {
   "heather gray": "#77777b",
   "light gray": "#d7d7d9",
   cream: "#f2e4cf",
-  khaki: "#aa936d",
-  tan: "#aa936d",
   navy: "#283456",
   green: "#74846a",
   purple: "#776b86",
@@ -50,34 +49,42 @@ function toCatalogColor(name: string) {
   }
 }
 
-export function useVibeyaProducts() {
-  const [products, setProducts] = useState(vibeyaProducts)
+export function useVibeyaProducts(countryCode = "us", locale = "") {
+  const [marketData, setMarketData] = useState<{ countryCode: string; products: VibeyaProduct[] } | null>(null)
 
   useEffect(() => {
     let active = true
-    const countryCode = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i)?.[1] ?? "us"
-    fetch(`/api/vibeya/catalog?countryCode=${encodeURIComponent(countryCode)}`, { credentials: "same-origin", cache: "no-store" })
-      .then((response) => response.ok ? response.json() : null)
+    const params = new URLSearchParams({ country_code: countryCode })
+    if (locale) params.set("locale", locale)
+    fetch(`/api/vibeya/catalog?${params.toString()}`, { credentials: "same-origin", cache: "no-store" })
+      .then((response) => {
+        if (!response.ok) throw new Error("Market catalog unavailable")
+        return response.json()
+      })
       .then((data: { products?: CatalogProduct[] } | null) => {
-        if (!active || !data?.products) return
-        setProducts((current) => {
-          const updated = current.map((product) => {
+        if (!active) return
+        if (!data?.products) {
+          setMarketData({ countryCode, products: [] })
+          return
+        }
+        const marketHandles = new Set(data.products.map((product) => product.handle).filter((handle): handle is string => Boolean(handle)))
+        const updated = vibeyaProducts.filter((product) => marketHandles.has(product.handle)).map((product) => {
             const remote = data.products?.find((entry) => entry.handle === product.handle)
             if (!remote) return product
             return {
               ...product,
-              catalogImage: remote.image ?? product.catalogImage,
+              marketGallery: remote.market_images?.length ? remote.market_images : product.marketGallery,
               price: typeof remote.price === "number" && Number.isFinite(remote.price) ? remote.price : product.price,
               sizePrices: remote.size_prices && Object.keys(remote.size_prices).length ? remote.size_prices : product.sizePrices,
               currency: remote.currency_code?.toUpperCase() ?? product.currency,
               colors: remote.colors?.length ? product.colors.filter((color) => remote.colors?.includes(color.id)) : product.colors,
               sizes: remote.sizes?.length ? product.sizes.filter((size) => remote.sizes?.includes(size)) : product.sizes,
             }
-          })
-          const knownHandles = new Set(updated.map((product) => product.handle))
-          const added = (data.products ?? [])
-            .filter((product) => product.handle && !knownHandles.has(product.handle))
-            .map((product) => ({
+        })
+        const knownHandles = new Set(updated.map((product) => product.handle))
+        const added: VibeyaProduct[] = data.products
+          .filter((product) => product.handle && !knownHandles.has(product.handle))
+          .map((product) => ({
               id: product.id || product.handle!,
               handle: product.handle!,
               catalogOnly: true,
@@ -101,13 +108,15 @@ export function useVibeyaProducts() {
               sizeRows: [],
               sizeNote: "",
               services: [],
-            }))
-          return [...updated, ...added]
-        })
+          }))
+        setMarketData({ countryCode, products: [...updated, ...added] })
       })
-      .catch(() => undefined)
+      .catch(() => {
+        if (!active) return
+        setMarketData({ countryCode, products: [] })
+      })
     return () => { active = false }
-  }, [])
+  }, [countryCode, locale])
 
-  return products
+  return marketData?.countryCode === countryCode ? marketData.products : []
 }

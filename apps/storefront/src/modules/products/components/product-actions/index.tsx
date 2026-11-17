@@ -14,10 +14,12 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import MobileActions from "./mobile-actions"
 import { useRouter } from "next/navigation"
+import { getProductMarketCopy } from "@modules/products/market-copy"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
+  countryCode: string
   disabled?: boolean
 }
 
@@ -36,6 +38,7 @@ const getDefaultVariant = (product: HttpTypes.StoreProduct) =>
 export default function ProductActions({
   product,
   disabled,
+  countryCode,
 }: ProductActionsProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -46,7 +49,8 @@ export default function ProductActions({
   )
   const [isUrlVariantApplied, setIsUrlVariantApplied] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
-  const countryCode = useParams().countryCode as string
+  const routeCountryCode = useParams().countryCode as string
+  const marketCopy = getProductMarketCopy(countryCode || routeCountryCode)
 
   const selectedVariant = useMemo(() => {
     if (!product.variants || product.variants.length === 0) {
@@ -123,7 +127,7 @@ export default function ProductActions({
     await addToCart({
       variantId: selectedVariant.id,
       quantity: 1,
-      countryCode,
+      countryCode: countryCode || routeCountryCode,
     })
     notifyCartUpdated()
 
@@ -170,6 +174,7 @@ export default function ProductActions({
                         name={`options[${option.id}]`}
                         data-testid="product-options"
                         disabled={!!disabled || isAdding}
+                        countryCode={countryCode}
                       />
                     </div>
                   )
@@ -179,14 +184,14 @@ export default function ProductActions({
             )}
           </div>
 
-          <ProductPrice product={product} variant={selectedVariant} />
+          <ProductPrice product={product} variant={selectedVariant} countryCode={countryCode} />
 
           {selectedVariant && isValidVariant && (
             <p
               className="text-small-regular text-ui-fg-subtle"
               data-testid="product-availability"
             >
-              {inStock ? "In stock" : "Out of stock"}
+              {inStock ? marketCopy?.inStock ?? "In stock" : marketCopy?.outOfStock ?? "Out of stock"}
             </p>
           )}
 
@@ -205,10 +210,10 @@ export default function ProductActions({
             data-testid="add-product-button"
           >
             {!selectedVariant
-              ? "Select variant"
+              ? marketCopy?.selectVariant ?? "Select variant"
               : !inStock || !isValidVariant
-              ? "Out of stock"
-              : "Add to cart"}
+              ? marketCopy?.outOfStock ?? "Out of stock"
+              : marketCopy?.addToCart ?? "Add to cart"}
           </Button>
         </form>
         <MobileActions
@@ -221,6 +226,7 @@ export default function ProductActions({
           isAdding={isAdding}
           show={!inView}
           optionsDisabled={!!disabled || isAdding}
+          countryCode={countryCode}
         />
       </div>
     </>

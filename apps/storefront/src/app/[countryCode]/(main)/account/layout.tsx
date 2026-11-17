@@ -10,14 +10,18 @@ export const metadata: Metadata = {
 export default async function AccountPageLayout({
   dashboard,
   login,
+  params,
 }: {
   dashboard?: React.ReactNode
   login?: React.ReactNode
+  params: Promise<{ countryCode: string }>
 }) {
-  const customer = await retrieveCustomer().catch(() => null)
-
+  const [{ countryCode }, customer] = await Promise.all([
+    params,
+    retrieveCustomer().catch(() => null),
+  ])
   return (
-    <AccountLayout customer={customer}>
+    <AccountLayout customer={customer} countryCode={countryCode}>
       {customer ? dashboard : login}
       {/* TODO: Re-add Toaster component when needed */}
     </AccountLayout>

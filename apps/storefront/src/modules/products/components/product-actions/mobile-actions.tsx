@@ -10,6 +10,7 @@ import { getProductPrice } from "@lib/util/get-product-price"
 import OptionSelect from "./option-select"
 import { HttpTypes } from "@medusajs/types"
 import { isSimpleProduct } from "@lib/util/product"
+import { getProductMarketCopy, translateProductOptionValue } from "@modules/products/market-copy"
 
 type MobileActionsProps = {
   product: HttpTypes.StoreProduct
@@ -21,6 +22,7 @@ type MobileActionsProps = {
   isAdding?: boolean
   show: boolean
   optionsDisabled: boolean
+  countryCode: string
 }
 
 const MobileActions: React.FC<MobileActionsProps> = ({
@@ -33,6 +35,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   isAdding,
   show,
   optionsDisabled,
+  countryCode,
 }) => {
   const { state, open, close } = useToggleState()
 
@@ -51,6 +54,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   }, [price])
 
   const isSimple = isSimpleProduct(product)
+  const marketCopy = getProductMarketCopy(countryCode)
 
   return (
     <>
@@ -111,8 +115,8 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                 <div className="flex items-center justify-between w-full">
                   <span>
                     {variant
-                      ? Object.values(options).join(" / ")
-                      : "Select Options"}
+                      ? Object.entries(options).map(([optionId, value]) => translateProductOptionValue(countryCode, product.options?.find((option) => option.id === optionId)?.title ?? "", value ?? "")).join(" / ")
+                      : marketCopy?.selectOptions ?? "Select Options"}
                   </span>
                   <ChevronDown />
                 </div>
@@ -126,10 +130,10 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                 data-testid="mobile-cart-button"
               >
                 {!variant
-                  ? "Select variant"
+                  ? marketCopy?.selectVariant ?? "Select variant"
                   : !inStock
-                  ? "Out of stock"
-                  : "Add to cart"}
+                  ? marketCopy?.outOfStock ?? "Out of stock"
+                  : marketCopy?.addToCart ?? "Add to cart"}
               </Button>
             </div>
           </div>
@@ -187,6 +191,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                                 title={option.title ?? ""}
                                 name={`mobile-options[${option.id}]`}
                                 disabled={optionsDisabled}
+                      countryCode={countryCode}
                               />
                             </div>
                           )

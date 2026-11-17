@@ -308,12 +308,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const isBlanket = productId === "sds-97226"
   const isBathMat = productId === "sds-138708"
   const isBeanie = productId === "sds-172647"
-  const isDenimCap = productId === "mg8012002"
   const isShowerCurtain = productId === "vibeya-shower-curtain"
   const isTankini = productId === "sds-137892"
-  const isYogaSet = productId === "sds-63823" || productId === "63823"
-  const isApron = productId === "sds-275844"
   const isMetalWallSign = productId === "mg8014061"
+  const isYogaSet = productId === "sds-63823"
+  const isApron = productId === "sds-275844"
   const isBasketballUniform = productId === "sds-233939"
   const basketballZoneIds = ["jersey-front", "jersey-back", "shorts"] as const
   const basketballZoneLabels: Record<typeof basketballZoneIds[number], string> = {
@@ -335,7 +334,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isShowerCurtain && !["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"].includes(size)) {
     return res.status(400).json({ error: "请选择有效的浴帘尺寸后重新生成。" })
   }
-  const printPlacement = isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isApron ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
+  const printPlacement = isYogaSet ? "both" : isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
     ? body.printPlacement
     : "none"
   const isTumbler = productId === "sds-128646"
@@ -386,12 +385,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       colorAliases: { Black: "Black", Red: "Red", Pink: "Pink", Blue: "Blue", Cyan: "Cyan" },
     },
     "sds-63823": {
-      name: "Custom Women's Two-Piece Yoga Set",
-      colorAliases: { White: "White", Black: "Black", Red: "Red", Pink: "Pink", Blue: "Blue", "Light Blue": "Light Blue", Green: "Green", "Light Green": "Light Green", Purple: "Purple", Yellow: "Yellow", Gray: "Gray", Grey: "Gray", Navy: "Navy" },
+      name: "Custom Women's Yoga Set",
+      colorAliases: { White: "White with black binding" },
     },
-    "63823": {
-      name: "Custom Women's Two-Piece Yoga Set",
-      colorAliases: { White: "White", Black: "Black", Red: "Red", Pink: "Pink", Blue: "Blue", "Light Blue": "Light Blue", Green: "Green", "Light Green": "Light Green", Purple: "Purple", Yellow: "Yellow", Gray: "Gray", Grey: "Gray", Navy: "Navy" },
+    "mg8014061": {
+      name: "Custom Metal Bottle Cap Wall Sign",
+      colorAliases: { Black: "Black" },
     },
     "sds-233939": {
       name: "Custom Kids' Basketball Jersey and Shorts Set",
@@ -399,14 +398,6 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     },
     "sds-275844": {
       name: "Custom Prompt-Designed Apron",
-      colorAliases: { Black: "Black" },
-    },
-    "mg8012002": {
-      name: "Custom Washed Denim Baseball Cap",
-      colorAliases: { Black: "Washed Black", Khaki: "Washed Khaki", Gray: "Washed Gray" },
-    },
-    "mg8014061": {
-      name: "Custom Metal Bottle Cap Wall Sign",
       colorAliases: { Black: "Black" },
     },
   }
@@ -419,12 +410,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const references = rawReferences
   let productReference = typeof body?.productReference === "string" ? body.productReference : ""
   let productPrintAreaReference = typeof body?.productPrintAreaReference === "string" ? body.productPrintAreaReference : ""
-  if (isTankini || isYogaSet || isBasketballUniform || isApron || isDenimCap || isMetalWallSign || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
+  if (isTankini || isYogaSet || isBasketballUniform || isApron || isMetalWallSign || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
     try {
       productReference = await getVibeyaProductReference(productId, colorKey, typeof body?.size === "string" ? body.size : undefined)
     } catch (error) {
       console.error("Unable to load the VIBEYA product print reference", error)
-      return res.status(503).json({ error: isYogaSet ? "瑜伽服正反面底图暂时无法读取，请稍后重试。" : isMetalWallSign ? "金属画底图暂时无法读取，请稍后重试。" : isDenimCap ? "棒球帽正面印刷区域参考图暂时无法读取，请稍后重试。" : isApron ? "围裙白底底图暂时无法读取，请稍后重试。" : isBasketballUniform ? "篮球服正面印刷区域参考图暂时无法读取，请稍后重试。" : isBeanie ? "针织帽印刷区域参考图暂时无法读取，请稍后重试。" : "商品满印底板暂时无法读取，请稍后重试。" })
+      return res.status(503).json({ error: isMetalWallSign ? "金属画底图暂时无法读取，请稍后重试。" : isApron ? "围裙白底底图暂时无法读取，请稍后重试。" : isBasketballUniform ? "篮球服正面印刷区域参考图暂时无法读取，请稍后重试。" : isBeanie ? "帽子印刷区域参考图暂时无法读取，请稍后重试。" : "商品满印底板暂时无法读取，请稍后重试。" })
     }
   }
   if (isTankini || isBasketballUniform || isApron) {
@@ -439,25 +430,25 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const preserveOriginalDesign = body?.preserveOriginalDesign === true
   const isWashedHoodie = productId === "vibeya-washed-hoodie"
   const isLongSleeveTee = productId === "sds-167256"
-  const placementGuideCount = isFullSurfaceProduct || isBeanie || isDenimCap || isApron || printPlacement === "none" ? 0 : printPlacement === "both" ? 2 : 1
-  const artworkReferenceStart = isTumbler || isFullSurfaceProduct || isBeanie || isDenimCap || isApron ? 0 : 2 + placementGuideCount
+  const placementGuideCount = isFullSurfaceProduct || isBeanie || isApron || printPlacement === "none" ? 0 : printPlacement === "both" ? 2 : 1
+  const artworkReferenceStart = isTumbler || isFullSurfaceProduct || isBeanie || isApron ? 0 : 2 + placementGuideCount
   const artworkReferenceNumbers = references.slice(artworkReferenceStart).map((_, index) => artworkReferenceStart + index + 1)
   const artworkReferenceLabel = artworkReferenceNumbers.length
     ? `Customer artwork reference${artworkReferenceNumbers.length > 1 ? "s" : ""}: image${artworkReferenceNumbers.length > 1 ? "s" : ""} ${artworkReferenceNumbers.join(", ")}.`
     : "No uploaded artwork reference was provided."
   const compositeReferenceNumber = preserveBaseComposite ? references.length + 1 : 0
-  const hasUploadedArtwork = isTumbler || isFullSurfaceProduct || isBeanie || isDenimCap || isApron ? references.length > 0 : references.length > 2 + placementGuideCount
-  const uploadedArtworkReferences = isTumbler || isFullSurfaceProduct || isBeanie || isDenimCap || isApron ? references : references.slice(2 + placementGuideCount)
-  const preserveArtworkAfterGeneration = preserveOriginalDesign && hasUploadedArtwork && !isFullSurfaceProduct && !isBeanie && !isDenimCap && !isApron
+  const hasUploadedArtwork = isTumbler || isFullSurfaceProduct || isBeanie || isApron ? references.length > 0 : references.length > 2 + placementGuideCount
+  const uploadedArtworkReferences = isTumbler || isFullSurfaceProduct || isBeanie || isApron ? references : references.slice(2 + placementGuideCount)
+  const preserveArtworkAfterGeneration = preserveOriginalDesign && hasUploadedArtwork && !isFullSurfaceProduct && !isBeanie && !isApron
   if (preserveArtworkAfterGeneration && !isTumbler && !preserveBaseComposite) {
     return res.status(400).json({ error: "无法校准这款衣服的印刷区域，请重新选择商品颜色后再提交。" })
   }
-  const minimumReferences = isTumbler || isFullSurfaceProduct || isBeanie || isDenimCap || isApron ? 0 : mode === "designed-product" ? 2 + placementGuideCount : 2
-  const maximumReferences = isTumbler || isFullSurfaceProduct || isBeanie || isDenimCap || isApron ? 6 : minimumReferences + 6
+  const minimumReferences = isTumbler || isFullSurfaceProduct || isBeanie || isApron ? 0 : mode === "designed-product" ? 2 + placementGuideCount : 2
+  const maximumReferences = isTumbler || isFullSurfaceProduct || isBeanie || isApron ? 6 : minimumReferences + 6
   if (!isProviderResume && (references.length < minimumReferences || references.length > maximumReferences ||
     references.reduce((total, reference) => total + (typeof reference === "string" ? reference.length : 0), 0) > 300000 ||
     references.some((reference, index) =>
-      typeof reference !== "string" || reference.length > (isTumbler || isFullSurfaceProduct || isBeanie || isDenimCap || isApron ? (preserveOriginalDesign ? 150000 : 36000) : index < 2 + placementGuideCount ? 14000 : preserveOriginalDesign ? 150000 : 36000) ||
+      typeof reference !== "string" || reference.length > (isTumbler || isFullSurfaceProduct || isBeanie || isApron ? (preserveOriginalDesign ? 150000 : 36000) : index < 2 + placementGuideCount ? 14000 : preserveOriginalDesign ? 150000 : 36000) ||
     !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(reference)
   ))) {
     return res.status(400).json({ error: "商品正反面图或印花区域参考图缺失，或参考图格式、数量、大小不符合要求。" })
@@ -474,14 +465,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isShowerCurtain && !isProviderResume && !productReference) {
     return res.status(400).json({ error: "对应尺寸的浴帘底图缺失，请重新选择尺寸后提交。" })
   }
-  if (isDenimCap && !isProviderResume && !productReference) {
-    return res.status(400).json({ error: "棒球帽正面印花区域底图缺失，请刷新页面后重新提交。" })
+  if (isTankini && !isProviderResume && !productReference) {
+    return res.status(400).json({ error: "泳衣印花区域底图缺失，请刷新页面后重新提交。" })
   }
   if (isMetalWallSign && !isProviderResume && !productReference) {
     return res.status(400).json({ error: "金属画底图缺失，请刷新页面后重新提交。" })
-  }
-  if (isTankini && !isProviderResume && !productReference) {
-    return res.status(400).json({ error: "泳衣印花区域底图缺失，请刷新页面后重新提交。" })
   }
   if (isTankini && !isProviderResume && !productPrintAreaReference) {
     return res.status(400).json({ error: "泳衣印花位置参考图缺失，请刷新页面后重新提交。" })
@@ -492,8 +480,8 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isApron && (!productReference || !productPrintAreaReference)) {
     return res.status(400).json({ error: "围裙白底底图或胸前印刷区域参考图缺失，请刷新页面后重新提交。" })
   }
-  if (productReference && (productReference.length > (isYogaSet || isTankini || isBasketballUniform || isApron || isBathMat || isMetalWallSign ? 2500000 : isDenimCap ? 120000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
-    return res.status(400).json({ error: isYogaSet ? "瑜伽服正反面底图无效，请刷新页面后重新提交。" : isApron ? "围裙白底底图无效，请刷新页面后重新提交。" : isBasketballUniform ? "篮球服正面印刷区域参考图无效，请刷新页面后重新提交。" : isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : isShowerCurtain ? "浴帘底图无效，请重新选择尺寸后提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
+  if (productReference && (productReference.length > (isTankini || isYogaSet || isBasketballUniform || isApron || isMetalWallSign ? 2500000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+    return res.status(400).json({ error: isApron ? "围裙白底底图无效，请刷新页面后重新提交。" : isBasketballUniform ? "篮球服正面印刷区域参考图无效，请刷新页面后重新提交。" : isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : isShowerCurtain ? "浴帘底图无效，请重新选择尺寸后提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
   }
   if (productPrintAreaReference && (productPrintAreaReference.length > 2500000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
     return res.status(400).json({ error: isApron ? "围裙胸前印刷区域参考图无效，请刷新页面后重新提交。" : isBasketballUniform ? "篮球服背面印刷区域参考图无效，请刷新页面后重新提交。" : "泳衣印花位置参考图无效，请刷新页面后重新提交。" })
@@ -539,15 +527,25 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     : "CENTER = the only sign."
   const safePrompt = isYogaSet
     ? [
-        `Create exactly ONE photorealistic product preview on a seamless pure white background. Show a coordinated women's two-piece yoga set as four separate garment views in the same layout as the authoritative reference: crop top front at upper left, crop top back at upper right, shorts front at lower left, shorts back at lower right. Keep all four views equally scaled, aligned, fully visible, and clearly separated.`,
-        `Image ${references.length + 1} is the exact blank yoga set reference. Preserve the crop-top and shorts silhouettes, their proportions, front/back orientation, black binding around the top neckline and armholes, the single internal underbust seam, and the smooth lower top band. Keep the shorts' wide waistband and leg hems; do not add center-front, center-back, or crotch construction seams where the reference has none.`,
-        `CUSTOM PRINT LOCK — the top and shorts are two separately assigned design areas within one coordinated product set. Read any explicit "Top", "Crop top", "Shorts", or "Bottom" section in the customer brief as a binding garment assignment. Apply the Top/Crop top instruction only to the front and back crop-top fabric; apply the Shorts/Bottom instruction only to the front and back shorts fabric. Never swap, merge, copy, or move a design between the top and shorts. If the customer gives distinct artwork, colors, motifs, or placement for each garment, preserve those differences exactly. If the brief gives only one garment-specific instruction, follow it only for that garment and create a visually compatible but distinct treatment for the other garment without reusing the specified artwork. Apply each garment's assigned design consistently to its front and back views. Do not leave a garment or view blank unless explicitly requested; do not print on the black binding, seams, or white background. Keep the underbust seam, smooth lower band, waistband, and hems visible and correctly constructed.`,
+        `Create exactly ONE square photorealistic product image on a seamless pure white (#FFFFFF) background, matching the supplied reference's four-view layout: crop-top FRONT at upper left, crop-top BACK at upper right, shorts FRONT at lower left, and shorts BACK at lower right. Show all four complete views, centered, aligned, and at the same relative scale as the reference, with clean white spacing.`,
+        `Image ${references.length + 1} is the sole authoritative blank-product construction reference. Preserve the exact separate crop top and mid-thigh shorts, their proportions, fit, panel shapes, fabric texture, folds, shadows, and the reference's front/back positions. Keep the top hem length and the small natural gap above the shorts waistband; the shorts waistband is wider than the top's lower band. Keep the narrow black binding ONLY around the top's neckline and armholes, black and unprinted. Preserve the top's single hem seam and the shorts' original waistband and leg-hem stitching. Do not add a center-front or center-back rise seam on the shorts, extra hem lines, straps, pockets, pads, logos, or garment parts. This reference is blank and contains no sample artwork to copy.`,
+        `FULL-SET PRINT RULE — apply the same coordinated custom design across the fabric print areas on BOTH pieces and BOTH sides: crop top front and back, plus shorts front and back. The top and shorts are one complete product; never omit a view, show them as separate purchasable choices, or leave one piece blank. Adapt the same motif and palette separately to each garment panel while preserving the product construction. Keep black binding black and unprinted, preserve seams and waistband/hem construction, and keep the white background completely clean.`,
         hasUploadedArtwork
-          ? `${artworkReferenceLabel} Use the uploaded artwork as the print design on the whole set. Preserve its recognizable composition and colors.`
-          : "Create original artwork that follows the customer's garment-by-garment brief. Maintain a coherent overall palette only where compatible; preserve intentionally different designs, motifs, colors, and compositions assigned to the top versus shorts.",
+          ? `${artworkReferenceLabel} Treat the uploaded image as the customer's exact design source. Apply the same recognizable print to both garments and retain its requested colors and wording.`
+          : "No uploaded artwork was provided; create one original design from the written brief and adapt it coherently to both garment pieces.",
         artworkHandlingInstruction,
-        `CUSTOMER DESIGN BRIEF: ${prompt}`,
-        "Render the design as realistic fabric printing integrated with the knit texture, natural folds, stitching, and studio lighting. Avoid a sticker, decal, patch, embroidery, or flat pasted-on look. Do not add text, logos, labels, extra garments, people, mannequins, or props unless specifically requested. Return one clean white-background image showing all four garment views.",
+        `CUSTOMER DESIGN BRIEF FOR THE COMPLETE SET: ${prompt}`,
+        "Render the design as sublimation ink integrated into the stretch-polyester fibers, following fabric texture, seams, gentle folds, lighting, and perspective. No sticker, decal, raised patch, hard rectangular edge, fake panel, brand name, watermark, or extra presentation text. Keep the four garment views in the exact two-by-two arrangement on white, with no model, mannequin, hanger, props, labels, badges, arrows, or extra views. Output exactly one image.",
+      ].join("\n")
+    : isMetalWallSign
+    ? [
+        `Create a pure-white-background product preview containing EXACTLY ${metalSignCount} complete round metal bottle-cap wall sign${metalSignCount === 1 ? "" : "s"}, arranged as ${metalSignLayout}. The supplied blank sign image is a shape/material guide only and shows three sample signs; it does not specify the final quantity. Never reproduce unused signs from the guide.`,
+        `STRICT FINAL OBJECT COUNT: ${metalSignCount} visible sign${metalSignCount === 1 ? "" : "s"}, no more and no less. ${metalSignCount === 1 ? "Use the top sign from the reference as the only final product. Completely omit the lower-left and lower-right signs." : metalSignCount === 2 ? "Use the top and lower-left signs from the reference as the two final products, arranged side by side. Completely omit the lower-right sign." : "Use all three signs from the reference in the balanced triangular arrangement: Piece 1 top, Piece 2 lower left, Piece 3 lower right."} Do not show an extra blank sign, a partial rim, a faint circle, a duplicate, or a ghost silhouette anywhere in the final image. Keep equal sign scale and generous white space.`,
+        `Preserve the exact product design on every included sign: black scalloped metal rim, circular white print face, matching proportions, and full-face print boundary. The reference's white circles are print areas. Print only on the ${metalSignCount} selected circular faces; leave the black rims and the clean white background unprinted.`,
+        `ONE CUSTOMER DESIGN INSTRUCTION FOR THE SELECTED PACK: ${prompt}. Follow any explicit requests to repeat the same artwork or give signs different subjects. Otherwise, create a cohesive set of distinct but related compositions across the selected signs, using the same requested theme and palette.`,
+        `LOCKED ARTWORK POSITION MAP: ${metalSignPositionMap} If the customer labels artwork Left, Right, Top, Lower left, Lower right, Piece 1, Piece 2, or Piece 3, map it using this position map exactly. Never swap, reorder, mirror, or move a labeled design to another sign. An explicit position label in the customer's instruction overrides default assignment.`,
+        hasUploadedArtwork ? `${artworkReferenceLabel} Use uploaded artwork as a visual guide for the selected sign pack, following the written instruction about whether to repeat or vary it.` : "Create original artwork for the selected sign pack from the customer's single written instruction.",
+        `Render each design as direct UV print on its circular metal face, following the surface and subtle lighting naturally. Keep all ink inside the circle and off the scalloped rim. At final review, count the visible product circles: the count must be exactly ${metalSignCount}. Remove any extra signs or partial circles from the output. No logos, watermarks, captions, or added text.`,
       ].join("\n")
     : isApron
     ? [
@@ -560,28 +558,6 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         artworkHandlingInstruction,
         `CUSTOMER DESIGN BRIEF: ${prompt}`,
         "Render the artwork as realistic ink integrated into the apron fabric, following its texture, lighting, and gentle folds. Do not make it look like a sticker, decal, separate patch, or hard-edged overlay. Do not add VIBEYA branding, logos, watermarks, or extra text. Return one complete front-facing apron product photo on pure white.",
-      ].join("\n")
-    : isDenimCap
-    ? [
-        "Create exactly ONE photorealistic e-commerce product image on a seamless pure white (#FFFFFF) background. Show one complete washed denim baseball cap in a straight-on FRONT view, centered, upright, and fully visible, including the full curved brim. Use a clean product-only studio composition with even white margins. No person, mannequin, hanger, room, props, labels, callouts, captions, decorative text, borders, watermark, or extra products.",
-        `Product: a classic 100% cotton washed denim baseball cap, selected base color ${productConfig.colorAliases[colorKey]}, adjustable one size. Image ${references.length + 1} is the authoritative product and print-area guide for this exact cap color, front silhouette, seams, washed denim texture, proportions, and lighting. Preserve the guide's cap shape, brim, crown panels, stitching, eyelets, top button, and color.`,
-        `PRINT AREA LOCK — FRONT CROWN ONLY: the white curved horizontal panel on the center front crown in image ${references.length + 1} marks the ONLY printable area and its exact maximum boundary. Replace that white placeholder with the design. Match its curved top and bottom edges and rounded corners; fit the complete artwork inside with a clear fabric margin. Do not print on the brim, side panels, eyelets, crown button, seams outside the marked panel, rear closure, or background. If needed, uniformly scale down and center the complete design so every letter, outline, shadow, accent, and decorative mark stays inside the white guide; never crop, stretch, or expand the area.`,
-        hasUploadedArtwork
-          ? `${artworkReferenceLabel} Use the uploaded artwork as the design source on the front crown. Preserve its recognizable subject and follow the customer's written instructions.`
-          : "Create original artwork for the front crown by following the customer's written instructions closely.",
-        artworkHandlingInstruction,
-        `CUSTOMER DESIGN BRIEF: ${prompt}`,
-        "Render the artwork as realistic direct print integrated with the washed denim weave, following the curved crown surface, fabric grain, seams, lighting, and perspective naturally. It must not look like a sticker, decal, embroidery, raised patch, or pasted-on sheet. Do not add branding, logos, watermarks, or extra text. Keep every surface outside the white curved crown panel plain and unprinted. Output exactly one complete front-view cap product image.",
-      ].join("\n")
-    : isMetalWallSign
-    ? [
-        `Create a pure-white-background product preview containing EXACTLY ${metalSignCount} complete round metal bottle-cap wall sign${metalSignCount === 1 ? "" : "s"}, arranged as ${metalSignLayout}. The supplied blank sign image is a shape/material guide only and shows three sample signs; it does not specify the final quantity. Never reproduce unused signs from the guide.`,
-        `STRICT FINAL OBJECT COUNT: ${metalSignCount} visible sign${metalSignCount === 1 ? "" : "s"}, no more and no less. ${metalSignCount === 1 ? "Use the top sign from the reference as the only final product. Completely omit the lower-left and lower-right signs." : metalSignCount === 2 ? "Use the top and lower-left signs from the reference as the two final products, arranged side by side. Completely omit the lower-right sign." : "Use all three signs from the reference in the balanced triangular arrangement: Piece 1 top, Piece 2 lower left, Piece 3 lower right."} Do not show an extra blank sign, a partial rim, a faint circle, a duplicate, or a ghost silhouette anywhere in the final image. Keep equal sign scale and generous white space.`,
-        `Preserve the exact product design on every included sign: black scalloped metal rim, circular white print face, matching proportions, and full-face print boundary. The reference's white circles are print areas. Print only on the ${metalSignCount} selected circular faces; leave the black rims and the clean white background unprinted.`,
-        `ONE CUSTOMER DESIGN INSTRUCTION FOR THE SELECTED PACK: ${prompt}. Follow any explicit requests to repeat the same artwork or give signs different subjects. Otherwise, create a cohesive set of distinct but related compositions across the selected signs, using the same requested theme and palette.`,
-        `LOCKED ARTWORK POSITION MAP: ${metalSignPositionMap} If the customer labels artwork Left, Right, Top, Lower left, Lower right, Piece 1, Piece 2, or Piece 3, map it using this position map exactly. Never swap, reorder, mirror, or move a labeled design to another sign. An explicit position label in the customer's instruction overrides default assignment.`,
-        hasUploadedArtwork ? `${artworkReferenceLabel} Use uploaded artwork as a visual guide for the selected sign pack, following the written instruction about whether to repeat or vary it.` : "Create original artwork for the selected sign pack from the customer's single written instruction.",
-        `Render each design as direct UV print on its circular metal face, following the surface and subtle lighting naturally. Keep all ink inside the circle and off the scalloped rim. At final review, count the visible product circles: the count must be exactly ${metalSignCount}. Remove any extra signs or partial circles from the output. No logos, watermarks, captions, or added text.`,
       ].join("\n")
     : isBasketballUniform
     ? [

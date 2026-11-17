@@ -1,103 +1,54 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { listProducts } from "@lib/data/products"
-import { getRegion, listRegions } from "@lib/data/regions"
-import { retrieveCustomer } from "@lib/data/customer"
+import { getRegion } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
-import StandaloneProductPage from "@modules/vibeya/components/standalone-product-page"
-import VibeyaProductExperience from "@modules/vibeya/components/vibeya-product-experience"
-import { vibeyaProducts } from "@modules/vibeya/data/products"
 import { HttpTypes } from "@medusajs/types"
-import VibeyaHome from "../../vibeya-home"
 import { isVariantInStock } from "@lib/util/inventory"
 import {
   buildProductStructuredData,
   getPricedVariants,
   toJsonLd,
 } from "@lib/util/product-structured-data"
-import { getSiteOrigin, listCountryCodes, STORE_NAME } from "@lib/util/site"
+import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
+import { getVibeyaMarket } from "@lib/vibeya/region"
+import { SUPPORTED_MARKET_COUNTRIES, SupportedMarketCountry } from "@lib/vibeya/markets"
+import { getMarketAlternateUrls, getMarketLocale, getMarketLocaleUrl } from "@lib/util/market-locale"
+import { retrieveCustomer } from "@lib/data/customer"
+import VibeyaHome from "../../vibeya-home"
 
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
-  searchParams?: Promise<Record<string, string | string[] | undefined>>
+  searchParams: Promise<{ locale?: string; v_id?: string; size?: string; color?: string; openStudio?: string; print?: string }>
 }
 
-const PRODUCT_SEO: Partial<
-  Record<string, { title: string; description: string }>
-> = {
-  "vibeya-custom-cotton-long-sleeve-tee": {
-    title: "Custom Long Sleeve Shirt | Photo & AI Design | VIBEYA",
-    description:
-      "Design a custom long sleeve shirt with a photo, artwork, or AI prompt. Preview front, back, or double-sided print; choose from seven colors and sizes XS–3XL.",
-  },
-  "vibeya-washed-vintage-hooded-sweatshirt": {
-    title: "Custom Graphic Hoodie | Washed Vintage Style | VIBEYA",
-    description:
-      "Design a custom graphic hoodie with front and back artwork on 400g washed fleece. Choose from six colors and sizes S–2XL, then preview your design.",
-  },
-  "vibeya-custom-knitted-beanie": {
-    title: "Custom Knitted Beanie with Cuff Print | VIBEYA",
-    description:
-      "Create a custom knitted beanie with your design printed on the folded front cuff. Preview a personalized winter hat in black, red, or gray; one size.",
-  },
-  "vibeya-custom-20oz-stainless-steel-tumbler": {
-    title: "Custom 20 oz Stainless Steel Tumbler | VIBEYA",
-    description:
-      "Design a custom 20 oz stainless steel tumbler with your art in a full-wrap print. Includes a clear lid and separate straw; preview before ordering.",
-  },
-  "vibeya-custom-3d-bath-mat": {
-    title: "Custom 3D Bath Mat | Photo & AI Design | VIBEYA",
-    description:
-      "Create a custom photo bath mat or describe an original design with an AI prompt. Preview the full-surface print and choose from three sizes for your bathroom.",
-  },
-  "vibeya-custom-flannel-throw-blanket": {
-    title: "Custom Photo Blanket | Flannel Throw Blanket | VIBEYA",
-    description:
-      "Design a custom flannel throw blanket with a full-surface printed front and soft white reverse. Preview your personalized blanket and choose from four sizes.",
-  },
-  "vibeya-custom-shower-curtain": {
-    title: "Custom Shower Curtain | Design Your Own | VIBEYA",
-    description:
-      "Design a custom shower curtain with a single-sided, edge-to-edge print. Preview it hanging naturally and choose from four sizes.",
-  },
-  "vibeya-custom-womens-tankini-swimsuit-set": {
-    title: "Custom Tankini Swimsuit Set for Women | VIBEYA",
-    description:
-      "Design a custom women's tankini swimsuit with artwork or a text prompt. Preview a halter top and separate side-tie shorts; five colors, sizes S–XL.",
-  },
-  "vibeya-custom-kids-basketball-uniform": {
-    title: "Custom Kids Basketball Jersey and Shorts Set | VIBEYA",
-    description:
-      "Create a custom kids basketball jersey set with a text prompt. Design the jersey front, back, and shorts separately; five colors, sizes 100–140 cm.",
-  },
+const LOCALIZED_PRODUCT_SEO: Record<string, Record<string, { title: string; description: string }>> = {
   "vibeya-custom-womens-yoga-set": {
-    title: "Custom Women's Yoga Set | Design Matching Top & Shorts | VIBEYA",
-    description:
-      "Create a custom women's yoga set with one coordinated print across the crop top and shorts. Upload artwork or design with a prompt, preview, and choose sizes XS–2XL.",
-  },
-  "vibeya-custom-prompt-design-apron": {
-    title: "Custom Apron Design | Personalized Cooking Apron | VIBEYA",
-    description:
-      "Create a personalized cooking apron from a text prompt. Preview it on a black apron with an adjustable neck strap and three divided pockets; one size.",
-  },
-  "vibeya-custom-metal-bottle-cap-wall-sign": {
-    title: "Custom Bottle Cap Wall Sign | Design & Preview | VIBEYA",
-    description:
-      "Design a custom bottle cap wall sign with a prompt or uploaded artwork. Preview your 30 cm metal wall art, then choose a 1, 2, or 3-piece pack.",
-  },
-  "vibeya-custom-washed-denim-baseball-cap": {
-    title: "Custom Denim Baseball Cap | Design Your Own | VIBEYA",
-    description:
-      "Create a custom washed denim baseball cap from your artwork or a design prompt. Preview the front print before ordering. Choose black, khaki, or gray.",
+    "en-CA": {
+      title: "Custom Women's Yoga Set | VIBEYA Canada",
+      description: "Personalize a coordinated women's yoga set with your own artwork or design prompt. Preview your matching print across the crop top and shorts before ordering.",
+    },
+    "ja-JP": {
+      title: "カスタム レディース ヨガウェアセット | VIBEYA",
+      description: "トップスとショーツを自由にカスタマイズできるレディースヨガウェアセット。オリジナルデザインで自分らしい一着を作れます。",
+    },
+    "es-MX": {
+      title: "Conjunto de yoga personalizado para mujer | VIBEYA",
+      description: "Personaliza este conjunto de yoga para mujer con top y shorts. Crea un diseño propio para entrenar con tu estilo.",
+    },
+    "fr-CA": {
+      title: "Ensemble de yoga personnalisé pour femmes | VIBEYA",
+      description: "Personnalisez cet ensemble de yoga pour femmes comprenant un haut et un short. Créez un modèle unique à votre image.",
+    },
   },
 }
 
-export const dynamic = "force-static"
 export const revalidate = 60
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const params = await props.params
+  const [params, searchParams] = await Promise.all([props.params, props.searchParams])
   const { handle } = params
+  const locale = getMarketLocale(params.countryCode, searchParams.locale)
   const region = await getRegion(params.countryCode)
 
   if (!region) {
@@ -106,37 +57,72 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   const product = await listProducts({
     countryCode: params.countryCode,
-    queryParams: { handle },
+    queryParams: { handle, locale },
   }).then(({ response }) => response.products[0])
 
-  if (!product) {
+  const market = await getVibeyaMarket(params.countryCode).catch(() => null)
+  if (!product || !market?.handles.includes(handle)) {
     notFound()
   }
 
-  const [origin, regions] = await Promise.all([getSiteOrigin(), listRegions()])
+  const origin = await getSiteOrigin()
   const path = `/products/${product.handle}`
-  const productUrl = `${origin}/${params.countryCode}${path}`
-  const productSeo = PRODUCT_SEO[product.handle]
-  const title =
-    productSeo?.title ??
-    `${product.title.replace(/^VIBEYA\s+/i, "")} | ${STORE_NAME}`
-  const description =
+  const productUrl = getMarketLocaleUrl(origin, params.countryCode, path, locale)
+  const seoContent: Record<string, { title: string; description: string }> = {
+    "vibeya-washed-vintage-hooded-sweatshirt": {
+      title: "Custom Vintage Graphic Hoodie | VIBEYA",
+      description:
+        "Shop VIBEYA’s 400g washed vintage hoodie with original double-sided artwork. Choose from six colors and sizes S–2XL. Free U.S. shipping.",
+    },
+    "vibeya-custom-cotton-long-sleeve-tee": {
+      title: "Custom Long Sleeve T-Shirt | VIBEYA",
+      description:
+        "Shop VIBEYA’s cotton long sleeve tee with the Funny Skeleton graphic. Choose from seven colors and sizes XS–3XL. Free U.S. shipping.",
+    },
+    "vibeya-custom-20oz-stainless-steel-tumbler": {
+      title: "Custom 20 oz Stainless Steel Tumbler | VIBEYA",
+      description:
+        "Design your own full-wrap print for VIBEYA’s 20 oz stainless steel tumbler. Clear sliding lid, separate straw, and U.S. shipping available.",
+    },
+    "vibeya-custom-womens-tankini-swimsuit-set": {
+      title: "Custom Women’s Tankini Swimsuit Set | Design Your Own | VIBEYA",
+      description:
+        "Design your own women’s tankini swimsuit with a custom print. Choose a halter swim top and separate side-tie shorts in five colors, sizes S–XL.",
+    },
+    "vibeya-custom-kids-basketball-uniform": {
+      title: "Custom Kids Basketball Jersey & Shorts | Design Your Own | VIBEYA",
+      description:
+        "Design a custom kids basketball uniform with a text prompt. Customize the jersey front, back, and shorts independently, then mix and match prints. Five colors, sizes 100–140 cm.",
+    },
+    "vibeya-custom-metal-bottle-cap-wall-sign": {
+      title: "Custom Metal Bottle Cap Wall Sign | Design Your Own | VIBEYA",
+      description:
+        "Create a custom 30 cm metal bottle-cap wall sign with your own prompt or uploaded artwork. Preview your full-face UV print before ordering. Choose a 1-, 2-, or 3-piece set.",
+    },
+  }
+  const productSeo = seoContent[product.handle]
+  const localizedSeo = LOCALIZED_PRODUCT_SEO[product.handle]?.[locale]
+  const title = localizedSeo?.title ?? productSeo?.title ?? `${product.title} | ${STORE_NAME}`
+  const description = localizedSeo?.description ??
     productSeo?.description ??
     `${product.subtitle || product.description || product.title}`
       .replace(/\s+/g, " ")
       .slice(0, 160)
+
+  const eligibleCountries = await Promise.all(
+    [...SUPPORTED_MARKET_COUNTRIES].map(async (countryCode) => {
+      const market = await getVibeyaMarket(countryCode).catch(() => null)
+      return market?.handles.includes(handle) ? countryCode : null
+    })
+  ).then((codes) => codes.filter((code): code is SupportedMarketCountry => code !== null))
+  const languages = getMarketAlternateUrls(origin, path, eligibleCountries)
 
   return {
     title,
     description,
     alternates: {
       canonical: productUrl,
-      languages: Object.fromEntries(
-        listCountryCodes(regions).map((code) => [
-          `en-${code.toUpperCase()}`,
-          `${origin}/${code}${path}`,
-        ])
-      ),
+      languages,
       types: { "text/markdown": `${productUrl}.md` },
     },
     openGraph: {
@@ -188,8 +174,7 @@ const ProductMetaTags = ({
 }
 
 export default async function ProductPage(props: Props) {
-  const params = await props.params
-  const searchParams = await props.searchParams
+  const [params, searchParams] = await Promise.all([props.params, props.searchParams])
   const region = await getRegion(params.countryCode)
 
   if (!region) {
@@ -198,43 +183,50 @@ export default async function ProductPage(props: Props) {
 
   const pricedProduct = await listProducts({
     countryCode: params.countryCode,
-    queryParams: { handle: params.handle },
+    queryParams: { handle: params.handle, locale: getMarketLocale(params.countryCode, searchParams.locale) },
   }).then(({ response }) => response.products[0])
 
-  if (!pricedProduct) {
+  const market = await getVibeyaMarket(params.countryCode).catch(() => null)
+  if (!pricedProduct || !market?.handles.includes(params.handle)) {
     notFound()
   }
 
   const origin = await getSiteOrigin()
-  const productSeo = PRODUCT_SEO[pricedProduct.handle]
-  const structuredProduct = productSeo
-    ? {
-        ...pricedProduct,
-        description: productSeo.description,
-      }
-    : pricedProduct
+  const locale = getMarketLocale(params.countryCode, searchParams.locale)
+  const localizedSeo = LOCALIZED_PRODUCT_SEO[pricedProduct.handle]?.[locale]
   const structuredData = buildProductStructuredData({
-    product: structuredProduct,
+    product: localizedSeo
+      ? { ...pricedProduct, title: localizedSeo.title, description: localizedSeo.description }
+      : pricedProduct,
     region,
     countryCode: params.countryCode,
     productUrl: `${origin}/${params.countryCode}/products/${pricedProduct.handle}`,
   })
 
-  if (pricedProduct.handle === "vibeya-custom-womens-yoga-set") {
-    const queryValue = (key: string) => {
-      const value = searchParams?.[key]
-      return Array.isArray(value) ? value[0] : value
-    }
-    const selectedVariant = pricedProduct.variants?.find(
-      (variant) => variant.id === queryValue("v_id")
-    )
-    const variantSize = selectedVariant?.options?.find(
-      (option) => option.option?.title?.toLowerCase() === "size"
-    )?.value
+  if (params.handle === "vibeya-custom-womens-yoga-set") {
+    const queryValue = (key: "v_id" | "size" | "color") => searchParams?.[key]
+    const selectedVariant = pricedProduct.variants?.find((variant) => variant.id === queryValue("v_id"))
+    const variantSize = selectedVariant?.options?.find((option) => option.option?.title?.toLowerCase() === "size")?.value
     const initialSize = queryValue("size") || variantSize || "M"
-    const colorParam = queryValue("color")
     const customer = await retrieveCustomer().catch(() => null)
 
+    return (
+      <>
+        <ProductMetaTags product={pricedProduct} region={region} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }} />
+        <VibeyaHome
+          countryCode={params.countryCode}
+          locale={searchParams.locale}
+          isAuthenticated={Boolean(customer)}
+          standaloneProductId="sds-63823"
+          standaloneColor={queryValue("color") || "White"}
+          standaloneSize={initialSize}
+        />
+      </>
+    )
+  }
+  if (params.handle === "vibeya-custom-metal-bottle-cap-wall-sign") {
+    const customer = await retrieveCustomer().catch(() => null)
     return (
       <>
         <ProductMetaTags product={pricedProduct} region={region} />
@@ -244,43 +236,13 @@ export default async function ProductPage(props: Props) {
         />
         <VibeyaHome
           countryCode={params.countryCode}
+          locale={searchParams.locale}
           isAuthenticated={Boolean(customer)}
-          standaloneProductId="sds-63823"
-          standaloneColor={colorParam || "White"}
-          standaloneSize={initialSize}
+          standaloneProductId="mg8014061"
         />
       </>
     )
   }
-
-  if (
-    pricedProduct.handle === "vibeya-custom-metal-bottle-cap-wall-sign" ||
-    pricedProduct.handle === "vibeya-custom-washed-denim-baseball-cap"
-  ) {
-    const isDenimCap = pricedProduct.handle === "vibeya-custom-washed-denim-baseball-cap"
-    return (
-      <>
-        <ProductMetaTags product={pricedProduct} region={region} />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
-        />
-        <StandaloneProductPage
-          countryCode={params.countryCode}
-          handle={pricedProduct.handle}
-          productId={isDenimCap ? "mg8012002" : "mg8014061"}
-          title={pricedProduct.title}
-          version={isDenimCap ? "denim-cap-20261116-1" : "metal-sign-position-lock-20261117-5"}
-        />
-      </>
-    )
-  }
-
-  const vibeyaProduct = vibeyaProducts.find(
-    (product) => product.handle === pricedProduct.handle
-  )
-  const colorParam = searchParams?.color
-  const initialColor = Array.isArray(colorParam) ? colorParam[0] : colorParam
 
   return (
     <>
@@ -289,19 +251,11 @@ export default async function ProductPage(props: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
       />
-      {vibeyaProduct ? (
-        <VibeyaProductExperience
-          countryCode={params.countryCode}
-          productId={vibeyaProduct.id}
-          initialColor={initialColor}
-        />
-      ) : (
-        <ProductTemplate
-          product={pricedProduct}
-          region={region}
-          countryCode={params.countryCode}
-        />
-      )}
+      <ProductTemplate
+        product={pricedProduct}
+        region={region}
+        countryCode={params.countryCode}
+      />
     </>
   )
 }

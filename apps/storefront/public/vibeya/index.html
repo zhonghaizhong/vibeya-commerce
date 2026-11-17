@@ -5,13 +5,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#fffdfb" />
-  <meta name="description" content="Create personalized gifts from a photo or AI prompt. Design custom apparel, drinkware, blankets, bath mats, and shower curtains, then preview and order online." />
+  <meta name="description" content="Create custom apparel, drinkware, blankets, shower curtains, and home decor online. Personalize a product, preview your design, and order one made for you." />
   <meta name="robots" content="noindex,indexifembedded" />
   <link rel="canonical" href="https://vibeyastudio.com/us" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://vibeyastudio.com/us" />
   <meta property="og:title" content="Custom Products &amp; Personalized Gifts | VIBEYA" />
-  <meta property="og:description" content="Create personalized gifts from a photo or AI prompt. Design custom apparel, drinkware, blankets, bath mats, and shower curtains, then preview and order online." />
+  <meta property="og:description" content="Create custom apparel, drinkware, blankets, shower curtains, and home decor online. Personalize a product, preview your design, and order one made for you." />
   <title>Custom Products &amp; Personalized Gifts | VIBEYA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -39,6 +39,9 @@
     .navigation{display:flex;align-items:center;gap:34px;font-size:14px;font-weight:800;}
     .navigation a{white-space:nowrap;transition:opacity .2s;}
     .navigation a:hover{opacity:.55;}
+    .nav-market-controls{display:flex;align-items:center;gap:8px;}
+    .nav-market-control{display:flex;min-width:0;align-items:center;gap:6px;padding:7px 10px;border:1px solid var(--edge);border-radius:999px;background:var(--cream);color:var(--muted);font-size:11px;font-weight:700;white-space:nowrap;}
+    .nav-market-control select{min-width:0;max-width:112px;padding:0 14px 0 0;border:0;outline:0;background:transparent;color:var(--ink);font:inherit;cursor:pointer;}
     .nav-ai {display:inline-flex;gap:9px;align-items:center;background:var(--lime);padding:13px 18px;border-radius:40px;}
     .nav-right{display:flex;align-items:center;gap:8px;}
     .icon-btn{width:42px;height:42px;background:transparent;border:0;border-radius:50%;display:grid;place-items:center;position:relative;color:var(--ink);}
@@ -158,8 +161,7 @@
     .dialog-head{display:flex;justify-content:space-between;align-items:start;gap:18px;padding:27px 30px 20px;border-bottom:1px solid var(--edge);}
     .dialog-head h2{font-size:31px;line-height:1.05;letter-spacing:-.05em;margin:0;}
     .dialog-head p{margin:7px 0 0;color:var(--muted);font-size:13px;}
-    .close-btn{border:1px solid var(--edge);background:#fff;width:44px;height:44px;min-width:44px;min-height:44px;border-radius:50%;font-size:23px;line-height:1;flex:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
-    .close-btn:focus-visible{outline:3px solid #9c60f2;outline-offset:2px;}
+    .close-btn{border:1px solid var(--edge);background:#fff;width:36px;height:36px;border-radius:50%;font-size:23px;line-height:1;flex:none;}
     .studio-body{display:grid;grid-template-columns:1fr 1.02fr;min-height:570px;}
     .studio-controls{padding:25px 30px 30px;}
     .studio-controls label{display:block;font-weight:900;font-size:13px;margin:0 0 10px;}
@@ -255,7 +257,7 @@
     .catalog-hero.ideas-hero{background:radial-gradient(circle at 85% 5%,#d8f487,transparent 39%),linear-gradient(110deg,#f4e8fc,#fcece3);}
     .catalog-crumb{display:flex;gap:10px;font-size:12px;font-weight:800;color:#675c73;margin-bottom:23px;align-items:center;}
     .catalog-crumb a:hover{text-decoration:underline;}
-    .catalog-hero h1,.catalog-hero h2{font-size:clamp(46px,5.3vw,78px);max-width:800px;margin:0 0 13px;}
+    .catalog-hero h1{font-size:clamp(46px,5.3vw,78px);max-width:800px;margin:0 0 13px;}
     .catalog-hero p{font-size:16px;max-width:520px;line-height:1.6;margin:0;}
     .catalog-main{padding:34px 0 75px;}
     .catalog-tools{display:flex;gap:15px;align-items:center;margin-bottom:21px;flex-wrap:wrap;}
@@ -264,7 +266,7 @@
     .catalog-search-wrap input{border:none;background:transparent;flex:1;min-width:0;outline:none;color:var(--ink);font-size:14px;}
     .catalog-select{background:#fff;border:1.5px solid #dfd7e1;border-radius:14px;padding:14px 16px;min-height:52px;color:var(--ink);font-weight:800;font-size:13px;min-width:170px;}
     .catalog-chips{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 25px;}
-    .catalog-chip{display:inline-block;text-decoration:none;background:#f8f5f9;border:1px solid #e6ddeb;border-radius:50px;padding:11px 17px;font-weight:800;font-size:12px;color:var(--ink);}
+    .catalog-chip{background:#f8f5f9;border:1px solid #e6ddeb;border-radius:50px;padding:11px 17px;font-weight:800;font-size:12px;color:var(--ink);}
     .catalog-chip.active{background:var(--lime);border-color:var(--lime);}
     .catalog-status{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px;font-size:12px;color:var(--muted);}
     .catalog-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;}
@@ -288,7 +290,9 @@
       .catalog-grid.products-catalog{grid-template-columns:repeat(3,minmax(0,1fr));}
 
       .container{width:min(100% - 52px,1440px);}
-      .navigation{gap:18px;font-size:13px;}
+      .navigation{gap:14px;font-size:12px;}
+      .nav-market-controls{gap:5px;}
+      .nav-market-control{gap:4px;padding:6px 8px;font-size:10px;}
       h1{font-size:clamp(49px,5vw,66px);}
       .hero-layout,.hero{min-height:535px;}
       .steps-bar{padding:22px;grid-template-columns:1fr repeat(3,1.5fr);gap:9px;}
@@ -301,8 +305,11 @@
       .container{width:min(100% - 36px,1440px);}
       .topnav{height:66px;}
       .logo{font-size:29px;}
-      .navigation{display:none;position:absolute;top:66px;left:0;right:0;background:#fffdfa;padding:20px;border-bottom:1px solid var(--edge);box-shadow:0 20px 30px #0001;flex-direction:column;align-items:stretch;gap:18px;}
+      .navigation{display:none;position:absolute;top:66px;left:0;right:0;max-height:calc(100vh - 100px);max-height:calc(100dvh - 100px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:#fffdfa;padding:20px;border-bottom:1px solid var(--edge);box-shadow:0 20px 30px #0001;flex-direction:column;align-items:stretch;gap:18px;}
       .navigation.open{display:flex;}
+      .nav-market-controls{align-items:stretch;flex-direction:column;margin:4px 0;}
+      .nav-market-control{width:100%;justify-content:space-between;min-height:48px;padding:9px 12px;font-size:13px;}
+      .nav-market-control select{flex:0 1 auto;width:auto;max-width:min(62vw,240px);text-align:right;}
       .mobile-menu{display:grid;}
       .hero-layout{grid-template-columns:1fr;}
       .hero-copy{padding:49px 0 38px;}
@@ -360,6 +367,13 @@
       .catalog-callout{flex-direction:column;align-items:flex-start;padding:22px;}
       .catalog-chip{font-size:11px;padding:9px 12px;}
       .search-results{grid-template-columns:repeat(2,1fr);}
+    }
+    @media (max-width:380px){
+      .hero-copy{min-width:0;width:100%;}
+      .hero-copy h1{max-width:100%;font-size:clamp(37px,12vw,45px)!important;}
+      .hero-copy h1 em{white-space:normal;}
+      .hero-actions{min-width:0;}
+      .hero-actions .btn{max-width:100%;}
     }
     @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}*{transition:none!important;}}
 
@@ -419,8 +433,8 @@
     .color-choice:focus-visible{outline:3px solid #7859bb;outline-offset:4px;}
     .color-choice .color-black{width:30px;height:30px;border-radius:100%;display:block;background:#171717;box-shadow:inset 0 0 0 1px #484848;}
     .color-only-note{font-size:12px;color:#827789;line-height:1.4;}
-    .size-label{margin-top:25px;}.size-options,.studio-sizes{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;}
-    .variant-size,.studio-size{display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;min-width:52px;min-height:44px;padding:0 12px;white-space:nowrap;line-height:1;background:#fff;border:1.5px solid #dcd4e3;border-radius:10px;color:#352b3b;font-weight:850;font-size:12px;}
+    .size-label{margin-top:25px;}.size-options,.studio-sizes{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;}
+    .variant-size,.studio-size{min-height:44px;background:#fff;border:1.5px solid #dcd4e3;border-radius:10px;color:#352b3b;font-weight:850;font-size:12px;}
     .variant-size[aria-pressed="true"],.studio-size[aria-pressed="true"]{border:2px solid #21192b;background:#dcfc60;color:#21192b;}
     .size-guide{margin-top:12px;}.size-guide summary{cursor:pointer;text-decoration:underline;text-underline-offset:3px;color:#7859bb;font-size:12px;font-weight:800;}
     .size-table-wrap{overflow-x:auto;margin-top:13px;border-radius:9px;border:1px solid #ded6e4;}
@@ -446,10 +460,10 @@
     .studio-variant-row{display:flex;justify-content:space-between;gap:8px;font-size:12px;margin:6px 0 9px;}.studio-variant-row strong{font-weight:900;}.studio-variant-row span{color:#6c6475;font-weight:700;}
     .studio-variant-row:not(:first-child){position:relative;margin-top:12px;padding-top:12px;}
     .studio-variant-row:not(:first-child)::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,rgba(128,83,200,.24),rgba(216,200,236,.8) 48%,rgba(128,83,200,.12));}
-    .studio-sizes{margin-bottom:14px;}.studio-size{min-height:44px;border-radius:10px;font-size:12px;}.studio-print{min-height:38px;border-radius:8px;font-size:10px;}
+    .studio-sizes{margin-bottom:14px;}.studio-size{min-height:34px;border-radius:8px;font-size:11px;}.studio-print{min-height:38px;border-radius:8px;font-size:10px;}
     @media (max-width:1080px){.detail-layout{grid-template-columns:minmax(0,1fr) minmax(350px,.86fr);gap:30px;}.detail-service-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.detail-purchase h1{font-size:36px;}}
     @media (max-width:790px){.detail-layout{grid-template-columns:1fr;}.detail-gallery{position:static;max-width:590px;margin:auto;width:100%;}.detail-purchase{max-width:680px;width:100%;margin:auto;}.detail-main-image{max-height:none;}.detail-service-grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
-    @media (max-width:520px){.detail-container{padding-top:16px;}.detail-breadcrumb{font-size:10px;gap:6px;}.detail-main-image{border-radius:18px;}.detail-thumbnails{gap:5px;}.detail-thumb{border-radius:7px;}.detail-purchase h1{font-size:36px!important;}.detail-service-grid{grid-template-columns:1fr;}.detail-price{font-size:19px;}.detail-layout{gap:22px;}.print-options,.studio-prints{gap:6px;}.variant-side,.studio-print{font-size:10px;}.detail-purchase{padding-top:0;}}
+    @media (max-width:520px){.detail-container{padding-top:16px;}.detail-breadcrumb{font-size:10px;gap:6px;}.detail-main-image{border-radius:18px;}.detail-thumbnails{gap:5px;}.detail-thumb{border-radius:7px;}.detail-purchase h1{font-size:36px!important;}.detail-service-grid{grid-template-columns:1fr;}.detail-price{font-size:19px;}.detail-layout{gap:22px;}.size-options,.studio-sizes{grid-template-columns:repeat(4,minmax(0,1fr));}.print-options,.studio-prints{gap:6px;}.variant-side,.studio-print{font-size:10px;}.detail-purchase{padding-top:0;}}
 
   
     /* Seven-color selection: identical round swatches in both product + studio */
@@ -669,7 +683,7 @@
     #studioOverlay .upload-footnote{font-size:13px;line-height:1.5;}
     @media(max-width:570px){#studioOverlay .preview-view-tabs button{font-size:14px;}}
   </style>
-<link rel="stylesheet" href="assets/shared/header.css?v=nav-match-5">
+<link rel="stylesheet" href="assets/shared/header.css?v=nav-market-controls-6">
 <script src="assets/shared/catalog-price.js" defer></script>
 <script src="assets/inspiration/catalog.js?v=portrait-six-inspirations-1"></script>
 </head>
@@ -677,21 +691,25 @@
   <div class="announcement">YOUR IDEA, YOUR VIBE, YOURS TO KEEP. <strong>✳ MADE JUST FOR YOU</strong></div>
   <header>
     <div class="container topnav">
-      <a href="#top" class="logo" aria-label="VIBEYA home">VIBEYA<span>.</span></a>
+        <a href="#top" class="logo" aria-label="VIBEYA home">VIBEYA<span>.</span></a>
       <nav class="navigation" id="nav">
-        <a href="#top" data-menu-target="home" aria-current="page">Home</a>
-        <a href="#shop" data-menu-target="shop">Shop All</a>
-        <a href="#create" class="nav-ai" id="navCreate" data-menu-target="create">✦ &nbsp;Design your look</a>
-        <a href="/vibeya/inspiration/index.html" target="_top" data-menu-target="inspiration">Inspiration</a>
-        <a href="#how-it-works" data-menu-target="how-it-works">How It Works</a>
-        <a href="#my-designs" data-menu-target="my-designs">My Designs</a>
-        <a class="account-menu-link" href="/us/account">Account</a>
+        <a href="#top" data-menu-target="home" data-nav-key="home" aria-current="page">Home</a>
+        <a href="#shop" data-menu-target="shop" data-nav-key="shop">Shop All</a>
+        <a href="#create" class="nav-ai" id="navCreate" data-menu-target="create" data-nav-key="create">✦ &nbsp;Design your look</a>
+        <a href="/vibeya/inspiration/index.html" data-menu-target="inspiration" data-nav-key="inspiration">Inspiration</a>
+        <a href="#how-it-works" data-menu-target="how-it-works" data-nav-key="how">How It Works</a>
+        <a href="#my-designs" data-menu-target="my-designs" data-nav-key="designs">My Designs</a>
+        <div class="nav-market-controls">
+          <label class="nav-market-control"><span data-nav-key="shipTo">Ship to</span><select id="navDestination" aria-label="Shipping destination"><option value="us">United States</option><option value="ca">Canada</option><option value="jp">Japan</option><option value="mx">Mexico</option></select></label>
+          <label class="nav-market-control"><span data-nav-key="language">Language</span><select id="navLanguage" aria-label="Language"><option value="en-US">English</option><option value="ja-JP">日本語</option><option value="es-MX">Español</option><option value="fr-CA">Français</option></select></label>
+        </div>
+        <a class="account-menu-link" href="/us/account" data-nav-key="account">Account</a>
       </nav>
       <div class="nav-right">
         <button class="icon-btn" id="searchBtn" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16.2 16.2 5 5"/></svg></button>
         <button class="icon-btn" id="cartBtn" aria-label="Shopping bag"><svg viewBox="0 0 24 24"><path d="M3 4h2l2.3 11.5h11.9L22 7H6"/><circle cx="9" cy="20" r="1"/><circle cx="19" cy="20" r="1"/></svg><span class="count" id="cartCount">0</span></button>
-        <a class="sign-in-link" href="/us/account" aria-label="Sign in or register">Sign in</a>
-        <a class="account-link" href="/us/account">Account</a>
+        <a class="sign-in-link" href="/us/account" aria-label="Sign in or register" data-nav-key="signIn">Sign in</a>
+        <a class="account-link" href="/us/account" data-nav-key="account">Account</a>
       <button class="icon-btn mobile-menu" id="menuBtn" aria-label="Toggle menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
       </div>
     </div>
@@ -745,7 +763,7 @@
       <div class="container">
         <div class="section-heading"><div><div class="eyebrow">GOOD IDEAS ARE CONTAGIOUS</div><h2>Need a little inspo?</h2><p>Pick a vibe. Remix it. Make it completely yours.</p></div><button class="btn outline small" data-open-studio>CREATE SOMETHING ↗</button></div>
         <div class="insp-grid home-inspiration-grid" id="inspoCards"></div>
-        <div class="catalog-bottom"><a class="btn secondary" href="inspiration/index.html" target="_top">EXPLORE ALL INSPIRATION ↗</a></div>
+        <div class="catalog-bottom"><a class="btn secondary" href="inspiration/index.html">EXPLORE ALL INSPIRATION ↗</a></div>
       </div>
     </section>
 
@@ -774,8 +792,8 @@
     <div class="catalog-hero"><div class="container">
       <div class="catalog-crumb"><a href="#top">HOME</a> / SHOP ALL</div>
       <div class="eyebrow">YOUR IDEAS DESERVE A CANVAS</div>
-      <h2>FIND YOUR CANVAS<span style="color:#9963e8">.</span></h2>
-      <p>Choose a custom gift. Upload a photo or describe a design with a text prompt, then preview it on apparel, drinkware, blankets, and home goods before ordering.</p>
+      <h1>FIND YOUR CANVAS<span style="color:#9963e8">.</span></h1>
+      <p>From everyday favorites to the unexpected. Pick what you love, then make it one of a kind.</p>
     </div></div>
     <div class="container catalog-main">
       <div class="catalog-tools">
@@ -785,6 +803,7 @@
       <div class="catalog-chips" id="productFilters" aria-label="Product categories"></div>
       <div class="catalog-status"><span id="productCount" role="status"></span><span>Choose a product to start customizing ✳</span></div>
       <div class="catalog-grid products-catalog" id="allProducts"></div>
+      <div class="catalog-bottom"><button class="btn secondary" id="moreProducts" hidden>LOAD MORE PRODUCTS</button></div>
       <div class="catalog-callout"><div><strong>Have an idea, but no product yet?</strong><p>Start with your imagination. You can pick a product later.</p></div><button class="btn dark" data-open-studio>✦ START DESIGNING</button></div>
     </div>
   </main>
@@ -814,7 +833,7 @@
       <section class="detail-purchase" aria-labelledby="detailProductTitle">
         <div class="detail-eyebrow" id="detailEyebrow">VIBEYA / FIRST COLLECTION</div>
         <h1 id="detailProductTitle">Custom Cotton Long Sleeve Tee</h1>
-        <p class="detail-intro" id="detailIntro">Upload a photo or artwork, or describe a custom long sleeve shirt design with a prompt. Choose from seven colors, then preview front, back, or double-sided printing.</p>
+        <p class="detail-intro" id="detailIntro">Your vibe, your rules. Choose from seven colors, then create your own front, back, or double-sided artwork.</p>
         <p class="detail-price"><span id="detailPrice" data-vibeya-price="vibeya-custom-cotton-long-sleeve-tee">$19.99 USD</span> <small id="detailShipping">Free U.S. shipping · U.S. addresses only</small></p>
         <div class="detail-trust-mini" id="detailHighlights" aria-label="Product highlights"><span>100% Cotton</span><span>Custom Front / Back</span></div>
         <div class="detail-divider"></div>
@@ -856,7 +875,7 @@
     <div class="eyebrow">INSPIRATION MARKET</div>
     <h1>Creative ideas with a story.</h1>
     <p>Browse original design concepts and read how each look comes together.</p>
-    <a class="btn primary" href="inspiration/index.html" target="_top">EXPLORE INSPIRATION</a>
+    <a class="btn primary" href="inspiration/index.html">EXPLORE INSPIRATION</a>
   </section>
   <div style="display:none" aria-hidden="true"><input id="ideaSearch"><select id="ideaSort"><option value="featured">Featured</option></select><div id="ideaFilters"></div><div id="ideaCount"></div><div id="allIdeas"></div><button id="moreIdeas" hidden>More</button></div>
 </main>
@@ -869,7 +888,7 @@
 </main>
 
   <footer>
-    <div class="container"><div class="footer-top"><div><a class="logo" href="#top">VIBEYA<span>.</span></a><p class="footer-desc">A place to make things that feel like you. No templates for personality. No rules for imagination.</p><div class="footer-socials"><a href="https://www.facebook.com/profile.php?id=61596154035820" target="_blank" rel="noopener noreferrer" aria-label="VIBEYA on Facebook" title="Facebook"><svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.5 1.6-1.5h1.7V3.9c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3V10H7.3v3h2.8v8h3.4Z"/></svg></a><a href="https://www.instagram.com/vibeya.studio/" target="_blank" rel="noopener noreferrer" aria-label="VIBEYA on Instagram" title="Instagram"><svg class="instagram-mark" aria-hidden="true" viewBox="0 0 24 24"><rect x="3.25" y="3.25" width="17.5" height="17.5" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.7" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a></div></div><div class="footer-links"><div><h4>Explore</h4><a href="#shop">Shop products</a><a href="#create">Design your look</a><a href="inspiration/index.html" target="_top" target="_top">Inspiration</a></div><div><h4>Discover</h4><a href="#how-it-works">How it works</a><a href="#top">Back to top</a></div><div><h4>Customer care</h4><a data-store-route="shipping" href="/us/shipping" target="_top">Shipping</a><a data-store-route="returns" href="/us/returns" target="_top">Custom order policy</a><a data-store-route="contact" href="/us/contact" target="_top">Contact</a></div></div></div><div class="footer-bottom"><span>© 2026 VIBEYA.</span><span>Designed for expression. Made to be yours.</span></div></div>
+    <div class="container"><div class="footer-top"><div><a class="logo" href="#top">VIBEYA<span>.</span></a><p class="footer-desc">A place to make things that feel like you. No templates for personality. No rules for imagination.</p><div class="footer-socials"><a href="https://www.facebook.com/profile.php?id=61596154035820" target="_blank" rel="noopener noreferrer" aria-label="VIBEYA on Facebook" title="Facebook"><svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.5 1.6-1.5h1.7V3.9c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3V10H7.3v3h2.8v8h3.4Z"/></svg></a><a href="https://www.instagram.com/vibeya.studio/" target="_blank" rel="noopener noreferrer" aria-label="VIBEYA on Instagram" title="Instagram"><svg class="instagram-mark" aria-hidden="true" viewBox="0 0 24 24"><rect x="3.25" y="3.25" width="17.5" height="17.5" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.7" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a></div></div><div class="footer-links"><div><h4>Explore</h4><a href="#shop">Shop products</a><a href="#create">Design your look</a><a href="inspiration/index.html">Inspiration</a></div><div><h4>Discover</h4><a href="#how-it-works">How it works</a><a href="#top">Back to top</a></div><div><h4>Customer care</h4><a data-store-route="shipping" href="/us/shipping" target="_top">Shipping</a><a data-store-route="returns" href="/us/returns" target="_top">Custom order policy</a><a data-store-route="contact" href="/us/contact" target="_top">Contact</a></div></div></div><div class="footer-bottom"><span>© 2026 VIBEYA.</span><span>Designed for expression. Made to be yours.</span></div></div>
   </footer>
 
   <!-- AI artwork generation is connected through the server; checkout remains handled by Medusa. -->
@@ -928,6 +947,7 @@
   <div class="overlay" id="searchOverlay" role="presentation"><div class="dialog search-dialog" role="dialog" aria-modal="true" aria-labelledby="searchTitle"><div class="dialog-head"><div><h2 id="searchTitle">What would you like to make?</h2><p>Search products and design inspiration in one place.</p></div><button class="close-btn" id="closeSearch" aria-label="Close">×</button></div><div class="inner"><input class="search-input" id="siteSearch" type="search" placeholder="Try 'hoodie', 'retro', 'cute cat'..." aria-label="Search products"/><div class="search-results" id="searchResults"></div></div></div></div>
   <div class="drawer-overlay" id="drawerOverlay"></div><aside class="drawer" id="cartDrawer" aria-labelledby="drawerTitle"><div class="drawer-head"><h2 id="drawerTitle">Your Bag <span id="drawerCount">(0)</span></h2><button class="close-btn" id="closeCart" aria-label="Close">×</button></div><div id="cartContent"></div><div class="drawer-note">Demo only. Items are stored in this browser; delivery, payment and order submission have not been connected.</div></aside>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="assets/shared/market-translations.generated.js?v=market-copy-3"></script>
 <script>
 (function(){
   // ===============================================================
@@ -942,7 +962,7 @@
       name:'VIBEYA Custom Cotton Long Sleeve Tee',
       short:'Cotton long sleeve tee',
       price:'$19.99 USD',
-      category:'Custom Clothing',
+      category:'Apparel',
       supplier:'SDS',
       supplierId:'167256',
       supplierUrl:'https://www.sdsdiy.com/portal/detail/167256',
@@ -956,7 +976,7 @@
        name:'VIBEYA Washed Vintage Hooded Sweatshirt',
        short:'Washed vintage hoodie',
        price:'$29.99 USD',
-       category:'Custom Clothing',
+       category:'Apparel',
        supplier:'SDSDIY',
        supplierId:'174750',
        supplierUrl:'https://www.sdsdiy.com/portal/detail/174750',
@@ -970,7 +990,7 @@
         name:'VIBEYA Custom Knitted Beanie',
         short:'Custom knitted beanie',
         price:'$14.99 USD',
-        category:'Custom Hats',
+        category:'Apparel',
         supplier:'SDSDIY',
         supplierId:'172647',
         supplierUrl:'https://www.sdsdiy.com/portal/detail/172647',
@@ -985,7 +1005,7 @@
         name:'VIBEYA Custom 20 oz Stainless Steel Tumbler',
         short:'Custom 20 oz tumbler',
         price:'$19.99 USD',
-        category:'Custom Tumblers',
+        category:'Drinkware',
         supplier:'SDSDIY',
         supplierId:'128646',
         supplierUrl:'https://www.sdsdiy.com/portal/detail/128646',
@@ -1000,7 +1020,7 @@
        name:'VIBEYA Custom 3D Optical Illusion Bath Mat',
        short:'Custom 3D bath mat',
        price:'$19.99 USD',
-       category:'Custom Home & Bath',
+       category:'Home & Bath',
        supplier:'SDSDIY',
        supplierId:'138708',
        supplierUrl:'https://www.sdsdiy.com/portal/detail/138708',
@@ -1009,7 +1029,7 @@
        sizes:['40x60cm','50x80cm','60x90cm'],
        sizeLabels:{'40x60cm':'15.7 × 23.6 in','50x80cm':'19.7 × 31.5 in','60x90cm':'23.6 × 35.4 in'},
        sizePrices:{'40x60cm':19.99,'50x80cm':21.99,'60x90cm':23.99},
-       variantSummary:'Photo upload + AI prompt design · 3 sizes'
+       variantSummary:'Custom full-surface print · 3 sizes'
      },
      {
        id:'sds-97226',
@@ -1017,7 +1037,7 @@
        name:'VIBEYA Custom Flannel Throw Blanket',
        short:'Custom flannel throw blanket',
        price:'$14.99 USD',
-       category:'Custom Home & Bath',
+       category:'Home & Bath',
        supplier:'SDSDIY',
        supplierId:'97226',
        supplierUrl:'https://www.sdsdiy.com/portal/detail/97226',
@@ -1034,7 +1054,7 @@
         name:'VIBEYA Custom Prompt-Designed Apron',
         short:'Custom black cooking apron',
         price:'$17.99',
-        category:'Custom Kitchen & Dining',
+        category:'Kitchen & Dining',
         supplier:'SDSDIY',
         supplierId:'275844',
         supplierUrl:'https://www.sdsdiy.com/portal/detail/275844',
@@ -1050,7 +1070,7 @@
        name:'VIBEYA Custom Shower Curtain',
        short:'Custom shower curtain',
        price:'$17.99 USD',
-       category:'Custom Home & Bath',
+       category:'Home & Bath',
        supplier:'VIBEYA',
        asset:'assets/products/vibeya-shower-curtain/36x70.8in.webp',
        colors:['White'],
@@ -1059,12 +1079,24 @@
        sizeLabels:{'36x70.8in':'36 × 70.8 in (90 × 180 cm)','60x70.8in':'60 × 70.8 in (152 × 180 cm)','70.8x70.8in':'70.8 × 70.8 in (180 × 180 cm)','70.8x84in':'70.8 × 84 in (180 × 213 cm)'},
        variantSummary:'Single-sided full-bleed print · 4 sizes'
      },{
+       id:'sds-63823',
+       handle:'vibeya-custom-womens-yoga-set',
+       name:"VIBEYA Custom Women's Yoga Set",
+       short:'Custom women’s yoga set · top + shorts',
+       price:'$19.99 USD',
+       category:'Apparel',supplier:'SDSDIY',supplierId:'63823',
+       supplierUrl:'https://www.sdsdiy.com/portal/detail/63823',
+       asset:'assets/products/sds-63823/us/01-carousel.webp',
+       colors:['White'],sizes:['XS','S','M','L','XL','2XL'],
+       colorOptionLabel:'Base color',sizeOptionLabel:'Set size',
+       variantSummary:'Design or upload · matching top + shorts · sizes XS–2XL'
+     },{
        id:'sds-137892',
        handle:'vibeya-custom-womens-tankini-swimsuit-set',
        name:'VIBEYA Custom Women’s Tankini Swimsuit Set',
        short:'Custom women’s tankini swimsuit',
        price:'$19.99 USD',
-        category:'Custom Clothing',
+       category:'Apparel',
        supplier:'SDSDIY',
        supplierId:'137892',
        supplierUrl:'https://www.sdsdiy.com/portal/detail/137892',
@@ -1073,93 +1105,80 @@
        sizes:['S','M','L','XL'],
        variantSummary:'Design or upload artwork · 5 colors · Sizes S–XL'
      },{
-        id:'sds-63823',
-        handle:'vibeya-custom-womens-yoga-set',
-        catalogOnly:true,
-        name:"VIBEYA Custom Women's Yoga Set",
-        short:"Custom women's yoga set",
-        price:'$19.99 USD',
-        image:'assets/products/sds-63823/us/01-carousel.webp',
-        category:'Apparel',
-        supplier:'SDSDIY',
-        supplierId:'63823',
-        supplierUrl:'https://www.sdsdiy.com/portal/detail/63823',
-        asset:'assets/products/sds-63823/blank-print-base.png',
-        colors:['White'],
-        sizes:['XS','S','M','L','XL','2XL'],
-        colorOptionLabel:'Base color',
-        sizeOptionLabel:'Size',
-        variantSummary:'One coordinated design · Top + Shorts · Sizes XS–2XL'
-      },{
        id:'sds-233939',
        handle:'vibeya-custom-kids-basketball-uniform',
        name:"VIBEYA Custom Kids' Basketball Uniform",
        short:'Custom kids’ basketball jersey and shorts set',
        price:'$19.99 USD',
-        category:'Custom Clothing',
+       category:'Apparel',
        supplier:'SDSDIY',
        supplierId:'233939',
        supplierUrl:'https://www.sdsdiy.com/portal/detail/233939',
        asset:'assets/products/sds-233939/black/01-carousel.jpg',
        colors:['Black','White','Red','Sapphire Blue','Pure yellow'],
        sizes:['100CM','110CM','120CM','130CM','140CM'],
-        variantSummary:'Design with a prompt · 5 colors · 5 sizes · 3 print areas'
+       variantSummary:'Design with a prompt · 5 colors · 5 sizes · 3 print areas'
       },
       {
-        id:'mg8014061',
-        handle:'vibeya-custom-metal-bottle-cap-wall-sign',
-        catalogOnly:true,
-        name:'VIBEYA Custom Metal Bottle Cap Wall Sign',
-        short:'Custom round metal wall sign',
-        price:'$16.99 USD',
-        image:'assets/products/mg8014061/black/01-carousel.webp',
-        sizePrices:{'1 Piece':16.99,'2 Pieces':22.99,'3 Pieces':28.99},
-        category:'Custom Wall Decor',
-        supplier:'SDSDIY',
-        supplierId:'124106',
-        supplierUrl:'https://www.sdsdiy.com/portal/detail/124106',
-        asset:'assets/products/mg8014061/black/01-carousel.webp',
-        colors:['Black'],
-        sizes:['1 Piece','2 Pieces','3 Pieces'],
-        colorOptionLabel:'Base color',
-        sizeOptionLabel:'Size',
+        id:'mg8014061',handle:'vibeya-custom-metal-bottle-cap-wall-sign',
+        name:'VIBEYA Custom Metal Bottle Cap Wall Sign',short:'Custom round metal wall sign',price:'$16.99 USD',
+        sizePrices:{'1 Piece':16.99,'2 Pieces':22.99,'3 Pieces':28.99},category:'Home & Bath',supplier:'SDSDIY',supplierId:'124106',
+        supplierUrl:'https://www.sdsdiy.com/portal/detail/124106',asset:'assets/products/mg8014061/black/01-carousel.png',
+        colors:['Black'],sizes:['1 Piece','2 Pieces','3 Pieces'],colorOptionLabel:'Base color',sizeOptionLabel:'Size',
         variantSummary:'Design with a prompt · Black · 1, 2, or 3 pieces'
-      },
-      {
-        id:'mg8012002',
-        handle:'vibeya-custom-washed-denim-baseball-cap',
-        catalogOnly:true,
-        name:'VIBEYA Custom Washed Denim Baseball Cap',
-        short:'Custom washed denim baseball cap',
-        price:'$14.99 USD',
-        image:'assets/products/mg8012002/black/01-carousel.webp',
-        category:'Custom Hats',
-        supplier:'SDSDIY',
-        supplierId:'96763',
-        supplierUrl:'https://www.sdsdiy.com/portal/detail/96763',
-        asset:'assets/products/mg8012002/black/01-carousel.webp',
-        colors:['Black','Khaki','Gray'],
-        sizes:['One Size'],
-        colorOptionLabel:'Base color',
-        sizeOptionLabel:'Size',
-        variantSummary:'Design or upload artwork · 3 colors · One Size'
       }
    ];
   const inspirations=[{title:'Funny Skeleton — Lazy Mood',tags:['Funny','Skull','Streetwear'],prompt:'Front: A laid-back cartoon skeleton lounging in headphones and a purple hoodie with a coffee cup, cheeky expression, street graffiti lettering PROFESSIONAL PROCRASTINATOR. Back: ZERO TASKS TODAY in bold typography, with matching lime-and-purple doodles. Keep the designs connected in color and attitude.'}];
   const inlineIdeaAssets={0:'assets/inspiration/skeleton-illustration.webp'};
   const asset=i=>inlineIdeaAssets[i];
   const $=s=>document.querySelector(s);
-  const marketCountryCode=()=>{
-    const queryCountry=new URLSearchParams(location.search).get('country');
-    if(queryCountry)return queryCountry.toLowerCase();
-    try{
-      const routeCountry=window.parent.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i)?.[1];
-      if(routeCountry)return routeCountry.toLowerCase();
-    }catch{}
-    return 'us';
-  };
+  const marketCountryCode=()=>new URLSearchParams(location.search).get('country')||'us';
   const marketPath=path=>`/${encodeURIComponent(marketCountryCode())}/${String(path||'').replace(/^\/+/, '')}`;
-  if(window.parent===window){fetch('/api/vibeya/session',{credentials:'same-origin',cache:'no-store'}).then(response=>{if(!response.ok)throw new Error('Session check unavailable');return response.json();}).then(session=>{const authenticated=Boolean(session?.authenticated);document.body.dataset.vibeyaAuth=authenticated?'authenticated':'guest';const label=authenticated?'Account':'Sign in';document.querySelectorAll('.account-link,.account-menu-link,.sign-in-link').forEach(link=>{link.textContent=label;link.setAttribute('aria-label',authenticated?'Account':'Sign in or register');});}).catch(()=>{});}
+  const marketCatalog=window.VIBEYA_MARKET_TRANSLATIONS;
+  const navTranslations=marketCatalog.navigation;
+  const applyNavigationLocale=locale=>{
+    const labels=navTranslations[locale]||navTranslations['en-US'];
+    document.documentElement.lang=locale||'en-US';
+    document.querySelectorAll('[data-nav-key]').forEach(element=>{
+      const key=element.dataset.navKey;
+      if(labels[key])element.textContent=key==='create'?`✦  ${labels[key]}`:labels[key];
+    });
+    $('#searchBtn')?.setAttribute('aria-label',labels.search);
+    $('#cartBtn')?.setAttribute('aria-label',labels.bag);
+    $('#navDestination')?.setAttribute('aria-label',labels.shipTo);
+    $('#navLanguage')?.setAttribute('aria-label',labels.language);
+    document.querySelector('.logo')?.setAttribute('aria-label',`VIBEYA ${labels.home}`);
+    const countryNames=marketCatalog.countryNames[locale]||marketCatalog.countryNames['en-US'];
+    navDestination?.querySelectorAll('option').forEach(option=>{option.textContent=countryNames[option.value]||option.value;});
+  };
+  window.vibeyaSetNavigationLocale=applyNavigationLocale;
+  const navDestination=$('#navDestination'),navLanguage=$('#navLanguage');
+  const marketCode=marketCountryCode().toLowerCase();
+  const marketLocales=Object.fromEntries(Object.entries(marketCatalog.markets).map(([market,config])=>[market,config.locales]));
+  const defaultLocales=Object.fromEntries(Object.entries(marketCatalog.markets).map(([market,config])=>[market,config.defaultLocale]));
+  const localeNames=marketCatalog.localeNames;
+  const supportedLanguages=marketLocales[marketCode]||marketLocales.us;
+  const currentLocale=new URLSearchParams(location.search).get('locale');
+  const marketDefaultLocale=defaultLocales[marketCode]||'en-US';
+  const activeLocale=supportedLanguages.includes(currentLocale)?currentLocale:marketDefaultLocale;
+  if(navLanguage)navLanguage.replaceChildren(...supportedLanguages.map(locale=>new Option(localeNames[locale],locale)));
+  if(navDestination)navDestination.value=marketCountryCode().toLowerCase();
+  if(navLanguage)navLanguage.value=activeLocale;
+  applyNavigationLocale(navLanguage?.value||'en-US');
+  const withMarketContext=href=>{const url=new URL(href,location.href);if(url.pathname.includes('/vibeya/inspiration/')){url.searchParams.set('country',marketCountryCode().toLowerCase());url.searchParams.set('locale',navLanguage?.value||marketDefaultLocale);}return url.pathname+url.search+url.hash;};
+  document.querySelectorAll('a[href*="inspiration/index.html"]').forEach(link=>link.href=withMarketContext(link.href));
+  navDestination?.addEventListener('change',()=>{
+    const countryCode=navDestination.value.toLowerCase();
+    if(window.parent!==window)window.parent.postMessage({type:'vibeya:change-destination',countryCode},location.origin);
+    else location.assign(`/${countryCode}${location.hash||'#top'}`);
+  });
+  navLanguage?.addEventListener('change',()=>{
+    const locale=navLanguage.value;
+    if(window.parent!==window)window.parent.postMessage({type:'vibeya:change-language',locale},location.origin);
+    else{const params=new URLSearchParams(location.search);params.set('locale',locale);location.search=params.toString();}
+  });
+  if(window.parent===window){fetch('/api/vibeya/session',{credentials:'same-origin',cache:'no-store'}).then(response=>{if(!response.ok)throw new Error('Session check unavailable');return response.json();}).then(session=>{const authenticated=Boolean(session?.authenticated);document.body.dataset.vibeyaAuth=authenticated?'authenticated':'guest';const labels=navTranslations[navLanguage?.value]||navTranslations['en-US'];document.querySelectorAll('.account-link,.account-menu-link,.sign-in-link').forEach(link=>{const key=link.classList.contains('sign-in-link')&&!authenticated?'signIn':'account';link.textContent=labels[key];link.setAttribute('aria-label',labels[key]);});}).catch(()=>{});}
+  if(["ca","jp","mx"].includes(marketCountryCode().toLowerCase())){products.splice(0,products.length,...products.filter(product=>product.id==="sds-63823"));}
   let chosen=products[0],chosenArt=0,hasPreview=false,saved=[],generatedArtworkDataUrl=null,designCreditsRemaining=null,designGenerationInProgress=false,currentDesignJobId=null;
   const activeGenerationRequests=new Set();
   let studioViewMode='product', studioImageIndex=0, studioPreviewSide='front';
@@ -1173,7 +1192,6 @@
     if(product?.id==='sds-172647')return ({Black:'Black',Red:'Red',Gray:'Medium Gray'}[color]||color);
     if(product?.id==='sds-137892')return ({Black:'Black',Red:'Red',Pink:'Pink',Blue:'Blue',Cyan:'Cyan'}[color]||color);
     if(product?.id==='sds-233939')return ({Black:'Black',White:'White',Red:'Red','Sapphire Blue':'Sapphire Blue','Pure yellow':'Pure Yellow'}[color]||color);
-    if(product?.id==='mg8012002')return ({Black:'Washed Black',Khaki:'Washed Khaki',Gray:'Washed Gray'}[color]||color);
     return ({Black:'Black',White:'White',Red:'Red',Gray:'Heather Gray',LightGray:'Light Heather Gray',Cream:'Cream',Navy:'Navy'}[color]||color);
   }
   function designColorHex(product,color){
@@ -1245,8 +1263,7 @@
     const host=$('#metalSignDesignSlots');if(!host)return;
     const count=chosen.id==='mg8014061'?Math.max(1,Math.min(3,Number.parseInt(selectedSize,10)||1)):0;
     host.hidden=!count;
-    const promptGroup=$('#studioPrompt').closest('.studio-prompt-group');
-    promptGroup.hidden=Boolean(count);
+    const promptGroup=$('#studioPrompt').closest('.studio-prompt-group');promptGroup.hidden=Boolean(count);
     if(!count){host.innerHTML='';return;}
     const guidance=[
       {label:'Design instruction · 1 sign',placeholder:'Describe the artwork for your sign…',hint:'One prompt creates one printed design.'},
@@ -1264,21 +1281,21 @@
       both:{mode:'Front + Back',hint:'Describe both sides and how they relate.',guide:'Keep each print within its marked area.',placeholder:'Front: Describe the print…\n\nBack: Describe the print…\n\nHow should they relate?'},
       wrap:{mode:'Full Wrap',hint:'Describe the full-wrap design for a three-view tumbler product image.',guide:'Shows the white tumbler from the front, side, and back with a full-body wrap print.',placeholder:'Describe the subject, colors, pattern, and any text…'}
     };
-    const v=chosen.id==='sds-233939'
+    const v=chosen.id==='sds-63823'
+      ?{mode:'One matching set · Top + Shorts',hint:'Describe one coordinated print or upload one artwork file. The design is previewed across both pieces together.',guide:'The crop top and shorts are one product and cannot be selected separately.',placeholder:'Describe the artwork you want across the complete yoga set…'}
+      :chosen.id==='sds-233939'
       ?{mode:`${selectedUniformZones.length} Print Area${selectedUniformZones.length===1?'':'s'} Selected`,hint:`Describe artwork for: ${selectedUniformZoneLabel()}.`,guide:'Each selected area gets its own design. Unselected areas stay in the base color.',placeholder:uniformPrintZones.filter(([id])=>selectedUniformZones.includes(id)).map(([,label])=>`${label}: Describe the artwork…`).join('\n\n')}
       :chosen.id==='sds-138708'&&selectedPrint==='wrap'
       ?{mode:'Full Surface · Single Sided',hint:'Describe the artwork for the entire printable face of the bath mat.',guide:'One complete print covers the mat face edge to edge.',placeholder:'Describe the full-surface bath mat design…'}
       :chosen.id==='vibeya-shower-curtain'
       ?{mode:'Full Surface · Single Sided',hint:'Describe the artwork for the entire curtain face.',guide:'One continuous print covers the curtain from side seam to side seam and from below the header to the bottom hem.',placeholder:'Describe the full-surface shower curtain design…'}
-      :yogaSet
-      ?{mode:'Complete Set · Top + Shorts',hint:'Give separate instructions for the top and shorts. The preview will apply each design only to its assigned garment, on both front and back views.',guide:'Use “Top:” and “Shorts:” labels to assign different artwork. Example: Top: blue floral print. Shorts: solid navy with a small matching floral motif.',placeholder:'Top: Describe the top design, colors, and placement…\n\nShorts: Describe the shorts design, colors, and placement…\n\nOptional: Explain which colors or style details should tie the two designs together.'}
       :variants[selectedPrint]||variants.none;
     $('#studioPromptMode').textContent=v.mode;
     $('#studioPromptHelper').textContent=v.hint;
     $('#studioPromptExample').textContent=v.guide;
     $('#studioPrompt').placeholder=v.placeholder;
     syncMetalSignDesignSlots();
-    $('#studioOutputNote').textContent=chosen.id==='sds-128646'?'Your three-view white tumbler product image will appear in My Designs.':chosen.id==='sds-138708'?'Your full-surface bath mat product image will appear in My Designs.':chosen.id==='sds-97226'?'Your full-front printed blanket, hanging from two hooks, will appear in My Designs.':chosen.id==='vibeya-shower-curtain'?'Your full-surface printed shower curtain, hanging against a white background, will appear in My Designs.':chosen.id==='sds-172647'?'Your beanie preview will appear in My Designs with front and back views; print stays inside the front cuff area only.':chosen.id==='sds-233939'?`Your basketball set will be customized on: ${selectedUniformZoneLabel()}.`:'Your generated design will appear in My Designs.';
+    $('#studioOutputNote').textContent=chosen.id==='sds-128646'?'Your three-view white tumbler product image will appear in My Designs.':chosen.id==='sds-138708'?'Your full-surface bath mat product image will appear in My Designs.':chosen.id==='sds-97226'?'Your full-front printed blanket, hanging from two hooks, will appear in My Designs.':chosen.id==='vibeya-shower-curtain'?'Your full-surface printed shower curtain, hanging against a white background, will appear in My Designs.':chosen.id==='sds-172647'?'Your beanie preview will appear in My Designs with front and back views; print stays inside the front cuff area only.':chosen.id==='sds-63823'?'Your coordinated yoga-set preview will show the same custom design across the crop top and shorts.':chosen.id==='sds-233939'?`Your basketball set will be customized on: ${selectedUniformZoneLabel()}.`:'Your generated design will appear in My Designs.';
   }
   function renderStudioReferences(){
     $('#uploadCount').textContent=uploadedReferences.length+' / 6 uploaded';
@@ -1343,29 +1360,16 @@
   // Both libraries are driven by data arrays, not hand-written page cards.
   // More items can be added without expanding the homepage or changing navigation.
   const catalogProducts=[...products];
-  const listingParams=new URLSearchParams(location.search);
-  const listingScoped=listingParams.get('listingScoped')==='1';
-  const listingCategory=listingParams.get('listingCategory')||'';
-  const listingTitle=listingParams.get('listingTitle')||'';
-  const allowedProductHandles=new Set((listingParams.get('listingHandles')||'').split(',').filter(Boolean));
-  const productCategoryOrder=['Custom Clothing','Custom Tumblers','Custom Home & Bath','Custom Kitchen & Dining','Custom Hats','Custom Wall Decor','New arrivals'];
-  let productTags=['All Products',...productCategoryOrder.filter(category=>category!=='New arrivals'||catalogProducts.some(product=>product.category===category))];
+  if(["ca","jp","mx"].includes(marketCountryCode().toLowerCase())){catalogProducts.splice(0,catalogProducts.length,...catalogProducts.filter(product=>product.id==="sds-63823"));}
+  let productTags=['All Products', ...new Set(catalogProducts.map(p=>p.category))];
   const ideaTags=['All Inspiration','Animals','Cute','Funny','Nature','Retro','Art','Space'];
-  let productTag=productTags.includes(listingCategory)?listingCategory:'All Products',ideaTag='All Inspiration',ideaVisible=9;
-  if(listingTitle){const categoryCopy={'Custom Clothing':'Explore custom clothing, from personalized shirts and hoodies to team gear and swimwear. Upload artwork or describe a design, preview it, and order online.','Custom Tumblers':'Design a custom tumbler with your photo, artwork, or a written prompt. Preview the full-wrap design before ordering.','Custom Home & Bath':'Explore custom bath mats, shower curtains, and throw blankets. Upload your image or describe a design, preview it, and order online.','Custom Kitchen & Dining':'Create a custom apron from your photo, artwork, or design prompt. Preview your printed design before ordering.','Custom Hats':'Design a custom hat, from a knitted beanie to a washed denim baseball cap. Upload artwork or describe your idea, then preview it before ordering.','Custom Wall Decor':'Create a custom metal wall sign with your artwork, photo, or design prompt. Preview it before ordering.'};const heading=$('#shop .catalog-hero h2'),crumb=$('#shop .catalog-crumb'),lead=$('#shop .catalog-hero p'),search=$('#productSearch');if(heading)heading.textContent=listingTitle.toUpperCase();if(crumb)crumb.textContent=`HOME / ${listingTitle.toUpperCase()}`;if(lead)lead.textContent=categoryCopy[listingTitle]||`Explore ${listingTitle.toLowerCase()} from VIBEYA. Upload artwork or describe a design, preview it before ordering.`;if(search)search.setAttribute('aria-label',`Search ${listingTitle.toLowerCase()} products`);}
+  let productTag='All Products',ideaTag='All Inspiration',productVisible=8,ideaVisible=9;
   const itemPrice=p=>{const v=(p.price.match(/[\d.]+/)||[])[0];return v===undefined?null:Number(v);};
   const sizeLabel=(product,size)=>product?.sizeLabels?.[size]||size||'Select a size';
-  const selectedProductPrice=(product,size)=>product?.sizePrices?.[size]??itemPrice(product);
-  const marketQuery=new URLSearchParams(location.search);
-  const marketCurrency=(marketQuery.get('marketCurrency')||({us:'USD',ca:'CAD',jp:'JPY',mx:'MXN'}[marketCountryCode()]||'USD')).toUpperCase();
-  const marketPriceValue=marketQuery.get('marketPrice');
-  const marketStartingPrice=marketPriceValue===null?undefined:Number(marketPriceValue);
-  const usdPrice=value=>{
-    const amount=Number.isFinite(marketStartingPrice)?marketStartingPrice:value;
-    if(amount===null||amount===undefined||!Number.isFinite(Number(amount)))return '';
-    return new Intl.NumberFormat(marketCountryCode()==='jp'?'ja-JP':marketCountryCode()==='mx'?'es-MX':marketCountryCode()==='ca'?'en-CA':'en-US',{style:'currency',currency:marketCurrency}).format(Number(amount))+' '+marketCurrency;
-  };
-  const cardColorHex={Black:'#252427',White:'#ffffff',Red:'#e52537',Pink:'#ec4c91',Blue:'#3859d7',Cyan:'#22c3d7',Gray:'#77797b',Khaki:'#aa936d',LightGray:'#d7d7d9',Cream:'#f2e4cf',Navy:'#283456','Sapphire Blue':'#315ad8','Pure yellow':'#ffe100'};
+  const selectedProductPrice=(product,size)=>product?.marketPrice??product?.sizePrices?.[size]??itemPrice(product);
+  const usdPrice=value=>value===null||value===undefined?'':new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(value)+' USD';
+  const selectedMarketPrice=product=>{const value=selectedProductPrice(product,selectedSize);if(value===null||value===undefined)return '';const currency=product?.marketCurrency||'USD';return new Intl.NumberFormat('en-US',{style:'currency',currency}).format(value)+' '+currency;};
+  const cardColorHex={Black:'#17171b',White:'#ffffff',Red:'#e52537',Pink:'#ec4c91',Blue:'#3859d7',Cyan:'#22c3d7',Gray:'#64666c',LightGray:'#d7d7d9',Cream:'#f2e4cf',Navy:'#283456','Sapphire Blue':'#315ad8','Pure yellow':'#ffe100'};
   const cardColorNames={Black:'Black',White:'White',Red:'Red',Gray:'Heather Gray',LightGray:'Light Heather Gray',Cream:'Cream',Navy:'Navy'};
   const productVariants={
     'sds-167256':{
@@ -1374,7 +1378,7 @@
       sizesLabel:'Sizes XS–3XL',
       details:{
         title:'Custom Cotton Long Sleeve Tee',eyebrow:'VIBEYA / FIRST COLLECTION',
-        intro:'Upload a photo or artwork, or describe a custom long sleeve shirt design with a prompt. Choose from seven colors, then preview front, back, or double-sided printing.',
+        intro:'Your vibe, your rules. Choose from seven colors, then create your own front, back, or double-sided artwork.',
         highlights:['100% Cotton','Custom Front / Back'],
         rows:[['XS',69,81,52,62],['S',71,91,53,63],['M',75,102,54,64],['L',79,112,55,65],['XL',81,122,56,66],['2XL',84,132,57,67],['3XL',85,141,58,68]],
         guide:'View size guide (cm)',note:'Supplier measurements in centimeters. Manual measurement may vary by 1–2 cm.',
@@ -1434,15 +1438,15 @@
       colorOptionLabel:'Print design',
       details:{
         title:'Custom 3D Optical Illusion Bath Mat',eyebrow:'VIBEYA / CUSTOM HOME',
-         intro:'Create a custom photo bath mat by uploading your own image, or describe an original design with a text prompt in the AI design studio. Preview your full-surface print, choose from three sizes, and order a personalized bath mat online.',
+        intro:'Add a little absurdity to your daily reset. This custom bath mat features a playful 3D optical-illusion print, with artwork printed across the full surface and edges.',
         highlights:['Full-surface print','Thickened design','Short pile','Non-slip design'],
         measurementRows:[['Small','15.7 × 23.6 in'],['Medium','19.7 × 31.5 in'],['Large','23.6 × 35.4 in']],
         sizeLabels:{'40x60cm':'15.7 × 23.6 in','50x80cm':'19.7 × 31.5 in','60x90cm':'23.6 × 35.4 in'},
         sizePrices:{'40x60cm':19.99,'50x80cm':21.99,'60x90cm':23.99},
         guide:'View dimensions (in)',note:'Approximate dimensions converted from supplier sizes.',
         services:[['Made in the USA','Manufactured in the United States.'],['Ships within 24 hours','Dispatched from the USA.'],['Free U.S. shipping','Shipping to U.S. addresses only.']],
-         productDetails:'Custom bath mat with a thickened build, short pile, neat edging, and a non-slip design. Choose 15.7 × 23.6, 19.7 × 31.5, or 23.6 × 35.4 in. Your print covers the full surface and edges.',
-         productionDetails:'Upload a photo or describe your idea with a text prompt to create or adapt artwork in the AI design studio. Preview your design on the bath mat before ordering. The duck artwork shown is an example; your custom print covers the full surface and edges.'
+        productDetails:'Custom bath mat with thickened construction, short pile, neat edging, and a non-slip design. The custom print extends across the full surface and edges.',
+        productionDetails:'Create or upload your own artwork. The 3D Bubble Duck image is an example design; your custom print covers the full mat, including the edges.'
       }
     },
     'sds-97226':{
@@ -1496,6 +1500,21 @@
         productionDetails:'Create a design with a written prompt or upload your artwork, then preview the result before ordering. The sample prints shown in the gallery are examples only. Your custom print is applied to the front panel of the tankini top; the shorts remain in the selected solid color.'
       }
     },
+    'sds-63823':{
+      colors:{White:['White · black trim','#f7f6f2']},
+      image:()=> 'assets/products/sds-63823/us/01-carousel.webp',
+      sizesLabel:'Sizes XS–2XL',colorOptionLabel:'Base color',sizeOptionLabel:'Set size',
+      details:{
+        title:"Custom Women's Yoga Set",eyebrow:'VIBEYA / CUSTOM ACTIVEWEAR',
+        intro:'Create one coordinated yoga set with your own uploaded artwork or a written design prompt. Preview the matching print across both the crop top and mid-thigh shorts before ordering. The two pieces are always customized and sold together.',
+        highlights:['Matching crop top + shorts','Customize both pieces together','77% polyester · 23% spandex','Removable bra pads'],
+        measurementRows:[['XS','Top 14.5 cm length · 33 cm half bust · Shorts 25.5 cm length · 30 cm half hip'],['S','Top 15 cm length · 35.5 cm half bust · Shorts 26.5 cm length · 32.5 cm half hip'],['M','Top 15.5 cm length · 38 cm half bust · Shorts 27.5 cm length · 35 cm half hip'],['L','Top 16 cm length · 40.5 cm half bust · Shorts 28.5 cm length · 37.5 cm half hip'],['XL','Top 16.5 cm length · 43 cm half bust · Shorts 29.5 cm length · 40 cm half hip'],['2XL','Top 17 cm length · 45.5 cm half bust · Shorts 30.5 cm length · 42.5 cm half hip']],
+        guide:'View set size guide (cm / in)',note:'Flat-lay garment measurements. Manual measurement may vary by 1–2 cm. Compare both pieces with a similar garment before choosing.',
+        services:[['One complete set','The crop top and shorts are selected, printed, and sold together.'],['Design or upload','Describe your idea or upload artwork, then preview the same coordinated design across both pieces.'],['Free shipping','Free shipping to the United States, Canada, Japan, and Mexico.']],
+        productDetails:'Women’s two-piece yoga set: a white crop top with black binding around the neckline and armholes, plus matching mid-thigh shorts. Fabric: 77% polyester and 23% spandex. Removable bra pads are included. Sizes XS–2XL.',
+        productionDetails:'Enter a written design prompt or upload your artwork. Review the coordinated preview across the top and shorts before ordering. This item is one complete set; the top and shorts cannot be purchased or customized separately. Free shipping to the United States, Canada, Japan, and Mexico.'
+      }
+    },
     'sds-233939':{
       colors:{Black:['Black','#17171b'],White:['White','#ffffff'],Red:['Red','#e52d3d'],'Sapphire Blue':['Sapphire Blue','#315ad8'],'Pure yellow':['Pure Yellow','#ffe100']},
       image:(color)=>'assets/products/sds-233939/'+({Black:'black',White:'white',Red:'red','Sapphire Blue':'blue','Pure yellow':'yellow'}[color]||'black')+'/01-carousel.jpg',
@@ -1527,24 +1546,8 @@
         productionDetails:'Describe an original print with a written prompt, preview the result on the black apron, and place a custom order. The gallery print is a sample. The print shown is on the front bib.'
       }
     },
-    'sds-63823':{
-      colors:{White:['White','#ffffff']},
-      image:()=> 'assets/products/sds-63823/us/01-carousel.webp',
-      sizesLabel:'Sizes XS–2XL',colorOptionLabel:'Base color',sizeOptionLabel:'Size',
-      details:{
-        title:"Custom Women's Yoga Set",eyebrow:'VIBEYA / CUSTOM ACTIVEWEAR',
-        intro:'Create one coordinated print for the complete two-piece yoga set. Upload artwork or describe a design with a prompt, preview it across the crop top and shorts, then confirm before ordering. The top and shorts are customized and sold together.',
-        highlights:['Matching crop top + mid-thigh shorts','One coordinated design across both pieces','Upload artwork or design from a prompt','Sizes XS–2XL'],
-        measurementRows:[['Set','Crop top + mid-thigh shorts'],['Material','77% polyester · 23% spandex'],['Print','Coordinated full set'],['Base color','White']],
-        guide:'View product details (cm / in)',note:'Supplier garment measurements may vary by 1–2 cm.',
-        services:[['Design the complete set','One artwork direction is applied across the crop top and shorts together.'],['Preview before ordering','Review the coordinated print placement before confirming your custom set.'],['Free shipping','Available in the United States, Canada, Japan, and Mexico.']],
-        productDetails:'A two-piece women’s yoga set with a crop top and mid-thigh shorts. The white top has black binding around the neckline and armholes; the shorts have a wide waistband. Made from 77% polyester and 23% spandex.',
-        productionDetails:'Upload your own artwork or describe an original design with a prompt. The same coordinated print is applied across the top and shorts; both pieces are customized and sold together.'
-      }
-    },
     'mg8014061':{
-      colors:{Black:['Black','#17171b']},
-      image:()=> 'assets/products/mg8014061/black/01-carousel.webp',
+      colors:{Black:['Black','#17171b']},image:()=> 'assets/products/mg8014061/black/01-carousel.png',
       sizesLabel:'1, 2, or 3 pieces',colorOptionLabel:'Base color',sizeOptionLabel:'Size',
       details:{
         title:'Custom Metal Bottle Cap Wall Sign',eyebrow:'VIBEYA / CUSTOM HOME',
@@ -1555,21 +1558,6 @@
         services:[['Design from a prompt','Describe an idea or upload artwork, then preview it on the sign before ordering.'],['Made personal','The gallery artwork is an example; create a different custom design.'],['Black metal base','Each sign has a black scalloped edge and a full-face print area.']],
         productDetails:'Round 30 cm (11.8 in) metal wall sign with a black scalloped bottle-cap edge. The entire front face is printed with UV artwork.',
         productionDetails:'Enter a design prompt or upload artwork, review the on-product preview, and confirm before ordering. Pack options include one, two, or three signs. Gallery artwork is a sample.'
-      }
-    },
-    'mg8012002':{
-      colors:{Black:['Washed Black','#252427'],Khaki:['Washed Khaki','#aa936d'],Gray:['Washed Gray','#77797b']},
-      image:(color)=>'assets/products/mg8012002/'+({Black:'black',Khaki:'khaki',Gray:'gray'}[color]||'black')+'/01-carousel.webp',
-      sizesLabel:'One Size',colorOptionLabel:'Base color',sizeOptionLabel:'Size',
-      details:{
-        title:'Custom Washed Denim Baseball Cap',eyebrow:'VIBEYA / CUSTOM ACCESSORIES',
-        intro:'Make a washed denim baseball cap your own. Upload artwork or describe a design with a prompt, preview the front print, then confirm before ordering. Choose black, khaki, or gray.',
-        highlights:['100% cotton washed denim','Prompt design or artwork upload','Front crown print area','Adjustable one-size fit'],
-        measurementRows:[['Material','100% cotton washed denim'],['Print area','Front crown only'],['Fit','Adjustable · approximately 55–59 cm'],['Brim','Approximately 7 cm']],
-        guide:'View product details (cm / in)',note:'One adjustable size. Supplier fit range is approximately 55–59 cm.',
-        services:[['Design your way','Describe an idea with a prompt or upload your own artwork.'],['Preview before ordering','Review the custom front print on the selected cap color before checkout.'],['Three washed colors','Choose black, khaki, or gray. Each color has its own gallery examples.']],
-        productDetails:'A 100% cotton washed denim baseball cap with a curved brim and adjustable one-size fit. Approximate fit range: 55–59 cm. The custom print area is on the front crown.',
-        productionDetails:'Describe a design with a prompt or upload your own artwork, review the front-crown preview on the selected cap color, and confirm before ordering. Carousel artwork is shown as a sample.'
       }
     }
   };
@@ -1597,27 +1585,21 @@
     const image=variant.image(defaultColor),colorName=colorNames[defaultColor];
     const variantSummary=p.variantSummary||`${colorName} · ${p.colors.length} colors · ${variant.sizesLabel}`;
     const cardPrice=p.sizePrices?`From ${p.price}`:p.price;
-    if(p.id==='sds-167256'){
-      const href=`/us/products/${encodeURIComponent(p.handle)}?color=${encodeURIComponent(defaultColor)}`;
-      return `<article class="product-card" data-product-id="${esc(p.id)}" aria-label="${esc(p.name)}"><a class="product-card-media product-detail-link" href="${href}" target="_top" aria-label="View ${esc(p.name)} in ${esc(colorName)}"><span class="card-plus" aria-hidden="true">↗</span><div class="photo"><img data-card-image src="${image}" alt="${esc(colorName)} ${esc(p.short)} — product gallery image 1" loading="lazy"></div></a><div class="card-color-options" role="group" aria-label="Preview ${esc(p.short)} colors">${swatches}</div><div class="card-color-caption" aria-live="polite">${esc(variantSummary)}</div><a class="product-card-info product-detail-link" href="${href}" target="_top" aria-label="View details for ${esc(p.name)} in ${esc(colorName)}"><h3>${esc(p.name)}</h3><p>${esc(cardPrice)}</p></a></article>`;
-    }
-    const href=`/us/products/${encodeURIComponent(p.handle)}`;
-    return `<article class="product-card" data-product-id="${esc(p.id)}" aria-label="${esc(p.name)}"><a class="product-card-media product-detail-link" href="${href}" target="_top" aria-label="View ${esc(p.name)} in ${esc(colorName)}"><span class="card-plus" aria-hidden="true">↗</span><div class="photo"><img data-card-image src="${image}" alt="${esc(colorName)} ${esc(p.short)} — product gallery image 1" loading="lazy"></div></a><div class="card-color-options" role="group" aria-label="Preview ${esc(p.short)} colors">${swatches}</div><div class="card-color-caption" aria-live="polite">${esc(variantSummary)}</div><a class="product-card-info product-detail-link" href="${href}" target="_top" aria-label="View details for ${esc(p.name)} in ${esc(colorName)}"><h3>${esc(p.name)}</h3><p>${esc(cardPrice)}</p></a></article>`;
+    return `<article class="product-card" aria-label="${esc(p.name)}"><button type="button" class="product-card-media" data-product="${esc(p.id)}" data-product-color="${defaultColor}" aria-label="View ${esc(p.name)} in ${esc(colorName)}"><span class="card-plus" aria-hidden="true">↗</span><div class="photo"><img data-card-image src="${image}" alt="${esc(colorName)} ${esc(p.short)} — product gallery image 1" loading="lazy"></div></button><div class="card-color-options" role="group" aria-label="Preview ${esc(p.short)} colors">${swatches}</div><div class="card-color-caption" aria-live="polite">${esc(variantSummary)}</div><button type="button" class="product-card-info" data-product="${esc(p.id)}" data-product-color="${defaultColor}" aria-label="View details for ${esc(p.name)} in ${esc(colorName)}"><h3>${esc(p.name)}</h3><p>${esc(cardPrice)}</p></button></article>`;
   }
   const productHTML=renderProductCard;
   function paintChips(id,all,selected,attr){$(id).innerHTML=all.map(cat=>`<button type="button" class="catalog-chip ${cat===selected?'active':''}" ${attr}="${esc(cat)}" aria-pressed="${cat===selected}">${esc(cat)}</button>`).join('');}
   function paintProducts(){
-    const visibleTags=['All Products',...productCategoryOrder.filter(category=>category!=='New arrivals'||catalogProducts.some(product=>product.category===category))];
-    const categorySlugs={'Custom Clothing':'custom-clothing','Custom Tumblers':'custom-tumblers','Custom Home & Bath':'custom-home-bath','Custom Kitchen & Dining':'custom-kitchen-dining','Custom Hats':'custom-hats','Custom Wall Decor':'custom-wall-decor'};
-    $('#productFilters').innerHTML=visibleTags.map(category=>{const href=category==='All Products'?marketPath('')+'#shop':marketPath('categories/'+categorySlugs[category])+'#shop';return `<a class="catalog-chip ${category===productTag?'active':''}" href="${esc(href)}" target="_top" ${category===productTag?'aria-current="page"':''}>${esc(category)}</a>`;}).join('');
+    paintChips('#productFilters',productTags,productTag,'data-product-tag');
     let q=$('#productSearch').value.toLowerCase().trim();
-    let matches=catalogProducts.filter(p=>(!listingScoped||allowedProductHandles.has(p.handle))&&(productTag==='All Products'||p.category===productTag)&&[p.name,p.short,p.category].some(t=>String(t||'').toLowerCase().includes(q)));
+    let matches=catalogProducts.filter(p=>(productTag==='All Products'||p.category===productTag)&&[p.name,p.short,p.category].some(t=>String(t||'').toLowerCase().includes(q)));
     const order=$('#productSort').value;
     if(order==='az')matches.sort((a,b)=>a.name.localeCompare(b.name));
     if(order==='low')matches.sort((a,b)=>(itemPrice(a)??Infinity)-(itemPrice(b)??Infinity));
     if(order==='high')matches.sort((a,b)=>{const x=itemPrice(a),y=itemPrice(b);return (y===null?-Infinity:y)-(x===null?-Infinity:x);});
-    $('#allProducts').innerHTML=matches.length?matches.map(productHTML).join(''):'<div class="catalog-empty"><strong>No products found.</strong>Try a different search or category.</div>';
-    $('#productCount').textContent=`Showing ${matches.length} ${matches.length===1?'product':'products'}`;
+    $('#allProducts').innerHTML=matches.length?matches.slice(0,productVisible).map(productHTML).join(''):'<div class="catalog-empty"><strong>No products found.</strong>Try a different search or category.</div>';
+    $('#productCount').textContent=`Showing ${Math.min(productVisible,matches.length)} of ${matches.length} products`;
+    $('#moreProducts').hidden=matches.length<=productVisible;
   }
   function paintIdeas(){
     paintChips('#ideaFilters',ideaTags,ideaTag,'data-idea-tag');
@@ -1671,7 +1653,7 @@
     if(grid.dataset.loaded!=='1')grid.innerHTML='<div class="my-design-empty"><strong>Loading your designs…</strong></div>';
     try{
       const response=await fetch('/api/vibeya/ai/jobs',{credentials:'same-origin',cache:'no-store'});
-      if(response.status===401){grid.dataset.loaded='1';grid.innerHTML='<div class="my-design-empty"><strong>Sign in to see your designs</strong><p>Your submitted designs are saved to your account.</p><a class="btn primary" href="/us/account" target="_top">Sign in</a></div>';return;}
+      if(response.status===401){grid.dataset.loaded='1';grid.innerHTML=`<div class="my-design-empty"><strong>Sign in to see your designs</strong><p>Your submitted designs are saved to your account.</p><a class="btn primary" href="${marketPath('account')}" target="_top">Sign in</a></div>`;return;}
       const result=await response.json();if(!response.ok)throw new Error(result.error||'Could not load your designs.');
       renderDesignCreditBalance(result.credits);
       const jobs=Array.isArray(result.jobs)?result.jobs:[];
@@ -1765,7 +1747,7 @@
     try{
       const response=await fetch('/api/vibeya/ai/jobs',{credentials:'same-origin',cache:'no-store'});
       if(request!==studioDesignsRequest||studioViewMode!=='designs')return;
-      if(response.status===401){container.innerHTML='<div class="studio-saved-empty"><strong>Sign in to see your designs</strong><p>Designs saved to your account will appear here.</p><a class="btn primary" href="/us/account" target="_top">Sign in</a></div>';return;}
+      if(response.status===401){container.innerHTML=`<div class="studio-saved-empty"><strong>Sign in to see your designs</strong><p>Designs saved to your account will appear here.</p><a class="btn primary" href="${marketPath('account')}" target="_top">Sign in</a></div>`;return;}
       const result=await response.json();if(!response.ok)throw new Error(result.error||'Could not load your designs.');
       const jobs=Array.isArray(result.jobs)?result.jobs:[];
       if(!jobs.length){container.innerHTML='<div class="studio-saved-empty"><strong>No designs yet</strong><p>Every design you create will be collected here.</p></div>';return;}
@@ -1841,7 +1823,7 @@
           if(!detail.ok||!data.job?.image)throw new Error(data.error||'Could not load this design image.');
           const generatedArtwork=await optimizeArtworkForCart(data.job.image);
           const cart=await addBackendCartItem({product:job.product_id,color,size,print:job.print_placement,quantity:1,designName:`Custom ${product.short||'product'} design`,prompt:job.prompt||'',generatedArtwork});
-          if(cart)window.top.location.assign(marketPath('cart'));
+            if(cart)window.top.location.assign(marketPath('cart'));
           else{addButton.disabled=false;addButton.textContent='Add to bag';}
         }catch(error){toast(error.message||'Could not add this design to your bag.');addButton.disabled=false;addButton.textContent='Add to bag';}
       };
@@ -1860,32 +1842,21 @@
   }
   function routeCatalog(){
     const [key,routeQuery='']=location.hash.slice(1).split('?');
-    if(key==='product-sds-167256'&&window.top===window){
-      const color=new URLSearchParams(routeQuery).get('color')||'Black';
-      window.location.replace(`/us/products/vibeya-custom-cotton-long-sleeve-tee?color=${encodeURIComponent(color)}`);
-      return;
-    }
-    if(key==='product-sds-138708'&&window.top===window){
-      const color=new URLSearchParams(routeQuery).get('color')||selectedColor||'White';
-      window.location.replace(`/us/products/vibeya-custom-3d-bath-mat?color=${encodeURIComponent(color)}`);
-      return;
-    }
     if(key.startsWith('product-')){
       const product=products.find(p=>p.id===key.slice(8));
-      if(product?.catalogOnly&&new URLSearchParams(location.search).get('standalone')!=='1'){window.top.location.assign(marketPath('products/'+encodeURIComponent(product.handle)));return;}
       const params=new URLSearchParams(routeQuery);
       const requestedColor=params.get('color'),requestedSize=params.get('size');
       if(product&&(product.id!==chosen.id||(product.colors?.includes(requestedColor)&&requestedColor!==selectedColor)||(product.sizes?.includes(requestedSize)&&requestedSize!==selectedSize))){
         const sameProduct=product.id===chosen.id;
         const nextColor=product.colors?.includes(requestedColor)?requestedColor:sameProduct&&product.colors?.includes(selectedColor)?selectedColor:(product.colors?.[0]||'Black');
         const nextSize=product.sizes?.includes(requestedSize)?requestedSize:sameProduct&&product.sizes?.includes(selectedSize)?selectedSize:(product.sizePrices?product.sizes?.[0]||'':'');
-      chosen=product;selectedColor=nextColor;selectedColorConfirmed=product.colors?.length===1||!!product.colors?.includes(requestedColor);selectedSize=nextSize;if(!sameProduct){selectedPrint=product.id==='sds-128646'||product.id==='sds-138708'?'wrap':'front';if(product.id==='sds-233939')selectedUniformZones=uniformPrintZones.map(([id])=>id);}
+      chosen=product;selectedColor=nextColor;selectedColorConfirmed=product.colors?.length===1||!!product.colors?.includes(requestedColor);selectedSize=nextSize;if(!sameProduct){selectedPrint=product.id==='sds-128646'?'wrap':'front';if(product.id==='sds-233939')selectedUniformZones=uniformPrintZones.map(([id])=>id);}
         renderProductDetails();drawStudioVariantChoices();setGallery(0);syncVariants();
       }
     }
     document.body.dataset.view=key==='shop'?'shop':key==='ideas'?'ideas':key==='my-designs'?'designs':key.startsWith('product-')?'product':'home';
     document.querySelectorAll('#nav a[aria-current]').forEach(el=>el.removeAttribute('aria-current'));
-    const sel=document.body.dataset.view==='shop'||document.body.dataset.view==='product'?'a[href="#shop"]':document.body.dataset.view==='ideas'?'a[href="inspiration/index.html" target="_top"]':document.body.dataset.view==='designs'?'a[href="#my-designs"]':'a[href="#top"]';
+    const sel=document.body.dataset.view==='shop'||document.body.dataset.view==='product'?'a[href="#shop"]':document.body.dataset.view==='ideas'?'a[href="inspiration/index.html"]':document.body.dataset.view==='designs'?'a[href="#my-designs"]':'a[href="#top"]';
     const active=$('#nav '+sel);if(active)active.setAttribute('aria-current','page');
     if(key==='shop')paintProducts();if(key==='ideas')paintIdeas();if(key==='my-designs')loadMyDesigns();
     // Page views replace the home content; don't jump to hidden anchors.
@@ -1918,10 +1889,6 @@
   function studioLoginUrl(selection){const params=new URLSearchParams({openStudio:'1',product:selection.product,color:selection.color,size:selection.size,print:selection.print});if(selection.areas)params.set('areas',selection.areas);if(selection.prompt)params.set('prompt',selection.prompt);return '/us?'+params.toString()+'#top';}
   function requestStudio(product=chosen,prompt){
     const selection={product:product.id,color:selectedColor,size:selectedSize,print:selectedPrint,areas:product.id==='sds-233939'?selectedUniformZones.join(','):'',prompt:prompt||''};
-    if(window.parent!==window&&new URLSearchParams(location.search).get('v')==='canonical-bath-mat-product'){
-      showStudio(product,prompt);
-      return;
-    }
     if(window.parent!==window){window.parent.postMessage({type:'vibeya:request-studio',...selection},location.origin);return;}
     fetch('/api/vibeya/session',{credentials:'same-origin',cache:'no-store'}).then(response=>{if(!response.ok)throw new Error('Session check unavailable');return response.json();}).then(session=>{
       if(session?.authenticated){showStudio(product,prompt);return;}
@@ -1954,9 +1921,16 @@
   function openCart(){window.top.location.assign(marketPath('cart'));}
   async function syncBackendCatalog(){
     try{
-      const response=await fetch('/api/vibeya/catalog?countryCode='+encodeURIComponent(marketCountryCode()),{credentials:'same-origin',cache:'no-store'});
-      if(!response.ok)return;
+      const marketCountry=new URLSearchParams(location.search).get('country')||'us';
+      const marketLocale=new URLSearchParams(location.search).get('locale');
+      const catalogParams=new URLSearchParams({country_code:marketCountry});if(marketLocale)catalogParams.set('locale',marketLocale);
+      const response=await fetch('/api/vibeya/catalog?'+catalogParams.toString(),{credentials:'same-origin',cache:'no-store'});
+      if(!response.ok){products.splice(0);catalogProducts.splice(0);drawProductChoices();drawStudioVariantChoices();renderProductCards();paintProducts();return;}
       const data=await response.json();
+      const eligibleHandles=new Set((data.products||[]).map(product=>product.handle).filter(Boolean));
+      products.splice(0,products.length,...products.filter(product=>eligibleHandles.has(product.handle)));
+      catalogProducts.splice(0,catalogProducts.length,...catalogProducts.filter(product=>eligibleHandles.has(product.handle)));
+      if(!products.some(product=>product.id===chosen.id)&&products[0])chosen=products[0];
       for(const remote of data.products||[]){
         const local=products.find(p=>p.handle===remote.handle);
         if(!local){
@@ -1964,18 +1938,20 @@
           const currency=(remote.currency_code||'USD').toUpperCase();
           const price=typeof remote.price==='number'&&Number.isFinite(remote.price)?new Intl.NumberFormat('en-US',{style:'currency',currency}).format(remote.price)+' '+currency:'Price unavailable';
           const product=existing||{id:remote.id,handle:remote.handle,catalogOnly:true,name:remote.title||remote.handle,short:remote.subtitle||remote.title||remote.handle,price,category:remote.category||'New arrivals',image:remote.image||'',colors:[],sizes:[]};
-          Object.assign(product,{name:remote.title||product.name,short:remote.subtitle||remote.title||product.short,price,category:remote.category||'New arrivals',image:remote.image||'',colors:remote.colors?.length?remote.colors:product.colors||[],sizes:remote.sizes?.length?remote.sizes:product.sizes||[]});
+          Object.assign(product,{name:remote.title||product.name,short:remote.subtitle||remote.title||product.short,price,category:remote.category||'New arrivals',image:remote.image||'',marketGallery:remote.market_images?.length?remote.market_images:product.marketGallery,colors:remote.colors?.length?remote.colors:product.colors||[],sizes:remote.sizes?.length?remote.sizes:product.sizes||[]});
           if(!existing)catalogProducts.push(product);
           continue;
         }
-        if(typeof remote.price==='number'&&Number.isFinite(remote.price)){const currency=(remote.currency_code||'usd').toUpperCase();const locale=marketCountryCode()==='jp'?'ja-JP':marketCountryCode()==='mx'?'es-MX':marketCountryCode()==='ca'?'en-CA':'en-US';local.price=new Intl.NumberFormat(locale,{style:'currency',currency}).format(remote.price)+' '+currency;}
+        if(typeof remote.price==='number'&&Number.isFinite(remote.price)){const currency=(remote.currency_code||'usd').toUpperCase();local.price=new Intl.NumberFormat('en-US',{style:'currency',currency}).format(remote.price)+' '+currency;if(local.id==='sds-63823'){local.marketPrice=remote.price;local.marketCurrency=currency;}}
+        if(remote.market_images?.length)local.marketGallery=remote.market_images;
         if(remote.size_prices)local.sizePrices=remote.size_prices;
         if(remote.colors?.length){const remoteColors=remote.colors.map(color=>local.id==='sds-128646'&&color==='NightGarden'?'White':color);local.colors=local.colors.filter(color=>remoteColors.includes(color));}
         if(remote.sizes?.length)local.sizes=local.sizes.filter(size=>remote.sizes.includes(size));
       }
       productTags=['All Products',...new Set(catalogProducts.map(p=>p.category||'New arrivals'))];
       if(!productTags.includes(productTag))productTag='All Products';
-      drawStudioVariantChoices();renderProductCards();paintProducts();
+      if(chosen.id==='sds-63823'){renderProductDetails();setGallery(galleryIndex);syncVariants();}
+      drawProductChoices();drawStudioVariantChoices();renderProductCards();paintProducts();
     }catch(error){console.warn('VIBEYA catalog sync unavailable',error);}
   }
   async function addBackendCartItem(item){
@@ -1985,12 +1961,18 @@
     return data.cart;
   }
   function hideCart(){$('#drawerOverlay').classList.remove('open');$('#cartDrawer').classList.remove('open');syncLock();}
-  function renderProductCards(){if(document.body.dataset.reactProductCards==='true')return;const ordered=[...catalogProducts.filter(p=>p.catalogOnly),...catalogProducts.filter(p=>!p.catalogOnly)],tankini=ordered.find(p=>p.id==='sds-137892'),blanket=ordered.find(p=>p.id==='sds-97226'),basketball=ordered.find(p=>p.handle==='vibeya-custom-kids-basketball-uniform'),pinned=[tankini,blanket,basketball].filter(Boolean),featured=[...pinned,...ordered.filter(p=>!pinned.includes(p))];$('#productCards').innerHTML=featured.map(productHTML).join('');}
+  function renderProductCards(){if(document.body.dataset.reactProductCards==='true')return;const ordered=[...catalogProducts.filter(p=>p.catalogOnly),...catalogProducts.filter(p=>!p.catalogOnly)],tankini=ordered.find(p=>p.id==='sds-137892'),blanket=ordered.find(p=>p.id==='sds-97226'),basketball=ordered.find(p=>p.handle==='vibeya-custom-kids-basketball-uniform'),yogaSet=ordered.find(p=>p.id==='sds-63823'),pinned=[tankini,blanket,basketball,yogaSet].filter(Boolean),featured=[...pinned,...ordered.filter(p=>!pinned.includes(p))];$('#productCards').innerHTML=featured.map(productHTML).join('');}
   async function renderInspo(){
+    const inspirationSection=$('#inspiration');
+    if(inspirationSection)inspirationSection.hidden=true;
     const bundledCatalog=Array.isArray(window.VIBEYA_INSPIRATION_CATALOG)?window.VIBEYA_INSPIRATION_CATALOG:[];
-    let catalog=[...bundledCatalog];
-    try{const response=await fetch('/api/vibeya/inspirations',{credentials:'same-origin',cache:'no-store'});if(response.ok){const data=await response.json();if(Array.isArray(data.inspirations)){const managed=data.inspirations;catalog=[...bundledCatalog.map(item=>({...item,...(managed.find(entry=>entry.id===item.id)||{})})),...managed.filter(entry=>!bundledCatalog.some(item=>item.id===entry.id))];}}}catch(error){console.warn('Using bundled inspiration catalog',error);}
+    const country=marketCountryCode();
+    const isCountryEligible=entry=>{const markets=Array.isArray(entry?.countryCodes)?entry.countryCodes:Array.isArray(entry?.markets)?entry.markets:null;return markets?markets.includes('*')||markets.includes(country):country==='us';};
+    let catalog=[];let excludedIds=new Set();
+    try{const response=await fetch('/api/vibeya/inspirations?country_code='+encodeURIComponent(country),{credentials:'same-origin',cache:'no-store'});if(!response.ok)throw new Error('Could not load destination inspirations');const data=await response.json();if(!Array.isArray(data.inspirations))throw new Error('Invalid inspiration response');const managed=data.inspirations.filter(isCountryEligible);excludedIds=new Set(Array.isArray(data.excluded_ids)?data.excluded_ids:[]);catalog=[...bundledCatalog.filter(item=>!excludedIds.has(item.id)).map(item=>({...item,...(managed.find(entry=>entry.id===item.id)||{})})),...managed.filter(entry=>!bundledCatalog.some(item=>item.id===entry.id))].filter(isCountryEligible);}catch(error){console.warn('Could not load destination inspirations',error);$('#inspoCards').innerHTML='';return;}
+    if(activeLocale==='ja-JP'||activeLocale==='es-MX')catalog=catalog.map(entry=>{const localized=entry.translations?.[activeLocale];return localized?.title&&localized?.summary&&localized?.articleBody&&localized?.tags?.length&&localized?.image&&localized?.cardImage?{...entry,...localized}:null;}).filter(Boolean);
     const inspirationUrl=new URL('/vibeya/inspiration/index.html',location.origin);
+    const inspirationStoryHref=(href,entry)=>{const url=new URL(href,inspirationUrl);if(activeLocale==='ja-JP'||activeLocale==='es-MX'){url.pathname='/vibeya/inspiration/story.html';url.searchParams.set('inspiration',entry.id);}return withMarketContext(url.href);};
     const cards=[];
     try{
       const response=await fetch(inspirationUrl,{credentials:'same-origin',cache:'no-store'});
@@ -2003,29 +1985,34 @@
           const href=new URL(link.getAttribute('href'),inspirationUrl);
           const articleFile=href.pathname.split('/').pop()||'';
           const entry=catalog.find(item=>item.slug===articleFile);
-          if(entry?.published===false)return;
+          if(!entry||excludedIds.has(entry.id)||entry.published===false||entry.homeFeatured===false)return;
           const title=entry?.title||section.querySelector('.featured-text h2')?.textContent?.replace(/\s+/g,' ').trim()||'VIBEYA inspiration';
-          cards.push({id:entry?.id||articleFile.replace(/\.html$/,''),title,alt:image.getAttribute('alt')||`${title} inspiration card`,image:new URL(image.getAttribute('src')||'',inspirationUrl).href,href:href.href});
+          const localizedAsset=entry.cardImage||entry.image;
+          const cardImage=localizedAsset?/^(https?:)?\//.test(localizedAsset)?new URL(localizedAsset,location.origin).href:new URL(`../assets/inspiration/${encodeURIComponent(localizedAsset)}`,inspirationUrl).href:new URL(image.getAttribute('src')||'',inspirationUrl).href;
+          cards.push({id:entry?.id||articleFile.replace(/\.html$/,''),title,alt:`${title} inspiration card`,image:cardImage,href:inspirationStoryHref(href.href,entry)});
         });
       }
     }catch(error){console.warn('Could not load inspiration-list feature cards',error);}
 
-    if(cards.length<6){
+    if(cards.length<4){
       const known=new Set(cards.map(card=>card.id));
       for(const entry of catalog){
-        if(entry.published===false||known.has(entry.id)||!entry.slug)continue;
+        if(entry.published===false||entry.homeFeatured===false||known.has(entry.id)||!entry.slug)continue;
         const asset=entry.cardImage||entry.image;
         if(!asset)continue;
-        cards.push({id:entry.id,title:entry.title||'VIBEYA inspiration',alt:`${entry.title||'VIBEYA'} custom design inspiration`,image:new URL(`../assets/inspiration/${encodeURIComponent(asset)}`,inspirationUrl).href,href:new URL(entry.slug,inspirationUrl).href});
+        const image=/^(https?:)?\//.test(asset)?new URL(asset,location.origin).href:new URL(`../assets/inspiration/${encodeURIComponent(asset)}`,inspirationUrl).href;
+        cards.push({id:entry.id,title:entry.title||'VIBEYA inspiration',alt:`${entry.title||'VIBEYA'} custom design inspiration`,image,href:inspirationStoryHref(new URL(entry.slug,inspirationUrl).href,entry)});
         known.add(entry.id);
-        if(cards.length>=6)break;
+        if(cards.length>=4)break;
       }
     }
     for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
-    $('#inspoCards').innerHTML=cards.slice(0,6).map(card=>{
+    const selectedCards=cards.slice(0,4);
+    $('#inspoCards').innerHTML=selectedCards.map(card=>{
       const alt=card.alt||`${card.title} inspiration card`;
-      return `<a class="home-featured-inspo" data-inspiration="${esc(card.id)}" style="--artwork-extension:url('${esc(card.image)}')" href="${esc(card.href)}" target="_top" aria-label="Open ${esc(alt)}"><img src="${esc(card.image)}" alt="${esc(alt)}" loading="lazy"></a>`;
+      return `<a class="home-featured-inspo" data-inspiration="${esc(card.id)}" style="--artwork-extension:url('${esc(card.image)}')" href="${esc(card.href)}" aria-label="Open ${esc(alt)}"><img src="${esc(card.image)}" alt="${esc(alt)}" loading="lazy"></a>`;
     }).join('');
+    if(inspirationSection)inspirationSection.hidden=selectedCards.length===0;
   }
   window.addEventListener('pageshow',event=>{if(event.persisted)renderInspo();});
   function drawProductChoices(){$('#studioProducts').innerHTML=products.map(p=>`<button class="studio-product ${chosen.id===p.id?'active':''}" data-studio-product="${p.id}" aria-pressed="${chosen.id===p.id}">${p.name}</button>`).join('');}
@@ -2220,26 +2207,24 @@
    const tankiniGalleryFiles=['01-main-image.jpg','02-prompt-preview.jpg','03-fabric-fit.jpg','04-two-piece.jpg','05-sizes.jpg','06-care.jpg','07-customize.jpg'];
    const tankiniGalleryTitles=['Design Your Tankini','Preview a Prompt-Based Print','Nylon-Spandex Stretch Fabric','Separate Swim Top and Shorts','Find Your Size','Care for Your Custom Swimwear','Start Your One-of-a-Kind Design'];
    const tankiniColorFolders={Black:'black',Red:'red',Pink:'pink',Blue:'blue',Cyan:'cyan'};
+   const yogaSetGalleryFiles=Array.from({length:6},(_,i)=>String(i+1).padStart(2,'0')+'-carousel.webp');
+   const yogaSetGalleryTitles=['Your set, your art','One design, both pieces','Fit and fabric details','Made to move','Size and construction guide','Prompt or upload, then preview'];
    const basketballGalleryFiles=Array.from({length:7},(_,i)=>String(i+1).padStart(2,'0')+'-carousel.jpg');
    const basketballGalleryTitles=['Design Your Basketball Set','Mix Three Custom Print Areas','Create a Jersey Front Print','Create a Jersey Back Print','Add Matching Shorts Artwork','Choose Your Uniform Color','Find Your Kids’ Size'];
    const basketballColorFolders={Black:'black',White:'white',Red:'red','Sapphire Blue':'blue','Pure yellow':'yellow'};
    const apronGalleryFiles=Array.from({length:6},(_,i)=>String(i+1).padStart(2,'0')+'-carousel.png');
    const apronGalleryTitles=['Your Apron, Your Humor','Apron Details','Describe It, Preview It, Make It Yours','Made for Messy, Happy Kitchens','Built for Everyday Cooking','One Size for Daily Cooking'];
-   const metalSignGalleryFiles=Array.from({length:6},(_,i)=>String(i+1).padStart(2,'0')+'-carousel.webp');
-  const yogaGalleryFiles=Array.from({length:6},(_,i)=>String(i+1).padStart(2,'0')+'-carousel.webp');
-  const yogaGalleryTitles=['A Custom Yoga Set, Made Yours','One Coordinated Print','Create from a Prompt or Upload Art','A Matching Two-Piece Set','Preview Before Ordering','Fit and Fabric Details'];
+   const metalSignGalleryFiles=Array.from({length:6},(_,i)=>String(i+1).padStart(2,'0')+'-carousel.png');
    const metalSignGalleryTitles=['A Custom Sign, Made Yours','Three Signs, One Playful Story','Design from a Prompt','A Conversation for Your Wall','Preview and Confirm Your Design','Metal Sign Details'];
-   const denimCapGalleryFiles=Array.from({length:6},(_,i)=>String(i+1).padStart(2,'0')+'-carousel.webp');
-   const denimCapGalleryTitles=['Your Cap, Your Custom Design','Washed Denim in Three Colors','Create Art for the Front Panel','Choose a Prompt or Upload Artwork','Preview Before You Order','Adjustable Everyday Fit'];
    const showerCurtainReferenceFiles={'36x70.8in':'36x70.8in.webp','60x70.8in':'60x70.8in.webp','70.8x70.8in':'70.8x70.8in.png','70.8x84in':'70.8x84in.webp'};
-   const galleryCount=()=>chosen.id==='sds-128646'?tumblerGalleryFiles.length:chosen.id==='sds-138708'?bathMatGalleryFiles.length:chosen.id==='sds-97226'?blanketGalleryFiles.length:chosen.id==='sds-172647'?beanieGalleryFiles.length:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryFiles.length:chosen.id==='sds-137892'?tankiniGalleryFiles.length:chosen.id==='sds-233939'?basketballGalleryFiles.length:chosen.id==='sds-275844'?apronGalleryFiles.length:chosen.id==='sds-63823'?yogaGalleryFiles.length:chosen.id==='mg8014061'?metalSignGalleryFiles.length:chosen.id==='mg8012002'?denimCapGalleryFiles.length:galleryTitles.length;
-   const galleryTitleAt=i=>chosen.id==='sds-128646'?tumblerGalleryTitles[i]:chosen.id==='sds-138708'?bathMatGalleryTitles[i]:chosen.id==='sds-97226'?blanketGalleryTitles[i]:chosen.id==='sds-172647'?selectedColor==='Black'?(i===0?beanieGalleryTitles[1]:i===1?beanieGalleryTitles[0]:beanieGalleryTitles[i]):beanieGalleryTitles[i]:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryTitles[i]:chosen.id==='sds-137892'?tankiniGalleryTitles[i]:chosen.id==='sds-233939'?basketballGalleryTitles[i]:chosen.id==='sds-275844'?apronGalleryTitles[i]:chosen.id==='sds-63823'?yogaGalleryTitles[i]:chosen.id==='mg8014061'?metalSignGalleryTitles[i]:chosen.id==='mg8012002'?denimCapGalleryTitles[i]:chosen.id==='vibeya-washed-hoodie'?hoodieGalleryTitles[i]:galleryTitles[i];
+   const galleryCount=()=>chosen.marketGallery?.length||(chosen.id==='sds-128646'?tumblerGalleryFiles.length:chosen.id==='sds-138708'?bathMatGalleryFiles.length:chosen.id==='sds-97226'?blanketGalleryFiles.length:chosen.id==='sds-172647'?beanieGalleryFiles.length:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryFiles.length:chosen.id==='sds-137892'?tankiniGalleryFiles.length:chosen.id==='sds-63823'?yogaSetGalleryFiles.length:chosen.id==='sds-233939'?basketballGalleryFiles.length:chosen.id==='sds-275844'?apronGalleryFiles.length:chosen.id==='mg8014061'?metalSignGalleryFiles.length:galleryTitles.length);
+   const galleryTitleAt=i=>chosen.id==='sds-128646'?tumblerGalleryTitles[i]:chosen.id==='sds-138708'?bathMatGalleryTitles[i]:chosen.id==='sds-97226'?blanketGalleryTitles[i]:chosen.id==='sds-172647'?selectedColor==='Black'?(i===0?beanieGalleryTitles[1]:i===1?beanieGalleryTitles[0]:beanieGalleryTitles[i]):beanieGalleryTitles[i]:chosen.id==='vibeya-shower-curtain'?showerCurtainGalleryTitles[i]:chosen.id==='sds-137892'?tankiniGalleryTitles[i]:chosen.id==='sds-63823'?yogaSetGalleryTitles[i]:chosen.id==='sds-233939'?basketballGalleryTitles[i]:chosen.id==='sds-275844'?apronGalleryTitles[i]:chosen.id==='mg8014061'?metalSignGalleryTitles[i]:chosen.id==='vibeya-washed-hoodie'?hoodieGalleryTitles[i]:galleryTitles[i];
   const galleryFiles=['01-brand-lifestyle.webp','02-make-it-personal.webp','03-cotton-comfort.webp','04-wear-it-your-way.webp','05-attention-to-detail.webp','06-idea-to-outfit.webp','07-make-it-yours.webp'];
   const colorGalleries={Black:galleryFiles,White:galleryFiles.map(f=>'white/'+f),Red:galleryFiles.map(f=>'red/'+f),Gray:galleryFiles.map(f=>'gray/'+f),LightGray:galleryFiles.map(f=>'light-gray/'+f),Cream:galleryFiles.map(f=>'cream/'+f),Navy:galleryFiles.map(f=>'navy/'+f)};
   const colorDisplayNames={Black:'Black',White:'White',Red:'Red',Gray:'Heather Gray',LightGray:'Light Heather Gray',Cream:'Cream',Navy:'Navy'};
   const hoodieColorNames={Black:'Washed Black',Gray:'Light Gray',Khaki:'Brown',Green:'Muted Green',Pink:'Pink',Purple:'Lavender'};
    const beanieColorNames={Black:'Black',Red:'Red',Gray:'Medium Gray'};
-   const colorLabel=(key)=>chosen.id==='sds-128646'?'White':chosen.id==='sds-138708'||chosen.id==='sds-97226'||chosen.id==='vibeya-shower-curtain'?'White':chosen.id==='sds-172647'?(beanieColorNames[key]||key):chosen.id==='vibeya-washed-hoodie'?(hoodieColorNames[key]||key):chosen.id==='mg8012002'?({Black:'Washed Black',Khaki:'Washed Khaki',Gray:'Washed Gray'}[key]||key):chosen.id==='sds-233939'?(key==='Pure yellow'?'Pure Yellow':key):(colorDisplayNames[key]||key);
+   const colorLabel=(key)=>chosen.id==='sds-128646'?'White':chosen.id==='sds-138708'||chosen.id==='sds-97226'||chosen.id==='vibeya-shower-curtain'?'White':chosen.id==='sds-63823'?'White · black trim':chosen.id==='sds-172647'?(beanieColorNames[key]||key):chosen.id==='vibeya-washed-hoodie'?(hoodieColorNames[key]||key):chosen.id==='sds-233939'?(key==='Pure yellow'?'Pure Yellow':key):(colorDisplayNames[key]||key);
    let galleryIndex=0,selectedColor='Black',selectedColorConfirmed=false,selectedSize='',selectedPrint='front',selectedUniformZones=['jersey-front','jersey-back','shorts'],metalSignDesignPrompt='';
    const uniformPrintZones=[['jersey-front','Jersey Front'],['jersey-back','Jersey Back'],['shorts','Shorts · One Leg Only']];
    const selectedUniformZoneLabel=()=>uniformPrintZones.filter(([id])=>selectedUniformZones.includes(id)).map(([,label])=>label).join(' + ')||'Choose at least one print area';
@@ -2259,20 +2244,20 @@
    }));
    const cleanProductReferences={'sds-167256':teeReferences,'vibeya-washed-hoodie':hoodieReferences};
    const blankProductReferenceSource=()=>cleanProductReferences[chosen.id]?.[selectedColor]||null;
-   const productReferenceSources=()=>{if(chosen.id==='sds-128646'||chosen.id==='sds-97226'||chosen.id==='sds-138708'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-63823'||chosen.id==='63823'||chosen.id==='sds-233939'||chosen.id==='sds-275844'||chosen.id==='mg8014061'||chosen.id==='mg8012002')return [];const refs=blankProductReferenceSource();if(!refs)return null;const zones=selectedPrint==='both'?[refs.zoneFront,refs.zoneBack]:[selectedPrint==='back'?refs.zoneBack:refs.zoneFront];return [refs.front,refs.back,...zones];};
+   const productReferenceSources=()=>{if(chosen.id==='sds-128646'||chosen.id==='sds-97226'||chosen.id==='sds-138708'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-63823'||chosen.id==='sds-233939'||chosen.id==='sds-275844'||chosen.id==='mg8014061')return [];const refs=blankProductReferenceSource();if(!refs)return null;const zones=selectedPrint==='both'?[refs.zoneFront,refs.zoneBack]:[selectedPrint==='back'?refs.zoneBack:refs.zoneFront];return [refs.front,refs.back,...zones];};
    const blankProductPreviewSource=()=>blankProductReferenceSource()?.composite||null;
   const gallerySrc=(i,color=selectedColor)=>{
+    if(chosen.marketGallery?.length)return chosen.marketGallery[Math.min(i,chosen.marketGallery.length-1)];
     let src;
     if(chosen.id==='sds-128646')src='assets/products/sds-128646/'+tumblerGalleryFiles[i];
     else if(chosen.id==='sds-138708')src='assets/products/sds-138708/'+bathMatGalleryFiles[i];
     else if(chosen.id==='sds-97226')src='assets/products/sds-97226/'+blanketGalleryFiles[i];
-    else if(chosen.id==='vibeya-shower-curtain')src='/vibeya/assets/products/mg8014087/'+showerCurtainGalleryFiles[i]+'?v=20261116-gallery';
+    else if(chosen.id==='vibeya-shower-curtain')src='/vibeya/assets/products/mg8014087/'+showerCurtainGalleryFiles[i];
     else if(chosen.id==='sds-137892')src='assets/products/mg8011024/'+(tankiniColorFolders[color]||'black')+'/'+tankiniGalleryFiles[i];
+    else if(chosen.id==='sds-63823')src='assets/products/sds-63823/us/'+yogaSetGalleryFiles[i];
     else if(chosen.id==='sds-233939')src='assets/products/sds-233939/'+(basketballColorFolders[color]||'black')+'/'+basketballGalleryFiles[i];
     else if(chosen.id==='sds-275844')src='assets/products/sds-275844/black/'+apronGalleryFiles[i];
-    else if(chosen.id==='sds-63823')src='assets/products/sds-63823/'+marketCountryCode()+'/'+yogaGalleryFiles[i];
     else if(chosen.id==='mg8014061')src='assets/products/mg8014061/black/'+metalSignGalleryFiles[i];
-    else if(chosen.id==='mg8012002')src='assets/products/mg8012002/'+({Black:'black',Khaki:'khaki',Gray:'gray'}[color]||'black')+'/'+denimCapGalleryFiles[i];
     else if(chosen.id==='sds-172647'){
       const files=color==='Black'?[beanieGalleryFiles[1],beanieGalleryFiles[0],...beanieGalleryFiles.slice(2)]:beanieGalleryFiles;
       src='assets/products/sds-172647/'+({Black:'black',Red:'red',Gray:'gray'}[color]||'black')+'/'+files[i]+(color==='Black'&&i<2?'?rev=2':'');
@@ -2284,9 +2269,8 @@
       const k='assets/products/sds-167256/'+colorGalleries[color][i];
       src=extraGalleryAssets[k]||embeddedGalleryAssets[k]||k;
     }
-    const optimizedSrc=chosen.id==='vibeya-shower-curtain'&&i===4?src:src.replace(/\.(?:png|jpe?g)(?=\?|$)/i,'.webp');
-    const version=chosen.id==='sds-275844'?'v=20261114-price-1799':'v=20261110-2';
-    return optimizedSrc+(optimizedSrc.includes('?')?'&':'?')+version+'&cv=carousel-webp-20261116-2';
+    const imageVersion=chosen.id==='vibeya-shower-curtain'&&i===4?'v=20261116-curtain-gallery-5':chosen.id==='sds-275844'?'v=20261114-price-1799':'v=20261110-2';
+    return src+(src.includes('?')?'&':'?')+imageVersion;
   };
   function renderProductDetails(){
     const {colors,details:config,colorOptionLabel,sizeOptionLabel}=productVariants[chosen.id];
@@ -2294,9 +2278,9 @@
     $('#detailEyebrow').textContent=config.eyebrow;
     $('#detailProductTitle').textContent=config.title;
     $('#detailIntro').textContent=config.intro;
-    $('#detailPrice').textContent=usdPrice(selectedProductPrice(chosen,selectedSize))||chosen.price;
+    $('#detailPrice').textContent=(chosen.id==='sds-63823'?selectedMarketPrice(chosen):usdPrice(selectedProductPrice(chosen,selectedSize)))||chosen.price;
     $('#detailPrice').removeAttribute('data-vibeya-price');
-    $('#detailShipping').textContent=chosen.id==='sds-63823'?'Free shipping · U.S., Canada, Japan, and Mexico':chosen.id==='vibeya-shower-curtain'||chosen.id==='mg8012002'?'Shipping options will be confirmed at checkout':'Free U.S. shipping · U.S. addresses only';
+    $('#detailShipping').textContent=chosen.id==='vibeya-shower-curtain'?'Shipping options will be confirmed at checkout':chosen.id==='sds-63823'?'Free shipping · United States, Canada, Japan & Mexico':'Free U.S. shipping · U.S. addresses only';
     $('#detailHighlights').innerHTML=config.highlights.map(x=>'<span>'+esc(x)+'</span>').join('');
     $('#detailColorOptions').setAttribute('aria-label','Choose '+chosen.short+' '+(colorOptionLabel||'color'));
     $('#detailColorOptions').previousElementSibling.querySelector('strong').textContent=colorOptionLabel||'Color';
@@ -2317,22 +2301,21 @@
     $('#detailSizeGuideNote').textContent=config.note;
     $('#detailServices').innerHTML=config.services.map((service,index)=>'<div class="detail-service"><span class="service-ico" aria-hidden="true">'+['✦','◷','↗'][index]+'</span><div><strong>'+esc(service[0])+'</strong><p>'+esc(service[1])+'</p></div></div>').join('');
     $('#detailPrintSection').hidden=false;
-    const fullSurface=chosen.id==='sds-128646'||chosen.id==='sds-138708'||chosen.id==='sds-63823'||chosen.id==='63823';
+    const fullSurface=chosen.id==='sds-128646'||chosen.id==='sds-138708';
 const blanket=chosen.id==='sds-97226';
     const showerCurtain=chosen.id==='vibeya-shower-curtain';
     const beanie=chosen.id==='sds-172647';
     const tankini=chosen.id==='sds-137892';
-    const yogaSet=chosen.id==='sds-63823'||chosen.id==='63823';
+    const yogaSet=chosen.id==='sds-63823';
     const basketball=chosen.id==='sds-233939';
     const apron=chosen.id==='sds-275844';
     const wallSign=chosen.id==='mg8014061';
-    const denimCap=chosen.id==='mg8012002';
-    $('#detailPrintSection .variant-label strong').textContent=yogaSet||wallSign||apron||denimCap?'Print area':basketball?'Print areas':chosen.id==='sds-138708'||blanket||showerCurtain?'Print coverage':'Print placement';
-    $('#detailPrints').innerHTML=wallSign?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Face</button>`:denimCap?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Front Crown Only</button>`:apron?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Front Bib Only</button>`:fullSurface?`<button type="button" class="variant-side" data-select-print="wrap" aria-pressed="${selectedPrint==='wrap'}">${yogaSet?'Top + Shorts':chosen.id==='sds-138708'?'Full Surface':'Full Wrap'}</button>`:basketball?uniformPrintZones.map(([id,label])=>`<button type="button" class="variant-side" data-select-zone="${id}" aria-pressed="${selectedUniformZones.includes(id)}">${label}</button>`).join(''):blanket?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Surface · Front Only</button>`:showerCurtain?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Surface · Single Sided</button>`:beanie?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Folded Front Cuff Only</button>`:tankini?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Tankini Top · Front Only</button>`:`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Front Only</button><button type="button" class="variant-side" data-select-print="back" aria-pressed="${selectedPrint==='back'}">Back Only</button><button type="button" class="variant-side" data-select-print="both" aria-pressed="${selectedPrint==='both'}">Front + Back</button>`;
-    $('#detailPrintSection .option-helper').textContent=yogaSet?'Create or upload one design for the complete two-piece set. The top and shorts are customized together; front and back views use the same coordinated print.':denimCap?'Describe a design with a prompt or upload your own artwork. Preview it on the front crown only; the brim and side panels stay plain.':wallSign?'Describe a design with a written prompt or upload your artwork. Preview it across the full front face of the sign, then confirm before ordering.':apron?'Describe a design with a written prompt, preview it on the black apron, then order. Printing is shown on the front bib only.':basketball?'Select any combination of Jersey Front, Jersey Back, and Shorts. Each selected area can have its own design prompt; unselected areas stay in the base color.':tankini?'Describe or upload your print in AI Studio. The design is previewed on the front of the tankini top; the separate shorts stay in the selected solid color.':chosen.id==='sds-128646'?'Create a continuous design for the printable area around the cup, or upload your own artwork in AI Studio. The gallery art is only an example.':chosen.id==='sds-138708'?'The custom print covers the entire mat, including its rounded edges. Upload artwork or create a design in AI Studio.':blanket?'Upload or create your artwork. It prints across the blanket front to the edges; the reverse remains white.':showerCurtain?'One continuous print covers the full curtain face edge to edge. Choose a size, then create or upload your artwork in AI Studio.':beanie?'Upload your artwork or describe a new design. Printing is limited to the front of the folded cuff; the rest of the beanie stays plain.':'Choose one side or both. The gallery shows example prints for each color. Your own design can be added to either side in AI Studio.';
+    $('#detailPrintSection .variant-label strong').textContent=wallSign||apron?'Print area':basketball?'Print areas':chosen.id==='sds-138708'||blanket||showerCurtain?'Print coverage':'Print placement';
+    $('#detailPrints').innerHTML=wallSign?'<button type="button" class="variant-side" data-select-print="front" aria-pressed="'+(selectedPrint==='front')+'">Full Face</button>':apron?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Front Bib Only</button>`:fullSurface?`<button type="button" class="variant-side" data-select-print="wrap" aria-pressed="${selectedPrint==='wrap'}">${chosen.id==='sds-138708'?'Full Surface':'Full Wrap'}</button>`:yogaSet?`<button type="button" class="variant-side" data-select-print="both" aria-pressed="${selectedPrint==='both'}">Both Pieces · Complete Set</button>`:basketball?uniformPrintZones.map(([id,label])=>`<button type="button" class="variant-side" data-select-zone="${id}" aria-pressed="${selectedUniformZones.includes(id)}">${label}</button>`).join(''):blanket?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Surface · Front Only</button>`:showerCurtain?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Surface · Single Sided</button>`:beanie?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Folded Front Cuff Only</button>`:tankini?`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Tankini Top · Front Only</button>`:`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Front Only</button><button type="button" class="variant-side" data-select-print="back" aria-pressed="${selectedPrint==='back'}">Back Only</button><button type="button" class="variant-side" data-select-print="both" aria-pressed="${selectedPrint==='both'}">Front + Back</button>`;
+    $('#detailPrintSection .option-helper').textContent=wallSign?'Describe your design with a written prompt or upload artwork. Preview it across the full front face of the sign, then confirm before ordering.':apron?'Describe a design with a written prompt, preview it on the black apron, then order. Printing is shown on the front bib only.':yogaSet?'Use a written prompt or upload one artwork file. The same coordinated print is previewed across the crop top and shorts; both pieces are sold together.':basketball?'Select any combination of Jersey Front, Jersey Back, and Shorts. Each selected area can have its own design prompt; unselected areas stay in the base color.':tankini?'Describe or upload your print in AI Studio. The design is previewed on the front of the tankini top; the separate shorts stay in the selected solid color.':chosen.id==='sds-128646'?'Create a continuous design for the printable area around the cup, or upload your own artwork in AI Studio. The gallery art is only an example.':chosen.id==='sds-138708'?'The custom print covers the entire mat, including its rounded edges. Upload artwork or create a design in AI Studio.':blanket?'Upload or create your artwork. It prints across the blanket front to the edges; the reverse remains white.':showerCurtain?'One continuous print covers the full curtain face edge to edge. Choose a size, then create or upload your artwork in AI Studio.':beanie?'Upload your artwork or describe a new design. Printing is limited to the front of the folded cuff; the rest of the beanie stays plain.':'Choose one side or both. The gallery shows example prints for each color. Your own design can be added to either side in AI Studio.';
     $('#detailCustomize').innerHTML='✦&nbsp; START CUSTOMIZING <span>↗</span>';
-    $('#detailSalesNotice').textContent=denimCap?'Create your cap with a prompt or uploaded artwork, preview it, then order. $14.99 USD.':wallSign?'Create a design from a prompt or upload artwork, preview it, and confirm before ordering. Pack prices: $16.99, $22.99, or $28.99.':apron?'Describe your design with a prompt, preview it, then order. $17.99 USD.':showerCurtain?'Price and ordering will be available after product setup is complete.': 'Create a design in AI Studio, then add the finished artwork to your bag. Free U.S. shipping.';
-    $('#detailGalleryNote').textContent=denimCap?'Carousel artwork is a sample. Create an original print with a prompt or upload your own artwork. Only the front crown is printed; every color has its own six-image gallery.':wallSign?'The three-sign animal scene is an example. Create your own artwork with a prompt or upload a design; the print covers each sign’s full front face.':apron?'Every gallery print is a sample. Describe your own design with a prompt and preview it on the black apron; the print is shown on the front bib.':basketball?'Every carousel print is an example. Create a custom jersey-front, jersey-back, and shorts design with a written prompt.':tankini?'Every print shown is a sample. Create your own print or upload artwork; the top is customized while the separate shorts stay plain.':chosen.id==='sds-128646'?'The cat-and-moon print is a sample. Create a new full-wrap design or upload your own artwork in AI Studio.':chosen.id==='sds-138708'?'The 3D Bubble Duck print is an example. Create or upload your own full-surface design in AI Studio.':blanket?'The artwork shown is a sample. Create or upload your own design for a full-front print that reaches the edges; the reverse stays white.':showerCurtain?'Choose a size to view its matching white curtain reference. The finished design will be a single-sided, full-bleed hanging product image.':beanie?'All displayed prints are examples. Create or upload your design for the folded front cuff; no other part of the beanie is printed.':'Example artwork shown. Create your own print on the front, back, or both sides.';
+    $('#detailSalesNotice').textContent=wallSign?'Create a design from a prompt or upload artwork, preview it, and confirm before ordering. Pack prices: $16.99, $22.99, or $28.99.':apron?'Describe your design with a prompt, preview it, then order. $17.99 USD.':yogaSet?'Customize one complete top-and-shorts set, preview your design, and confirm. Free shipping to the U.S., Canada, Japan, and Mexico.':showerCurtain?'Price and ordering will be available after product setup is complete.': 'Create a design in AI Studio, then add the finished artwork to your bag. Free U.S. shipping.';
+    $('#detailGalleryNote').textContent=wallSign?'The three-sign animal scene is an example. Create your own artwork with a prompt or upload a design; the print covers each sign’s full front face.':apron?'Every gallery print is a sample. Describe your own design with a prompt and preview it on the black apron; the print is shown on the front bib.':yogaSet?'Gallery artwork is an example. Upload your own image or describe a design, preview it across both pieces, and order the matching set together.':basketball?'Every carousel print is an example. Create a custom jersey-front, jersey-back, and shorts design with a written prompt.':tankini?'Every print shown is a sample. Create your own print or upload artwork; the top is customized while the separate shorts stay plain.':chosen.id==='sds-128646'?'The cat-and-moon print is a sample. Create a new full-wrap design or upload your own artwork in AI Studio.':chosen.id==='sds-138708'?'The 3D Bubble Duck print is an example. Create or upload your own full-surface design in AI Studio.':blanket?'The artwork shown is a sample. Create or upload your own design for a full-front print that reaches the edges; the reverse stays white.':showerCurtain?'Choose a size to view its matching white curtain reference. The finished design will be a single-sided, full-bleed hanging product image.':beanie?'All displayed prints are examples. Create or upload your design for the folded front cuff; no other part of the beanie is printed.':'Example artwork shown. Create your own print on the front, back, or both sides.';
     $('#detailProductDetails').textContent=config.productDetails||'100% cotton, relaxed fit, crew neckline, long sleeves and custom artwork placement. Available in Black, White and Red, sizes XS–3XL.';
     $('#detailProductionDetails').textContent=config.productionDetails||'Made in the USA. Ships from the USA within 24 hours of order confirmation, according to current store fulfillment information. Delivery time depends on carrier and destination.';
     $('#detailThumbnails').innerHTML=Array.from({length:galleryCount()},(_,index)=>'<button type="button" class="detail-thumb" data-gallery-index="'+index+'" aria-label="View product image '+(index+1)+': '+esc(galleryTitleAt(index))+'" aria-pressed="'+(index===galleryIndex)+'"><img src="'+gallerySrc(index)+'" alt="" loading="lazy"></button>').join('');
@@ -2346,7 +2329,7 @@ const blanket=chosen.id==='sds-97226';
     hero.fetchPriority='high';
     hero.src=gallerySrc(galleryIndex);
     hero.style.objectFit='cover';
-    const garment=chosen.id==='sds-128646'?'20 oz tumbler':chosen.id==='sds-138708'?'custom bath mat':chosen.id==='sds-97226'?'custom flannel throw blanket':chosen.id==='vibeya-shower-curtain'?'custom shower curtain':chosen.id==='sds-137892'?'custom women’s tankini swimsuit set':chosen.id==='sds-233939'?'custom kids’ basketball jersey and shorts set':chosen.id==='sds-275844'?'custom apron':chosen.id==='mg8014061'?'custom metal wall sign':chosen.id==='sds-172647'?'custom knitted beanie':chosen.id==='vibeya-washed-hoodie'?'washed hoodie':'custom cotton long sleeve';
+    const garment=chosen.id==='sds-128646'?'20 oz tumbler':chosen.id==='sds-138708'?'custom bath mat':chosen.id==='sds-97226'?'custom flannel throw blanket':chosen.id==='vibeya-shower-curtain'?'custom shower curtain':chosen.id==='sds-137892'?"custom women's tankini swimsuit set":chosen.id==='sds-63823'?"custom women's yoga set":chosen.id==='sds-233939'?"custom kids' basketball jersey and shorts set":chosen.id==='sds-275844'?'custom apron':chosen.id==='mg8014061'?'custom metal wall sign':chosen.id==='sds-172647'?'custom knitted beanie':chosen.id==='vibeya-washed-hoodie'?'washed hoodie':'custom cotton long sleeve';
     $('#detailHeroImage').alt=`${galleryTitleAt(galleryIndex)} — ${colorLabel(selectedColor)} VIBEYA ${garment}, example artwork`;
     $('#detailImageCount').textContent=String(galleryIndex+1).padStart(2,'0')+' / '+String(galleryCount()).padStart(2,'0');
     const updateThumbnails=()=>{
@@ -2369,14 +2352,10 @@ const blanket=chosen.id==='sds-97226';
     $('#studioColorLabel').textContent=colorLabel(selectedColor);
     $('#detailColorHint').textContent=chosen.id==='sds-128646'?colorLabel(selectedColor)+' artwork':chosen.id==='mg8014061'?'Black metal base':colorLabel(selectedColor)+' · '+(chosen.colors?.length||7)+' colors available';
     $('#currentSizeLabel').textContent=sizeLabel(chosen,selectedSize);
-    $('#currentPrintLabel').textContent=yogaSet?'Complete Set · Top + Shorts':chosen.id==='mg8014061'?`${sizeLabel(chosen,selectedSize)} · Full Face`:chosen.id==='mg8012002'?'Front Crown Only':chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
+    $('#currentPrintLabel').textContent=chosen.id==='mg8014061'?`${sizeLabel(chosen,selectedSize)} · Full Face`:chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
     $('#studioSizeLabel').textContent=sizeLabel(chosen,selectedSize);
-    if(chosen.sizePrices)$('#detailPrice').textContent=usdPrice(selectedProductPrice(chosen,selectedSize));
-    $('#studioPrintLabel').textContent=yogaSet?'Complete Set · Top + Shorts':chosen.id==='mg8014061'?`${sizeLabel(chosen,selectedSize)} · Full Face`:chosen.id==='mg8012002'?'Front Crown Only':chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
-    if(chosen.id==='mg8014061'){
-      $('#detailPrints').innerHTML=`<button type="button" class="variant-side" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Face</button>`;
-      $('#studioPrints').innerHTML=`<button type="button" class="studio-print" data-select-print="front" aria-pressed="${selectedPrint==='front'}">Full Face</button>`;
-    }
+    if(chosen.sizePrices||chosen.id==='sds-63823')$('#detailPrice').textContent=chosen.id==='sds-63823'?selectedMarketPrice(chosen):usdPrice(selectedProductPrice(chosen,selectedSize));
+    $('#studioPrintLabel').textContent=chosen.id==='mg8014061'?`${sizeLabel(chosen,selectedSize)} · Full Face`:chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':chosen.id==='sds-63823'?'Complete Set · Top + Shorts':chosen.id==='sds-233939'?selectedUniformZoneLabel():printNames[selectedPrint];
     document.querySelectorAll('[data-select-color]').forEach(b=>{
       b.setAttribute('aria-pressed',String(b.dataset.selectColor===selectedColor));
       b.classList.toggle('chosen',b.dataset.selectColor===selectedColor);
@@ -2384,13 +2363,15 @@ const blanket=chosen.id==='sds-97226';
     document.querySelectorAll('[data-select-size]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.selectSize===selectedSize)));
     document.querySelectorAll('[data-select-print]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.selectPrint===selectedPrint)));
     document.querySelectorAll('[data-select-zone]').forEach(b=>b.setAttribute('aria-pressed',String(selectedUniformZones.includes(b.dataset.selectZone))));
+    if(chosen.id==='mg8014061'){
+      $('#detailPrints').innerHTML='<button type="button" class="variant-side" data-select-print="front" aria-pressed="'+(selectedPrint==='front')+'">Full Face</button>';
+      $('#studioPrints').innerHTML='<button type="button" class="studio-print" data-select-print="front" aria-pressed="'+(selectedPrint==='front')+'">Full Face</button>';
+    }
     syncMetalSignDesignSlots();
   }
   function drawStudioVariantChoices(){
     const studioColors=chosen.colors||['Black','White','Red','Gray','LightGray','Cream','Navy'];
-    const studioColorHex=chosen.id==='mg8012002'
-      ?{Black:'#252427',Khaki:'#aa936d',Gray:'#77797b'}
-      :chosen.id==='vibeya-washed-hoodie'
+    const studioColorHex=chosen.id==='vibeya-washed-hoodie'
       ?{Khaki:'#79675a',Gray:'#c9c8c8',Black:'#28282a',Green:'#747d71',Pink:'#c95178',Purple:'#776b86'}
       :cardColorHex;
     $('#studioColorOptions').innerHTML=studioColors.map(key=>{
@@ -2398,16 +2379,19 @@ const blanket=chosen.id==='sds-97226';
       return `<button class="color-choice" type="button" data-select-color="${key}" style="--studio-swatch:${studioColorHex[key]||'#ccc'}" aria-pressed="${key===selectedColor}" aria-label="${esc(label)}" title="${esc(label)}"><span class="studio-color-dot"></span></button>`;
     }).join('');
     const sizes=chosen.sizes||['XS','S','M','L','XL','2XL','3XL'];
-    $('#studioSizes').innerHTML=sizes.map(s=>`<button type="button" class="studio-size" data-select-size="${s}" aria-pressed="${s===selectedSize}">${esc(sizeLabel(chosen,s))}</button>`).join('');
-    $('#studioPrintLabel').parentElement.querySelector('strong').textContent=chosen.id==='sds-233939'?'Print areas':chosen.id==='sds-275844'||chosen.id==='mg8014061'||chosen.id==='mg8012002'?'Print area':'Print placement';
-     const placements=chosen.id==='sds-128646'||chosen.id==='sds-138708'?['wrap']:chosen.id==='sds-97226'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-63823'||chosen.id==='63823'||chosen.id==='sds-233939'||chosen.id==='sds-275844'||chosen.id==='mg8014061'||chosen.id==='mg8012002'?['front']:['front','back','both'];
-     $('#studioPrints').innerHTML=chosen.id==='sds-233939'?uniformPrintZones.map(([id,label])=>`<button type="button" class="studio-print" data-select-zone="${id}" aria-pressed="${selectedUniformZones.includes(id)}">${label}</button>`).join(''):placements.map(k=>`<button type="button" class="studio-print" data-select-print="${k}">${chosen.id==='mg8014061'?'Full Face':chosen.id==='mg8012002'?'Front Crown Only':chosen.id==='sds-97226'?'Full Surface · Front Only':chosen.id==='sds-138708'||chosen.id==='vibeya-shower-curtain'?'Full Surface · Single Sided':chosen.id==='sds-172647'?'Folded Front Cuff Only':yogaSet?'Complete Set · Top + Shorts':chosen.id==='sds-137892'?'Tankini Top · Front Only':printNames[k]}</button>`).join('');
+    $('#studioSizes').innerHTML=sizes.map(s=>`<button type="button" class="studio-size" data-select-size="${s}">${esc(sizeLabel(chosen,s))}</button>`).join('');
+    $('#studioPrintLabel').parentElement.querySelector('strong').textContent=chosen.id==='sds-233939'?'Print areas':chosen.id==='sds-275844'||chosen.id==='mg8014061'?'Print area':'Print placement';
+     const placements=chosen.id==='sds-128646'||chosen.id==='sds-138708'?['wrap']:chosen.id==='sds-63823'?['both']:chosen.id==='sds-97226'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939'||chosen.id==='sds-275844'||chosen.id==='mg8014061'?['front']:['front','back','both'];
+     $('#studioPrints').innerHTML=chosen.id==='sds-233939'?uniformPrintZones.map(([id,label])=>`<button type="button" class="studio-print" data-select-zone="${id}" aria-pressed="${selectedUniformZones.includes(id)}">${label}</button>`).join(''):placements.map(k=>`<button type="button" class="studio-print" data-select-print="${k}">${chosen.id==='sds-63823'?'Both Pieces · Complete Set':chosen.id==='mg8014061'?'Full Face':chosen.id==='sds-97226'?'Full Surface · Front Only':chosen.id==='sds-138708'||chosen.id==='vibeya-shower-curtain'?'Full Surface · Single Sided':chosen.id==='sds-172647'?'Folded Front Cuff Only':chosen.id==='sds-137892'?'Tankini Top · Front Only':printNames[k]}</button>`).join('');
     syncVariants();
   }
   function openProductById(id,color){
+    if(id==='mg8014061'){
+      window.top.location.assign(marketPath('products/vibeya-custom-metal-bottle-cap-wall-sign'));
+      return;
+    }
     const p=products.find(x=>x.id===id);if(!p)return;
-    if(p.catalogOnly&&new URLSearchParams(location.search).get('standalone')!=='1'){window.top.location.assign(marketPath('products/'+encodeURIComponent(p.handle)));return;}
-      chosen=p;const requestedColor=id==='sds-128646'&&color==='NightGarden'?'White':color;selectedColor=p.colors?.includes(requestedColor)?requestedColor:(p.colors?.[0]||'Black');selectedColorConfirmed=p.colors?.length===1||p.colors?.includes(requestedColor)||(p.id==='mg8012002'&&!requestedColor);selectedSize=p.sizes?.length===1?p.sizes[0]:p.id==='sds-63823'?'M':p.id==='sds-138708'||p.id==='vibeya-shower-curtain'||p.id==='sds-137892'||p.sizePrices?p.sizes[0]:'';selectedPrint=(id==='sds-128646'||id==='sds-138708')?'wrap':'front';if(id==='sds-233939')selectedUniformZones=uniformPrintZones.map(([zone])=>zone);$('#preserveOriginalDesign').checked=false;
+      chosen=p;const requestedColor=id==='sds-128646'&&color==='NightGarden'?'White':color;selectedColor=p.colors?.includes(requestedColor)?requestedColor:(p.colors?.[0]||'Black');selectedColorConfirmed=p.colors?.length===1||p.colors?.includes(requestedColor);selectedSize=p.sizes?.length===1?p.sizes[0]:p.id==='sds-138708'||p.id==='vibeya-shower-curtain'||p.id==='sds-137892'||p.id==='sds-63823'||p.sizePrices?p.sizes[0]:'';selectedPrint=(id==='sds-128646'||id==='sds-138708')?'wrap':id==='sds-63823'?'both':'front';if(id==='sds-233939')selectedUniformZones=uniformPrintZones.map(([zone])=>zone);$('#preserveOriginalDesign').checked=false;
     renderProductDetails();drawStudioVariantChoices();setGallery(0);syncVariants();location.hash='#product-'+id;
     if(location.hash==='#product-'+id){routeCatalog();}
   }
@@ -2468,10 +2452,11 @@ const blanket=chosen.id==='sds-97226';
     setTimeout(()=>requestStudio(products[0],inspirations[0].prompt),60);
   }
 
-  $('#productSearch').addEventListener('input',paintProducts);
+  $('#productSearch').addEventListener('input',()=>{productVisible=8;paintProducts();});
   $('#ideaSearch').addEventListener('input',()=>{ideaVisible=9;paintIdeas();});
   $('#productSort').addEventListener('change',paintProducts);
   $('#ideaSort').addEventListener('change',paintIdeas);
+  $('#moreProducts').addEventListener('click',()=>{productVisible+=8;paintProducts();});
   $('#moreIdeas').addEventListener('click',()=>{ideaVisible+=9;paintIdeas();});
   const preloadedColorImages=new Set();
   document.addEventListener('pointerover',e=>{
@@ -2484,7 +2469,7 @@ const blanket=chosen.id==='sds-97226';
   },{passive:true});
   document.addEventListener('click',e=>{
     let b=e.target.closest('[data-zoom-generated]');if(b){lastZoomTrigger=b;openImageZoom();return;}
-    let tag=e.target.closest('[data-product-tag]');if(tag){productTag=tag.dataset.productTag;paintProducts();return;}
+    let tag=e.target.closest('[data-product-tag]');if(tag){productTag=tag.dataset.productTag;productVisible=8;paintProducts();return;}
     tag=e.target.closest('[data-idea-tag]');if(tag){ideaTag=tag.dataset.ideaTag;ideaVisible=9;paintIdeas();return;}
 
     let catalogColorSwatch=e.target.closest('[data-catalog-color]');if(catalogColorSwatch){
@@ -2496,19 +2481,11 @@ const blanket=chosen.id==='sds-97226';
       return;
     }
     let colorSwatch=e.target.closest('[data-card-color]');if(colorSwatch){
-      const card=colorSwatch.closest('.product-card'),product=products.find(p=>p.id===card.dataset.productId);
-      if(!product)return;
+      const card=colorSwatch.closest('.product-card'),product=products.find(p=>p.id===card.querySelector('[data-product]').dataset.product);
       const variant=productVariants[product.id],color=colorSwatch.dataset.cardColor,label=variant.colors[color][0],image=card.querySelector('[data-card-image]');
       card.querySelectorAll('[data-card-color]').forEach(button=>button.setAttribute('aria-pressed',String(button===colorSwatch)));
       image.src=variant.image(color);image.alt=label+' '+product.short+' — product gallery image 1';
-      card.querySelectorAll('.product-detail-link').forEach(link=>{
-        link.setAttribute('aria-label',(link.classList.contains('product-card-info')?'View details for ':'View ')+product.name+' in '+label);
-        if(product.id==='sds-167256'){
-          const destination=new URL(link.href,location.href);
-          destination.searchParams.set('color',color);
-          link.href=destination.pathname+destination.search;
-        }
-      });
+      card.querySelectorAll('[data-product]').forEach(button=>{button.dataset.productColor=color;button.setAttribute('aria-label',(button.classList.contains('product-card-info')?'View details for ':'View ')+product.name+' in '+label);});
       card.querySelector('.card-color-caption').textContent=product.variantSummary||label+' · '+product.colors.length+' colors · '+variant.sizesLabel;
       return;
     }
@@ -2526,7 +2503,7 @@ const blanket=chosen.id==='sds-97226';
     b=e.target.closest('[data-select-print]');if(b){selectedPrint=b.dataset.selectPrint;studioViewMode='product';syncVariants();syncStudioPromptFields();hasPreview=false;drawPreview();return;}
     b=e.target.closest('[data-select-color]');if(b){
       const color=b.dataset.selectColor;
-      const allowed=chosen.id==='vibeya-washed-hoodie'||chosen.id==='sds-128646'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939'||chosen.id==='mg8012002'?chosen.colors?.includes(color):!!colorGalleries[color];
+      const allowed=chosen.id==='vibeya-washed-hoodie'||chosen.id==='sds-128646'||chosen.id==='sds-172647'||chosen.id==='vibeya-shower-curtain'||chosen.id==='sds-137892'||chosen.id==='sds-233939'?chosen.colors?.includes(color):!!colorGalleries[color];
       if(!allowed)return;
       selectedColor=color;
       selectedColorConfirmed=true;
@@ -2537,6 +2514,7 @@ const blanket=chosen.id==='sds-97226';
       if(chosen.id==='sds-167256'){renderProductCards();paintProducts();}
       return;
     }
+    b=e.target.closest('[data-product]');if(b){openProductById(b.dataset.product,b.dataset.productColor);return;}
     b=e.target.closest('[data-inspo]');if(b){chosenArt=+b.dataset.inspo;hasPreview=true;requestStudio(chosen,inspirations[chosenArt].prompt);return;}
     b=e.target.closest('[data-studio-product]');if(b){chosen=products.find(p=>p.id===b.dataset.studioProduct);selectedColor=chosen.colors?.[0]||'Black';selectedColorConfirmed=chosen.colors?.length===1;selectedSize=chosen.sizes?.length===1||chosen.id==='vibeya-shower-curtain'?chosen.sizes[0]:'';selectedPrint=chosen.id==='sds-128646'?'wrap':'front';studioViewMode='product';drawProductChoices();drawStudioVariantChoices();syncStudioPromptFields();hasPreview=false;drawPreview();return;}
     b=e.target.closest('[data-example]');if(b){studioActiveInput().value=b.dataset.example;hasPreview=false;drawPreview();return;}
@@ -2558,7 +2536,7 @@ const blanket=chosen.id==='sds-97226';
 
   $('#detailPrev').addEventListener('click',()=>setGallery(galleryIndex-1));
   $('#detailNext').addEventListener('click',()=>setGallery(galleryIndex+1));
-  $('#detailCustomize').addEventListener('click',()=>{selectedPrint=chosen.id==='sds-128646'||chosen.id==='sds-138708'?'wrap':'front';syncVariants();syncStudioPromptFields();requestStudio(chosen);});
+  $('#detailCustomize').addEventListener('click',()=>{selectedPrint=chosen.id==='sds-128646'?'wrap':'front';syncVariants();syncStudioPromptFields();requestStudio(chosen);});
   $('#quickPromptForm').addEventListener('submit',e=>{e.preventDefault();let prompt=$('#quickPrompt').value.trim();chosenArt=detectArtwork(prompt);selectedPrint='front';syncVariants();syncStudioPromptFields();hasPreview=false;requestStudio(chosen,prompt);});
   $('#generateBtn').addEventListener('click',async()=>{
     // The blanket only supports a single-sided full-surface print. Never route it
@@ -2656,5 +2634,6 @@ const blanket=chosen.id==='sds-97226';
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#imageZoomOverlay').classList.contains('open'))closeImageZoom();else{hideStudio();hideSearch();hideCart();$('#nav').classList.remove('open');}}});
 })();
 </script>
+<script src="assets/shared/market-locale.js?v=site-locale-copy-30" defer></script>
 </body>
 </html>

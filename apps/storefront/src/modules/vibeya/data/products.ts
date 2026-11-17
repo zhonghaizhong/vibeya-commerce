@@ -10,6 +10,7 @@ export type VibeyaProduct = {
   handle: string
   catalogOnly?: boolean
   catalogImage?: string | null
+  marketGallery?: string[]
   category?: string
   priceUnavailable?: boolean
   name: string
@@ -117,12 +118,7 @@ const apronGallery = Array.from(
 
 const metalPlaqueGallery = Array.from(
   { length: 6 },
-  (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.webp`
-)
-
-const denimCapGallery = Array.from(
-  { length: 6 },
-  (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.webp`
+  (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.png`
 )
 
 const longSleeveColors: VibeyaColor[] = [
@@ -146,9 +142,49 @@ const hoodieColors: VibeyaColor[] = [
 
 export const vibeyaProducts: VibeyaProduct[] = [
   {
+    id: "sds-63823",
+    handle: "vibeya-custom-womens-yoga-set",
+    category: "Apparel",
+    name: "VIBEYA Custom Women's Yoga Set",
+    short: "Custom women's yoga set · top + shorts",
+    price: 19.99,
+    currency: "USD",
+    colors: [{ id: "White", name: "White · black trim", hex: "#f7f6f2", folder: "us" }],
+    sizes: ["XS", "S", "M", "L", "XL", "2XL"],
+    gallery: Array.from({ length: 6 }, (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.webp`),
+    eyebrow: "VIBEYA / CUSTOM ACTIVEWEAR",
+    intro: "Create one coordinated yoga set with your own uploaded artwork or a written design prompt. Preview the matching print across both the crop top and mid-thigh shorts before ordering; the two pieces are sold and customized together.",
+    highlights: ["Matching two-piece set", "Customize top + shorts together", "77% polyester · 23% spandex", "Removable bra pads"],
+    sizeGuide: "cm / in",
+    sizeRows: [
+      ["XS", "14.5 / 5.7", "33 / 13.0", "30 / 11.8", "25.5 / 10.0", "30 / 11.8", "19 / 7.5"],
+      ["S", "15 / 5.9", "35.5 / 14.0", "32.5 / 12.8", "26.5 / 10.4", "32.5 / 12.8", "20 / 7.9"],
+      ["M", "15.5 / 6.1", "38 / 15.0", "35 / 13.8", "27.5 / 10.8", "35 / 13.8", "21 / 8.3"],
+      ["L", "16 / 6.3", "40.5 / 15.9", "37.5 / 14.8", "28.5 / 11.2", "37.5 / 14.8", "22 / 8.7"],
+      ["XL", "16.5 / 6.5", "43 / 16.9", "40 / 15.7", "29.5 / 11.6", "40 / 15.7", "23 / 9.1"],
+      ["2XL", "17 / 6.7", "45.5 / 17.9", "42.5 / 16.7", "30.5 / 12.0", "42.5 / 16.7", "24 / 9.4"],
+    ],
+    sizeNote: "Flat-lay garment measurements in cm / in. Manual measurement may vary by 1–2 cm. Compare the top and shorts measurements with a similar garment before choosing.",
+    services: [
+      ["One complete set", "The top and shorts are selected, printed, and sold together."],
+      ["Prompt or upload", "Describe your idea or upload artwork, then preview both pieces before ordering."],
+      ["Free shipping", "Free shipping to the United States, Canada, Japan, and Mexico."],
+    ],
+    variantSummary: "Design or upload · matching top + shorts · sizes XS–2XL",
+    colorOptionLabel: "Base color",
+    sizeOptionLabel: "Set size",
+    measurementRows: [
+      ["XS", "Top length 14.5 cm · half bust 33 cm · shorts length 25.5 cm · half hip 30 cm"],
+      ["S", "Top length 15 cm · half bust 35.5 cm · shorts length 26.5 cm · half hip 32.5 cm"],
+      ["M", "Top length 15.5 cm · half bust 38 cm · shorts length 27.5 cm · half hip 35 cm"],
+      ["L", "Top length 16 cm · half bust 40.5 cm · shorts length 28.5 cm · half hip 37.5 cm"],
+      ["XL", "Top length 16.5 cm · half bust 43 cm · shorts length 29.5 cm · half hip 40 cm"],
+      ["2XL", "Top length 17 cm · half bust 45.5 cm · shorts length 30.5 cm · half hip 42.5 cm"],
+    ],
+  },
+  {
     id: "sds-167256",
     handle: "vibeya-custom-cotton-long-sleeve-tee",
-    category: "Custom Clothing",
     name: "VIBEYA Custom Cotton Long Sleeve Tee",
     short: "Cotton long sleeve tee",
     price: 19.99,
@@ -157,7 +193,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
     sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
     gallery: longSleeveGallery,
     eyebrow: "VIBEYA / FIRST COLLECTION",
-    intro: "Upload a photo or artwork, or describe a custom long sleeve shirt design with a prompt. Choose from seven colors, then preview front, back, or double-sided printing.",
+    intro: "Your vibe, your rules. Choose from seven colors, then create your own front, back, or double-sided artwork.",
     highlights: ["100% Cotton", "Custom Front / Back"],
     sizeGuide: "cm",
     sizeRows: [
@@ -175,7 +211,6 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "vibeya-washed-hoodie",
     handle: "vibeya-washed-vintage-hooded-sweatshirt",
-    category: "Custom Clothing",
     name: "VIBEYA Washed Vintage Hooded Sweatshirt",
     short: "Washed vintage hoodie",
     price: 29.99,
@@ -201,7 +236,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "sds-172647",
     handle: "vibeya-custom-knitted-beanie",
-    category: "Custom Hats",
+    category: "Apparel",
     name: "VIBEYA Custom Knitted Beanie",
     short: "Custom knitted beanie",
     price: 14.99,
@@ -238,7 +273,6 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "sds-128646",
     handle: "vibeya-custom-20oz-stainless-steel-tumbler",
-    category: "Custom Tumblers",
     name: "VIBEYA Custom 20 oz Stainless Steel Tumbler",
     short: "Custom 20 oz tumbler",
     price: 19.99,
@@ -270,7 +304,6 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "sds-138708",
     handle: "vibeya-custom-3d-bath-mat",
-    category: "Custom Home & Bath",
     name: "VIBEYA Custom 3D Optical Illusion Bath Mat",
     short: "Custom 3D bath mat",
     price: 19.99,
@@ -308,7 +341,6 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "sds-97226",
     handle: "vibeya-custom-flannel-throw-blanket",
-    category: "Custom Home & Bath",
     name: "VIBEYA Custom Flannel Throw Blanket",
     short: "Custom flannel throw blanket",
     price: 14.99,
@@ -348,7 +380,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "vibeya-shower-curtain",
     handle: "vibeya-custom-shower-curtain",
-    category: "Custom Home & Bath",
+    category: "Home & Bath",
     name: "VIBEYA Custom Shower Curtain",
     short: "Custom shower curtain",
     price: 17.99,
@@ -388,7 +420,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "sds-137892",
     handle: "vibeya-custom-womens-tankini-swimsuit-set",
-    category: "Custom Clothing",
+    category: "Apparel",
     name: "VIBEYA Custom Women's Tankini Swimsuit Set",
     short: "Custom women's tankini swimsuit",
     price: 19.99,
@@ -426,7 +458,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "sds-233939",
     handle: "vibeya-custom-kids-basketball-uniform",
-    category: "Custom Clothing",
+    category: "Apparel",
     name: "VIBEYA Custom Kids' Basketball Uniform",
     short: "Custom kids' basketball jersey and shorts set",
     price: 19.99,
@@ -465,7 +497,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
   {
     id: "sds-275844",
     handle: "vibeya-custom-prompt-design-apron",
-    category: "Custom Kitchen & Dining",
+    category: "Kitchen & Dining",
     name: "VIBEYA Custom Prompt-Designed Apron",
     short: "Custom black cooking apron",
     price: 17.99,
@@ -497,41 +529,9 @@ export const vibeyaProducts: VibeyaProduct[] = [
     ],
   },
   {
-    id: "sds-63823",
-    handle: "vibeya-custom-womens-yoga-set",
-    catalogOnly: true,
-    catalogImage: "/vibeya/assets/products/sds-63823/us/01-carousel.webp",
-    category: "Apparel",
-    name: "VIBEYA Custom Women's Yoga Set",
-    short: "Custom women's yoga set",
-    price: 19.99,
-    currency: "USD",
-    colors: [{ id: "White", name: "White", hex: "#ffffff", folder: "white" }],
-    sizes: ["XS", "S", "M", "L", "XL", "2XL"],
-    defaultSize: "M",
-    gallery: Array.from({ length: 6 }, (_, index) => `${String(index + 1).padStart(2, "0")}-carousel.webp`),
-    eyebrow: "VIBEYA / CUSTOM ACTIVEWEAR",
-    intro: "Create one coordinated print for the complete two-piece yoga set. Upload your artwork or describe a design with a prompt, preview it across the crop top and shorts, then confirm before ordering. The top and shorts are customized and sold together.",
-    highlights: ["Matching crop top and mid-thigh shorts", "One coordinated design across both pieces", "Upload artwork or design from a prompt", "Sizes XS–2XL"],
-    sizeGuide: "cm",
-    sizeRows: [],
-    sizeNote: "Supplier measurements may vary by 1–2 cm.",
-    variantSummary: "One custom design for top + shorts · White · Sizes XS–2XL",
-    colorOptionLabel: "Base color",
-    sizeOptionLabel: "Size",
-    measurementRows: [["Set", "Crop top + mid-thigh shorts"], ["Material", "77% polyester · 23% spandex"], ["Print", "Coordinated full set"], ["Base color", "White"]],
-    services: [
-      ["Design the complete set", "One artwork direction is applied across the crop top and shorts together."],
-      ["Preview before ordering", "Review the coordinated print placement before confirming your custom set."],
-      ["Free shipping", "Available in the United States, Canada, Japan, and Mexico."],
-    ],
-  },
-  {
     id: "mg8014061",
     handle: "vibeya-custom-metal-bottle-cap-wall-sign",
-    catalogOnly: true,
-    catalogImage: "/vibeya/assets/products/mg8014061/black/01-carousel.webp",
-    category: "Custom Wall Decor",
+    category: "Home & Bath",
     name: "VIBEYA Custom Metal Bottle Cap Wall Sign",
     short: "Custom round metal wall sign",
     price: 16.99,
@@ -564,67 +564,12 @@ export const vibeyaProducts: VibeyaProduct[] = [
       ["U.S. fulfillment", "Ships from U.S. warehouse locations."],
     ],
   },
-  {
-    id: "mg8012002",
-    handle: "vibeya-custom-washed-denim-baseball-cap",
-    catalogOnly: true,
-    catalogImage: "/vibeya/assets/products/mg8012002/black/01-carousel.webp",
-    category: "Custom Hats",
-    name: "VIBEYA Custom Washed Denim Baseball Cap",
-    short: "Custom washed denim baseball cap",
-    price: 14.99,
-    currency: "USD",
-    colors: [
-      { id: "Black", name: "Black", hex: "#252427", folder: "black" },
-      { id: "Khaki", name: "Khaki", hex: "#aa936d", folder: "khaki" },
-      { id: "Gray", name: "Gray", hex: "#77797b", folder: "gray" },
-    ],
-    sizes: ["One Size"],
-    sizeLabels: { "One Size": "One Size" },
-    defaultSize: "One Size",
-    gallery: denimCapGallery,
-    eyebrow: "VIBEYA / CUSTOM ACCESSORIES",
-    intro:
-      "Make a washed denim baseball cap your own. Upload artwork or describe a design with a prompt, preview the front print, then confirm before ordering. Choose black, khaki, or gray.",
-    highlights: [
-      "Design from a prompt or upload artwork",
-      "Washed cotton denim",
-      "Front crown print area",
-      "Adjustable one-size fit",
-    ],
-    sizeGuide: "cm / in",
-    sizeRows: [],
-    sizeNote: "One adjustable size. Supplier fit range is approximately 55–59 cm.",
-    variantSummary: "Design or upload artwork · 3 colors · One Size",
-    colorOptionLabel: "Base color",
-    sizeOptionLabel: "Size",
-    measurementRows: [
-      ["Material", "100% cotton washed denim"],
-      ["Print area", "Front crown only"],
-      ["Fit", "Adjustable · approximately 55–59 cm"],
-      ["Brim", "Approximately 7 cm"],
-    ],
-    services: [
-      [
-        "Design your way",
-        "Describe an idea with a prompt or upload your own artwork.",
-      ],
-      [
-        "Preview before ordering",
-        "Review the custom front print on the selected cap color before checkout.",
-      ],
-      [
-        "Three washed colors",
-        "Choose black, khaki, or gray. Each color has its own gallery examples.",
-      ],
-    ],
-  },
 ]
 
-export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index = 0, countryCode = "us") {
+export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index = 0) {
   const file = product.gallery[index] ?? product.gallery[0]
   if (product.id === "sds-63823") {
-    return `/vibeya/assets/products/sds-63823/${countryCode}/${file}`
+    return `/vibeya/assets/products/sds-63823/${color.folder}/${file}`
   }
   if (product.id === "sds-128646") {
     return `/vibeya/assets/products/sds-128646/${file}`
@@ -649,9 +594,6 @@ export function getVibeyaImage(product: VibeyaProduct, color: VibeyaColor, index
   }
   if (product.id === "mg8014061") {
     return `/vibeya/assets/products/mg8014061/${color.folder}/${file}`
-  }
-  if (product.id === "mg8012002") {
-    return `/vibeya/assets/products/mg8012002/${color.folder}/${file}`
   }
   if (product.id === "sds-172647") {
     const colorGallery = color.id === "Black"

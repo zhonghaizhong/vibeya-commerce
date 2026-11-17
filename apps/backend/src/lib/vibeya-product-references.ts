@@ -2,11 +2,10 @@ import { readFile } from "node:fs/promises"
 import path from "node:path"
 
 const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string> | Record<string, Record<string, string>>> = {
-  "sds-63823": "vibeya/assets/products/sds-63823/blank-print-base.png",
-  "63823": "vibeya/assets/products/sds-63823/blank-print-base.png",
   "mg8014061": "vibeya/assets/products/mg8014061/black/blank-sign-print-area.png",
+  "sds-63823": "vibeya/assets/products/sds-63823/blank-set-reference.jpg",
   "sds-97226": "vibeya/assets/products/sds-97226/blank-print-base.webp",
-  "sds-138708": "vibeya/assets/products/sds-138708/blank-print-base-hd.webp",
+  "sds-138708": "vibeya/assets/products/sds-138708/blank-print-base.webp",
   "sds-137892": {
     Black: "vibeya/assets/products/mg8011024/swimwear-blank-product-base.png",
     Red: "vibeya/assets/products/mg8011024/red/swimwear-blank-product-base.png",
@@ -24,11 +23,6 @@ const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string> | 
     Black: "vibeya/assets/products/sds-172647/beanie-print-area-guide.webp",
     Red: "vibeya/assets/products/sds-172647/red/beanie-print-area-guide.webp",
     Gray: "vibeya/assets/products/sds-172647/gray/beanie-print-area-guide.webp",
-  },
-  "mg8012002": {
-    Black: "vibeya/assets/products/mg8012002/black/print-area-guide.webp",
-    Khaki: "vibeya/assets/products/mg8012002/khaki/print-area-guide.webp",
-    Gray: "vibeya/assets/products/mg8012002/gray/print-area-guide.webp",
   },
   "sds-233939": {
     Black: "vibeya/assets/products/sds-233939/black/print-area-front.png",

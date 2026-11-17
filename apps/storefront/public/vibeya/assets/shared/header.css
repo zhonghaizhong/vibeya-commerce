@@ -46,6 +46,9 @@ body > header :is(.navigation,.market-navigation) a.nav-create[aria-current]{
   font:800 14px 'DM Sans',Arial,system-ui,sans-serif;
 }
 body > header :is(.nav-right,.market-nav-right){display:flex;align-items:center;gap:8px;flex:0 0 auto}
+body > header .nav-market-controls{display:flex;align-items:center;gap:8px}
+body > header .nav-market-control{display:flex;min-width:0;align-items:center;gap:6px;padding:7px 10px;border:1px solid #e7ddec;border-radius:999px;background:#fffaf5;color:#6e6178;font:700 11px 'DM Sans',Arial,system-ui,sans-serif;white-space:nowrap}
+body > header .nav-market-control select{min-width:0;max-width:112px;padding:0 14px 0 0;border:0;outline:0;background:transparent;color:var(--v-nav-ink);font:inherit;cursor:pointer}
 body > header :is(.icon-btn,.market-icon-btn){
   width:42px;height:42px;background:transparent;border:0;
   border-radius:50%;display:grid;place-items:center;
@@ -77,7 +80,7 @@ body > header .sign-in-link:hover{opacity:.6}
 body > header .account-menu-link{display:none;text-decoration:none;color:var(--v-nav-ink)}
 body > header :is(.mobile-menu,.market-menu-btn){display:none}
 body > header .mobile-menu-glyph{font-size:20px;line-height:1}
-@media (max-width:860px){
+@media (max-width:1100px){
   body > header > :is(.topnav,.market-topnav){width:min(100% - 36px,1440px);height:66px;gap:8px}
   body > header :is(.nav-right,.market-nav-right) > :is(.sign-in-link,.account-link){display:none}
   body > header :is(.navigation,.market-navigation){
@@ -92,6 +95,9 @@ body > header .mobile-menu-glyph{font-size:20px;line-height:1}
   }
   body > header :is(.mobile-menu,.market-menu-btn){display:grid}
   body > header :is(.navigation,.market-navigation).open a:not(.nav-ai):not(.nav-create){border-radius:12px;padding:12px}
+  body > header .nav-market-controls{align-items:stretch;flex-direction:column;margin:4px 0}
+  body > header .nav-market-control{width:100%;justify-content:space-between;min-height:48px;padding:9px 12px;font-size:13px}
+  body > header .nav-market-control select{flex:0 1 auto;width:auto;max-width:min(62vw,240px);text-align:right}
 }
 @media (max-width:570px){
   :is(.announcement,.site-announcement){font-size:10px}
@@ -99,4 +105,7 @@ body > header .mobile-menu-glyph{font-size:20px;line-height:1}
   body > header :is(.logo,.market-logo){font-size:27px}
   body > header :is(.nav-right,.market-nav-right){gap:0}
   body > header :is(.icon-btn,.market-icon-btn){width:36px;height:40px}
+}
+@media (max-width:380px){
+  body > header > :is(.topnav,.market-topnav){width:min(100% - 24px,1440px)}
 }

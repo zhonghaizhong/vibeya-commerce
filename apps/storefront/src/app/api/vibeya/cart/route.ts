@@ -1,5 +1,6 @@
 import { sdk } from "@lib/config"
 import { getCartId } from "@lib/data/cookies"
+import { getVibeyaMarket } from "@lib/vibeya/region"
 import { activateCart, MAX_LINE_ITEM_QUANTITY } from "@lib/util/server-cart"
 import { vibeyaProducts } from "@modules/vibeya/data/products"
 import { HttpTypes } from "@medusajs/types"
@@ -52,9 +53,6 @@ export async function POST(request: NextRequest) {
   if (!body || typeof body !== "object") return jsonError("Invalid cart item")
 
   const countryCode = String(body.countryCode ?? "us").toLowerCase()
-  if (!["us", "ca", "mx", "jp"].includes(countryCode)) {
-    return jsonError("This VIBEYA product is not available in this market", 400)
-  }
 
   const productConfig = vibeyaProducts.find((product) => product.id === String(body.product ?? ""))
   const handle = productConfig?.handle
@@ -66,14 +64,14 @@ export async function POST(request: NextRequest) {
     Math.max(Number.parseInt(String(body.quantity ?? 1), 10) || 1, 1),
     MAX_LINE_ITEM_QUANTITY
   )
-  const { regions } = await sdk.client.fetch<{ regions: HttpTypes.StoreRegion[] }>(
-    "/store/regions",
-    { cache: "no-store" }
-  )
-  const region = regions.find((candidate) =>
-    candidate.countries?.some((country) => country.iso_2?.toLowerCase() === countryCode)
-  )
-  if (!region) return jsonError("Checkout is unavailable for this market", 503)
+  let market: Awaited<ReturnType<typeof getVibeyaMarket>>
+  try {
+    market = await getVibeyaMarket(countryCode)
+  } catch {
+    return jsonError("Could not check delivery availability for this destination.", 502)
+  }
+  if (!market.region) return jsonError("Checkout is not configured for this destination yet.", 400)
+  const region = market.region
 
   try {
     const { products } = await sdk.store.product.list({
@@ -84,6 +82,7 @@ export async function POST(request: NextRequest) {
     })
     const product = products[0]
     if (!product) return jsonError("Product is not published", 404)
+    if (!market.product_ids.includes(product.id)) return jsonError("This product cannot be delivered to the selected destination.", 400)
 
     const normalizedColor = normalizeColorValue(color, handle)
     const normalizedSize = normalizeOptionValue(size)
@@ -103,13 +102,18 @@ export async function POST(request: NextRequest) {
     })
     if (!variant) return jsonError("That color and size combination is unavailable", 400)
 
-    const print = ["none", "front", "back", "both", "wrap"].includes(String(body.print))
-      ? String(body.print)
-      : "front"
+    const print = productConfig.id === "sds-63823"
+      ? "both"
+      : ["none", "front", "back", "both", "wrap"].includes(String(body.print))
+        ? String(body.print)
+        : "front"
     const metadata = {
       vibeya_design_name: String(body.designName ?? "Custom design").slice(0, 120),
       vibeya_design_prompt: String(body.prompt ?? "").slice(0, 4000),
       vibeya_print_placement: print,
+      ...(productConfig.id === "sds-63823"
+        ? { vibeya_customization_scope: "matching_top_and_shorts_complete_set" }
+        : {}),
       vibeya_reference_images_not_attached: Number(body.referenceCount ?? 0) > 0,
       vibeya_inspiration_id: String(body.inspirationId ?? "").slice(0, 100),
     }
@@ -124,8 +128,7 @@ export async function POST(request: NextRequest) {
     let cartId = await getCartId()
     if (cartId) {
       try {
-        const existingCart = await loadCart(cartId)
-        if (existingCart.region_id !== region.id) cartId = undefined
+        await loadCart(cartId)
       } catch {
         // A completed or stale cart cookie should not block a new purchase.
         cartId = undefined
