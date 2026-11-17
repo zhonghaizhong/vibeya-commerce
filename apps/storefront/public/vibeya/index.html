@@ -763,7 +763,7 @@
       <div class="container">
         <div class="section-heading"><div><div class="eyebrow">GOOD IDEAS ARE CONTAGIOUS</div><h2>Need a little inspo?</h2><p>Pick a vibe. Remix it. Make it completely yours.</p></div><button class="btn outline small" data-open-studio>CREATE SOMETHING ↗</button></div>
         <div class="insp-grid home-inspiration-grid" id="inspoCards"></div>
-        <div class="catalog-bottom"><a class="btn secondary" href="inspiration/index.html">EXPLORE ALL INSPIRATION ↗</a></div>
+        <div class="catalog-bottom"><a class="btn secondary" href="inspiration/index.html" target="_top">EXPLORE ALL INSPIRATION ↗</a></div>
       </div>
     </section>
 
@@ -875,7 +875,7 @@
     <div class="eyebrow">INSPIRATION MARKET</div>
     <h1>Creative ideas with a story.</h1>
     <p>Browse original design concepts and read how each look comes together.</p>
-    <a class="btn primary" href="inspiration/index.html">EXPLORE INSPIRATION</a>
+    <a class="btn primary" href="inspiration/index.html" target="_top">EXPLORE INSPIRATION</a>
   </section>
   <div style="display:none" aria-hidden="true"><input id="ideaSearch"><select id="ideaSort"><option value="featured">Featured</option></select><div id="ideaFilters"></div><div id="ideaCount"></div><div id="allIdeas"></div><button id="moreIdeas" hidden>More</button></div>
 </main>
@@ -2021,7 +2021,7 @@
     if(activeLocale==='ja-JP'||activeLocale==='es-MX')catalog=catalog.map(entry=>{const localized=entry.translations?.[activeLocale];return localized?.title&&localized?.summary&&localized?.articleBody&&localized?.tags?.length&&localized?.image&&localized?.cardImage?{...entry,...localized}:null;}).filter(Boolean);
     const inspirationUrl=new URL(country==='us'?'/vibeya/inspiration/index.html':`/${country}/inspiration/`,location.origin);
     const inspirationAssetBase=new URL('/vibeya/inspiration/index.html',location.origin);
-    const inspirationStoryHref=(href,entry)=>{if(entry?.marketUrls?.[country])return new URL(entry.marketUrls[country],location.origin).href;const url=new URL(href,inspirationUrl);if(activeLocale==='ja-JP'||activeLocale==='es-MX'){url.pathname='/vibeya/inspiration/story.html';url.searchParams.set('inspiration',entry.id);}return withMarketContext(url.href);};
+    const inspirationStoryHref=(href,entry)=>{if(entry?.marketUrls?.[country])return new URL(entry.marketUrls[country],location.origin).href;const url=new URL(href,inspirationUrl);if(activeLocale==='ja-JP'||activeLocale==='es-MX'){url.pathname='/vibeya/inspiration/story.html';url.searchParams.set('inspiration',entry.id);}url.hash='';return withMarketContext(url.href);};
     const cards=[];
     try{
       const response=await fetch(inspirationUrl,{credentials:'same-origin',cache:'no-store'});
@@ -2048,7 +2048,7 @@
     const selectedCards=cards.slice(0,6);
     $('#inspoCards').innerHTML=selectedCards.map(card=>{
       const alt=card.alt||`${card.title} inspiration card`;
-      return `<a class="home-featured-inspo" data-inspiration="${esc(card.id)}" style="--artwork-extension:url('${esc(card.image)}')" href="${esc(card.href)}" aria-label="Open ${esc(alt)}"><img src="${esc(card.image)}" alt="${esc(alt)}" loading="lazy"></a>`;
+      return `<a class="home-featured-inspo" data-inspiration="${esc(card.id)}" style="--artwork-extension:url('${esc(card.image)}')" href="${esc(card.href)}" target="_top" aria-label="Open ${esc(alt)}"><img src="${esc(card.image)}" alt="${esc(alt)}" loading="lazy"></a>`;
     }).join('');
     if(inspirationSection)inspirationSection.hidden=selectedCards.length===0;
   }
