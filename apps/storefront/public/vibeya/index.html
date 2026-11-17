@@ -39,6 +39,8 @@
     .navigation{display:flex;align-items:center;gap:34px;font-size:14px;font-weight:800;}
     .navigation a{white-space:nowrap;transition:opacity .2s;}
     .navigation a:hover{opacity:.55;}
+    .navigation .nav-dialog-link{white-space:nowrap;transition:opacity .2s;color:inherit;font:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left;}
+    .navigation .nav-dialog-link:hover{opacity:.55;}
     .nav-market-controls{display:flex;align-items:center;gap:8px;}
     .nav-market-control{display:flex;min-width:0;align-items:center;gap:6px;padding:7px 10px;border:1px solid var(--edge);border-radius:999px;background:var(--cream);color:var(--muted);font-size:11px;font-weight:700;white-space:nowrap;}
     .nav-market-control select{min-width:0;max-width:112px;padding:0 14px 0 0;border:0;outline:0;background:transparent;color:var(--ink);font:inherit;cursor:pointer;}
@@ -162,6 +164,17 @@
     .dialog-head h2{font-size:31px;line-height:1.05;letter-spacing:-.05em;margin:0;}
     .dialog-head p{margin:7px 0 0;color:var(--muted);font-size:13px;}
     .close-btn{border:1px solid var(--edge);background:#fff;width:36px;height:36px;border-radius:50%;font-size:23px;line-height:1;flex:none;}
+    .how-it-works-dialog{width:min(100%,820px);padding:clamp(22px,4vw,42px);}
+    .how-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:28px;}
+    .how-dialog-head h2{font-size:clamp(30px,5vw,48px);line-height:.98;letter-spacing:-.055em;margin:0;}
+    .how-dialog-head p{max-width:590px;color:var(--muted);font-size:15px;line-height:1.65;margin:13px 0 0;}
+    .how-dialog-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
+    .how-dialog-step{min-width:0;padding:20px 18px;border:1px solid var(--edge);border-radius:19px;background:linear-gradient(145deg,#fff,#faf5ff);}
+    .how-dialog-number{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--lime);font-weight:900;margin-bottom:18px;}
+    .how-dialog-step h3{font-size:17px;line-height:1.25;margin:0 0 8px;letter-spacing:-.02em;}
+    .how-dialog-step p{font-size:13px;line-height:1.55;color:var(--muted);margin:0;}
+    .how-dialog-footer{display:flex;justify-content:flex-end;margin-top:23px;}
+    @media(max-width:650px){.how-dialog-steps{grid-template-columns:1fr;gap:10px}.how-dialog-step{display:grid;grid-template-columns:38px 1fr;column-gap:14px;padding:15px}.how-dialog-number{grid-row:span 2;margin:0}.how-dialog-step h3{align-self:end;margin-bottom:4px}.how-dialog-step p{align-self:start}}
     .studio-body{display:grid;grid-template-columns:1fr 1.02fr;min-height:570px;}
     .studio-controls{padding:25px 30px 30px;}
     .studio-controls label{display:block;font-weight:900;font-size:13px;margin:0 0 10px;}
@@ -697,7 +710,7 @@
         <a href="#shop" data-menu-target="shop" data-nav-key="shop">Shop All</a>
         <a href="#create" class="nav-ai" id="navCreate" data-menu-target="create" data-nav-key="create">✦ &nbsp;Design your look</a>
         <a href="/vibeya/inspiration/index.html" data-menu-target="inspiration" data-nav-key="inspiration">Inspiration</a>
-        <a href="#how-it-works" data-menu-target="how-it-works" data-nav-key="how">How It Works</a>
+        <button type="button" class="nav-dialog-link" id="howItWorksBtn" data-nav-key="how">How It Works</button>
         <a href="#my-designs" data-menu-target="my-designs" data-nav-key="designs">My Designs</a>
         <div class="nav-market-controls">
           <label class="nav-market-control"><span data-nav-key="shipTo">Ship to</span><select id="navDestination" aria-label="Shipping destination"><option value="us">United States</option><option value="ca">Canada</option><option value="jp">Japan</option><option value="mx">Mexico</option></select></label>
@@ -944,6 +957,7 @@
     </div>
   </div>
   <div class="overlay image-zoom-overlay" id="imageZoomOverlay" role="presentation"><div class="dialog image-zoom-dialog" role="dialog" aria-modal="true" aria-label="Full size generated product image"><button class="close-btn" type="button" id="closeImageZoom" aria-label="Close enlarged image">×</button><img class="image-zoom-full" id="imageZoomFull" alt="Enlarged generated product image"></div></div>
+  <div class="overlay" id="howItWorksOverlay" role="presentation"><section class="dialog how-it-works-dialog" role="dialog" aria-modal="true" aria-labelledby="howDialogTitle" tabindex="-1"><div class="how-dialog-head"><div><h2 id="howDialogTitle">How It Works</h2><p>Turn your ideas into one-of-a-kind things. Just describe it, get creative, and make it yours.</p></div><button class="close-btn" type="button" id="closeHowItWorks" aria-label="Close">×</button></div><div class="how-dialog-steps"><article class="how-dialog-step"><span class="how-dialog-number" aria-hidden="true">01</span><h3>1. Describe your idea</h3><p>Tell us what you imagine.</p></article><article class="how-dialog-step"><span class="how-dialog-number" aria-hidden="true">02</span><h3>2. Preview &amp; customize</h3><p>See it on your favorite product.</p></article><article class="how-dialog-step"><span class="how-dialog-number" aria-hidden="true">03</span><h3>3. Make it yours</h3><p>Approve it, then we make it.</p></article></div><div class="how-dialog-footer"><button type="button" class="btn primary" id="doneHowItWorks">Close</button></div></section></div>
   <div class="overlay" id="searchOverlay" role="presentation"><div class="dialog search-dialog" role="dialog" aria-modal="true" aria-labelledby="searchTitle"><div class="dialog-head"><div><h2 id="searchTitle">What would you like to make?</h2><p>Search products and design inspiration in one place.</p></div><button class="close-btn" id="closeSearch" aria-label="Close">×</button></div><div class="inner"><input class="search-input" id="siteSearch" type="search" placeholder="Try 'hoodie', 'retro', 'cute cat'..." aria-label="Search products"/><div class="search-results" id="searchResults"></div></div></div></div>
   <div class="drawer-overlay" id="drawerOverlay"></div><aside class="drawer" id="cartDrawer" aria-labelledby="drawerTitle"><div class="drawer-head"><h2 id="drawerTitle">Your Bag <span id="drawerCount">(0)</span></h2><button class="close-btn" id="closeCart" aria-label="Close">×</button></div><div id="cartContent"></div><div class="drawer-note">Demo only. Items are stored in this browser; delivery, payment and order submission have not been connected.</div></aside>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1963,6 +1977,9 @@
   let lastZoomTrigger=null;
   function openImageZoom(){if(!generatedArtworkDataUrl)return;$('#imageZoomFull').src=generatedArtworkDataUrl;$('#imageZoomOverlay').classList.add('open');syncLock();$('#closeImageZoom').focus();}
   function closeImageZoom(){const overlay=$('#imageZoomOverlay');if(!overlay.classList.contains('open'))return;overlay.classList.remove('open');$('#imageZoomFull').removeAttribute('src');syncLock();if(lastZoomTrigger?.isConnected)lastZoomTrigger.focus();}
+  let howItWorksTrigger=null;
+  function showHowItWorks(trigger){howItWorksTrigger=trigger;$('#howItWorksOverlay').classList.add('open');syncLock();$('#closeHowItWorks').focus();}
+  function hideHowItWorks(){const overlay=$('#howItWorksOverlay');if(!overlay.classList.contains('open'))return;overlay.classList.remove('open');syncLock();if(howItWorksTrigger?.isConnected)howItWorksTrigger.focus();}
   function showSearch(){$('#searchOverlay').classList.add('open');syncLock();renderSearch('');setTimeout(()=>$('#siteSearch').focus(),80);}
   function hideSearch(){$('#searchOverlay').classList.remove('open');syncLock();}
   function openCart(){window.top.location.assign(marketPath('cart'));}
@@ -2674,14 +2691,17 @@ const blanket=chosen.id==='sds-97226';
   $('#preserveOriginalDesign').addEventListener('change',updateArtworkModeHint);
   $('#cartBtn').addEventListener('click',openCart);$('#closeCart').addEventListener('click',hideCart);$('#drawerOverlay').addEventListener('click',hideCart);
   $('#menuBtn').addEventListener('click',()=>{let open=$('#nav').classList.toggle('open');$('#menuBtn').setAttribute('aria-expanded',String(open));});
+  document.querySelectorAll('#howItWorksBtn, a[href="#how-it-works"]').forEach(trigger=>trigger.addEventListener('click',event=>{event.preventDefault();$('#nav').classList.remove('open');showHowItWorks(event.currentTarget);}));
+  $('#closeHowItWorks').addEventListener('click',hideHowItWorks);$('#doneHowItWorks').addEventListener('click',hideHowItWorks);
   setInterval(()=>{if(document.body.dataset.view==='designs')loadMyDesigns();},10000);
   document.querySelectorAll('#nav a:not(#navCreate)').forEach(a=>a.addEventListener('click',()=>$('#nav').classList.remove('open')));
   $('#studioOverlay').addEventListener('click',e=>{if(e.target===$('#studioOverlay'))hideStudio();});
   $('#closeImageZoom').addEventListener('click',closeImageZoom);
   $('#imageZoomOverlay').addEventListener('click',e=>{if(e.target===$('#imageZoomOverlay'))closeImageZoom();});
+  $('#howItWorksOverlay').addEventListener('click',e=>{if(e.target===$('#howItWorksOverlay'))hideHowItWorks();});
   $('#searchOverlay').addEventListener('click',e=>{if(e.target===$('#searchOverlay'))hideSearch();});
   document.addEventListener('keydown',e=>{if(document.body.dataset.view==='product'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){if(e.key==='ArrowLeft')setGallery(galleryIndex-1);if(e.key==='ArrowRight')setGallery(galleryIndex+1);}});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#imageZoomOverlay').classList.contains('open'))closeImageZoom();else{hideStudio();hideSearch();hideCart();$('#nav').classList.remove('open');}}});
+  document.addEventListener('keydown',e=>{if($('#howItWorksOverlay').classList.contains('open')){if(e.key==='Escape'){e.preventDefault();hideHowItWorks();}else if(e.key==='Tab'){const focusable=Array.from($('#howItWorksOverlay').querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled])')).filter(element=>element.offsetParent!==null);if(focusable.length){const first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}}return;}if(e.key==='Escape'){if($('#imageZoomOverlay').classList.contains('open'))closeImageZoom();else{hideStudio();hideSearch();hideCart();$('#nav').classList.remove('open');}}});
 })();
 </script>
 <script src="assets/shared/market-locale.js?v=site-locale-copy-30" defer></script>

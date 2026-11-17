@@ -69,7 +69,9 @@
     const nextCountry = destination.value.toLowerCase()
     const nextMarket = markets[nextCountry]
     if (!nextMarket) return
-    navigateWith(nextCountry, nextMarket.defaultLocale)
+    const home = new URL(`/${nextCountry}/`, window.location.origin)
+    home.searchParams.set("locale", nextMarket.defaultLocale)
+    window.location.assign(home.href)
   })
   language.addEventListener("change", () => {
     const nextLocale = language.value

@@ -13,6 +13,8 @@ import ReactCountryFlag from "react-country-flag"
 import { StateType } from "@lib/hooks/use-toggle-state"
 import { useParams } from "next/navigation"
 import { updateRegion } from "@lib/data/cart"
+import { updateLocale } from "@lib/data/locale-actions"
+import { getMarketDefaultLocale } from "@lib/util/market-locale"
 import { HttpTypes } from "@medusajs/types"
 import { SUPPORTED_MARKET_COUNTRIES } from "@lib/vibeya/markets"
 
@@ -57,8 +59,10 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
   }, [options, countryCode])
 
   const handleChange = (option: CountryOption) => {
-    updateRegion(option.country)
     close()
+    void updateLocale(getMarketDefaultLocale(option.country))
+      .catch(() => undefined)
+      .then(() => updateRegion(option.country))
   }
 
   return (

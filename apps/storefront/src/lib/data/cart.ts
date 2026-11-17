@@ -437,7 +437,7 @@ export async function updateRegion(countryCode: string) {
     path: "/",
   })
 
-  redirect(`/${normalizedCountryCode}`)
+  redirect(`/${normalizedCountryCode}/`)
 }
 
 export async function listCartOptions() {
