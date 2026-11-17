@@ -685,7 +685,7 @@
   </style>
 <link rel="stylesheet" href="assets/shared/header.css?v=nav-market-controls-6">
 <script src="assets/shared/catalog-price.js" defer></script>
-<script src="assets/inspiration/catalog.js?v=portrait-six-inspirations-1"></script>
+<script src="assets/inspiration/catalog.js?v=portrait-six-inspirations-2"></script>
 </head>
 <body>
   <div class="announcement">YOUR IDEA, YOUR VIBE, YOURS TO KEEP. <strong>✳ MADE JUST FOR YOU</strong></div>
@@ -763,7 +763,7 @@
       <div class="container">
         <div class="section-heading"><div><div class="eyebrow">GOOD IDEAS ARE CONTAGIOUS</div><h2>Need a little inspo?</h2><p>Pick a vibe. Remix it. Make it completely yours.</p></div><button class="btn outline small" data-open-studio>CREATE SOMETHING ↗</button></div>
         <div class="insp-grid home-inspiration-grid" id="inspoCards"></div>
-        <div class="catalog-bottom"><a class="btn secondary" href="inspiration/index.html">EXPLORE ALL INSPIRATION ↗</a></div>
+        <div class="catalog-bottom"><a class="btn secondary" href="inspiration/index.html" target="_top">EXPLORE ALL INSPIRATION ↗</a></div>
       </div>
     </section>
 
@@ -875,7 +875,7 @@
     <div class="eyebrow">INSPIRATION MARKET</div>
     <h1>Creative ideas with a story.</h1>
     <p>Browse original design concepts and read how each look comes together.</p>
-    <a class="btn primary" href="inspiration/index.html">EXPLORE INSPIRATION</a>
+    <a class="btn primary" href="inspiration/index.html" target="_top">EXPLORE INSPIRATION</a>
   </section>
   <div style="display:none" aria-hidden="true"><input id="ideaSearch"><select id="ideaSort"><option value="featured">Featured</option></select><div id="ideaFilters"></div><div id="ideaCount"></div><div id="allIdeas"></div><button id="moreIdeas" hidden>More</button></div>
 </main>
@@ -1997,7 +1997,7 @@
         if(remote.sizes?.length)local.sizes=local.sizes.filter(size=>remote.sizes.includes(size));
       }
       productTags=['All Products',...new Set(catalogProducts.map(p=>p.category||'New arrivals'))];
-      if(!productTags.includes(productTag))productTag='All Products';
+      if(!pageListing&&!productTags.includes(productTag))productTag='All Products';
       if(chosen.id==='sds-63823'){renderProductDetails();setGallery(galleryIndex);syncVariants();}
       drawProductChoices();drawStudioVariantChoices();renderProductCards();paintProducts();
     }catch(error){console.warn('VIBEYA catalog sync unavailable',error);}
@@ -2019,8 +2019,9 @@
     let catalog=[];let excludedIds=new Set();
     try{const response=await fetch('/api/vibeya/inspirations?country_code='+encodeURIComponent(country),{credentials:'same-origin',cache:'no-store'});if(!response.ok)throw new Error('Could not load destination inspirations');const data=await response.json();if(!Array.isArray(data.inspirations))throw new Error('Invalid inspiration response');const managed=data.inspirations.filter(isCountryEligible);excludedIds=new Set(Array.isArray(data.excluded_ids)?data.excluded_ids:[]);catalog=[...bundledCatalog.filter(item=>!excludedIds.has(item.id)).map(item=>({...item,...(managed.find(entry=>entry.id===item.id)||{})})),...managed.filter(entry=>!bundledCatalog.some(item=>item.id===entry.id))].filter(isCountryEligible);}catch(error){console.warn('Could not load destination inspirations',error);$('#inspoCards').innerHTML='';return;}
     if(activeLocale==='ja-JP'||activeLocale==='es-MX')catalog=catalog.map(entry=>{const localized=entry.translations?.[activeLocale];return localized?.title&&localized?.summary&&localized?.articleBody&&localized?.tags?.length&&localized?.image&&localized?.cardImage?{...entry,...localized}:null;}).filter(Boolean);
-    const inspirationUrl=new URL('/vibeya/inspiration/index.html',location.origin);
-    const inspirationStoryHref=(href,entry)=>{const url=new URL(href,inspirationUrl);if(activeLocale==='ja-JP'||activeLocale==='es-MX'){url.pathname='/vibeya/inspiration/story.html';url.searchParams.set('inspiration',entry.id);}return withMarketContext(url.href);};
+    const inspirationUrl=new URL(country==='us'?'/vibeya/inspiration/index.html':`/${country}/inspiration/`,location.origin);
+    const inspirationAssetBase=new URL('/vibeya/inspiration/index.html',location.origin);
+    const inspirationStoryHref=(href,entry)=>{if(entry?.marketUrls?.[country])return new URL(entry.marketUrls[country],location.origin).href;const url=new URL(href,inspirationUrl);if(activeLocale==='ja-JP'||activeLocale==='es-MX'){url.pathname='/vibeya/inspiration/story.html';url.searchParams.set('inspiration',entry.id);}url.hash='';return withMarketContext(url.href);};
     const cards=[];
     try{
       const response=await fetch(inspirationUrl,{credentials:'same-origin',cache:'no-store'});
@@ -2032,33 +2033,22 @@
           if(!image||!link)return;
           const href=new URL(link.getAttribute('href'),inspirationUrl);
           const articleFile=href.pathname.split('/').pop()||'';
-          const entry=catalog.find(item=>item.slug===articleFile);
+          const normalizedArticleSlug=articleFile.replace(/\.html$/i,'').toLowerCase();
+          const entry=catalog.find(item=>[item.slug,...Object.values(item.marketUrls||{})].some(route=>new URL(route,inspirationUrl).pathname.split('/').pop()?.replace(/\.html$/i,'').toLowerCase()===normalizedArticleSlug));
           if(!entry||excludedIds.has(entry.id)||entry.published===false||entry.homeFeatured===false)return;
           const title=entry?.title||section.querySelector('.featured-text h2')?.textContent?.replace(/\s+/g,' ').trim()||'VIBEYA inspiration';
-          const localizedAsset=entry.cardImage||entry.image;
-          const cardImage=localizedAsset?/^(https?:)?\//.test(localizedAsset)?new URL(localizedAsset,location.origin).href:new URL(`../assets/inspiration/${encodeURIComponent(localizedAsset)}`,inspirationUrl).href:new URL(image.getAttribute('src')||'',inspirationUrl).href;
-          cards.push({id:entry?.id||articleFile.replace(/\.html$/,''),title,alt:`${title} inspiration card`,image:cardImage,href:inspirationStoryHref(href.href,entry)});
+          const campaignImage=new URL(image.getAttribute('src')||'',inspirationAssetBase).href;
+          cards.push({id:entry?.id||normalizedArticleSlug,title,alt:image.getAttribute('alt')||`${title} inspiration card`,image:campaignImage,href:inspirationStoryHref(href.href,entry)});
         });
       }
     }catch(error){console.warn('Could not load inspiration-list feature cards',error);}
 
-    if(cards.length<4){
-      const known=new Set(cards.map(card=>card.id));
-      for(const entry of catalog){
-        if(entry.published===false||entry.homeFeatured===false||known.has(entry.id)||!entry.slug)continue;
-        const asset=entry.cardImage||entry.image;
-        if(!asset)continue;
-        const image=/^(https?:)?\//.test(asset)?new URL(asset,location.origin).href:new URL(`../assets/inspiration/${encodeURIComponent(asset)}`,inspirationUrl).href;
-        cards.push({id:entry.id,title:entry.title||'VIBEYA inspiration',alt:`${entry.title||'VIBEYA'} custom design inspiration`,image,href:inspirationStoryHref(new URL(entry.slug,inspirationUrl).href,entry)});
-        known.add(entry.id);
-        if(cards.length>=4)break;
-      }
-    }
+    if(cards.length<6)console.warn(`Only ${cards.length} published inspirations have matching campaign images for ${country}.`);
     for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
-    const selectedCards=cards.slice(0,4);
+    const selectedCards=cards.slice(0,6);
     $('#inspoCards').innerHTML=selectedCards.map(card=>{
       const alt=card.alt||`${card.title} inspiration card`;
-      return `<a class="home-featured-inspo" data-inspiration="${esc(card.id)}" style="--artwork-extension:url('${esc(card.image)}')" href="${esc(card.href)}" aria-label="Open ${esc(alt)}"><img src="${esc(card.image)}" alt="${esc(alt)}" loading="lazy"></a>`;
+      return `<a class="home-featured-inspo" data-inspiration="${esc(card.id)}" style="--artwork-extension:url('${esc(card.image)}')" href="${esc(card.href)}" target="_top" aria-label="Open ${esc(alt)}"><img src="${esc(card.image)}" alt="${esc(alt)}" loading="lazy"></a>`;
     }).join('');
     if(inspirationSection)inspirationSection.hidden=selectedCards.length===0;
   }
