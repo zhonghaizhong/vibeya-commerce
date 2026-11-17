@@ -3,7 +3,7 @@ import path from "node:path"
 
 const PRODUCT_REFERENCE_PATHS: Record<string, string | Record<string, string> | Record<string, Record<string, string>>> = {
   "mg8014061": "vibeya/assets/products/mg8014061/black/blank-sign-print-area.png",
-  "sds-63823": "vibeya/assets/products/sds-63823/blank-set-reference-v2.png",
+  "sds-63823": "vibeya/assets/products/sds-63823/blank-set-reference-v3.png",
   "sds-97226": "vibeya/assets/products/sds-97226/blank-print-base.webp",
   "sds-138708": "vibeya/assets/products/sds-138708/blank-print-base.webp",
   "sds-137892": {
