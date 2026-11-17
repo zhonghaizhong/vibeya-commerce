@@ -11,7 +11,7 @@ import { Fragment, useEffect, useMemo, useState } from "react"
 import ReactCountryFlag from "react-country-flag"
 
 import { StateType } from "@lib/hooks/use-toggle-state"
-import { useParams, usePathname } from "next/navigation"
+import { useParams } from "next/navigation"
 import { updateRegion } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 
@@ -30,7 +30,6 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
   const [current, setCurrent] = useState<CountryOption | undefined>(undefined)
 
   const { countryCode } = useParams()
-  const currentPath = usePathname().split(`/${countryCode}`)[1]
 
   const { state, close } = toggleState
 
@@ -56,7 +55,7 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
   }, [options, countryCode])
 
   const handleChange = (option: CountryOption) => {
-    updateRegion(option.country, currentPath)
+    updateRegion(option.country)
     close()
   }
 

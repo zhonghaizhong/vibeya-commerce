@@ -402,7 +402,7 @@ export async function placeOrder(cartId?: string) {
  * @param regionId
  * @param countryCode
  */
-export async function updateRegion(countryCode: string, currentPath: string) {
+export async function updateRegion(countryCode: string) {
   const cartId = await getCartId()
   const region = await getRegion(countryCode)
 
@@ -422,7 +422,7 @@ export async function updateRegion(countryCode: string, currentPath: string) {
   const productsCacheTag = await getCacheTag("products")
   revalidateTag(productsCacheTag, { expire: 0 })
 
-  redirect(`/${countryCode}${currentPath}`)
+  redirect(`/${countryCode}`)
 }
 
 export async function listCartOptions() {
