@@ -26,6 +26,7 @@ export type VibeyaInspiration = {
   homeFeatured: boolean
   /** ISO-2 destination countries; '*' keeps legacy content available everywhere. */
   countryCodes?: string[]
+  marketUrls?: Partial<Record<"us" | "ca" | "mx" | "jp", string>>
   translations?: Partial<Record<"ja-JP" | "es-MX", LocalizedVibeyaInspiration>>
 }
 
@@ -38,7 +39,45 @@ export const DEFAULT_VIBEYA_INSPIRATIONS: VibeyaInspiration[] = [
   { id: "stars-stripes-denim-cap", title: "Stars & Stripes: Custom American Flag Baseball Cap", slug: "stars-stripes-custom-denim-baseball-cap.html", image: "stars-stripes-denim-cap-gallery-01-model.jpg", cardImage: "stars-stripes-denim-cap-spotlight.jpg", summary: "A vintage distressed American flag brings classic red, cream, and navy to a washed denim cap. Choose a color, upload artwork or describe your own design, preview it on the product, and order from VIBEYA.", articleBody: "", useManagedImage: false, product: "baseball-cap", pattern: "flag", style: "retro-americana", tags: ["american-flag-hat", "custom-baseball-cap", "washed-denim-baseball-cap", "patriotic-hat", "personalized-baseball-cap"], published: true, homeFeatured: true },
   { id: "no-nightmares-blanket", title: "Cozy Funny Blanket: Sleep Well, Dream Big", slug: "no-nightmares-jesus-blanket.html", image: "no-nightmares-blanket-sofa-scene.png", cardImage: "no-nightmares-blanket-sofa-scene.png", summary: "", articleBody: "", useManagedImage: false, product: "blanket", pattern: "sleepy-sheep", style: "cozy-humor", tags: ["cozy-blanket", "custom-flannel-throw", "funny-blanket", "blanket-gift"], published: true, homeFeatured: true },
   { id: "low-battery-club-beanie", title: "Low Battery Club: Funny Custom Knitted Beanie", slug: "low-battery-club-custom-beanie.html", image: "low-battery-club-beanie-spotlight-v1.jpg", cardImage: "low-battery-club-beanie-spotlight-v1.jpg", summary: "A sleepy cat, low-battery joke, and varsity-inspired lettering bring playful streetwear energy to a personalized custom knitted beanie.", articleBody: "", useManagedImage: false, product: "beanie", pattern: "typography", style: "streetwear", tags: ["custom-beanie", "personalized-beanie", "knit-winter-hat", "funny-cat", "winter-gift", "y2k-streetwear"], published: true, homeFeatured: true },
+  {
+    id: "yoga-animals-set", title: "Yoga Buddies: A Custom Animal Print Yoga Set", slug: "animal-yoga-set.html",
+    image: "yoga-animals-set-spotlight-portrait.jpg", cardImage: "yoga-animals-set-spotlight-portrait.jpg",
+    summary: "Small cats, rabbits, bears, dogs, foxes, and penguins bring a playful touch to a women's yoga set. Upload your own image or describe a print, preview it on the product, and customize it on VIBEYA.",
+    articleBody: "A warm ivory ground and small, colorful animals in varied yoga poses make this coordinated sports-bra top and high-waisted biker shorts set playful and easy to wear.\n\nChoose the yoga set for your market, upload your own photo or artwork, or describe an original design with a text prompt. Preview the print on the product, adjust it in VIBEYA's design studio, and place your order when it looks right.",
+    useManagedImage: true, product: "yoga-set", pattern: "animal", style: "playful-activewear",
+    tags: ["custom-yoga-set", "womens-yoga-set", "animal-print-activewear", "yoga-sports-bra-and-shorts"],
+    published: true, homeFeatured: true, countryCodes: ["us", "ca", "mx", "jp"],
+    marketUrls: {
+      us: "/us/inspiration/animal-yoga-set.html", ca: "/ca/inspiration/animal-yoga-set.html",
+      mx: "/mx/inspiration/animal-yoga-set.html", jp: "/jp/inspiration/animal-yoga-set.html",
+    },
+    translations: {
+      "es-MX": {
+        title: "Yoga en buena compañía: conjunto de yoga con estampado de animales",
+        summary: "Gatos, conejos, osos, perros, zorros y pingüinos en distintas posturas dan un toque alegre a este conjunto de yoga para mujer. Sube tu imagen o describe un diseño, visualízalo en el producto y personalízalo en VIBEYA.",
+        articleBody: "El fondo marfil y los animalitos de colores en distintas posturas hacen que este conjunto de top deportivo y short ciclista de cintura alta se sienta alegre y fácil de llevar.\n\nElige el conjunto de yoga disponible en México. Sube tu foto o diseño, o describe una idea con texto. Visualiza el estampado en el producto, ajústalo en el estudio de diseño de VIBEYA y haz tu pedido cuando te guste el resultado.",
+        tags: ["Conjunto de yoga para mujer", "Ropa de yoga estampada", "Estampado de animales", "Top y short de yoga"],
+        image: "yoga-animals-set-spotlight-es-MX.png", cardImage: "yoga-animals-set-spotlight-es-MX.png",
+      },
+      "ja-JP": {
+        title: "ヨガ仲間：動物柄のカスタムヨガウェアセット",
+        summary: "猫、うさぎ、くま、犬、きつね、ペンギンがさまざまなポーズをする、アイボリーカラーのヨガウェアセット。画像をアップロードするか、デザインを文章で伝えて、商品プレビューを見ながらカスタマイズできます。",
+        articleBody: "アイボリーの生地に、ヨガポーズをする小さなカラフルな動物たちを不規則に散りばめました。スポーツブラ風トップスとハイウエストのバイカーショーツを、黒い縁取りを残したままコーディネートしています。\n\n日本向けのヨガウェアセットを選び、自分の写真や画像をアップロードするか、テキストでデザインを説明してください。商品プレビューで確認・調整してから注文できます。",
+        tags: ["レディース ヨガウェア セット", "ヨガウェア 上下セット", "動物柄 アクティブウェア", "カスタムヨガウェア"],
+        image: "yoga-animals-set-spotlight-ja-JP.png", cardImage: "yoga-animals-set-spotlight-ja-JP.png",
+      },
+    },
+  },
 ]
+
+const RELEASED_DEFAULT_INSPIRATION_IDS = new Set(["yoga-animals-set"])
+
+export function includeReleasedDefaultInspirations(value: unknown): VibeyaInspiration[] {
+  const entries = normalizeVibeyaInspirations(value)
+  const existingIds = new Set(entries.map((entry) => entry.id))
+  const newlyReleased = DEFAULT_VIBEYA_INSPIRATIONS.filter((entry) => RELEASED_DEFAULT_INSPIRATION_IDS.has(entry.id) && !existingIds.has(entry.id))
+  return [...entries, ...newlyReleased]
+}
 
 export function normalizeVibeyaInspirations(value: unknown): VibeyaInspiration[] {
   if (!Array.isArray(value)) return DEFAULT_VIBEYA_INSPIRATIONS

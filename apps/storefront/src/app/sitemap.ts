@@ -22,6 +22,12 @@ const INDEXABLE_CONTENT_PATHS = [
   "/vibeya/inspiration/custom-kids-basketball-jersey-set.html",
   "/vibeya/inspiration/sauce-boss-custom-cooking-apron.html",
 ]
+const YOGA_INSPIRATION_PATHS = {
+  "en-US": "/us/inspiration/animal-yoga-set.html",
+  "en-CA": "/ca/inspiration/animal-yoga-set.html",
+  "es-MX": "/mx/inspiration/animal-yoga-set.html",
+  "ja-JP": "/jp/inspiration/animal-yoga-set.html",
+} as const
 const PAGE_SIZE = 200
 
 type Page<T> = { items: T[]; count: number }
@@ -141,5 +147,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...(countryCodes.includes("us")
       ? INDEXABLE_CONTENT_PATHS.map((path) => ({ url: `${origin}${path}` }))
       : []),
+    ...Object.values(YOGA_INSPIRATION_PATHS).map((path) => ({
+      url: `${origin}${path}`,
+      alternates: {
+        languages: {
+          "en-US": `${origin}${YOGA_INSPIRATION_PATHS["en-US"]}`,
+          "en-CA": `${origin}${YOGA_INSPIRATION_PATHS["en-CA"]}`,
+          "es-MX": `${origin}${YOGA_INSPIRATION_PATHS["es-MX"]}`,
+          "ja-JP": `${origin}${YOGA_INSPIRATION_PATHS["ja-JP"]}`,
+          "x-default": `${origin}${YOGA_INSPIRATION_PATHS["en-US"]}`,
+        },
+      },
+    })),
   ]
 }

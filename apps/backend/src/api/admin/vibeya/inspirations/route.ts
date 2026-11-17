@@ -1,7 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { updateStoresWorkflow } from "@medusajs/medusa/core-flows"
-import { DEFAULT_VIBEYA_INSPIRATIONS, normalizeVibeyaInspirations, VIBEYA_INSPIRATIONS_METADATA_KEY } from "../../../../lib/vibeya-inspirations"
+import { DEFAULT_VIBEYA_INSPIRATIONS, includeReleasedDefaultInspirations, normalizeVibeyaInspirations, VIBEYA_INSPIRATIONS_METADATA_KEY } from "../../../../lib/vibeya-inspirations"
 
 async function getStore(req: MedusaRequest) {
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
@@ -12,7 +12,7 @@ async function getStore(req: MedusaRequest) {
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const store = await getStore(req)
   const saved = store?.metadata?.[VIBEYA_INSPIRATIONS_METADATA_KEY]
-  const inspirations = normalizeVibeyaInspirations(saved ?? DEFAULT_VIBEYA_INSPIRATIONS)
+  const inspirations = includeReleasedDefaultInspirations(saved ?? DEFAULT_VIBEYA_INSPIRATIONS)
   return res.json({ inspirations })
 }
 
