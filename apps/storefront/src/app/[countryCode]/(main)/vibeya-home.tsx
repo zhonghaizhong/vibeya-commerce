@@ -88,7 +88,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
 
     const currentParams = new URLSearchParams(window.location.search)
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", standaloneProductId === "mg8012002" ? "denim-cap-unified-detail-20261117-1" : "metal-sign-single-prompt-20261117-4")
+    forwardedParams.set("v", "independent-pages-20261117-1")
     forwardedParams.set("country", countryCode.toLowerCase())
     forwardedParams.set("locale", marketLocale)
     if (standaloneProductId) forwardedParams.set("standalone", "1")
@@ -202,13 +202,19 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       }
       if (event.data?.type === "vibeya:route" && typeof event.data.hash === "string") {
         if (standaloneProductId && event.data.hash.startsWith(`#product-${standaloneProductId}`)) return
-        if (event.data.hash.startsWith("#product-mg8014061") && !standaloneProductId) {
-          router.push(`/${countryCode}/products/vibeya-custom-metal-bottle-cap-wall-sign`)
+        if (event.data.hash.startsWith("#product-")) {
+          if (typeof event.data.handle === "string" && event.data.handle) {
+            const target = new URL(`/${countryCode}/products/${encodeURIComponent(event.data.handle)}`, window.location.origin)
+            if (typeof event.data.color === "string" && event.data.color) target.searchParams.set("color", event.data.color)
+            const currentLocale = new URLSearchParams(window.location.search).get("locale")
+            if (currentLocale) target.searchParams.set("locale", currentLocale)
+            window.location.replace(target.href)
+          } else if (event.data.hash === "#product-mg8014061") {
+            router.replace(`/${countryCode}/products/vibeya-custom-metal-bottle-cap-wall-sign`)
+          }
           return
         }
-        const incomingHash = event.data.hash.startsWith("#product-") && typeof event.data.color === "string"
-          ? `${event.data.hash}?color=${encodeURIComponent(event.data.color)}`
-          : event.data.hash
+        const incomingHash = event.data.hash
         if (incomingHash && incomingHash !== window.location.hash) {
           window.history.pushState(null, "", incomingHash)
         }
@@ -303,7 +309,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       <iframe
         ref={frameRef}
         className="vibeya-theme-frame"
-        src={`/vibeya/index.html?v=metal-sign-single-prompt-20261117-4&country=${encodeURIComponent(countryCode.toLowerCase())}&locale=${encodeURIComponent(marketLocale)}${standaloneProductId ? `&standalone=1${standaloneHash}` : ""}`}
+        src={`/vibeya/index.html?v=independent-pages-20261117-1&country=${encodeURIComponent(countryCode.toLowerCase())}&locale=${encodeURIComponent(marketLocale)}${standaloneProductId ? `&standalone=1${standaloneHash}` : ""}`}
         title="VIBEYA storefront"
         onLoad={addAccountLink}
         style={{

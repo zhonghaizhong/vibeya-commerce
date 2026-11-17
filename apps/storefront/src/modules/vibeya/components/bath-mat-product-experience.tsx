@@ -54,7 +54,7 @@ export default function BathMatProductExperience({
     <div className="bath-mat-product-experience">
       <iframe
         ref={frameRef}
-        src="/vibeya/index.html?v=canonical-bath-mat-product#product-sds-138708?color=White"
+        src="/vibeya/index.html?standalone=1&v=independent-pages-20261117-1#product-sds-138708?color=White"
         title="Custom 3D Bath Mat product details and design studio"
       />
       <style>{`

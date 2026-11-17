@@ -1879,6 +1879,12 @@
     const [key,routeQuery='']=location.hash.slice(1).split('?');
     if(key.startsWith('product-')){
       const product=products.find(p=>p.id===key.slice(8));
+      if(product?.handle&&window.parent===window&&new URLSearchParams(location.search).get('standalone')!=='1'){
+        const query=new URLSearchParams(routeQuery);
+        const target=`${marketPath('products/'+encodeURIComponent(product.handle))}${query.toString()?`?${query.toString()}`:''}`;
+        location.replace(target);
+        return;
+      }
       const params=new URLSearchParams(routeQuery);
       const requestedColor=params.get('color'),requestedSize=params.get('size');
       if(product&&(product.id!==chosen.id||(product.colors?.includes(requestedColor)&&requestedColor!==selectedColor)||(product.sizes?.includes(requestedSize)&&requestedSize!==selectedSize))){
@@ -1898,7 +1904,7 @@
     if(key==='shop'||key==='ideas'||key==='my-designs'||key.startsWith('product-')){window.scrollTo({top:0,behavior:'instant'});}
     else if(key&&key!=='top'){requestAnimationFrame(()=>{const t=document.getElementById(key);if(t)t.scrollIntoView({block:'start',behavior:'instant'});});}
     else window.scrollTo({top:0,behavior:'instant'});
-    if(window.parent!==window)window.parent.postMessage({type:'vibeya:route',hash:location.hash.split('?')[0]||'#top',color:selectedColor},location.origin);
+    if(window.parent!==window)window.parent.postMessage({type:'vibeya:route',hash:location.hash.split('?')[0]||'#top',color:selectedColor,handle:key.startsWith('product-')?products.find(p=>p.id===key.slice(8))?.handle:undefined},location.origin);
   }
   window.addEventListener('message',event=>{
     if(window.parent===window||event.origin!==location.origin||event.source!==window.parent)return;
