@@ -21,11 +21,11 @@ function getStudioReturnUrl(countryCode: string, request: StudioRequest) {
   return `/${countryCode}?${params.toString()}#top`
 }
 
-export default function VibeyaHome({ countryCode, locale, isAuthenticated, standaloneProductId, standaloneColor, standaloneSize, listing }: { countryCode: string; locale?: string | null; isAuthenticated: boolean; standaloneProductId?: string; standaloneColor?: string; standaloneSize?: string; listing?: ProductListing }) {
+export default function VibeyaHome({ countryCode, locale, isAuthenticated, standaloneProductId, standaloneColor, standaloneSize, standaloneRoute, listing }: { countryCode: string; locale?: string | null; isAuthenticated: boolean; standaloneProductId?: string; standaloneColor?: string; standaloneSize?: string; standaloneRoute?: string; listing?: ProductListing }) {
   const marketLocale = getMarketLocale(countryCode, locale ?? undefined)
   const standaloneHash = standaloneProductId
     ? `#product-${standaloneProductId}?color=${encodeURIComponent(standaloneColor || "Black")}${standaloneSize ? `&size=${encodeURIComponent(standaloneSize)}` : ""}`
-    : "#top"
+    : standaloneRoute || "#top"
   const [authOpen, setAuthOpen] = useState(false)
   const [authRedirectTo, setAuthRedirectTo] = useState<string>()
   const [studioLayer, setStudioLayer] = useState(false)
@@ -95,10 +95,10 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       return
     }
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "independent-shop-route-20261117-4")
+    forwardedParams.set("v", "independent-shop-route-20261117-5")
     forwardedParams.set("country", countryCode.toLowerCase())
     forwardedParams.set("locale", marketLocale)
-    if (standaloneProductId) forwardedParams.set("standalone", "1")
+    if (standaloneProductId || standaloneRoute) forwardedParams.set("standalone", "1")
     if (listing) {
       forwardedParams.set("listing", listing.slug)
       forwardedParams.set("handles", listing.handles.join(","))
@@ -113,7 +113,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       forwardedParams.delete("openStudio")
     }
 
-    const hash = standaloneProductId
+    const hash = standaloneHash !== "#top"
       ? standaloneHash
       : listing
       ? "#shop"
@@ -133,7 +133,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
     const homeUrl = `/vibeya/index.html${query ? `?${query}` : ""}${hash}`
     const frame = frameRef.current
     if (frame && frame.getAttribute("src") !== homeUrl) frame.src = homeUrl
-  }, [countryCode, isAuthenticated, listing?.slug, listing?.handles.join(","), marketLocale, router, standaloneProductId, standaloneHash])
+  }, [countryCode, isAuthenticated, listing?.slug, listing?.handles.join(","), marketLocale, router, standaloneProductId, standaloneHash, standaloneRoute])
 
   useEffect(() => {
     const frame = frameRef.current
@@ -208,6 +208,11 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       }
       if (event.data?.type === "vibeya:route" && typeof event.data.hash === "string") {
         if (standaloneProductId && event.data.hash.startsWith(`#product-${standaloneProductId}`)) return
+        if (standaloneRoute === "#shop" && event.data.hash === "#shop") return
+        if (standaloneRoute === "#shop" && event.data.hash === "#top") {
+          router.push(`/${countryCode.toLowerCase()}/`)
+          return
+        }
         if (event.data.hash.startsWith("#product-")) {
           if (typeof event.data.handle === "string" && event.data.handle) {
             const target = new URL(`/${countryCode}/products/${encodeURIComponent(event.data.handle)}`, window.location.origin)
@@ -260,7 +265,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
 
     const syncFromHistory = () => {
       frameRef.current?.contentWindow?.postMessage(
-        { type: "vibeya:set-route", hash: window.location.hash || (standaloneProductId ? standaloneHash : "#top") },
+        { type: "vibeya:set-route", hash: window.location.hash || standaloneHash },
         window.location.origin
       )
     }
@@ -273,7 +278,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       window.removeEventListener("popstate", syncFromHistory)
       window.removeEventListener("hashchange", syncFromHistory)
     }
-  }, [countryCode, isAuthenticated, router, standaloneProductId, standaloneHash])
+  }, [countryCode, isAuthenticated, router, standaloneProductId, standaloneHash, standaloneRoute])
 
   const addAccountLink = useCallback(
     (event: SyntheticEvent<HTMLIFrameElement>) => {
@@ -314,13 +319,13 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       })
 
       frame.contentWindow?.postMessage(
-        { type: "vibeya:set-route", hash: window.location.hash || (standaloneProductId ? standaloneHash : "#top") },
+        { type: "vibeya:set-route", hash: window.location.hash || standaloneHash },
         window.location.origin
       )
 
       mountProductCards()
     },
-    [countryCode, isAuthenticated, marketLocale, mountProductCards, standaloneProductId, standaloneHash]
+    [countryCode, isAuthenticated, marketLocale, mountProductCards, standaloneHash]
   )
 
   return (
@@ -339,7 +344,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       <iframe
         ref={frameRef}
         className="vibeya-theme-frame"
-        src={`/vibeya/index.html?v=independent-shop-route-20261117-4&country=${encodeURIComponent(countryCode.toLowerCase())}&locale=${encodeURIComponent(marketLocale)}${standaloneProductId ? `&standalone=1${standaloneHash}` : ""}`}
+        src={`/vibeya/index.html?v=independent-shop-route-20261117-5&country=${encodeURIComponent(countryCode.toLowerCase())}&locale=${encodeURIComponent(marketLocale)}${standaloneProductId || standaloneRoute ? `&standalone=1${standaloneHash}` : ""}`}
         title="VIBEYA storefront"
         onLoad={addAccountLink}
         style={{
