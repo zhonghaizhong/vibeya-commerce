@@ -1357,7 +1357,7 @@
   const sizeLabel=(product,size)=>product?.sizeLabels?.[size]||size||'Select a size';
   const selectedProductPrice=(product,size)=>product?.sizePrices?.[size]??itemPrice(product);
   const marketQuery=new URLSearchParams(location.search);
-  const marketCurrency=(marketQuery.get('marketCurrency')||'USD').toUpperCase();
+  const marketCurrency=(marketQuery.get('marketCurrency')||({us:'USD',ca:'CAD',jp:'JPY',mx:'MXN'}[marketCountryCode()]||'USD')).toUpperCase();
   const marketPriceValue=marketQuery.get('marketPrice');
   const marketStartingPrice=marketPriceValue===null?undefined:Number(marketPriceValue);
   const usdPrice=value=>{
@@ -1968,7 +1968,7 @@
           if(!existing)catalogProducts.push(product);
           continue;
         }
-        if(typeof remote.price==='number'&&Number.isFinite(remote.price))local.price=new Intl.NumberFormat('en-US',{style:'currency',currency:(remote.currency_code||'usd').toUpperCase()}).format(remote.price)+' USD';
+        if(typeof remote.price==='number'&&Number.isFinite(remote.price)){const currency=(remote.currency_code||'usd').toUpperCase();const locale=marketCountryCode()==='jp'?'ja-JP':marketCountryCode()==='mx'?'es-MX':marketCountryCode()==='ca'?'en-CA':'en-US';local.price=new Intl.NumberFormat(locale,{style:'currency',currency}).format(remote.price)+' '+currency;}
         if(remote.size_prices)local.sizePrices=remote.size_prices;
         if(remote.colors?.length){const remoteColors=remote.colors.map(color=>local.id==='sds-128646'&&color==='NightGarden'?'White':color);local.colors=local.colors.filter(color=>remoteColors.includes(color));}
         if(remote.sizes?.length)local.sizes=local.sizes.filter(size=>remote.sizes.includes(size));
