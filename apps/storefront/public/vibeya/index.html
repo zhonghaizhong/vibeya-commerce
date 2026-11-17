@@ -2399,7 +2399,11 @@ const blanket=chosen.id==='sds-97226';
     syncVariants();
   }
   function openProductById(id,color){
-    if(id==='mg8014061'){
+    // Catalog clicks should leave the shared catalog for the canonical detail
+    // page. In standalone detail mode this function is also used to initialize
+    // the design studio; redirecting the top window here unloads the iframe
+    // while the studio is opening, which looks like the designer crashes.
+    if(id==='mg8014061'&&new URLSearchParams(location.search).get('standalone')!=='1'){
       window.top.location.assign(marketPath('products/vibeya-custom-metal-bottle-cap-wall-sign'));
       return;
     }
