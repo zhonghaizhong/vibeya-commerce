@@ -1,16 +1,14 @@
 import type { Metadata } from "next"
-import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { listProducts } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
+import { retrieveCustomer } from "@lib/data/customer"
 import { getMarketAlternateUrls, getMarketLocale, getMarketLocaleUrl } from "@lib/util/market-locale"
 import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
 import { toJsonLd } from "@lib/util/product-structured-data"
 import { getVibeyaMarket } from "@lib/vibeya/region"
-import { PRODUCT_CATEGORY_GROUPS } from "@lib/seo/categories"
-import styles from "./shop-all.module.css"
-import ShopProductGrid from "./shop-product-grid"
+import VibeyaHome from "../vibeya-home"
 
 type ShopCopy = {
   title: string
@@ -163,8 +161,7 @@ export default async function ShopAllPage(props: Props) {
   const data = await getShopData(countryCode, locale)
   if (!data) notFound()
 
-  const { products, region } = data
-  const currency = region.currency_code.toUpperCase()
+  const { products } = data
   const origin = await getSiteOrigin()
   const pageUrl = `${origin}/${countryCode}/products`
   const productListSchema = {
@@ -184,52 +181,12 @@ export default async function ShopAllPage(props: Props) {
     },
   }
 
-  const availableHandles = new Set(products.map((product) => product.handle))
-  const visibleCategories = countryCode === "us"
-    ? PRODUCT_CATEGORY_GROUPS.filter((group) => group.productHandles.some((handle) => availableHandles.has(handle)))
-    : []
+  const customer = await retrieveCustomer().catch(() => null)
 
   return (
-    <main className={styles.page}>
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(productListSchema) }} />
-      <div className={styles.content}>
-        <nav className={styles.breadcrumb} aria-label="Breadcrumb">
-          <Link href={`/${countryCode}/`}>{locale === "ja-JP" ? "ホーム" : locale === "es-MX" ? "Inicio" : "Home"}</Link>
-          <span aria-hidden="true">/</span>
-          <span aria-current="page">{copy.all}</span>
-        </nav>
-        <header className={styles.intro}>
-          <p className={styles.eyebrow}>{STORE_NAME} / {locale === "ja-JP" ? "商品一覧" : locale === "es-MX" ? "CATÁLOGO" : "SHOP"}</p>
-          <h1>{copy.heading}</h1>
-          <p>{copy.intro}</p>
-        </header>
-        <nav className={styles.categories} aria-label={locale === "ja-JP" ? "商品カテゴリー" : "Product categories"}>
-          <span className={styles.activeCategory}>{copy.all}</span>
-          {visibleCategories.map((category) => (
-            <Link key={category.slug} href={`/${countryCode}/categories/${category.slug}`}>
-              {category.label}
-            </Link>
-          ))}
-        </nav>
-        <ShopProductGrid
-          countryCode={countryCode}
-          locale={locale}
-          currency={currency}
-          products={products.map((product) => {
-            const amounts = (product.variants ?? [])
-              .map((variant) => variant.calculated_price?.calculated_amount)
-              .filter((amount): amount is number => typeof amount === "number")
-            return {
-              handle: product.handle,
-              title: product.title,
-              subtitle: product.subtitle ?? "",
-              thumbnail: product.thumbnail,
-              price: amounts.length ? Math.min(...amounts) : null,
-            }
-          })}
-          copy={copy}
-        />
-      </div>
-    </main>
+      <VibeyaHome countryCode={countryCode} locale={locale} isAuthenticated={Boolean(customer)} standaloneRoute="#shop" />
+    </>
   )
 }

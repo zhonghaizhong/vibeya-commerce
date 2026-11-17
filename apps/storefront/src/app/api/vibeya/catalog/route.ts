@@ -1,6 +1,7 @@
 import { sdk } from "@lib/config"
 import { getVibeyaMarket } from "@lib/vibeya/region"
 import { getMarketLocale } from "@lib/util/market-locale"
+import { getVibeyaImage, vibeyaProducts } from "@modules/vibeya/data/products"
 import { NextRequest, NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic"
@@ -28,6 +29,10 @@ export async function GET(request: NextRequest) {
       region: { id: region.id, currency_code: region.currency_code },
       products: products.filter((product) => market.product_ids.includes(product.id)).map((product) => {
         const marketImages = market.localized_media?.[product.id]?.[mediaCountryCode] ?? []
+        const localProduct = vibeyaProducts.find((entry) => entry.handle === product.handle)
+        const localImage = localProduct?.colors[0]
+          ? getVibeyaImage(localProduct, localProduct.colors[0])
+          : null
         const colors = new Set<string>()
         const sizes = new Set<string>()
         const sizePrices: Record<string, number> = {}
@@ -54,7 +59,7 @@ export async function GET(request: NextRequest) {
           title: product.title,
           subtitle: product.subtitle,
           description: product.description,
-          image: marketImages[0] ?? product.thumbnail ?? product.images?.[0]?.url ?? null,
+          image: marketImages[0] ?? product.thumbnail ?? product.images?.[0]?.url ?? localImage,
           market_images: marketImages,
           category: product.categories?.[0]?.name ?? product.type?.value ?? "New arrivals",
           colors: Array.from(colors),
