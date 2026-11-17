@@ -55,6 +55,7 @@ export default async function CategoryPage(props: Props) {
       listing={{
         category: group.label,
         title: group.label,
+        slug: group.slug,
         handles: [...group.productHandles],
       }}
     />

@@ -10,6 +10,7 @@ import { createPortal } from "react-dom"
 import { useCallback, useEffect, useRef, useState, type SyntheticEvent } from "react"
 
 type StudioRequest = { product?: string; color?: string; size?: string; print?: string; areas?: string; prompt?: string }
+type ProductListing = { category: string; title: string; slug: string; handles: string[] }
 
 function getStudioReturnUrl(countryCode: string, request: StudioRequest) {
   const params = new URLSearchParams({ openStudio: "1" })
@@ -20,7 +21,7 @@ function getStudioReturnUrl(countryCode: string, request: StudioRequest) {
   return `/${countryCode}?${params.toString()}#top`
 }
 
-export default function VibeyaHome({ countryCode, locale, isAuthenticated, standaloneProductId, standaloneColor, standaloneSize }: { countryCode: string; locale?: string | null; isAuthenticated: boolean; standaloneProductId?: string; standaloneColor?: string; standaloneSize?: string }) {
+export default function VibeyaHome({ countryCode, locale, isAuthenticated, standaloneProductId, standaloneColor, standaloneSize, listing }: { countryCode: string; locale?: string | null; isAuthenticated: boolean; standaloneProductId?: string; standaloneColor?: string; standaloneSize?: string; listing?: ProductListing }) {
   const marketLocale = getMarketLocale(countryCode, locale ?? undefined)
   const standaloneHash = standaloneProductId
     ? `#product-${standaloneProductId}?color=${encodeURIComponent(standaloneColor || "Black")}${standaloneSize ? `&size=${encodeURIComponent(standaloneSize)}` : ""}`
@@ -90,6 +91,10 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
     forwardedParams.set("v", "metal-sign-single-prompt-20261117-3")
     forwardedParams.set("country", countryCode.toLowerCase())
     forwardedParams.set("locale", marketLocale)
+    if (listing) {
+      forwardedParams.set("listing", listing.slug)
+      forwardedParams.set("handles", listing.handles.join(","))
+    }
     for (const key of ["viewCart", "openStudio", "openSearch", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
       const value = currentParams.get(key)
       if (value) forwardedParams.set(key, value)
@@ -102,6 +107,8 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
 
     const hash = standaloneProductId
       ? standaloneHash
+      : listing
+      ? "#shop"
       : [
       "#top",
       "#shop",
@@ -118,7 +125,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
     const homeUrl = `/vibeya/index.html${query ? `?${query}` : ""}${hash}`
     const frame = frameRef.current
     if (frame && frame.getAttribute("src") !== homeUrl) frame.src = homeUrl
-  }, [countryCode, isAuthenticated, marketLocale, router, standaloneProductId, standaloneHash])
+  }, [countryCode, isAuthenticated, listing?.slug, listing?.handles.join(","), marketLocale, router, standaloneProductId, standaloneHash])
 
   useEffect(() => {
     const frame = frameRef.current
@@ -315,7 +322,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
         }}
       />
       {homeCardsTarget && createPortal(
-        <ProductCards onSelect={selectProduct} countryCode={countryCode} locale={marketLocale} />,
+        <ProductCards onSelect={selectProduct} countryCode={countryCode} locale={marketLocale} handles={listing?.handles} />,
         homeCardsTarget
       )}
       {authOpen && <AuthModal countryCode={countryCode} onClose={closeAuth} redirectTo={authRedirectTo} />}

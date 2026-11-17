@@ -120,9 +120,10 @@ function ProductCard({ product, onSelect, countryCode = "us" }: ProductCardProps
   )
 }
 
-export function ProductCards({ onSelect, countryCode = "us", locale = "" }: { onSelect: ProductCardProps["onSelect"]; countryCode?: string; locale?: string }) {
+export function ProductCards({ onSelect, countryCode = "us", locale = "", handles }: { onSelect: ProductCardProps["onSelect"]; countryCode?: string; locale?: string; handles?: string[] }) {
   const products = useVibeyaProducts(countryCode, locale)
-  const ordered = [...products.filter((product) => product.catalogOnly), ...products.filter((product) => !product.catalogOnly)]
+  const listedProducts = handles ? products.filter((product) => handles.includes(product.handle)) : products
+  const ordered = [...listedProducts.filter((product) => product.catalogOnly), ...listedProducts.filter((product) => !product.catalogOnly)]
   const pinned = ["mg8014061", "sds-137892", "sds-97226", "sds-233939", "sds-275844", "sds-63823"]
     .map((id) => ordered.find((product) => product.id === id))
     .filter((product): product is VibeyaProduct => Boolean(product))

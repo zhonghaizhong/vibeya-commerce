@@ -1361,9 +1361,21 @@
   // More items can be added without expanding the homepage or changing navigation.
   const catalogProducts=[...products];
   if(["ca","jp","mx"].includes(marketCountryCode().toLowerCase())){catalogProducts.splice(0,catalogProducts.length,...catalogProducts.filter(product=>product.id==="sds-63823"));}
-  let productTags=['All Products', ...new Set(catalogProducts.map(p=>p.category))];
+  const marketCategoryGroups=[
+    {slug:'custom-clothing',label:'Custom Clothing',handles:['vibeya-custom-cotton-long-sleeve-tee','vibeya-washed-vintage-hooded-sweatshirt','vibeya-custom-womens-tankini-swimsuit-set','vibeya-custom-kids-basketball-uniform','vibeya-custom-womens-yoga-set'],description:'Design custom shirts, hoodies, swimwear, yoga sets, and kids’ basketball uniforms. Upload artwork or describe your idea, preview it, and order online.'},
+    {slug:'custom-tumblers',label:'Custom Tumblers',handles:['vibeya-custom-20oz-stainless-steel-tumbler'],description:'Create a custom stainless steel tumbler with your photo, artwork, or design prompt, then preview the full-wrap print before ordering.'},
+    {slug:'custom-home-bath',label:'Custom Home & Bath',handles:['vibeya-custom-3d-bath-mat','vibeya-custom-flannel-throw-blanket','vibeya-custom-shower-curtain'],description:'Personalize bath mats, shower curtains, and throw blankets with your own artwork, photo, or design prompt.'},
+    {slug:'custom-kitchen-dining',label:'Custom Kitchen & Dining',handles:['vibeya-custom-prompt-design-apron'],description:'Create a custom cooking apron with your photo, artwork, or design prompt and preview your finished design online.'},
+    {slug:'custom-hats',label:'Custom Hats',handles:['vibeya-custom-knitted-beanie','vibeya-custom-washed-denim-baseball-cap'],description:'Customize a knitted beanie or washed denim baseball cap with artwork or a design prompt.'},
+    {slug:'custom-wall-decor',label:'Custom Wall Decor',handles:['vibeya-custom-metal-bottle-cap-wall-sign'],description:'Design a personalized metal wall sign, from a single piece to an interactive multi-piece set.'}
+  ];
+  const queryParams=new URLSearchParams(location.search);
+  const pageListing=marketCategoryGroups.find(group=>group.slug===queryParams.get('listing'));
+  const pageListingHandles=queryParams.get('handles')?.split(',').filter(Boolean);
+  let productTags=['All Products',...marketCategoryGroups.map(group=>group.label)];
   const ideaTags=['All Inspiration','Animals','Cute','Funny','Nature','Retro','Art','Space'];
-  let productTag='All Products',ideaTag='All Inspiration',productVisible=8,ideaVisible=9;
+  let productTag=pageListing?.label||'All Products',ideaTag='All Inspiration',productVisible=8,ideaVisible=9;
+  if(pageListing){const crumb=document.querySelector('.catalog-crumb');const title=document.querySelector('.catalog-hero h1');const description=document.querySelector('.catalog-hero p');if(crumb)crumb.innerHTML=`<a href="/${marketCountryCode()}" target="_top">HOME</a> / ${pageListing.label.toUpperCase()}`;if(title)title.textContent=pageListing.label.toUpperCase();if(description)description.textContent=pageListing.description;}
   const itemPrice=p=>{const v=(p.price.match(/[\d.]+/)||[])[0];return v===undefined?null:Number(v);};
   const sizeLabel=(product,size)=>product?.sizeLabels?.[size]||size||'Select a size';
   const selectedProductPrice=(product,size)=>product?.marketPrice??product?.sizePrices?.[size]??itemPrice(product);
@@ -1588,11 +1600,11 @@
     return `<article class="product-card" aria-label="${esc(p.name)}"><button type="button" class="product-card-media" data-product="${esc(p.id)}" data-product-color="${defaultColor}" aria-label="View ${esc(p.name)} in ${esc(colorName)}"><span class="card-plus" aria-hidden="true">↗</span><div class="photo"><img data-card-image src="${image}" alt="${esc(colorName)} ${esc(p.short)} — product gallery image 1" loading="lazy"></div></button><div class="card-color-options" role="group" aria-label="Preview ${esc(p.short)} colors">${swatches}</div><div class="card-color-caption" aria-live="polite">${esc(variantSummary)}</div><button type="button" class="product-card-info" data-product="${esc(p.id)}" data-product-color="${defaultColor}" aria-label="View details for ${esc(p.name)} in ${esc(colorName)}"><h3>${esc(p.name)}</h3><p>${esc(cardPrice)}</p></button></article>`;
   }
   const productHTML=renderProductCard;
-  function paintChips(id,all,selected,attr){$(id).innerHTML=all.map(cat=>`<button type="button" class="catalog-chip ${cat===selected?'active':''}" ${attr}="${esc(cat)}" aria-pressed="${cat===selected}">${esc(cat)}</button>`).join('');}
+  function paintChips(id,all,selected,attr){if(id==='#productFilters'){const country=encodeURIComponent(marketCountryCode().toLowerCase());const visibleGroups=marketCategoryGroups.filter(group=>catalogProducts.some(product=>group.handles.includes(product.handle)));$(id).innerHTML=[`<a class="catalog-chip ${selected==='All Products'?'active':''}" href="/${country}#shop" target="_top">All Products</a>`,...visibleGroups.map(group=>`<a class="catalog-chip ${selected===group.label?'active':''}" href="/${country}/categories/${group.slug}" target="_top">${esc(group.label)}</a>`)].join('');return;}$(id).innerHTML=all.map(cat=>`<button type="button" class="catalog-chip ${cat===selected?'active':''}" ${attr}="${esc(cat)}" aria-pressed="${cat===selected}">${esc(cat)}</button>`).join('');}
   function paintProducts(){
     paintChips('#productFilters',productTags,productTag,'data-product-tag');
     let q=$('#productSearch').value.toLowerCase().trim();
-    let matches=catalogProducts.filter(p=>(productTag==='All Products'||p.category===productTag)&&[p.name,p.short,p.category].some(t=>String(t||'').toLowerCase().includes(q)));
+    let matches=catalogProducts.filter(p=>(!pageListingHandles||pageListingHandles.includes(p.handle))&&(productTag==='All Products'||pageListing?.handles.includes(p.handle))&&[p.name,p.short,p.category].some(t=>String(t||'').toLowerCase().includes(q)));
     const order=$('#productSort').value;
     if(order==='az')matches.sort((a,b)=>a.name.localeCompare(b.name));
     if(order==='low')matches.sort((a,b)=>(itemPrice(a)??Infinity)-(itemPrice(b)??Infinity));

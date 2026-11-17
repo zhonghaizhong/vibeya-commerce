@@ -4,6 +4,7 @@ import { getMarketAlternateUrls } from "@lib/util/market-locale"
 import { DEFAULT_COUNTRY_CODE, getSiteOrigin, listCountryCodes } from "@lib/util/site"
 import { getVibeyaMarket } from "@lib/vibeya/region"
 import { isSupportedMarketCountry } from "@lib/vibeya/markets"
+import { PRODUCT_CATEGORY_GROUPS } from "@lib/seo/categories"
 import type { MetadataRoute } from "next"
 
 export const dynamic = "force-dynamic"
@@ -145,7 +146,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...localizedEntries,
     ...(countryCodes.includes("us")
-      ? INDEXABLE_CONTENT_PATHS.map((path) => ({ url: `${origin}${path}` }))
+      ? [
+          ...INDEXABLE_CONTENT_PATHS.map((path) => ({ url: `${origin}${path}` })),
+          ...PRODUCT_CATEGORY_GROUPS.map((group) => ({
+            url: `${origin}/us/categories/${group.slug}`,
+          })),
+        ]
       : []),
     ...Object.values(YOGA_INSPIRATION_PATHS).map((path) => ({
       url: `${origin}${path}`,
