@@ -1,4 +1,5 @@
 import {
+  batchImageVariantsWorkflow,
   createProductsWorkflow,
   updateProductsWorkflow,
 } from "@medusajs/medusa/core-flows"
@@ -177,7 +178,15 @@ export default async function seedVibeyaCustomKidsBasketballUniform({
 
   const { data: products } = await query.graph({
     entity: "product",
-    fields: ["id"],
+    fields: [
+      "id",
+      "images.id",
+      "images.url",
+      "images.variants.id",
+      "variants.id",
+      "variants.options.option.title",
+      "variants.options.value",
+    ],
     filters: { handle },
   })
   const product = products[0]
@@ -186,6 +195,37 @@ export default async function seedVibeyaCustomKidsBasketballUniform({
       MedusaError.Types.INVALID_DATA,
       `Product ${handle} could not be loaded after saving.`
     )
+  }
+
+  const variantsByColor = new Map<string, string[]>()
+  for (const variant of product.variants ?? []) {
+    const color = optionValue(variant, "Color")
+    if (!color) continue
+    const current = variantsByColor.get(color) ?? []
+    current.push(variant.id)
+    variantsByColor.set(color, current)
+  }
+
+  for (const image of product.images ?? []) {
+    const color = colors.find((candidate) =>
+      image.url?.includes(`/${colorFolders[candidate]}/`)
+    )
+    if (!color) continue
+    const wanted = variantsByColor.get(color) ?? []
+    const linkedIds = new Set((image.variants ?? []).map((variant: any) => variant.id))
+    const add = wanted.filter((id) => !linkedIds.has(id))
+    const remove = [...linkedIds].filter((id) => !wanted.includes(id))
+    if (add.length || remove.length) {
+      try {
+        await batchImageVariantsWorkflow(container).run({
+          input: { image_id: image.id, add, remove },
+        })
+      } catch (error) {
+        logger.warn(
+          `Skipping variant image assignment for ${image.id}: ${error instanceof Error ? error.message : "unknown error"}`
+        )
+      }
+    }
   }
 
   logger.info(
