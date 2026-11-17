@@ -99,7 +99,8 @@ document.addEventListener('DOMContentLoaded',async()=>{
     const tags=document.getElementById('storyTags');if(tags)tags.innerHTML=(current.tags||[]).map(tag=>`<span class="chip">${safe(tag)}</span>`).join('');
     for(const [key,id] of [['product','storyProduct'],['pattern','storyPattern'],['style','storyStyle']]){const node=document.getElementById(id);if(node)node.textContent=activeStoryLabels[key]?.[current[key]]||current[key]||'';}
     const body=document.getElementById('storyBody');if(body){body.replaceChildren(...String(current.articleBody||'').split(/\n\s*\n/).map(text=>text.trim()).filter(Boolean).map(text=>{const p=document.createElement('p');p.textContent=text;return p;}));body.hidden=!current.articleBody;}
-    window.VIBEYA_CUSTOMIZE_URL=`../index.html?openStudio=1&embeddedStudio=1&inspiration=${encodeURIComponent(current.id)}`;
+    const yogaProductOptions=current.id==='yoga-animals-set'?'&product=sds-63823&color=White&size=M&print=both':'';
+    window.VIBEYA_CUSTOMIZE_URL=`/vibeya/index.html?country=${encodeURIComponent(marketCountry)}&locale=${encodeURIComponent(marketLocale)}&openStudio=1&embeddedStudio=1${yogaProductOptions}&inspiration=${encodeURIComponent(current.id)}`;
   }else if(isGenericStory){
     document.title='Design story unavailable | VIBEYA';
     const spotlight=document.querySelector('.story-spotlight');if(spotlight)spotlight.hidden=true;
