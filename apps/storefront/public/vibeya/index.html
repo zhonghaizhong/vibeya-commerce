@@ -1597,7 +1597,8 @@
     const image=variant.image(defaultColor),colorName=colorNames[defaultColor];
     const variantSummary=p.variantSummary||`${colorName} · ${p.colors.length} colors · ${variant.sizesLabel}`;
     const cardPrice=p.sizePrices?`From ${p.price}`:p.price;
-    return `<article class="product-card" aria-label="${esc(p.name)}"><button type="button" class="product-card-media" data-product="${esc(p.id)}" data-product-color="${defaultColor}" aria-label="View ${esc(p.name)} in ${esc(colorName)}"><span class="card-plus" aria-hidden="true">↗</span><div class="photo"><img data-card-image src="${image}" alt="${esc(colorName)} ${esc(p.short)} — product gallery image 1" loading="lazy"></div></button><div class="card-color-options" role="group" aria-label="Preview ${esc(p.short)} colors">${swatches}</div><div class="card-color-caption" aria-live="polite">${esc(variantSummary)}</div><button type="button" class="product-card-info" data-product="${esc(p.id)}" data-product-color="${defaultColor}" aria-label="View details for ${esc(p.name)} in ${esc(colorName)}"><h3>${esc(p.name)}</h3><p>${esc(cardPrice)}</p></button></article>`;
+    const href=marketPath('products/'+encodeURIComponent(p.handle));
+    return `<article class="product-card" data-product-id="${esc(p.id)}" aria-label="${esc(p.name)}"><a class="product-card-media" data-product-link href="${href}" target="_top" aria-label="View ${esc(p.name)} in ${esc(colorName)}"><span class="card-plus" aria-hidden="true">↗</span><div class="photo"><img data-card-image src="${image}" alt="${esc(colorName)} ${esc(p.short)} — product gallery image 1" loading="lazy"></div></a><div class="card-color-options" role="group" aria-label="Preview ${esc(p.short)} colors">${swatches}</div><div class="card-color-caption" aria-live="polite">${esc(variantSummary)}</div><a class="product-card-info" data-product-link href="${href}" target="_top" aria-label="View details for ${esc(p.name)} in ${esc(colorName)}"><h3>${esc(p.name)}</h3><p>${esc(cardPrice)}</p></a></article>`;
   }
   const productHTML=renderProductCard;
   function paintChips(id,all,selected,attr){if(id==='#productFilters'){const country=encodeURIComponent(marketCountryCode().toLowerCase());const visibleGroups=marketCategoryGroups.filter(group=>catalogProducts.some(product=>group.handles.includes(product.handle)));$(id).innerHTML=[`<a class="catalog-chip ${selected==='All Products'?'active':''}" href="/${country}#shop" target="_top">All Products</a>`,...visibleGroups.map(group=>`<a class="catalog-chip ${selected===group.label?'active':''}" href="/${country}/categories/${group.slug}" target="_top">${esc(group.label)}</a>`)].join('');return;}$(id).innerHTML=all.map(cat=>`<button type="button" class="catalog-chip ${cat===selected?'active':''}" ${attr}="${esc(cat)}" aria-pressed="${cat===selected}">${esc(cat)}</button>`).join('');}
@@ -2193,10 +2194,10 @@
   function renderSearch(q){
     const term=q.toLowerCase().trim();
     const p=catalogProducts.filter(v=>[v.name,v.short,v.category].some(t=>String(t||'').toLowerCase().includes(term))).slice(0,3);
-    const ideas=inspirations.map((v,i)=>({...v,idx:i})).filter(v=>[v.title,v.prompt,...v.tags].some(t=>t.toLowerCase().includes(term))).slice(0,3);
+    const ideas=(Array.isArray(window.VIBEYA_INSPIRATION_CATALOG)?window.VIBEYA_INSPIRATION_CATALOG:[]).filter(v=>v.published!==false&&[v.title,v.summary,...(v.tags||[])].some(t=>String(t||'').toLowerCase().includes(term))).slice(0,3);
     let h='';
-    if(p.length){h+='<strong style="grid-column:1/-1">PRODUCTS</strong>'+p.map(v=>v.catalogOnly?`<a class="search-item" href="${marketPath('products/'+encodeURIComponent(v.handle))}" target="_top">✳ ${esc(v.name)}</a>`:`<button class="search-item" data-search-product="${v.id}">✳ ${esc(v.name)}</button>`).join('');}
-    if(ideas.length){h+='<strong style="grid-column:1/-1;margin-top:8px">INSPIRATION</strong>'+ideas.map(v=>`<button class="search-item" data-search-inspo="${v.idx}">✦ ${esc(v.title)}</button>`).join('');}
+    if(p.length){h+='<strong style="grid-column:1/-1">PRODUCTS</strong>'+p.map(v=>`<a class="search-item" href="${marketPath('products/'+encodeURIComponent(v.handle))}" target="_top">✳ ${esc(v.name)}</a>`).join('');}
+    if(ideas.length){h+='<strong style="grid-column:1/-1;margin-top:8px">INSPIRATION</strong>'+ideas.map(v=>`<a class="search-item" href="${withMarketContext('/vibeya/inspiration/'+encodeURIComponent(v.slug))}" target="_top">✦ ${esc(v.title)}</a>`).join('');}
     $('#searchResults').innerHTML=h||'<p style="grid-column:1/-1;color:#625c69;font-size:13px">No matches. Try a different word or browse the catalogs.</p>';
   }
 
@@ -2493,11 +2494,11 @@ const blanket=chosen.id==='sds-97226';
       return;
     }
     let colorSwatch=e.target.closest('[data-card-color]');if(colorSwatch){
-      const card=colorSwatch.closest('.product-card'),product=products.find(p=>p.id===card.querySelector('[data-product]').dataset.product);
+      const card=colorSwatch.closest('.product-card'),product=products.find(p=>p.id===card.dataset.productId);
       const variant=productVariants[product.id],color=colorSwatch.dataset.cardColor,label=variant.colors[color][0],image=card.querySelector('[data-card-image]');
       card.querySelectorAll('[data-card-color]').forEach(button=>button.setAttribute('aria-pressed',String(button===colorSwatch)));
       image.src=variant.image(color);image.alt=label+' '+product.short+' — product gallery image 1';
-      card.querySelectorAll('[data-product]').forEach(button=>{button.dataset.productColor=color;button.setAttribute('aria-label',(button.classList.contains('product-card-info')?'View details for ':'View ')+product.name+' in '+label);});
+      card.querySelectorAll('[data-product-link]').forEach(link=>link.setAttribute('aria-label',(link.classList.contains('product-card-info')?'View details for ':'View ')+product.name+' in '+label));
       card.querySelector('.card-color-caption').textContent=product.variantSummary||label+' · '+product.colors.length+' colors · '+variant.sizesLabel;
       return;
     }
@@ -2536,7 +2537,6 @@ const blanket=chosen.id==='sds-97226';
     b=e.target.closest('[data-studio-view]');if(b){studioViewMode=b.dataset.studioView;drawPreview();return;}
     b=e.target.closest('[data-studio-image]');if(b){studioImageIndex=Number(b.dataset.studioImage);studioViewMode='product';drawPreview();return;}
     b=e.target.closest('[data-preview-side]');if(b){studioPreviewSide=b.dataset.previewSide;studioViewMode='designs';drawPreview();return;}
-    b=e.target.closest('[data-search-product]');if(b){hideSearch();openProductById(b.dataset.searchProduct);return;}
     b=e.target.closest('[data-search-inspo]');if(b){hideSearch();chosenArt=+b.dataset.searchInspo;hasPreview=true;requestStudio(chosen,inspirations[chosenArt].prompt);return;}
     b=e.target.closest('[data-qty-change]');if(b){const item=saved.find(s=>String(s.id)===b.dataset.qtyChange);if(item&&item.type==='inspiration'){item.quantity=Math.max(1,Math.min(20,(Number(item.quantity)||1)+Number(b.dataset.delta||0)));try{localStorage.setItem('vibeyaSaved',JSON.stringify(saved));}catch(e){}renderCart();}return;}
     b=e.target.closest('[data-remove]');if(b){saved=saved.filter(s=>String(s.id)!==b.dataset.remove);try{localStorage.setItem('vibeyaSaved',JSON.stringify(saved));}catch(e){}renderCart();return;}

@@ -19,7 +19,6 @@ type ProductExplorerProps = {
 
 type ProductCardProps = {
   product: VibeyaProduct
-  onSelect: (product: VibeyaProduct, color: string) => void
   countryCode?: string
 }
 
@@ -30,11 +29,11 @@ function formatPrice(price: number, currency: string) {
   }).format(price)
 }
 
-function ProductCard({ product, onSelect, countryCode = "us" }: ProductCardProps) {
+function ProductCard({ product, countryCode = "us" }: ProductCardProps) {
   const [colorId, setColorId] = useState(product.colors[0]?.id ?? "")
+  const href = `/${countryCode}/products/${encodeURIComponent(product.handle)}`
 
   if (product.catalogOnly || product.id === "mg8014061") {
-    const href = `/${countryCode}/products/${encodeURIComponent(product.handle)}`
     const selectedCatalogColor = product.colors.find((option) => option.id === colorId) ?? product.colors[0]
     const hasCatalogColorImages = product.handle === "vibeya-custom-washed-denim-baseball-cap"
     const catalogImage = selectedCatalogColor && product.catalogImage && hasCatalogColorImages
@@ -89,15 +88,10 @@ function ProductCard({ product, onSelect, countryCode = "us" }: ProductCardProps
 
   return (
     <article className={`${styles.card} product-card`} aria-label={product.name}>
-      <button
-        className={`${styles.cardImageButton} product-card-media`}
-        type="button"
-        onClick={() => onSelect(product, color.id)}
-        aria-label={`View ${product.name} in ${color.name}`}
-      >
+      <a className={`${styles.cardImageButton} product-card-media`} href={href} target="_top" aria-label={`View ${product.name} in ${color.name}`}>
         <span className={`${styles.cardArrow} card-plus`} aria-hidden="true">↗</span>
         <div className="photo"><img className={styles.cardImage} src={product.marketGallery?.[0] ?? getVibeyaImage(product, color)} alt={`${color.name} ${product.short}`} /></div>
-      </button>
+      </a>
       <div className={`${styles.swatches} card-color-options`} role="group" aria-label={`${product.short} colors`}>
         {product.colors.map((option) => (
           <button
@@ -112,15 +106,15 @@ function ProductCard({ product, onSelect, countryCode = "us" }: ProductCardProps
         ))}
       </div>
       <p className={`${styles.cardVariant} card-color-caption`}>{product.variantSummary ?? `${color.name} · ${product.colors.length} colors · Sizes ${product.sizes[0]}–${product.sizes.at(-1)}`}</p>
-      <button className={`${styles.cardInfo} product-card-info`} type="button" onClick={() => onSelect(product, color.id)} aria-label={`View details for ${product.name} in ${color.name}`}>
+      <a className={`${styles.cardInfo} product-card-info`} href={href} target="_top" aria-label={`View details for ${product.name} in ${color.name}`}>
         <h3>{product.name}</h3>
         <p>{product.priceUnavailable ? "Price to be confirmed" : product.sizePrices ? `From ${formatPrice(product.price, product.currency)}` : formatPrice(product.price, product.currency)}</p>
-      </button>
+      </a>
     </article>
   )
 }
 
-export function ProductCards({ onSelect, countryCode = "us", locale = "", handles }: { onSelect: ProductCardProps["onSelect"]; countryCode?: string; locale?: string; handles?: string[] }) {
+export function ProductCards({ countryCode = "us", locale = "", handles }: { countryCode?: string; locale?: string; handles?: string[] }) {
   const products = useVibeyaProducts(countryCode, locale)
   const listedProducts = handles ? products.filter((product) => handles.includes(product.handle)) : products
   const ordered = [...listedProducts.filter((product) => product.catalogOnly), ...listedProducts.filter((product) => !product.catalogOnly)]
@@ -128,10 +122,10 @@ export function ProductCards({ onSelect, countryCode = "us", locale = "", handle
     .map((id) => ordered.find((product) => product.id === id))
     .filter((product): product is VibeyaProduct => Boolean(product))
   const featured = [...pinned, ...ordered.filter((product) => !pinned.includes(product))].slice(0, 6)
-  return <>{featured.map((product) => <ProductCard key={product.id} product={product} onSelect={onSelect} countryCode={countryCode} />)}</>
+  return <>{featured.map((product) => <ProductCard key={product.id} product={product} countryCode={countryCode} />)}</>
 }
 
-function ProductGrid({ onSelect }: { onSelect: ProductCardProps["onSelect"] }) {
+function ProductGrid() {
   const [query, setQuery] = useState("")
   const productList = useVibeyaProducts()
   const products = useMemo(() => {
@@ -156,7 +150,7 @@ function ProductGrid({ onSelect }: { onSelect: ProductCardProps["onSelect"] }) {
       </div>
       {products.length ? (
         <div className={styles.grid}>
-          {products.map((product) => <ProductCard key={product.id} product={product} onSelect={onSelect} />)}
+          {products.map((product) => <ProductCard key={product.id} product={product} />)}
         </div>
       ) : <p className={styles.empty}>No products match that search.</p>}
     </>
@@ -294,7 +288,7 @@ export default function ProductExplorer({ productId, initialColor, onNavigate, o
       <main className={styles.main}>
         {selectedProduct ? (
           <ProductDetail key={selectedProduct.id} product={selectedProduct} initialColor={initialColor} onBack={() => onNavigate("#shop")} onCustomize={onCustomize} />
-        ) : <ProductGrid onSelect={onSelect} />}
+        ) : <ProductGrid />}
       </main>
       <footer className={styles.footer}><span>© 2026 VIBEYA</span><span>Designed for expression. Made to be yours.</span></footer>
     </div>

@@ -286,11 +286,6 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
     )
   }
 
-  const selectProduct = (product: { id: string }, color: string) =>
-    product.id === "mg8014061"
-      ? router.push(`/${countryCode}/products/vibeya-custom-metal-bottle-cap-wall-sign`)
-      : navigateTo(`#product-${product.id}?color=${encodeURIComponent(color)}`)
-
   return (
     <>
       <style>{`
@@ -322,7 +317,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
         }}
       />
       {homeCardsTarget && createPortal(
-        <ProductCards onSelect={selectProduct} countryCode={countryCode} locale={marketLocale} handles={listing?.handles} />,
+        <ProductCards countryCode={countryCode} locale={marketLocale} handles={listing?.handles} />,
         homeCardsTarget
       )}
       {authOpen && <AuthModal countryCode={countryCode} onClose={closeAuth} redirectTo={authRedirectTo} />}
