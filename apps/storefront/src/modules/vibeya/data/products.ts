@@ -541,7 +541,7 @@ export const vibeyaProducts: VibeyaProduct[] = [
     currency: "USD",
     colors: [
       { id: "Black", name: "Black", hex: "#252427", folder: "black" },
-      { id: "Khaki", name: "Khaki", hex: "#aa936d", folder: "khaki" },
+      { id: "Khaki", name: "Khaki", hex: "#b89b73", folder: "khaki" },
       { id: "Gray", name: "Gray", hex: "#77797b", folder: "gray" },
     ],
     sizes: ["One Size"],
