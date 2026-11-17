@@ -6,7 +6,10 @@ import {
   listCountryCodes,
 } from "@lib/util/site"
 import type { MetadataRoute } from "next"
-import { PRODUCT_CATEGORY_GROUPS } from "@lib/seo/categories"
+import {
+  isProductCategoryIndexable,
+  PRODUCT_CATEGORY_GROUPS,
+} from "@lib/seo/categories"
 
 export const dynamic = "force-dynamic"
 
@@ -107,6 +110,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [
       ...STATIC_PATHS.map((path) => ({ url: `${base}${path}` })),
       ...toEntries(base, "products", products),
+      ...PRODUCT_CATEGORY_GROUPS.filter((group) =>
+        isProductCategoryIndexable(group.slug, countryCode)
+      ).map((group) => ({ url: `${base}/categories/${group.slug}` })),
       ...toEntries(
         base,
         "categories",

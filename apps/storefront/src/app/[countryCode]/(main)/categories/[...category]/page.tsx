@@ -20,10 +20,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   const origin = await getSiteOrigin()
   const canonical = `${origin}/${countryCode}/categories/${group.slug}`
-  const indexed = isProductCategoryIndexable(group.slug)
+  const indexed = isProductCategoryIndexable(group.slug, countryCode)
 
   return {
-    title: `${group.label} | ${STORE_NAME}`,
+    title: group.seoTitle,
     description: group.description,
     robots: { index: indexed, follow: true },
     alternates: { canonical },

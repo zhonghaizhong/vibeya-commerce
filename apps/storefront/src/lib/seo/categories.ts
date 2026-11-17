@@ -1,6 +1,7 @@
 export type ProductCategoryGroup = {
   slug: string
   label: string
+  seoTitle: string
   description: string
   productHandles: readonly string[]
   legacyHandles: readonly string[]
@@ -10,8 +11,9 @@ export const PRODUCT_CATEGORY_GROUPS: readonly ProductCategoryGroup[] = [
   {
     slug: "custom-clothing",
     label: "Custom Clothing",
+    seoTitle: "Custom Clothing & Personalized Apparel | VIBEYA",
     description:
-      "Explore custom shirts, hoodies, swimwear, and team apparel. Upload artwork or describe your design, preview it on the product, and order online.",
+      "Design custom clothing including long sleeve shirts, washed hoodies, tankinis, and kids' basketball uniforms. Upload artwork or describe your idea, preview, and order online.",
     productHandles: [
       "vibeya-custom-cotton-long-sleeve-tee",
       "vibeya-washed-vintage-hooded-sweatshirt",
@@ -23,16 +25,18 @@ export const PRODUCT_CATEGORY_GROUPS: readonly ProductCategoryGroup[] = [
   {
     slug: "custom-tumblers",
     label: "Custom Tumblers",
+    seoTitle: "Custom Tumblers & Personalized Cups | VIBEYA",
     description:
-      "Create a custom tumbler with your photo, artwork, or design prompt. Preview the full-wrap print before you order.",
+      "Design a custom stainless steel tumbler with a photo, artwork, or text prompt. Preview the full-wrap print on a 20 oz tumbler before ordering.",
     productHandles: ["vibeya-custom-20oz-stainless-steel-tumbler"],
     legacyHandles: ["drinkware", "tumblers"],
   },
   {
     slug: "custom-home-bath",
     label: "Custom Home & Bath",
+    seoTitle: "Custom Home & Bath | Mats, Blankets & Curtains | VIBEYA",
     description:
-      "Explore custom bath mats, shower curtains, and throw blankets. Upload an image or describe a design, preview it, and order online.",
+      "Create custom bath mats, shower curtains, and throw blankets with a photo, artwork, or design prompt. Preview your personalized home design before ordering.",
     productHandles: [
       "vibeya-custom-3d-bath-mat",
       "vibeya-custom-flannel-throw-blanket",
@@ -43,16 +47,18 @@ export const PRODUCT_CATEGORY_GROUPS: readonly ProductCategoryGroup[] = [
   {
     slug: "custom-kitchen-dining",
     label: "Custom Kitchen & Dining",
+    seoTitle: "Custom Aprons & Personalized Cooking Aprons | VIBEYA",
     description:
-      "Design a custom apron with your artwork, photo, or a written prompt. Preview your print before ordering.",
+      "Make a custom apron with a photo, artwork, or design prompt. Preview your personalized cooking apron before ordering.",
     productHandles: ["vibeya-custom-prompt-design-apron"],
     legacyHandles: ["kitchen-dining", "kitchen-and-dining"],
   },
   {
     slug: "custom-hats",
     label: "Custom Hats",
+    seoTitle: "Custom Hats, Beanies & Baseball Caps | VIBEYA",
     description:
-      "Explore custom hats, from knitted beanies to washed denim baseball caps. Upload artwork or describe your idea, then preview it before ordering.",
+      "Create a custom knitted beanie or washed denim baseball cap with your artwork or design prompt. Preview your personalized hat before ordering.",
     productHandles: [
       "vibeya-custom-knitted-beanie",
       "vibeya-custom-washed-denim-baseball-cap",
@@ -62,8 +68,9 @@ export const PRODUCT_CATEGORY_GROUPS: readonly ProductCategoryGroup[] = [
   {
     slug: "custom-wall-decor",
     label: "Custom Wall Decor",
+    seoTitle: "Custom Metal Wall Signs & Personalized Decor | VIBEYA",
     description:
-      "Create a custom metal wall sign with your artwork, photo, or design prompt. Preview it before ordering.",
+      "Design personalized metal wall decor as a custom bottle cap sign. Upload artwork or a photo, preview a one-, two-, or three-piece set, and order online.",
     productHandles: ["vibeya-custom-metal-bottle-cap-wall-sign"],
     legacyHandles: ["wall-decor", "wall-decorations"],
   },
@@ -92,6 +99,11 @@ export const getProductCategoryLabel = (
   )
 }
 
-// Category filters are navigation and taxonomy. Keep thin groups out of search
-// until a separate keyword brief justifies indexing them as landing pages.
-export const isProductCategoryIndexable = (_slug: string) => false
+// U.S. category pages are indexable. Other country versions stay out of search
+// until their product availability and localized landing copy are ready.
+export const isProductCategoryIndexable = (
+  slug: string,
+  countryCode: string
+) =>
+  countryCode.toLowerCase() === "us" &&
+  PRODUCT_CATEGORY_GROUPS.some((group) => group.slug === slug)
