@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       region: { id: region.id, currency_code: region.currency_code },
       products: products.filter((product) => market.product_ids.includes(product.id)).map((product) => {
+        const localProduct = vibeyaProducts.find((entry) => entry.handle === product.handle)
         const yogaGalleryFiles = [
           "01-carousel.webp",
           "02-carousel.webp",
@@ -36,10 +37,9 @@ export async function GET(request: NextRequest) {
           "06-carousel.webp",
         ]
         const yogaMediaCountry = ["ca", "jp", "mx"].includes(mediaCountryCode) ? mediaCountryCode : "us"
-        const marketImages = product.id === "sds-63823"
+        const marketImages = localProduct?.id === "sds-63823"
           ? yogaGalleryFiles.map((file) => `/vibeya/assets/products/sds-63823/${yogaMediaCountry}/${file}`)
           : market.localized_media?.[product.id]?.[mediaCountryCode] ?? []
-        const localProduct = vibeyaProducts.find((entry) => entry.handle === product.handle)
         const localImage = localProduct?.colors[0]
           ? getVibeyaImage(localProduct, localProduct.colors[0])
           : null
