@@ -33,7 +33,7 @@ export default async function Checkout({ params }: { params: Promise<{ countryCo
       <div className={styles.checkoutGrid}>
         <div className={styles.formColumn}>
           <PaymentWrapper cart={cart}>
-            <CheckoutForm cart={cart} customer={customer} />
+            <CheckoutForm cart={cart} customer={customer} countryCode={countryCode} />
           </PaymentWrapper>
         </div>
         <div className={styles.summaryColumn}>

@@ -9,9 +9,11 @@ import Shipping from "@modules/checkout/components/shipping"
 export default async function CheckoutForm({
   cart,
   customer,
+  countryCode,
 }: {
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
+  countryCode: string
 }) {
   if (!cart) {
     return null
@@ -28,7 +30,7 @@ export default async function CheckoutForm({
     <div className="checkout-form w-full grid grid-cols-1 gap-y-8">
       <Addresses cart={cart} customer={customer} />
 
-      <Shipping cart={cart} availableShippingMethods={shippingMethods} />
+      <Shipping cart={cart} availableShippingMethods={shippingMethods} countryCode={countryCode} />
 
       <Payment cart={cart} availablePaymentMethods={paymentMethods} />
 
