@@ -88,7 +88,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
 
     const currentParams = new URLSearchParams(window.location.search)
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "metal-sign-single-prompt-20261117-4")
+    forwardedParams.set("v", standaloneProductId === "mg8012002" ? "denim-cap-unified-detail-20261117-1" : "metal-sign-single-prompt-20261117-4")
     forwardedParams.set("country", countryCode.toLowerCase())
     forwardedParams.set("locale", marketLocale)
     if (standaloneProductId) forwardedParams.set("standalone", "1")
