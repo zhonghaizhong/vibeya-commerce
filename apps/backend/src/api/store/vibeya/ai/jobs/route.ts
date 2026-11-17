@@ -23,6 +23,7 @@ const DESIGN_GENERATION_PRODUCT_IDS = new Set([
   "sds-233939",
   "sds-275844",
   "mg8014061",
+  "mg8012002",
 ])
 const BASKETBALL_PRINT_ZONES = ["jersey-front", "jersey-back", "shorts"] as const
 
@@ -103,15 +104,16 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const isTankini = productId === "sds-137892"
   const isYogaSet = productId === "sds-63823"
   const isApron = productId === "sds-275844"
+  const isDenimCap = productId === "mg8012002"
   if (isShowerCurtain && !["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"].includes(size)) {
     return res.status(400).json({ error: "Choose one of the available shower curtain sizes before creating your design." })
   }
-  if (isTankini || isYogaSet || isApron || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
+  if (isTankini || isYogaSet || isApron || isDenimCap || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
     try {
       productReference = await getVibeyaProductReference(productId, color, size)
     } catch (error) {
       console.error("Unable to load the VIBEYA product print reference", error)
-      return res.status(503).json({ error: isBeanie ? "The beanie print-area reference is not available right now. Please try again later." : "The product print reference is not available right now. Please try again later." })
+      return res.status(503).json({ error: isDenimCap ? "The cap print-area reference is not available right now. Please try again later." : isBeanie ? "The beanie print-area reference is not available right now. Please try again later." : "The product print reference is not available right now. Please try again later." })
     }
   }
   if (isTankini || isApron) {
@@ -122,8 +124,8 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(503).json({ error: isApron ? "The apron print-area guide is not available right now. Please try again later." : "The tankini print-area guide is not available right now. Please try again later." })
     }
   }
-  if (isTumbler && !productReference) {
-    return res.status(400).json({ error: "The tumbler print-area reference is missing. Refresh the page and try again." })
+  if ((isTumbler || isDenimCap) && !productReference) {
+    return res.status(400).json({ error: isDenimCap ? "The cap print-area reference is missing. Refresh the page and try again." : "The tumbler print-area reference is missing. Refresh the page and try again." })
   }
   if (isShowerCurtain && !productReference) {
     return res.status(400).json({ error: "The selected shower curtain size reference is missing. Refresh the page and try again." })
@@ -137,7 +139,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isApron && (!productReference || !productPrintAreaReference)) {
     return res.status(400).json({ error: "The apron blank reference or bib print-area guide is missing. Refresh the page and try again." })
   }
-  if (productReference && (productReference.length > (isTankini || isYogaSet || isApron ? 2500000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+  if (productReference && (productReference.length > (isTankini || isYogaSet || isApron ? 2500000 : isDenimCap ? 120000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
     return res.status(400).json({ error: "The product print-area reference is invalid. Refresh the page and try again." })
   }
   if (productPrintAreaReference && (productPrintAreaReference.length > 2500000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
@@ -150,9 +152,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isBasketballUniform && Array.isArray(body?.printZones) && !body.printZones.some((zone) => BASKETBALL_PRINT_ZONES.includes(zone as typeof BASKETBALL_PRINT_ZONES[number]))) {
     return res.status(400).json({ error: "Choose at least one valid basketball uniform print area." })
   }
-  const placement = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement
-  const placementGuideCount = isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform || isApron ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
-  const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie || isShowerCurtain || isTankini || isBasketballUniform || isApron ? 6 : 2 + placementGuideCount + 6
+  const placement = isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement
+  const placementGuideCount = isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
+  const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? 6 : 2 + placementGuideCount + 6
   if (references.length > maximumReferences || references.some((item) => typeof item !== "string") || JSON.stringify(references).length > 300_000 || preserveBaseComposite.length > 150_000 || (preserveBaseComposite && !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(preserveBaseComposite))) {
     return res.status(400).json({ error: "The reference image is too large. Please compress it and try again." })
   }
