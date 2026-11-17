@@ -1233,7 +1233,7 @@
       if(['sds-167256','vibeya-washed-hoodie'].includes(product.id)){
         const previous={chosen,selectedColor,selectedPrint};
         try{
-          chosen=product;selectedColor=color;selectedPrint=job.print_placement||'front';
+          chosen=product;selectedColor=color;selectedPrint=jobPrintPlacement(job);
           const sources=productReferenceSources();
           if(!sources)throw new Error('The clean garment reference for this color is unavailable.');
           const replacement=await Promise.all(sources.map(source=>compressReferenceForAI(source)));
@@ -1244,7 +1244,7 @@
         // base references (for example, the beanie) are supplied by the existing API flow.
         references=[originalImage];
       }
-      const placement=job.print_placement||'front';
+      const placement=jobPrintPlacement(job);
       const variantPrompt=[
         'COLOR VARIANT: recreate the same finished print from the completed source design image on the newly selected garment color.',
         'Use the completed source image as the authoritative artwork reference. Extract only the printed artwork from the garment; do not copy the source garment, its color, background, layout, photo, model, or product mockup into the new image.',
@@ -1683,7 +1683,7 @@
     openProductById(product.id,job.color);
     if(product.id==='sds-233939')restoreUniformZonesFromPrompt(job.prompt);
     selectedSize=product.sizes?.includes(job.size)?job.size:(product.sizes?.[0]||'');
-    selectedPrint=job.product_id==='sds-172647'?'front':['front','back','both','wrap'].includes(job.print_placement)?job.print_placement:'front';
+    selectedPrint=productPrintPlacement(job.product_id)==='both'?'both':job.product_id==='sds-172647'?'front':['front','back','both','wrap'].includes(job.print_placement)?job.print_placement:'front';
     $('#studioPrompt').value=job.prompt||'';
     hasPreview=false;generatedArtworkDataUrl=null;currentDesignJobId=null;
     showStudio(product,job.prompt||'');studioViewMode='product';drawPreview();
@@ -1707,7 +1707,8 @@
         const image=job.status==='completed'?`<button type="button" data-job-preview="${esc(job.id)}">Load image</button>`:(job.status==='failed'?'No image returned':'Your image will appear here when it is ready');
         const addDisabled=job.status!=='completed'||!product;
         const shownColor=job.product_id==='sds-128646'&&variant.color==='NightGarden'?'White':variant.color||'';
-        const shownPlacement=job.print_placement==='wrap'?'Full Wrap':job.print_placement||'';
+        const resolvedPlacement=jobPrintPlacement(job);
+        const shownPlacement=job.product_id==='sds-63823'?'Complete Set · Top + Shorts':resolvedPlacement==='wrap'?'Full Wrap':resolvedPlacement||'';
         const variantChoices=product&&job.status==='completed'&&((product.colors||[]).length>1||(product.sizes||[]).length>1)?`<div class="my-design-variant-select">${designColorPicker(job,product,variant.color,'job-color-choice')}${(product.sizes||[]).length>1?`<label>Size for your bag<select data-job-size="${esc(job.id)}" aria-label="Choose size">${product.sizes.map(size=>`<option value="${esc(size)}" ${size===(variant.size||product.sizes[0])?'selected':''}>${esc(sizeLabel(product,size))}</option>`).join('')}</select></label>`:''}</div>`:'';
         const runAction=job.status==='queued'||(job.status==='failed'&&job.provider_task_id)?`<button type="button" class="btn secondary" data-job-run="${esc(job.id)}">${job.status==='failed'?'Recover image':'Start generation'}</button>`:'';
         const retryAction=job.status==='failed'?`<button type="button" class="btn secondary" data-job-retry="${esc(job.id)}">Edit &amp; retry</button>`:'';
@@ -1746,7 +1747,7 @@
           try{
             const response=await fetch(`/api/vibeya/ai/jobs/${encodeURIComponent(job.id)}`,{credentials:'same-origin',cache:'no-store'}),result=await response.json();
             if(!response.ok||!result.job?.image)throw new Error(result.error||'Could not load this design image.');
-            const generatedArtwork=await optimizeArtworkForCart(result.job.image),cart=await addBackendCartItem({product:job.product_id,color,size,print:job.print_placement,quantity:1,designName:`Custom ${products.find(p=>p.id===job.product_id)?.short||'product'} design`,prompt:job.prompt||'',generatedArtwork});
+            const generatedArtwork=await optimizeArtworkForCart(result.job.image),cart=await addBackendCartItem({product:job.product_id,color,size,print:jobPrintPlacement(job),quantity:1,designName:`Custom ${products.find(p=>p.id===job.product_id)?.short||'product'} design`,prompt:job.prompt||'',generatedArtwork});
             if(cart)window.top.location.assign(marketPath('cart'));
           }catch(error){toast(error.message||'Could not add this design to your bag.');addButton.disabled=false;addButton.textContent='Add to bag';}
           return;
@@ -1862,7 +1863,7 @@
           const detail=await fetch(`/api/vibeya/ai/jobs/${encodeURIComponent(job.id)}`,{credentials:'same-origin',cache:'no-store'}),data=await detail.json();
           if(!detail.ok||!data.job?.image)throw new Error(data.error||'Could not load this design image.');
           const generatedArtwork=await optimizeArtworkForCart(data.job.image);
-          const cart=await addBackendCartItem({product:job.product_id,color,size,print:job.print_placement,quantity:1,designName:`Custom ${product.short||'product'} design`,prompt:job.prompt||'',generatedArtwork});
+          const cart=await addBackendCartItem({product:job.product_id,color,size,print:jobPrintPlacement(job),quantity:1,designName:`Custom ${product.short||'product'} design`,prompt:job.prompt||'',generatedArtwork});
             if(cart)window.top.location.assign(marketPath('cart'));
           else{addButton.disabled=false;addButton.textContent='Add to bag';}
         }catch(error){toast(error.message||'Could not add this design to your bag.');addButton.disabled=false;addButton.textContent='Add to bag';}
@@ -2271,6 +2272,8 @@
    const uniformPromptFor=(prompt)=>`VIBEYA_SELECTED_PRINT_ZONES: ${selectedUniformZones.join(', ')}\n\nOnly these selected zones may receive artwork. This selection overrides any conflicting placement wording in the design brief. Keep every unselected garment area completely plain in the selected base color.\n\n${prompt||''}`;
    const restoreUniformZonesFromPrompt=(prompt)=>{const text=String(prompt||''),match=text.match(/VIBEYA_SELECTED_PRINT_ZONES:\s*([^\r\n]+)/i)||text.match(/CUSTOMER-SELECTED PRINT ZONES[^:]*:\s*([^\r\n]+)/i);if(!match)return;const zones=match[1].split(',').map(id=>id.trim()).filter(id=>uniformPrintZones.some(([zone])=>zone===id));if(zones.length)selectedUniformZones=zones;};
    const printNames={none:'No print',front:'Front Only',back:'Back Only',both:'Front + Back',wrap:'Full Wrap'};
+   const productPrintPlacement=productId=>productId==='sds-63823'?'both':productId==='sds-128646'||productId==='sds-138708'?'wrap':'front';
+   const jobPrintPlacement=job=>job?.product_id==='sds-63823'?'both':job?.print_placement||'front';
    const teeBlankFolders={Black:'black',White:'white',Red:'red',Gray:'gray',LightGray:'light-gray',Cream:'cream',Navy:'navy'};
    const teePrintZones={front:[.129,.289,.380,.605],back:[.624,.291,.874,.609]};
    const teeReferences=Object.fromEntries(Object.entries(teeBlankFolders).map(([color,folder])=>{
@@ -2564,7 +2567,7 @@ const blanket=chosen.id==='sds-97226';
     }
     b=e.target.closest('[data-product]');if(b){openProductById(b.dataset.product,b.dataset.productColor);return;}
     b=e.target.closest('[data-inspo]');if(b){chosenArt=+b.dataset.inspo;hasPreview=true;requestStudio(chosen,inspirations[chosenArt].prompt);return;}
-    b=e.target.closest('[data-studio-product]');if(b){chosen=products.find(p=>p.id===b.dataset.studioProduct);selectedColor=chosen.colors?.[0]||'Black';selectedColorConfirmed=chosen.colors?.length===1;selectedSize=chosen.sizes?.length===1||chosen.id==='vibeya-shower-curtain'?chosen.sizes[0]:'';selectedPrint=chosen.id==='sds-128646'?'wrap':'front';studioViewMode='product';drawProductChoices();drawStudioVariantChoices();syncStudioPromptFields();hasPreview=false;drawPreview();return;}
+    b=e.target.closest('[data-studio-product]');if(b){chosen=products.find(p=>p.id===b.dataset.studioProduct);selectedColor=chosen.colors?.[0]||'Black';selectedColorConfirmed=chosen.colors?.length===1;selectedSize=chosen.sizes?.length===1||chosen.id==='vibeya-shower-curtain'?chosen.sizes[0]:'';selectedPrint=productPrintPlacement(chosen.id);studioViewMode='product';drawProductChoices();drawStudioVariantChoices();syncStudioPromptFields();hasPreview=false;drawPreview();return;}
     b=e.target.closest('[data-example]');if(b){studioActiveInput().value=b.dataset.example;hasPreview=false;drawPreview();return;}
   b=e.target.closest('[data-insert-example]');if(b){const target=$('#studioPrompt');if(chosen.id==='sds-233939'){const examples={'jersey-front':'Jersey Front: Add a bold basketball graphic, court lines, and number 24.','jersey-back':'Jersey Back: Add a coordinated player name and number 24 in the same palette.','shorts':'Shorts: Add matching side-panel artwork and a small basketball detail.'};target.value=selectedUniformZones.map(id=>examples[id]).join('\n\n');}else target.value=guidedExamples[selectedPrint]||guidedExamples.both;hasPreview=false;drawPreview();target.focus();return;}
     b=e.target.closest('[data-add-ref]');if(b){$('#studioFileInput').click();return;}
@@ -2583,8 +2586,8 @@ const blanket=chosen.id==='sds-97226';
 
   $('#detailPrev').addEventListener('click',()=>setGallery(galleryIndex-1));
   $('#detailNext').addEventListener('click',()=>setGallery(galleryIndex+1));
-  $('#detailCustomize').addEventListener('click',()=>{selectedPrint=chosen.id==='sds-128646'?'wrap':'front';syncVariants();syncStudioPromptFields();requestStudio(chosen);});
-  $('#quickPromptForm').addEventListener('submit',e=>{e.preventDefault();let prompt=$('#quickPrompt').value.trim();chosenArt=detectArtwork(prompt);selectedPrint='front';syncVariants();syncStudioPromptFields();hasPreview=false;requestStudio(chosen,prompt);});
+  $('#detailCustomize').addEventListener('click',()=>{selectedPrint=productPrintPlacement(chosen.id);syncVariants();syncStudioPromptFields();requestStudio(chosen);});
+  $('#quickPromptForm').addEventListener('submit',e=>{e.preventDefault();let prompt=$('#quickPrompt').value.trim();chosenArt=detectArtwork(prompt);selectedPrint=productPrintPlacement(chosen.id);syncVariants();syncStudioPromptFields();hasPreview=false;requestStudio(chosen,prompt);});
   $('#generateBtn').addEventListener('click',async()=>{
     // The blanket only supports a single-sided full-surface print. Never route it
     // through the apparel "no print" branch, which requires blank front/back refs.
@@ -2594,10 +2597,10 @@ const blanket=chosen.id==='sds-97226';
     // Prevent a typed print idea from being mistaken for a request to make another blank product.
     // Front Only is the safest default when the user has not selected a placement yet.
     if(selectedPrint==='none'&&($('#studioPrompt').value.trim()||uploadedReferences.length)){
-      selectedPrint=chosen.id==='sds-128646'?'wrap':'front';syncVariants();syncStudioPromptFields();
+      selectedPrint=productPrintPlacement(chosen.id);syncVariants();syncStudioPromptFields();
     }
     if(selectedPrint==='none'&&$('#studioPrompt').value.trim()){
-      selectedPrint='front';syncVariants();syncStudioPromptFields();
+      selectedPrint=productPrintPlacement(chosen.id);syncVariants();syncStudioPromptFields();
     }
     if(!chosen.colors?.includes(selectedColor)||!selectedColorConfirmed){
       toast('Choose a product color before creating your design.');$('#studioColorOptions').scrollIntoView({behavior:'smooth',block:'center'});return;

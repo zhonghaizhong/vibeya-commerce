@@ -20,6 +20,7 @@ const DESIGN_GENERATION_PRODUCT_IDS = new Set([
   "sds-172647",
   "vibeya-shower-curtain",
   "sds-137892",
+  "sds-63823",
   "sds-233939",
   "sds-275844",
   "mg8014061",
@@ -152,9 +153,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isBasketballUniform && Array.isArray(body?.printZones) && !body.printZones.some((zone) => BASKETBALL_PRINT_ZONES.includes(zone as typeof BASKETBALL_PRINT_ZONES[number]))) {
     return res.status(400).json({ error: "Choose at least one valid basketball uniform print area." })
   }
-  const placement = isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement
-  const placementGuideCount = isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
-  const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? 6 : 2 + placementGuideCount + 6
+  const placement = isYogaSet ? "both" : isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement
+  const placementGuideCount = isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isApron ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
+  const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isApron ? 6 : 2 + placementGuideCount + 6
   if (references.length > maximumReferences || references.some((item) => typeof item !== "string") || JSON.stringify(references).length > 300_000 || preserveBaseComposite.length > 150_000 || (preserveBaseComposite && !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(preserveBaseComposite))) {
     return res.status(400).json({ error: "The reference image is too large. Please compress it and try again." })
   }
