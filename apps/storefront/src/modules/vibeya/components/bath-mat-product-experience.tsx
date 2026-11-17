@@ -42,7 +42,9 @@ export default function BathMatProductExperience({
         typeof event.data.hash === "string" &&
         ["#top", "#shop"].includes(event.data.hash)
       ) {
-        window.location.assign(`/${countryCode}${event.data.hash}`)
+        const target = new URL(`/${countryCode}/`, window.location.origin)
+        if (event.data.hash !== "#top") target.hash = event.data.hash
+        window.location.assign(`${target.pathname}${target.search}${target.hash}`)
       }
     }
 

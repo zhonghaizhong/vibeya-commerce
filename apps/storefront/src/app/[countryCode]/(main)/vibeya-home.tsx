@@ -88,7 +88,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
 
     const currentParams = new URLSearchParams(window.location.search)
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "independent-pages-20261117-1")
+    forwardedParams.set("v", "independent-pages-20261117-3")
     forwardedParams.set("country", countryCode.toLowerCase())
     forwardedParams.set("locale", marketLocale)
     if (standaloneProductId) forwardedParams.set("standalone", "1")
@@ -176,14 +176,11 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       if (event.data?.type === "vibeya:change-destination" && typeof event.data.countryCode === "string") {
         const nextCountry = event.data.countryCode.toLowerCase()
         if (!["us", "ca", "jp", "mx"].includes(nextCountry) || nextCountry === countryCode.toLowerCase()) return
-        const currentPath = window.location.pathname.replace(new RegExp(`^/${countryCode.toLowerCase()}(?=/|$)`), "")
         const nextLocale = getMarketDefaultLocale(nextCountry)
-        const search = new URLSearchParams(window.location.search)
-        search.set("locale", nextLocale)
         // Changing the market must not be blocked by a stale cart's locale update.
         void updateLocale(nextLocale)
           .catch(() => undefined)
-          .then(() => updateRegion(nextCountry, `${currentPath}?${search.toString()}${window.location.hash}`))
+          .then(() => updateRegion(nextCountry))
         return
       }
       if (event.data?.type === "vibeya:change-language" && typeof event.data.locale === "string") {
@@ -215,6 +212,28 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
           return
         }
         const incomingHash = event.data.hash
+        if (incomingHash === "#inspiration") {
+          const normalizedCountry = countryCode.toLowerCase()
+          const inspirationPath = normalizedCountry === "us"
+            ? "/vibeya/inspiration/index.html"
+            : `/${normalizedCountry}/inspiration/`
+          const target = new URL(inspirationPath, window.location.origin)
+          const locale = typeof event.data.locale === "string" ? event.data.locale : marketLocale
+          if (locale) target.searchParams.set("locale", locale)
+          window.location.assign(`${target.pathname}${target.search}`)
+          return
+        }
+        if (
+          standaloneProductId &&
+          ["#top", "#shop", "#create", "#how-it-works", "#my-designs"].includes(incomingHash)
+        ) {
+          const target = new URL(`/${countryCode.toLowerCase()}/`, window.location.origin)
+          const locale = new URLSearchParams(window.location.search).get("locale")
+          if (locale) target.searchParams.set("locale", locale)
+          if (incomingHash !== "#top") target.hash = incomingHash
+          window.location.assign(`${target.pathname}${target.search}${target.hash}`)
+          return
+        }
         if (incomingHash && incomingHash !== window.location.hash) {
           window.history.pushState(null, "", incomingHash)
         }

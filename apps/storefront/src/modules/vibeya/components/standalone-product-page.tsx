@@ -112,7 +112,9 @@ export default function StandaloneProductPage({
         }
 
         if (["#top", "#shop", "#create", "#how-it-works", "#my-designs"].includes(event.data.hash)) {
-          window.location.assign(`/${countryCode}${event.data.hash}`)
+          const target = new URL(`/${countryCode}/`, window.location.origin)
+          if (event.data.hash !== "#top") target.hash = event.data.hash
+          window.location.assign(`${target.pathname}${target.search}${target.hash}`)
           return
         }
       }
