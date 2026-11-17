@@ -60,7 +60,9 @@ export default function VibeyaProductExperience({
         typeof event.data.hash === "string" &&
         ["#top", "#shop"].includes(event.data.hash)
       ) {
-        window.location.assign(`/${countryCode}${event.data.hash}`)
+        const target = new URL(`/${countryCode}/`, window.location.origin)
+        if (event.data.hash !== "#top") target.hash = event.data.hash
+        window.location.assign(`${target.pathname}${target.search}${target.hash}`)
       }
     }
 
@@ -80,7 +82,7 @@ export default function VibeyaProductExperience({
     <div className="vibeya-product-experience">
       <iframe
         ref={frameRef}
-        src={`/vibeya/index.html?standalone=1&v=independent-pages-20261117-1#product-${encodeURIComponent(productId)}${colorQuery}`}
+        src={`/vibeya/index.html?standalone=1&v=independent-pages-20261117-2#product-${encodeURIComponent(productId)}${colorQuery}`}
         title="VIBEYA custom product details and design studio"
       />
       <style>{`

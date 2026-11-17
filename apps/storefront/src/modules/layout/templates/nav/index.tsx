@@ -52,14 +52,9 @@ export default function Nav({ countryCode, currentLocale }: NavProps) {
   const closeMenu = () => setMenuOpen(false)
   const changeDestination = (nextCountry: string) => {
     if (nextCountry === normalizedCountry) return
-    const currentPath = pathname.replace(new RegExp(`^/${normalizedCountry}(?=/|$)`), "")
-    const params = new URLSearchParams(searchParams.toString())
-    params.set("locale", getMarketDefaultLocale(nextCountry))
-    const query = params.toString()
-    const hash = typeof window === "undefined" ? "" : window.location.hash
     startTransition(async () => {
       await updateLocale(getMarketDefaultLocale(nextCountry)).catch(() => undefined)
-      await updateRegion(nextCountry, `${currentPath}${query ? `?${query}` : ""}${hash}`)
+      await updateRegion(nextCountry)
     })
   }
   const changeLanguage = (locale: string) => {

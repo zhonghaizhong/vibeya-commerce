@@ -42,7 +42,9 @@ export default function BathMatProductExperience({
         typeof event.data.hash === "string" &&
         ["#top", "#shop"].includes(event.data.hash)
       ) {
-        window.location.assign(`/${countryCode}${event.data.hash}`)
+        const target = new URL(`/${countryCode}/`, window.location.origin)
+        if (event.data.hash !== "#top") target.hash = event.data.hash
+        window.location.assign(`${target.pathname}${target.search}${target.hash}`)
       }
     }
 
@@ -54,7 +56,7 @@ export default function BathMatProductExperience({
     <div className="bath-mat-product-experience">
       <iframe
         ref={frameRef}
-        src="/vibeya/index.html?standalone=1&v=independent-pages-20261117-1#product-sds-138708?color=White"
+        src="/vibeya/index.html?standalone=1&v=independent-pages-20261117-2#product-sds-138708?color=White"
         title="Custom 3D Bath Mat product details and design studio"
       />
       <style>{`

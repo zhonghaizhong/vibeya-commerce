@@ -1174,6 +1174,11 @@
   applyNavigationLocale(navLanguage?.value||'en-US');
   const withMarketContext=href=>{const url=new URL(href,location.href);if(url.pathname.includes('/vibeya/inspiration/')){url.searchParams.set('country',marketCountryCode().toLowerCase());url.searchParams.set('locale',navLanguage?.value||marketDefaultLocale);}return url.pathname+url.search+url.hash;};
   document.querySelectorAll('a[href*="inspiration/index.html"]').forEach(link=>link.href=withMarketContext(link.href));
+  $('#nav a[data-menu-target="inspiration"]')?.addEventListener('click',event=>{
+    if(window.parent===window)return;
+    event.preventDefault();
+    window.parent.postMessage({type:'vibeya:route',hash:'#inspiration',locale:navLanguage?.value||marketDefaultLocale},location.origin);
+  });
   navDestination?.addEventListener('change',()=>{
     const countryCode=navDestination.value.toLowerCase();
     if(window.parent!==window)window.parent.postMessage({type:'vibeya:change-destination',countryCode},location.origin);

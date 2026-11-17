@@ -101,12 +101,20 @@ export default function StandaloneProductPage({
         }
 
         if (event.data.hash === "#inspiration") {
-          window.location.assign("/vibeya/inspiration/index.html")
+          const locale = typeof event.data.locale === "string" ? event.data.locale : undefined
+          const inspirationPath = countryCode === "us"
+            ? "/vibeya/inspiration/index.html"
+            : `/${countryCode}/inspiration/`
+          const target = new URL(inspirationPath, window.location.origin)
+          if (locale) target.searchParams.set("locale", locale)
+          window.location.assign(`${target.pathname}${target.search}`)
           return
         }
 
         if (["#top", "#shop", "#create", "#how-it-works", "#my-designs"].includes(event.data.hash)) {
-          window.location.assign(`/${countryCode}${event.data.hash}`)
+          const target = new URL(`/${countryCode}/`, window.location.origin)
+          if (event.data.hash !== "#top") target.hash = event.data.hash
+          window.location.assign(`${target.pathname}${target.search}${target.hash}`)
           return
         }
       }
