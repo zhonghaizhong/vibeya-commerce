@@ -142,7 +142,7 @@ export default async function seedVibeyaCustomYogaSet({ container }: ExecArgs) {
     if (!productId) throw new Error("The yoga set product was not returned after creation.")
   } else {
     await updateProductsWorkflow(container).run({
-      input: { products: [{ id: productId, ...productData }] },
+      input: { products: [{ id: productId, ...productData, sales_channels: [{ id: salesChannel.id }] }] },
     })
     const { data: currentProducts } = await query.graph({
       entity: "product",
