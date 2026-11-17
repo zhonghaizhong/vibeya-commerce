@@ -1131,7 +1131,7 @@
         catalogOnly:true,
         name:'VIBEYA Custom Washed Denim Baseball Cap',short:'Custom washed denim baseball cap',price:'$14.99 USD',
         category:'Custom Hats',supplier:'SDSDIY',supplierId:'96763',supplierUrl:'https://www.sdsdiy.com/portal/detail/96763',
-        asset:'assets/products/mg8012002/black/01-carousel.webp',colors:['Black','Khaki','Gray'],sizes:['One Size'],
+        asset:'assets/products/mg8012002/black/01-carousel.webp',image:'assets/products/mg8012002/black/01-carousel.webp',colors:['Black','Khaki','Gray'],sizes:['One Size'],
         colorOptionLabel:'Base color',sizeOptionLabel:'Fit',variantSummary:'Create or upload a front-crown print · 3 colors · One Size'
       }
    ];
@@ -1983,6 +1983,7 @@
           if(!existing)catalogProducts.push(product);
           continue;
         }
+        if(local.catalogOnly&&remote.image)local.image=remote.image;
         if(typeof remote.price==='number'&&Number.isFinite(remote.price)){const currency=(remote.currency_code||'usd').toUpperCase();local.price=new Intl.NumberFormat('en-US',{style:'currency',currency}).format(remote.price)+' '+currency;if(local.id==='sds-63823'){local.marketPrice=remote.price;local.marketCurrency=currency;}}
         if(remote.market_images?.length)local.marketGallery=remote.market_images;
         if(remote.size_prices)local.sizePrices=remote.size_prices;
