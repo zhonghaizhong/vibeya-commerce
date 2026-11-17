@@ -28,6 +28,7 @@ const catalogColorHex: Record<string, string> = {
   "sapphire blue": "#315ad8",
   yellow: "#ffe100",
   "pure yellow": "#ffe100",
+  khaki: "#aa936d",
   gray: "#77777b",
   grey: "#77777b",
   "heather gray": "#77777b",
