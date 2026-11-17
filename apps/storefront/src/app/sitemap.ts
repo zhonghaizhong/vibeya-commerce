@@ -22,12 +22,14 @@ const INDEXABLE_CONTENT_PATHS = [
   "/vibeya/inspiration/deadpan-penguin-custom-tankini.html",
   "/vibeya/inspiration/custom-kids-basketball-jersey-set.html",
   "/vibeya/inspiration/sauce-boss-custom-cooking-apron.html",
+  "/vibeya/inspiration/stars-stripes-custom-denim-baseball-cap.html",
+  "/vibeya/inspiration/raccoon-bar-crew-custom-metal-wall-sign.html",
 ]
 const YOGA_INSPIRATION_PATHS = {
-  "en-US": "/us/inspiration/animal-yoga-set.html",
-  "en-CA": "/ca/inspiration/animal-yoga-set.html",
-  "es-MX": "/mx/inspiration/animal-yoga-set.html",
-  "ja-JP": "/jp/inspiration/animal-yoga-set.html",
+  "en-US": "/vibeya/inspiration/animal-yoga-set.html",
+  "en-CA": "/ca/inspiration/animal-yoga-set",
+  "es-MX": "/mx/inspiration/animal-yoga-set",
+  "ja-JP": "/jp/inspiration/animal-yoga-set",
 } as const
 const PAGE_SIZE = 200
 
@@ -131,7 +133,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return [
       ...STATIC_PATHS.map((path) => ({
-        url: `${base}${path}`,
+        url: `${base}${path || "/"}`,
         alternates: { languages: alternateUrls(path, countryCodes) },
       })),
       ...productEntries,
@@ -140,9 +142,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ]
   })
 
-  // These editorial URLs currently exist only as the U.S. English versions.
-  // Do not imply that translated/localized inspiration pages exist for other
-  // markets until those pages have their own localized content and canonicals.
+  // The main inspiration catalog and stories are U.S. English. Yoga Buddies
+  // has separate localized story pages and is listed with its market URLs below.
   return [
     ...localizedEntries,
     ...(countryCodes.includes("us")
@@ -164,6 +165,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           "x-default": `${origin}${YOGA_INSPIRATION_PATHS["en-US"]}`,
         },
       },
+    })),
+    ...countryCodes.filter((countryCode) => countryCode !== "us").map((countryCode) => ({
+      url: `${origin}/${countryCode}/inspiration/`,
     })),
   ]
 }

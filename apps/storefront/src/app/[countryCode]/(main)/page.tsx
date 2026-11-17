@@ -74,7 +74,7 @@ export default async function Home({
   const customer = await retrieveCustomer().catch(() => null)
   const locale = getMarketLocale(countryCode, search.locale)
   const origin = await getSiteOrigin()
-  const pageUrl = `${origin}/${countryCode}`
+  const pageUrl = `${origin}/${countryCode}/`
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [

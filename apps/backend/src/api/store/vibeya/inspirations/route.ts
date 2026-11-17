@@ -7,10 +7,21 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const { data } = await query.graph({ entity: "store", fields: ["metadata"] })
   const metadata = data[0]?.metadata as Record<string, unknown> | undefined
   const inspirations = includeReleasedDefaultInspirations(metadata?.[VIBEYA_INSPIRATIONS_METADATA_KEY] ?? DEFAULT_VIBEYA_INSPIRATIONS)
+  const canonicalInspirations = inspirations.map((entry) => entry.id === "yoga-animals-set"
+    ? {
+        ...entry,
+        marketUrls: {
+          us: "/vibeya/inspiration/animal-yoga-set.html",
+          ca: "/ca/inspiration/animal-yoga-set",
+          mx: "/mx/inspiration/animal-yoga-set",
+          jp: "/jp/inspiration/animal-yoga-set",
+        },
+      }
+    : entry)
   const countryCode = String(req.query.country_code ?? "us").toLowerCase()
-  const matchesCountry = (entry: typeof inspirations[number]) => entry.countryCodes?.includes("*") || entry.countryCodes?.includes(countryCode)
+  const matchesCountry = (entry: typeof canonicalInspirations[number]) => entry.countryCodes?.includes("*") || entry.countryCodes?.includes(countryCode)
   return res.json({
-    inspirations: inspirations.filter((entry) => entry.published && matchesCountry(entry)),
-    excluded_ids: inspirations.filter((entry) => !entry.published || !matchesCountry(entry)).map((entry) => entry.id),
+    inspirations: canonicalInspirations.filter((entry) => entry.published && matchesCountry(entry)),
+    excluded_ids: canonicalInspirations.filter((entry) => !entry.published || !matchesCountry(entry)).map((entry) => entry.id),
   })
 }

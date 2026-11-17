@@ -13,6 +13,7 @@ const S3_PATHNAME = process.env.MEDUSA_CLOUD_S3_PATHNAME
  */
 const nextConfig = {
   reactStrictMode: true,
+  skipTrailingSlashRedirect: true,
   async headers() {
     return [
       {
@@ -22,20 +23,6 @@ const nextConfig = {
       {
         source: "/:countryCode/products/:handle",
         headers: [{ key: "Vary", value: "Accept" }],
-      },
-    ]
-  },
-  async redirects() {
-    return [
-      {
-        source: "/:countryCode/vibeya/inspiration",
-        destination: "/vibeya/inspiration/index.html",
-        permanent: true,
-      },
-      {
-        source: "/:countryCode/vibeya/inspiration/index.html",
-        destination: "/vibeya/inspiration/index.html",
-        permanent: true,
       },
     ]
   },

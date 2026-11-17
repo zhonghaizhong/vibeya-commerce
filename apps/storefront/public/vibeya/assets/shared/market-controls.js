@@ -8,7 +8,8 @@
   const countryCodes = Object.keys(markets)
   const params = new URLSearchParams(window.location.search)
   const localeFromUrl = params.get("locale")
-  let country = (params.get("country") || countryCodes.find(code => (markets[code].locales || []).includes(localeFromUrl)) || "us").toLowerCase()
+  const pathCountry = window.location.pathname.match(/^\/(ca|mx|jp)\/inspiration\//i)?.[1]
+  let country = (pathCountry || params.get("country") || countryCodes.find(code => (markets[code].locales || []).includes(localeFromUrl)) || "us").toLowerCase()
   if (!markets[country]) country = "us"
   const locales = markets[country].locales || [markets[country].defaultLocale]
   let locale = locales.includes(params.get("locale")) ? params.get("locale") : markets[country].defaultLocale
@@ -38,6 +39,10 @@
 
   const navigateWith = (nextCountry, nextLocale) => {
     const next = new URL(window.location.href)
+    if (/^\/(?:us|ca|mx|jp)\/inspiration\//i.test(next.pathname)) {
+      next.pathname = nextCountry === "us" ? "/vibeya/inspiration/index.html" : `/${nextCountry}/inspiration/`
+      next.hash = ""
+    }
     next.searchParams.set("country", nextCountry)
     next.searchParams.set("locale", nextLocale)
     window.location.assign(next.href)

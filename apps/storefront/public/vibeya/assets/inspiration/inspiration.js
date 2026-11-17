@@ -3,7 +3,8 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const translations=window.VIBEYA_MARKET_TRANSLATIONS;
   const bundledCatalog=Array.isArray(window.VIBEYA_INSPIRATION_CATALOG)?window.VIBEYA_INSPIRATION_CATALOG:[];
   const marketParams=new URLSearchParams(location.search);
-  const marketCountry=(marketParams.get('country')||'us').toLowerCase();
+  const pathCountry=location.pathname.match(/^\/(ca|mx|jp)\/inspiration\//i)?.[1]?.toLowerCase();
+  const marketCountry=(pathCountry||marketParams.get('country')||'us').toLowerCase();
   const marketDefaults=Object.fromEntries(Object.entries(translations.markets).map(([market,config])=>[market,config.defaultLocale]));
   const marketLocales=Object.fromEntries(Object.entries(translations.markets).map(([market,config])=>[market,config.locales]));
   const requestedLocale=marketParams.get('locale');
@@ -48,7 +49,9 @@ document.addEventListener('DOMContentLoaded',async()=>{
     if(!marketCatalogLoaded||!entry||excludedIds.has(entry.id)||entry.published===false){section.hidden=true;section.dataset.destinationUnavailable='true';return;}
     if(entry.summary){const description=section.querySelector('.featured-text > p');if(description)description.textContent=entry.summary;}
     if(localizedMarket&&entry.title){const heading=section.querySelector('.featured-text h2');if(heading)heading.textContent=entry.title;const chips=section.querySelector('.featured-text .chips');if(chips)chips.replaceChildren(...(entry.tags||[]).map(tag=>{const chip=document.createElement('span');chip.className='chip';chip.textContent=tag;return chip;}));const rows=section.querySelectorAll('.featured-text .detail-row');for(const [index,key] of ['product','pattern','style'].entries()){const row=rows[index];if(!row)continue;const strong=row.querySelector('strong');const value=row.querySelector('span');if(strong)strong.textContent=marketPhrase(key[0].toUpperCase()+key.slice(1));if(value)value.textContent=storyLabels[key]?.[entry[key]]||entry[key]||'';}const spotlight=section.querySelector('.featured-text .pill-label');if(spotlight)spotlight.textContent=marketPhrase('DESIGN SPOTLIGHT');const action=section.querySelector('.featured-text .actions a');if(action){action.textContent=marketPhrase('Read the Design Story →');action.href=marketContext(`/vibeya/inspiration/story.html?inspiration=${encodeURIComponent(entry.id)}`);}}
-    if(link&&entry.marketUrls?.[marketCountry])link.href=entry.marketUrls[marketCountry];
+    if(entry.id==='yoga-animals-set'){
+      link.href=marketCountry==='us'?'/vibeya/inspiration/animal-yoga-set.html':`/${marketCountry}/inspiration/animal-yoga-set`;
+    }else if(link&&entry.marketUrls?.[marketCountry])link.href=entry.marketUrls[marketCountry];
     if((localizedMarket||entry.useManagedImage)&&entry.image){const image=section.querySelector('.art-card img');if(image){image.src=/^(https?:)?\//.test(entry.image)?new URL(entry.image,location.origin).href:`../assets/inspiration/${encodeURIComponent(entry.image)}`;image.alt=`${entry.title} inspiration`;}}
   });
   document.querySelectorAll('.inspiration-feature-grid .art-card-full img').forEach(image=>{

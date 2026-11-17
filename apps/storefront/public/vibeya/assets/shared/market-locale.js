@@ -3,6 +3,8 @@
   const defaults = Object.fromEntries(Object.entries(marketCatalog.markets).map(([market, config]) => [market, config.defaultLocale]))
   const supportedLocales = Object.fromEntries(Object.entries(marketCatalog.markets).map(([market, config]) => [market, config.locales]))
   const readCountry = () => {
+    const pathCountry = location.pathname.match(/^\/(ca|mx|jp)\/inspiration\//i)?.[1]
+    if (pathCountry) return pathCountry.toLowerCase()
     const queryCountry = new URLSearchParams(location.search).get("country")
     if (queryCountry) return queryCountry.toLowerCase()
     try { return window.parent.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i)?.[1]?.toLowerCase() || "us" } catch { return "us" }

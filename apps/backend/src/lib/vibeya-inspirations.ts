@@ -48,8 +48,8 @@ export const DEFAULT_VIBEYA_INSPIRATIONS: VibeyaInspiration[] = [
     tags: ["custom-yoga-set", "womens-yoga-set", "animal-print-activewear", "yoga-sports-bra-and-shorts"],
     published: true, homeFeatured: true, countryCodes: ["us", "ca", "mx", "jp"],
     marketUrls: {
-      us: "/us/inspiration/animal-yoga-set.html", ca: "/ca/inspiration/animal-yoga-set.html",
-      mx: "/mx/inspiration/animal-yoga-set.html", jp: "/jp/inspiration/animal-yoga-set.html",
+      us: "/vibeya/inspiration/animal-yoga-set.html", ca: "/ca/inspiration/animal-yoga-set",
+      mx: "/mx/inspiration/animal-yoga-set", jp: "/jp/inspiration/animal-yoga-set",
     },
     translations: {
       "es-MX": {

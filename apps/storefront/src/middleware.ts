@@ -148,13 +148,65 @@ async function getCountryCode(
  * Middleware to handle region selection and onboarding status.
  */
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
   const normalizedPath = request.nextUrl.pathname.replace(/\/+$/, "") || "/"
+  const redirectToPath = (path: string) => {
+    const destination = new URL(request.url)
+    destination.pathname = path
+    return NextResponse.redirect(destination, 308)
+  }
+  const rewriteToPath = (path: string) => {
+    const destination = new URL(request.url)
+    destination.pathname = path
+    return NextResponse.rewrite(destination)
+  }
+
+  const marketHome = pathname.match(/^\/(us|ca|mx|jp)\/?$/i)
+  if (marketHome && !pathname.endsWith("/")) {
+    return redirectToPath(`/${marketHome[1].toLowerCase()}/`)
+  }
+
+  const localInspirationIndex = pathname.match(/^\/(ca|mx|jp)\/inspiration\/?$/i)
+  if (localInspirationIndex) {
+    const countryCode = localInspirationIndex[1].toLowerCase()
+    if (!pathname.endsWith("/")) {
+      return redirectToPath(`/${countryCode}/inspiration/`)
+    }
+    return rewriteToPath(`/${countryCode}/inspiration/index.html`)
+  }
+
+  const legacyLocalizedInspiration = normalizedPath.match(/^\/(ca|mx|jp)\/vibeya\/inspiration(?:\/index\.html)?$/i)
+  if (legacyLocalizedInspiration) {
+    return redirectToPath(`/${legacyLocalizedInspiration[1].toLowerCase()}/inspiration/`)
+  }
+
+  const legacyUsInspiration = normalizedPath.match(/^\/us\/inspiration(?:\/([^/]+))?$/i)
+  if (legacyUsInspiration) {
+    const destination = legacyUsInspiration[1]
+      ? `/vibeya/inspiration/${legacyUsInspiration[1]}`
+      : "/vibeya/inspiration/index.html"
+    return redirectToPath(destination)
+  }
+
+  const legacyLocalizedYogaStory = normalizedPath.match(/^\/(ca|mx|jp)\/inspiration\/animal-yoga-set\.html$/i)
+  if (legacyLocalizedYogaStory) {
+    return redirectToPath(`/${legacyLocalizedYogaStory[1].toLowerCase()}/inspiration/animal-yoga-set`)
+  }
+
+  const localizedYogaStory = normalizedPath.match(/^\/(ca|mx|jp)\/inspiration\/animal-yoga-set$/i)
+  if (localizedYogaStory) {
+    const countryCode = localizedYogaStory[1].toLowerCase()
+    return rewriteToPath(`/${countryCode}/inspiration/animal-yoga-set.html`)
+  }
+
+  if (pathname !== "/" && pathname.endsWith("/") && !marketHome) {
+    return redirectToPath(pathname.replace(/\/+$/, ""))
+  }
+
   const cleanInspirationPath = /^\/(?:[a-z]{2}\/)?vibeya\/inspiration$/i.test(normalizedPath)
   const localizedIndexPath = /^\/[a-z]{2}\/vibeya\/inspiration\/index\.html$/i.test(normalizedPath)
   if (cleanInspirationPath || localizedIndexPath) {
-    const destination = new URL("/vibeya/inspiration/index.html", request.url)
-    destination.search = request.nextUrl.search
-    return NextResponse.redirect(destination, 308)
+    return redirectToPath("/vibeya/inspiration/index.html")
   }
 
   if (request.nextUrl.pathname.includes(".")) {
@@ -201,6 +253,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
+  skipTrailingSlashRedirect: true,
   matcher: [
     "/((?!api|ucp|buy|_next/static|_next/image|favicon.ico|images|assets|png|svg|jpg|jpeg|gif|webp).*)",
   ],

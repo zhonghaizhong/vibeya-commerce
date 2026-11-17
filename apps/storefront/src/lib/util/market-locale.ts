@@ -36,7 +36,8 @@ export function getMarketLocaleUrl(
   path: string,
   locale: string
 ) {
-  const base = `${origin.replace(/\/$/, "")}/${countryCode.toLowerCase()}${path}`
+  const normalizedPath = path || "/"
+  const base = `${origin.replace(/\/$/, "")}/${countryCode.toLowerCase()}${normalizedPath}`
   if (locale === getMarketDefaultLocale(countryCode)) {
     return base
   }
