@@ -27,6 +27,22 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
   const standaloneHash = standaloneProductId
     ? `#product-${standaloneProductId}?color=${encodeURIComponent(standaloneColor || "Black")}${standaloneSize ? `&size=${encodeURIComponent(standaloneSize)}` : ""}`
     : standaloneRoute || "#top"
+  const initialFrameParams = new URLSearchParams({
+    v: "anchor-free-navigation-20261118-1",
+    country: countryCode.toLowerCase(),
+    locale: marketLocale,
+  })
+  if (standaloneProductId || standaloneRoute) initialFrameParams.set("standalone", "1")
+  if (listing) {
+    initialFrameParams.set("listing", listing.slug)
+    initialFrameParams.set("handles", listing.handles.join(","))
+  }
+  const initialFrameHash = standaloneProductId || standaloneRoute
+    ? standaloneHash
+    : listing
+      ? "#shop"
+      : ""
+  const initialFrameSrc = `/vibeya/index.html?${initialFrameParams.toString()}${initialFrameHash}`
   const [authOpen, setAuthOpen] = useState(false)
   const [authRedirectTo, setAuthRedirectTo] = useState<string>()
   const [studioLayer, setStudioLayer] = useState(false)
@@ -367,7 +383,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       <iframe
         ref={frameRef}
         className="vibeya-theme-frame"
-        src={`/vibeya/index.html?v=anchor-free-navigation-20261118-1&country=${encodeURIComponent(countryCode.toLowerCase())}&locale=${encodeURIComponent(marketLocale)}${standaloneProductId || standaloneRoute ? `&standalone=1${standaloneHash}` : ""}`}
+        src={initialFrameSrc}
         title="VIBEYA storefront"
         onLoad={addAccountLink}
         style={{
