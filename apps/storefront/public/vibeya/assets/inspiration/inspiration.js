@@ -79,6 +79,8 @@ document.addEventListener('DOMContentLoaded',async()=>{
   document.querySelector('header a[aria-label="Open shopping bag"]')?.setAttribute('aria-label',navLabels.openBag);
   const marketContext=href=>{const url=new URL(href,location.href);url.searchParams.set('country',marketCountry);url.searchParams.set('locale',marketLocale);return url.href;};
   let catalog=[];let excludedIds=new Set();let marketCatalogLoaded=false;
+  const normalizeInspirationSlug=value=>String(value||'').split('/').pop().replace(/\.html?$/i,'').toLowerCase();
+  const findInspirationBySlug=slug=>catalog.find(item=>normalizeInspirationSlug(item.slug)===normalizeInspirationSlug(slug));
   try{const response=await fetch(`/api/vibeya/inspirations?country_code=${encodeURIComponent(marketCountry)}`,{credentials:'same-origin',cache:'no-store'});if(!response.ok)throw new Error('Destination inspiration catalog unavailable');const data=await response.json();if(Array.isArray(data.inspirations)){const managed=data.inspirations;excludedIds=new Set(Array.isArray(data.excluded_ids)?data.excluded_ids:[]);catalog=[...managed.map(entry=>({...(bundledCatalog.find(item=>item.id===entry.id)||{}),...entry})),...managed.filter(entry=>!bundledCatalog.some(item=>item.id===entry.id))];if(marketLocale==='ja-JP'||marketLocale==='es-MX')catalog=catalog.filter(entry=>{const localized=entry.translations?.[marketLocale];return localized?.title&&localized?.summary&&localized?.articleBody&&localized?.tags?.length&&localized?.image&&localized?.cardImage;}).map(entry=>({...entry,...entry.translations[marketLocale]}));marketCatalogLoaded=true;}}catch(error){console.warn('Could not load destination inspirations',error);}
   const restrictMarketFilter=(fieldId,key)=>{
     const select=document.getElementById(fieldId);if(!select)return;
@@ -101,7 +103,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
     const link=section.querySelector('.actions a[href]');
     if(!link)return;
     const slug=new URL(link.href,location.href).pathname.split('/').pop();
-    const entry=catalog.find(item=>item.slug===slug);
+    const entry=findInspirationBySlug(slug);
     if(!marketCatalogLoaded||!entry||excludedIds.has(entry.id)||entry.published===false){section.hidden=true;section.dataset.destinationUnavailable='true';return;}
     if(entry.summary){const description=section.querySelector('.featured-text > p');if(description)description.textContent=entry.summary;}
     if(localizedMarket&&entry.title){const heading=section.querySelector('.featured-text h2');if(heading)heading.textContent=entry.title;const chips=section.querySelector('.featured-text .chips');if(chips)chips.replaceChildren(...(entry.tags||[]).map(tag=>{const chip=document.createElement('span');chip.className='chip';chip.textContent=tag;return chip;}));const rows=section.querySelectorAll('.featured-text .detail-row');for(const [index,key] of ['product','pattern','style'].entries()){const row=rows[index];if(!row)continue;const strong=row.querySelector('strong');const value=row.querySelector('span');if(strong)strong.textContent=marketPhrase(key[0].toUpperCase()+key.slice(1));if(value)value.textContent=storyLabels[key]?.[entry[key]]||entry[key]||'';}const spotlight=section.querySelector('.featured-text .pill-label');if(spotlight)spotlight.textContent=marketPhrase('DESIGN SPOTLIGHT');const action=section.querySelector('.featured-text .actions a');if(action){action.textContent=marketPhrase('Read the Design Story →');action.href=marketContext(`/vibeya/inspiration/story.html?inspiration=${encodeURIComponent(entry.id)}`);}}
@@ -235,7 +237,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
           if(!image||!link)return [];
           const href=new URL(link.getAttribute('href'),inspirationUrl);
           const slug=href.pathname.split('/').pop()||'';
-          const entry=catalog.find(item=>item.slug===slug);
+          const entry=findInspirationBySlug(slug);
           if(!entry||entry.published===false||entry.id===current.id)return [];
           href.searchParams.set('country',marketCountry);
           href.searchParams.set('locale',marketLocale);
