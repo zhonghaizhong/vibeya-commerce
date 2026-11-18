@@ -23,6 +23,19 @@ type Customer = {
 }
 
 type Summary = { total: number; registered: number; withCart: number; ordered: number; paid: number }
+type CartItem = {
+  id: string
+  title: string
+  variant: string
+  thumbnail: string | null
+  quantity: number
+  design_name: string
+  design_prompt: string
+  print_placement: string
+  preview: string | null
+  inspiration_id: string
+}
+type CartDetail = { id: string; email: string; created_at: string; updated_at: string; items: CartItem[] }
 type Segment = "all" | "registered" | "cart" | "ordered" | "paid"
 
 const tabs: { id: Segment; label: string; count: (summary: Summary) => number }[] = [
@@ -50,6 +63,10 @@ const CustomerSegmentsPage = () => {
   const [editingDesignCustomerId, setEditingDesignCustomerId] = useState("")
   const [designRemainingDraft, setDesignRemainingDraft] = useState("")
   const [savingDesignCustomerId, setSavingDesignCustomerId] = useState("")
+  const [expandedCartCustomerId, setExpandedCartCustomerId] = useState("")
+  const [cartDetails, setCartDetails] = useState<Record<string, CartDetail[]>>({})
+  const [loadingCartCustomerId, setLoadingCartCustomerId] = useState("")
+  const [cartDetailErrors, setCartDetailErrors] = useState<Record<string, string>>({})
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
@@ -123,6 +140,31 @@ const CustomerSegmentsPage = () => {
       setError(caught instanceof Error ? caught.message : "保存设计次数失败。")
     } finally {
       setSavingDesignCustomerId("")
+    }
+  }
+
+  const toggleCartDetails = async (customer: Customer) => {
+    if (expandedCartCustomerId === customer.id) {
+      setExpandedCartCustomerId("")
+      return
+    }
+    setExpandedCartCustomerId(customer.id)
+    if (cartDetails[customer.id]) return
+
+    setLoadingCartCustomerId(customer.id)
+    setCartDetailErrors((current) => ({ ...current, [customer.id]: "" }))
+    try {
+      const params = new URLSearchParams()
+      if (!customer.id.startsWith("guest:")) params.set("customerId", customer.id)
+      if (customer.email) params.set("email", customer.email)
+      const response = await fetch(`/admin/vibeya/customer-cart?${params.toString()}`, { credentials: "same-origin", cache: "no-store" })
+      const data = await response.json() as { error?: string; carts?: CartDetail[] }
+      if (!response.ok) throw new Error(data.error || "读取购物车设计失败。")
+      setCartDetails((current) => ({ ...current, [customer.id]: data.carts ?? [] }))
+    } catch (caught) {
+      setCartDetailErrors((current) => ({ ...current, [customer.id]: caught instanceof Error ? caught.message : "读取购物车设计失败。" }))
+    } finally {
+      setLoadingCartCustomerId("")
     }
   }
 
@@ -216,7 +258,32 @@ const CustomerSegmentsPage = () => {
                         {customer.registered_at && <div className="mt-1 text-xs text-ui-fg-subtle">{formatDate(customer.registered_at)}</div>}
                       </td>
                       <td className="px-4 py-3">
-                        {customer.has_active_cart ? <><div>{customer.cart_item_count} 件商品</div><div className="mt-0.5 text-xs text-ui-fg-subtle">更新于 {formatDate(customer.cart_updated_at)}</div></> : <span className="text-ui-fg-subtle">无未结账商品</span>}
+                        {customer.has_active_cart ? <>
+                          <div>{customer.cart_item_count} 件商品</div>
+                          <div className="mt-0.5 text-xs text-ui-fg-subtle">更新于 {formatDate(customer.cart_updated_at)}</div>
+                          <button type="button" onClick={() => void toggleCartDetails(customer)} className="mt-2 rounded-md border border-ui-border-base px-2 py-1 text-xs font-medium text-ui-fg-base hover:bg-ui-bg-subtle">
+                            {loadingCartCustomerId === customer.id ? "读取中…" : expandedCartCustomerId === customer.id ? "收起设计详情" : "查看购物车设计"}
+                          </button>
+                          {expandedCartCustomerId === customer.id && <div className="mt-2 min-w-[280px] max-w-[420px] space-y-3 rounded-md border border-ui-border-base bg-ui-bg-subtle p-3">
+                            {cartDetailErrors[customer.id] ? <Text size="small" className="text-ui-fg-error">{cartDetailErrors[customer.id]}</Text>
+                              : loadingCartCustomerId === customer.id ? <Text size="small">正在读取购物车设计…</Text>
+                                : (cartDetails[customer.id] ?? []).length === 0 ? <Text size="small" className="text-ui-fg-subtle">没有找到仍未结账的购物车商品。</Text>
+                                  : cartDetails[customer.id].map((cart) => <div key={cart.id} className="space-y-2 border-b border-ui-border-base pb-3 last:border-0 last:pb-0">
+                                    <Text size="small" className="text-ui-fg-subtle">购物车更新于 {formatDate(cart.updated_at)}</Text>
+                                    {cart.items.map((item) => <div key={item.id} className="flex gap-3 rounded-md bg-ui-bg-base p-2">
+                                      {(item.preview || item.thumbnail) && <img src={item.preview || item.thumbnail || undefined} alt="设计预览" className="h-20 w-16 shrink-0 rounded border border-ui-border-base bg-ui-bg-subtle object-contain" />}
+                                      <div className="min-w-0 space-y-1">
+                                        <div className="font-medium text-ui-fg-base">{item.title}</div>
+                                        {item.variant && <div className="text-xs text-ui-fg-subtle">{item.variant}</div>}
+                                        <div className="text-xs text-ui-fg-subtle">数量：{item.quantity}{item.print_placement ? ` · 印花位置：${item.print_placement}` : ""}</div>
+                                        {item.design_name && <div className="text-xs">设计名称：{item.design_name}</div>}
+                                        {item.design_prompt && <div className="whitespace-pre-wrap break-words text-xs text-ui-fg-subtle">设计描述：{item.design_prompt}</div>}
+                                        {item.inspiration_id && <div className="text-xs text-ui-fg-subtle">灵感编号：{item.inspiration_id}</div>}
+                                      </div>
+                                    </div>)}
+                                  </div>)}
+                          </div>}
+                        </> : <span className="text-ui-fg-subtle">无未结账商品</span>}
                       </td>
                       <td className="px-4 py-3">{customer.order_count}</td>
                       <td className="px-4 py-3">{customer.paid_order_count}</td>
