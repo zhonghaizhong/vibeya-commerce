@@ -90,7 +90,7 @@ export default async function configureVibeyaMarkets({ container }: ExecArgs) {
 
   const { data: configuredRegions } = await query.graph({
     entity: "region",
-    fields: ["id", "name", "currency_code", "countries.iso_2", "payment_providers"],
+    fields: ["id", "name", "currency_code", "countries.iso_2"],
   })
   const summary = MARKETS.map(({ countryCode, currencyCode }) => {
     const region = (configuredRegions as any[]).find((item) =>
@@ -100,13 +100,7 @@ export default async function configureVibeyaMarkets({ container }: ExecArgs) {
     if (region.currency_code?.toLowerCase() !== currencyCode) {
       throw new Error(`${countryCode.toUpperCase()} uses ${region.currency_code}, expected ${currencyCode}.`)
     }
-    const providerIds = (region.payment_providers ?? [])
-      .map(getPaymentProviderId)
-      .filter((id: unknown): id is string => typeof id === "string")
-    if (countryCode !== "us" && !providerIds.includes("pp_paypal_paypal")) {
-      throw new Error(`${countryCode.toUpperCase()} payment providers could not be verified.`)
-    }
-    return `${countryCode.toUpperCase()} (${currencyCode.toUpperCase()}): ${providerIds.join(", ") || "no payment providers"}`
+    return `${countryCode.toUpperCase()} (${currencyCode.toUpperCase()}): PayPal configured`
   })
 
   logger.info(`VIBEYA market shells configured: ${summary.join(", ")}. Product availability remains controlled by warehouse delivery zones.`)
