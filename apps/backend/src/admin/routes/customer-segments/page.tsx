@@ -64,6 +64,7 @@ const CustomerSegmentsPage = () => {
   const [designRemainingDraft, setDesignRemainingDraft] = useState("")
   const [savingDesignCustomerId, setSavingDesignCustomerId] = useState("")
   const [expandedCartCustomerId, setExpandedCartCustomerId] = useState("")
+  const [previewImage, setPreviewImage] = useState("")
   const [cartDetails, setCartDetails] = useState<Record<string, CartDetail[]>>({})
   const [loadingCartCustomerId, setLoadingCartCustomerId] = useState("")
   const [cartDetailErrors, setCartDetailErrors] = useState<Record<string, string>>({})
@@ -97,6 +98,15 @@ const CustomerSegmentsPage = () => {
       window.removeEventListener("focus", refreshVisibleList)
     }
   }, [load, editingDesignCustomerId])
+
+  useEffect(() => {
+    if (!previewImage) return
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setPreviewImage("")
+    }
+    document.addEventListener("keydown", closeOnEscape)
+    return () => document.removeEventListener("keydown", closeOnEscape)
+  }, [previewImage])
 
   const saveDesignRemaining = async (customer: Customer) => {
     if (!designRemainingDraft.trim()) {
@@ -271,7 +281,9 @@ const CustomerSegmentsPage = () => {
                                   : cartDetails[customer.id].map((cart) => <div key={cart.id} className="space-y-2 border-b border-ui-border-base pb-3 last:border-0 last:pb-0">
                                     <Text size="small" className="text-ui-fg-subtle">购物车更新于 {formatDate(cart.updated_at)}</Text>
                                     {cart.items.map((item) => <div key={item.id} className="flex gap-3 rounded-md bg-ui-bg-base p-2">
-                                      {(item.preview || item.thumbnail) && <img src={item.preview || item.thumbnail || undefined} alt="设计预览" className="h-20 w-16 shrink-0 rounded border border-ui-border-base bg-ui-bg-subtle object-contain" />}
+                                      {(item.preview || item.thumbnail) && <button type="button" onClick={() => setPreviewImage(item.preview || item.thumbnail || "")} aria-label={`放大查看${item.title}的设计图片`} title="点击放大查看" className="shrink-0 cursor-zoom-in rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-ui-border-interactive">
+                                        <img src={item.preview || item.thumbnail || undefined} alt={`${item.title}设计预览`} className="h-20 w-16 rounded border border-ui-border-base bg-ui-bg-subtle object-contain" />
+                                      </button>}
                                       <div className="min-w-0 space-y-1">
                                         <div className="font-medium text-ui-fg-base">{item.title}</div>
                                         {item.variant && <div className="text-xs text-ui-fg-subtle">{item.variant}</div>}
@@ -336,6 +348,12 @@ const CustomerSegmentsPage = () => {
           </div>
         )}
       </Container>
+      {previewImage && <div role="presentation" onClick={() => setPreviewImage("")} className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-6">
+        <div role="dialog" aria-modal="true" aria-label="设计图片预览" onClick={(event) => event.stopPropagation()} className="relative flex max-h-[92vh] max-w-[92vw] items-center justify-center rounded-lg bg-white p-3 shadow-2xl">
+          <button type="button" autoFocus onClick={() => setPreviewImage("")} aria-label="关闭图片预览" className="absolute right-4 top-4 z-10 rounded-full bg-white/95 px-3 py-2 text-sm font-semibold text-ui-fg-base shadow hover:bg-white">关闭 ×</button>
+          <img src={previewImage} alt="放大的设计预览" className="max-h-[88vh] max-w-[88vw] rounded object-contain" />
+        </div>
+      </div>}
     </div>
   )
 }
