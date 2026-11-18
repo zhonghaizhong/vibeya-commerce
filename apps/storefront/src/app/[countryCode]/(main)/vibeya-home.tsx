@@ -5,7 +5,7 @@ import { updateRegion } from "@lib/data/cart"
 import { updateLocale } from "@lib/data/locale-actions"
 import { getMarketDefaultLocale, getMarketLocale } from "@lib/util/market-locale"
 import { ProductCards } from "@modules/vibeya/components/product-explorer"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createPortal } from "react-dom"
 import { useCallback, useEffect, useRef, useState, type SyntheticEvent } from "react"
 
@@ -33,6 +33,8 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
   const [homeCardsTarget, setHomeCardsTarget] = useState<HTMLElement | null>(null)
   const frameRef = useRef<HTMLIFrameElement>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const activeView = searchParams.get("view")
 
   useEffect(() => {
     if (!isAuthenticated) return
@@ -114,7 +116,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       forwardedParams.delete("openStudio")
     }
 
-    const hash = currentParams.get("view") === "designs"
+    const hash = activeView === "designs"
       ? "#my-designs"
       : standaloneHash !== "#top"
       ? standaloneHash
@@ -136,7 +138,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
     const homeUrl = `/vibeya/index.html${query ? `?${query}` : ""}${hash}`
     const frame = frameRef.current
     if (frame && frame.getAttribute("src") !== homeUrl) frame.src = homeUrl
-  }, [countryCode, isAuthenticated, listing?.slug, listing?.handles.join(","), marketLocale, router, standaloneProductId, standaloneHash, standaloneRoute])
+  }, [activeView, countryCode, isAuthenticated, listing?.slug, listing?.handles.join(","), marketLocale, router, standaloneProductId, standaloneHash, standaloneRoute])
 
   useEffect(() => {
     const frame = frameRef.current
@@ -232,6 +234,13 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
           return
         }
         const incomingHash = event.data.hash
+        if (activeView === "designs" && incomingHash === "#top") {
+          const target = new URL(`/${countryCode.toLowerCase()}/`, window.location.origin)
+          const locale = new URLSearchParams(window.location.search).get("locale")
+          if (locale) target.searchParams.set("locale", locale)
+          router.push(`${target.pathname}${target.search}`)
+          return
+        }
         if (incomingHash === "#shop") {
           const destination = new URL(`/${countryCode.toLowerCase()}/products`, window.location.origin)
           const locale = typeof event.data.locale === "string" ? event.data.locale : marketLocale
@@ -292,7 +301,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       window.removeEventListener("popstate", syncFromHistory)
       window.removeEventListener("hashchange", syncFromHistory)
     }
-  }, [countryCode, isAuthenticated, isListingPage, router, standaloneProductId, standaloneHash, standaloneRoute])
+  }, [activeView, countryCode, isAuthenticated, isListingPage, marketLocale, router, standaloneProductId, standaloneHash, standaloneRoute])
 
   const addAccountLink = useCallback(
     (event: SyntheticEvent<HTMLIFrameElement>) => {
