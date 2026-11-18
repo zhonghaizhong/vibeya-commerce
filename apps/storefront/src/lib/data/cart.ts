@@ -54,6 +54,47 @@ export async function retrieveCart(cartId?: string, fields?: string) {
     .catch(() => null)
 }
 
+/** Retrieves the shopper's cart and aligns its region and shipping country to the active site. */
+export async function retrieveCartForCountry(countryCode: string) {
+  const normalizedCountryCode = countryCode.toLowerCase()
+  const [cart, region] = await Promise.all([
+    retrieveCart(),
+    getRegion(normalizedCountryCode),
+  ])
+
+  if (!cart || !region) {
+    return cart
+  }
+
+  if (
+    cart.region_id === region.id &&
+    cart.shipping_address?.country_code?.toLowerCase() === normalizedCountryCode
+  ) {
+    return cart
+  }
+
+  const headers = {
+    ...(await getAuthHeaders()),
+  }
+  const update: HttpTypes.StoreUpdateCart = {
+    shipping_address: { country_code: normalizedCountryCode },
+    ...(cart.region_id !== region.id ? { region_id: region.id } : {}),
+  }
+
+  const { cart: alignedCart } = await sdk.store.cart.update(
+    cart.id,
+    update,
+    {},
+    headers
+  )
+  const cartCacheTag = await getCacheTag("carts")
+  if (cartCacheTag) {
+    revalidateTag(cartCacheTag, { expire: 0 })
+  }
+
+  return alignedCart
+}
+
 export async function getOrSetCart(countryCode: string) {
   const region = await getRegion(countryCode)
 

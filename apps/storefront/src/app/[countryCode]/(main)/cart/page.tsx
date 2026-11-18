@@ -1,4 +1,4 @@
-import { retrieveCart } from "@lib/data/cart"
+import { retrieveCartForCountry } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import CartTemplate from "@modules/cart/templates"
 import { Metadata } from "next"
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default async function Cart({ params }: { params: Promise<{ countryCode: string }> }) {
   const { countryCode } = await params
-  const cart = await retrieveCart().catch((error) => {
+  const cart = await retrieveCartForCountry(countryCode).catch((error) => {
     console.error(error)
     return notFound()
   })

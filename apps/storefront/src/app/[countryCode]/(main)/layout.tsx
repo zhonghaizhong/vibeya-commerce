@@ -1,4 +1,4 @@
-import { listCartOptions, retrieveCart } from "@lib/data/cart"
+import { listCartOptions, retrieveCartForCountry } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import { StoreCartShippingOption } from "@medusajs/types"
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
@@ -16,7 +16,7 @@ export default async function PageLayout(props: {
     retrieveCustomer(),
     getLocale(),
   ])
-  const cart = await retrieveCart()
+  const cart = await retrieveCartForCountry(countryCode)
   let shippingOptions: StoreCartShippingOption[] = []
 
   if (cart) {

@@ -1,4 +1,4 @@
-import { retrieveCart } from "@lib/data/cart"
+import { retrieveCartForCountry } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import PaymentWrapper from "@modules/checkout/components/payment-wrapper"
 import CheckoutForm from "@modules/checkout/templates/checkout-form"
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default async function Checkout({ params }: { params: Promise<{ countryCode: string }> }) {
   const { countryCode } = await params
   const marketCopy = getMarketUiCopy(countryCode)
-  const cart = await retrieveCart()
+  const cart = await retrieveCartForCountry(countryCode)
 
   if (!cart) {
     return notFound()
