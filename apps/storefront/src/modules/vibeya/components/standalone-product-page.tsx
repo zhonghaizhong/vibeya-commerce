@@ -23,7 +23,7 @@ export default function StandaloneProductPage({
   handle = "vibeya-custom-metal-bottle-cap-wall-sign",
   productId = "mg8014061",
   title = "Custom Metal Bottle Cap Wall Sign",
-  version = "anchor-free-navigation-20261118-1",
+  version = "product-first-paint-20261118-1",
 }: {
   countryCode: string
   handle?: string

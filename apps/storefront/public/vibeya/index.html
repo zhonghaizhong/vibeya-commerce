@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>if(new URLSearchParams(location.search).get('embeddedStudio')==='1')document.documentElement.classList.add('studio-embedded');</script>
+  <script>
+    const initialPageParams=new URLSearchParams(location.search);
+    if(initialPageParams.has('standaloneProductId')||location.hash.startsWith('#product-'))document.documentElement.classList.add('vibeya-product-route-pending');
+    if(initialPageParams.get('embeddedStudio')==='1')document.documentElement.classList.add('studio-embedded');
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#fffdfb" />
@@ -28,6 +32,7 @@
     button:disabled {cursor:not-allowed;opacity:.55;}
     a {text-decoration:none; color:inherit;}
     img {display:block; max-width:100%;}
+    .vibeya-product-route-pending #detailHeroImage {visibility:hidden;}
     :focus-visible {outline:3px solid #9f63ff;outline-offset:3px;}
     .container{width:min(100% - 88px,1440px);margin-inline:auto;}
     .announcement{background:var(--ink); color:#fff; text-align:center; font-size:12px; padding:8px 18px; letter-spacing:.03em;}
@@ -2423,7 +2428,11 @@ const blanket=chosen.id==='sds-97226';
     const hero=$('#detailHeroImage');
     const activeColor=selectedColor;
     hero.fetchPriority='high';
+    if(document.documentElement.classList.contains('vibeya-product-route-pending')){
+      hero.addEventListener('load',()=>document.documentElement.classList.remove('vibeya-product-route-pending'),{once:true});
+    }
     hero.src=gallerySrc(galleryIndex);
+    if(hero.complete&&hero.naturalWidth>0)document.documentElement.classList.remove('vibeya-product-route-pending');
     hero.style.objectFit='cover';
     const garment=chosen.id==='sds-128646'?'20 oz tumbler':chosen.id==='sds-138708'?'custom bath mat':chosen.id==='sds-97226'?'custom flannel throw blanket':chosen.id==='vibeya-shower-curtain'?'custom shower curtain':chosen.id==='sds-137892'?"custom women's tankini swimsuit set":chosen.id==='sds-63823'?"custom women's yoga set":chosen.id==='sds-233939'?"custom kids' basketball jersey and shorts set":chosen.id==='sds-275844'?'custom apron':chosen.id==='mg8014061'?'custom metal wall sign':chosen.id==='sds-172647'?'custom knitted beanie':chosen.id==='vibeya-washed-hoodie'?'washed hoodie':'custom cotton long sleeve';
     $('#detailHeroImage').alt=`${galleryTitleAt(galleryIndex)} — ${colorLabel(selectedColor)} VIBEYA ${garment}, example artwork`;
@@ -2507,6 +2516,7 @@ const blanket=chosen.id==='sds-97226';
   products[0].asset=gallerySrc(0);
   routeCatalog(false);
   renderProductDetails();
+  setGallery(0);
   syncBackendCatalog();
   drawStudioVariantChoices();
   renderProductCards();renderInspo();paintProducts();paintIdeas();refreshCount();migrateLegacyBag();drawPreview();routeCatalog();
