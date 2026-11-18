@@ -125,7 +125,7 @@ export default function Nav({ countryCode, currentLocale }: NavProps) {
                 </LocalizedClientLink>
               )
             })}
-            <LocalizedClientLink href="/#my-designs" onClick={closeMenu} className={styles.link}>
+            <LocalizedClientLink href="/?view=designs" onClick={closeMenu} className={styles.link}>
               {labels.designs}
             </LocalizedClientLink>
             <LocalizedClientLink href="/account" onClick={closeMenu} className={`${styles.link} ${styles.accountMenuLink}`}>

@@ -18,7 +18,7 @@ function getStudioReturnUrl(countryCode: string, request: StudioRequest) {
     const value = request[key]
     if (typeof value === "string" && value) params.set(key, value)
   }
-  return `/${countryCode}?${params.toString()}#top`
+  return `/${countryCode}/?${params.toString()}`
 }
 
 export default function VibeyaHome({ countryCode, locale, isAuthenticated, standaloneProductId, standaloneColor, standaloneSize, standaloneRoute, listing }: { countryCode: string; locale?: string | null; isAuthenticated: boolean; standaloneProductId?: string; standaloneColor?: string; standaloneSize?: string; standaloneRoute?: string; listing?: ProductListing }) {
@@ -96,7 +96,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       return
     }
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "independent-shop-route-20261118-yoga-locale-gallery-1")
+    forwardedParams.set("v", "anchor-free-navigation-20261118-1")
     forwardedParams.set("country", countryCode.toLowerCase())
     forwardedParams.set("locale", marketLocale)
     if (standaloneProductId || standaloneRoute) forwardedParams.set("standalone", "1")
@@ -104,7 +104,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       forwardedParams.set("listing", listing.slug)
       forwardedParams.set("handles", listing.handles.join(","))
     }
-    for (const key of ["viewCart", "openStudio", "openSearch", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
+    for (const key of ["viewCart", "openStudio", "openSearch", "view", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
       const value = currentParams.get(key)
       if (value) forwardedParams.set(key, value)
     }
@@ -114,7 +114,9 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       forwardedParams.delete("openStudio")
     }
 
-    const hash = standaloneHash !== "#top"
+    const hash = currentParams.get("view") === "designs"
+      ? "#my-designs"
+      : standaloneHash !== "#top"
       ? standaloneHash
       : listing
       ? "#shop"
@@ -248,6 +250,14 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
           router.push(`${target.pathname}${target.search}`)
           return
         }
+        if (incomingHash === "#my-designs") {
+          const target = new URL(`/${countryCode.toLowerCase()}/`, window.location.origin)
+          target.searchParams.set("view", "designs")
+          const locale = new URLSearchParams(window.location.search).get("locale")
+          if (locale) target.searchParams.set("locale", locale)
+          router.push(`${target.pathname}${target.search}`)
+          return
+        }
         if (
           standaloneProductId &&
           ["#top", "#shop", "#create", "#how-it-works", "#my-designs"].includes(incomingHash)
@@ -269,7 +279,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
 
     const syncFromHistory = () => {
       frameRef.current?.contentWindow?.postMessage(
-        { type: "vibeya:set-route", hash: window.location.hash || standaloneHash },
+        { type: "vibeya:set-route", hash: new URLSearchParams(window.location.search).get("view") === "designs" ? "#my-designs" : window.location.hash || standaloneHash },
         window.location.origin
       )
     }
@@ -323,7 +333,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       })
 
       frame.contentWindow?.postMessage(
-        { type: "vibeya:set-route", hash: window.location.hash || standaloneHash },
+        { type: "vibeya:set-route", hash: new URLSearchParams(window.location.search).get("view") === "designs" ? "#my-designs" : window.location.hash || standaloneHash },
         window.location.origin
       )
 
@@ -348,7 +358,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       <iframe
         ref={frameRef}
         className="vibeya-theme-frame"
-        src={`/vibeya/index.html?v=independent-shop-route-20261117-5&country=${encodeURIComponent(countryCode.toLowerCase())}&locale=${encodeURIComponent(marketLocale)}${standaloneProductId || standaloneRoute ? `&standalone=1${standaloneHash}` : ""}`}
+        src={`/vibeya/index.html?v=anchor-free-navigation-20261118-1&country=${encodeURIComponent(countryCode.toLowerCase())}&locale=${encodeURIComponent(marketLocale)}${standaloneProductId || standaloneRoute ? `&standalone=1${standaloneHash}` : ""}`}
         title="VIBEYA storefront"
         onLoad={addAccountLink}
         style={{

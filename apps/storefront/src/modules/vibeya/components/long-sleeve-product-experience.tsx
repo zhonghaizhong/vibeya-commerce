@@ -60,6 +60,9 @@ export default function LongSleeveProductExperience({
       ) {
         router.push(event.data.hash === "#shop" ? `/${countryCode}/products` : `/${countryCode}/`)
       }
+      if (event.data?.type === "vibeya:route" && event.data.hash === "#my-designs") {
+        router.push(`/${countryCode}/?view=designs`)
+      }
     }
 
     frame.addEventListener("load", applySelectedColor)
@@ -75,7 +78,7 @@ export default function LongSleeveProductExperience({
     <div className="long-sleeve-product-experience">
       <iframe
         ref={frameRef}
-        src="/vibeya/index.html?standalone=1&v=independent-pages-20261117-2#product-sds-167256?color=Black"
+        src="/vibeya/index.html?standalone=1&v=anchor-free-navigation-20261118-1#product-sds-167256?color=Black"
         title="Custom long sleeve T-shirt product details and design studio"
       />
       <style>{`

@@ -68,6 +68,9 @@ export default function VibeyaProductExperience({
         const target = new URL(targetPath, window.location.origin)
         router.push(`${target.pathname}${target.search}${target.hash}`)
       }
+      if (event.data?.type === "vibeya:route" && event.data.hash === "#my-designs") {
+        router.push(`/${countryCode}/?view=designs`)
+      }
     }
 
     frame.addEventListener("load", applyRequestedColor)
@@ -86,7 +89,7 @@ export default function VibeyaProductExperience({
     <div className="vibeya-product-experience">
       <iframe
         ref={frameRef}
-        src={`/vibeya/index.html?standalone=1&v=independent-pages-20261117-2#product-${encodeURIComponent(productId)}${colorQuery}`}
+        src={`/vibeya/index.html?standalone=1&v=anchor-free-navigation-20261118-1#product-${encodeURIComponent(productId)}${colorQuery}`}
         title="VIBEYA custom product details and design studio"
       />
       <style>{`
