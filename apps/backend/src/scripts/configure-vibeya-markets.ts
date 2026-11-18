@@ -5,6 +5,7 @@ import {
 import {
   createRegionsWorkflow,
   createTaxRegionsWorkflow,
+  updateRegionsWorkflow,
 } from "@medusajs/medusa/core-flows"
 
 const MARKETS = [
@@ -31,7 +32,13 @@ export default async function configureVibeyaMarkets({ container }: ExecArgs) {
   )
   const paymentProviders = (usRegion?.payment_providers ?? [])
     .map((provider: any) => provider?.id)
-    .filter((id: unknown): id is string => typeof id === "string")
+    .filter((id: unknown): id is string =>
+      typeof id === "string" && id !== "pp_paypal-invoice_paypal-invoice"
+    )
+
+  if (!paymentProviders.includes("pp_paypal_paypal")) {
+    throw new Error("The US region does not have the PayPal payment provider configured.")
+  }
 
   const missingMarkets = MARKETS.filter(({ countryCode }) =>
     !(regions as any[]).some((region) =>
@@ -53,6 +60,34 @@ export default async function configureVibeyaMarkets({ container }: ExecArgs) {
     })
   }
 
+  const regionalMarkets = MARKETS.filter(({ countryCode }) => countryCode !== "us")
+  const regionalProviderUpdates = regionalMarkets.flatMap(({ countryCode }) => {
+    const region = (regions as any[]).find((item) =>
+      item.countries?.some((country: any) => country.iso_2?.toLowerCase() === countryCode)
+    )
+    if (!region) return []
+
+    const currentProviderIds = (region.payment_providers ?? [])
+      .map((provider: any) => provider?.id)
+      .filter((id: unknown): id is string => typeof id === "string")
+    const nextProviderIds = [...new Set([...currentProviderIds, ...paymentProviders])]
+    if (nextProviderIds.length === currentProviderIds.length &&
+      nextProviderIds.every((id) => currentProviderIds.includes(id))) return []
+
+    return [{ id: region.id, payment_providers: nextProviderIds }]
+  })
+
+  if (regionalProviderUpdates.length) {
+    for (const { id, payment_providers: providerIds } of regionalProviderUpdates) {
+      await updateRegionsWorkflow(container).run({
+        input: {
+          selector: { id },
+          update: { payment_providers: providerIds },
+        },
+      })
+    }
+  }
+
   const missingTaxRegions = MARKETS
     .filter(({ countryCode }) =>
       !(taxRegions as any[]).some((taxRegion) => taxRegion.country_code?.toLowerCase() === countryCode)
@@ -65,7 +100,7 @@ export default async function configureVibeyaMarkets({ container }: ExecArgs) {
 
   const { data: configuredRegions } = await query.graph({
     entity: "region",
-    fields: ["id", "name", "currency_code", "countries.iso_2"],
+    fields: ["id", "name", "currency_code", "countries.iso_2", "payment_providers"],
   })
   const summary = MARKETS.map(({ countryCode, currencyCode }) => {
     const region = (configuredRegions as any[]).find((item) =>
@@ -75,7 +110,13 @@ export default async function configureVibeyaMarkets({ container }: ExecArgs) {
     if (region.currency_code?.toLowerCase() !== currencyCode) {
       throw new Error(`${countryCode.toUpperCase()} uses ${region.currency_code}, expected ${currencyCode}.`)
     }
-    return `${countryCode.toUpperCase()} (${currencyCode.toUpperCase()})`
+    const providerIds = (region.payment_providers ?? [])
+      .map((provider: any) => provider?.id)
+      .filter((id: unknown): id is string => typeof id === "string")
+    if (countryCode !== "us" && !providerIds.includes("pp_paypal_paypal")) {
+      throw new Error(`${countryCode.toUpperCase()} payment providers could not be verified.`)
+    }
+    return `${countryCode.toUpperCase()} (${currencyCode.toUpperCase()}): ${providerIds.join(", ") || "no payment providers"}`
   })
 
   logger.info(`VIBEYA market shells configured: ${summary.join(", ")}. Product availability remains controlled by warehouse delivery zones.`)
