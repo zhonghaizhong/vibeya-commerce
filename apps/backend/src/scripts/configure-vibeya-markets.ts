@@ -14,6 +14,7 @@ const MARKETS = [
   { countryCode: "jp", name: "Japan", currencyCode: "jpy" },
   { countryCode: "mx", name: "Mexico", currencyCode: "mxn" },
 ] as const
+const PAYMENT_PROVIDER_IDS = ["pp_paypal_paypal"]
 
 export default async function configureVibeyaMarkets({ container }: ExecArgs) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
@@ -26,19 +27,6 @@ export default async function configureVibeyaMarkets({ container }: ExecArgs) {
     }),
     query.graph({ entity: "tax_region", fields: ["id", "country_code"] }),
   ])
-
-  const usRegion = (regions as any[]).find((region) =>
-    region.countries?.some((country: any) => country.iso_2?.toLowerCase() === "us")
-  )
-  const paymentProviders = (usRegion?.payment_providers ?? [])
-    .map((provider: any) => provider?.id)
-    .filter((id: unknown): id is string =>
-      typeof id === "string" && id !== "pp_paypal-invoice_paypal-invoice"
-    )
-
-  if (!paymentProviders.includes("pp_paypal_paypal")) {
-    throw new Error("The US region does not have the PayPal payment provider configured.")
-  }
 
   const missingMarkets = MARKETS.filter(({ countryCode }) =>
     !(regions as any[]).some((region) =>
@@ -53,7 +41,7 @@ export default async function configureVibeyaMarkets({ container }: ExecArgs) {
           name,
           currency_code: currencyCode,
           countries: [countryCode],
-          payment_providers: paymentProviders,
+          payment_providers: PAYMENT_PROVIDER_IDS,
           metadata: { vibeya_market_status: "setup_required" },
         })),
       },
@@ -70,7 +58,7 @@ export default async function configureVibeyaMarkets({ container }: ExecArgs) {
     const currentProviderIds = (region.payment_providers ?? [])
       .map((provider: any) => provider?.id)
       .filter((id: unknown): id is string => typeof id === "string")
-    const nextProviderIds = [...new Set([...currentProviderIds, ...paymentProviders])]
+    const nextProviderIds = [...new Set([...currentProviderIds, ...PAYMENT_PROVIDER_IDS])]
     if (nextProviderIds.length === currentProviderIds.length &&
       nextProviderIds.every((id) => currentProviderIds.includes(id))) return []
 
