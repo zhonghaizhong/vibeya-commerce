@@ -6,6 +6,7 @@ const VibeyaAiJob = model.define("vibeya_ai_job", {
   status: model.text(),
   prompt: model.text(),
   product_id: model.text(),
+  market_country_code: model.text().default(""),
   color: model.text(),
   size: model.text().default(""),
   print_placement: model.text(),

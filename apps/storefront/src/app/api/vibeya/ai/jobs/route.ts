@@ -20,11 +20,12 @@ async function requireCustomer() {
   return customer ? getAuthHeaders() : null
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const headers = await requireCustomer()
   if (!headers) return NextResponse.json({ error: "Please sign in to view your designs." }, { status: 401 })
   try {
-    const result = await sdk.client.fetch<{ jobs: unknown[]; credits: DesignCreditSummary }>("/store/vibeya/ai/jobs", {
+    const countryCode = request.nextUrl.searchParams.get("country_code")?.toLowerCase() || "us"
+    const result = await sdk.client.fetch<{ jobs: unknown[]; legacy_jobs: unknown[]; credits: DesignCreditSummary }>(`/store/vibeya/ai/jobs?country_code=${encodeURIComponent(countryCode)}`, {
       method: "GET", headers, cache: "no-store",
     })
     return NextResponse.json(result, { headers: { "Cache-Control": "no-store" } })

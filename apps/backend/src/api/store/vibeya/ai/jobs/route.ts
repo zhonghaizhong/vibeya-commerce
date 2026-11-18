@@ -26,6 +26,7 @@ const DESIGN_GENERATION_PRODUCT_IDS = new Set([
   "mg8014061",
   "mg8012002",
 ])
+const MARKET_COUNTRY_CODES = new Set(["us", "ca", "jp", "mx"])
 const BASKETBALL_PRINT_ZONES = ["jersey-front", "jersey-back", "shorts"] as const
 
 const basketballPromptWithSelectedZones = (prompt: string, requestedZones: unknown): string => {
@@ -66,13 +67,29 @@ async function withCustomerGenerationLock<T>(customerId: string, task: () => Pro
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const customerId = customerFor(req)
   if (!customerId) return res.status(401).json({ error: "Please sign in to view your designs." })
+  const requestedCountry = String(req.query.country_code ?? "us").toLowerCase()
+  const countryCode = MARKET_COUNTRY_CODES.has(requestedCountry) ? requestedCountry : "us"
   const service = serviceFor(req)
   const jobs = await service.listVibeyaAiJobs(
     { customer_id: customerId },
     { order: { created_at: "DESC" }, take: 100 }
   )
   const credits = await getVibeyaDesignCredits(req.scope, customerId, service)
-  return res.json({ jobs: jobs.filter((job) => !["deleted", "deleted-failed"].includes(job.status)).slice(0, 30).map(({ references: _references, image: _image, ...job }) => job), credits })
+  const visibleJobs = jobs.filter((job) =>
+    !["deleted", "deleted-failed"].includes(job.status) && job.market_country_code === countryCode
+  )
+  const legacyJobs = jobs.filter((job) =>
+    !["deleted", "deleted-failed"].includes(job.status) && !job.market_country_code
+  )
+  const stripPrivateFields = (job: any) => {
+    const { references: _references, image: _image, ...publicJob } = job
+    return publicJob
+  }
+  return res.json({
+    jobs: visibleJobs.slice(0, 30).map(stripPrivateFields),
+    legacy_jobs: legacyJobs.slice(0, 30).map(stripPrivateFields),
+    credits,
+  })
 }
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
@@ -86,6 +103,8 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   let productPrintAreaReference = typeof body?.productPrintAreaReference === "string" ? body.productPrintAreaReference : ""
   const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : ""
   const productId = typeof body?.productId === "string" ? body.productId : ""
+  const requestedCountry = typeof body?.marketCountryCode === "string" ? body.marketCountryCode.toLowerCase() : "us"
+  const marketCountryCode = MARKET_COUNTRY_CODES.has(requestedCountry) ? requestedCountry : "us"
   const color = typeof body?.color === "string" ? body.color : ""
   const size = typeof body?.size === "string" ? body.size : ""
   if (!productId || !color || !size) {
@@ -170,6 +189,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       status: "reservation_pending",
       prompt: savedPrompt,
       product_id: productId,
+      market_country_code: marketCountryCode,
       color,
       size,
       print_placement: String(placement ?? ""),

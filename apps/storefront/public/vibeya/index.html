@@ -264,8 +264,15 @@
     .my-design-color-swatches .color-choice:disabled{opacity:.55;cursor:wait;}
     .my-design-empty{padding:55px 22px;text-align:center;border:1px dashed #d9c9e7;border-radius:20px;background:#fff;grid-column:1/-1;color:var(--muted);}
     .my-design-empty strong{display:block;color:var(--ink);font-size:20px;margin-bottom:9px;}
+    .my-design-legacy{grid-column:1/-1;margin-top:8px;padding:18px;border:1px solid #e4d7ec;border-radius:16px;background:#faf7fc;}
+    .my-design-legacy>summary{cursor:pointer;font-weight:800;color:#58456e;}
+    .my-design-legacy>p{margin:9px 0 14px;color:var(--muted);font-size:12px;line-height:1.5;}
+    .my-design-legacy-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
+    .my-design-legacy-card{opacity:.88;}
+    .studio-saved-legacy-note{grid-column:1/-1;margin:0;padding:10px 12px;border:1px solid #e4d7ec;border-radius:10px;background:#faf7fc;color:#665878;font-size:12px;line-height:1.5;}
     @media(max-width:850px){.my-designs-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
-    @media(max-width:570px){.my-designs-head{align-items:flex-start;flex-direction:column;}.my-designs-grid{grid-template-columns:1fr;}}
+    @media(max-width:850px){.my-design-legacy-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+    @media(max-width:570px){.my-designs-head{align-items:flex-start;flex-direction:column;}.my-designs-grid,.my-design-legacy-grid{grid-template-columns:1fr;}}
     .catalog-hero{background:radial-gradient(circle at 90% 5%,#f1dbfc,transparent 43%),linear-gradient(110deg,#f7f5ed,#ffebf1);padding:60px 0 54px;}
     .catalog-hero.ideas-hero{background:radial-gradient(circle at 85% 5%,#d8f487,transparent 39%),linear-gradient(110deg,#f4e8fc,#fcece3);}
     .catalog-crumb{display:flex;gap:10px;font-size:12px;font-weight:800;color:#675c73;margin-bottom:23px;align-items:center;}
@@ -1268,7 +1275,7 @@
         'Do not redesign, replace, add, remove, or reinterpret any part of the print. Render it anew as realistic ink integrated into the selected garment fabric, while keeping it wholly inside the existing print boundary. Keep the selected garment shape, seams, fabric and new color accurate.',
         `Original design brief for context: ${job.prompt||'Keep the same artwork shown in the completed source image.'}`
       ].join(' ');
-      const response=await fetch('/api/vibeya/ai/jobs',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:variantPrompt,productId:job.product_id,color,size,printPlacement:placement,mode:'designed-product',preserveOriginalDesign:false,preserveBaseComposite:'',productReference:'',references})});
+      const response=await fetch('/api/vibeya/ai/jobs',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:variantPrompt,productId:job.product_id,marketCountryCode:job.market_country_code||marketCountryCode().toLowerCase(),color,size,printPlacement:placement,mode:'designed-product',preserveOriginalDesign:false,preserveBaseComposite:'',productReference:'',references})});
       const result=await response.json();renderDesignCreditBalance(result.credits);
       if(!response.ok||!result.job?.id)throw new Error(result.error||'Could not create the color variation.');
       saveDesignVariant(result.job.id,job.product_id,color,size);
@@ -1678,7 +1685,7 @@
   }
   async function refreshDesignCreditBalance(){
     try{
-      const response=await fetch('/api/vibeya/ai/jobs',{credentials:'same-origin',cache:'no-store'});
+      const response=await fetch(`/api/vibeya/ai/jobs?country_code=${encodeURIComponent(marketCountryCode().toLowerCase())}`,{credentials:'same-origin',cache:'no-store'});
       if(!response.ok)return;
       const result=await response.json();renderDesignCreditBalance(result.credits);
     }catch{}
@@ -1706,15 +1713,16 @@
     const grid=$('#myDesignsGrid');if(!grid)return;
     if(grid.dataset.loaded!=='1')grid.innerHTML='<div class="my-design-empty"><strong>Loading your designs…</strong></div>';
     try{
-      const response=await fetch('/api/vibeya/ai/jobs',{credentials:'same-origin',cache:'no-store'});
+      const response=await fetch(`/api/vibeya/ai/jobs?country_code=${encodeURIComponent(marketCountryCode().toLowerCase())}`,{credentials:'same-origin',cache:'no-store'});
       if(response.status===401){grid.dataset.loaded='1';grid.innerHTML=`<div class="my-design-empty"><strong>Sign in to see your designs</strong><p>Your submitted designs are saved to your account.</p><a class="btn primary" href="${marketPath('account')}" target="_top">Sign in</a></div>`;return;}
       const result=await response.json();if(!response.ok)throw new Error(result.error||'Could not load your designs.');
       renderDesignCreditBalance(result.credits);
       const jobs=Array.isArray(result.jobs)?result.jobs:[];
-      const signature=jobs.map(job=>`${job.id}:${job.status}:${job.updated_at||''}`).join('|');
+      const legacyJobs=Array.isArray(result.legacy_jobs)?result.legacy_jobs:[];
+      const signature=[...jobs,...legacyJobs].map(job=>`${job.id}:${job.status}:${job.updated_at||''}:${job.market_country_code||''}`).join('|');
       if(grid.dataset.loaded==='1'&&grid.dataset.signature===signature)return;
       grid.dataset.loaded='1';grid.dataset.signature=signature;
-      if(!jobs.length){grid.innerHTML='<div class="my-design-empty"><strong>No designs yet</strong><p>Start a design and every submitted generation will appear here.</p><a class="btn primary" href="#create">Start creating</a></div>';return;}
+      if(!jobs.length&&!legacyJobs.length){const copy=activeLocale==='ja-JP'?['このサイトのデザインはまだありません','このサイトで作成したデザインがここに表示されます','デザインを作成']:activeLocale==='es-MX'?['Todavía no hay diseños para este sitio','Los diseños que crees en este sitio aparecerán aquí','Crear un diseño']:['No designs for this site yet','Designs you create on this site will appear here','Start creating'];grid.innerHTML=`<div class="my-design-empty"><strong>${copy[0]}</strong><p>${copy[1]}</p><a class="btn primary" href="#create">${copy[2]}</a></div>`;return;}
       grid.innerHTML=jobs.map(job=>{
         const product=products.find(p=>p.id===job.product_id),title=product?.name||job.product_id||'Custom product';
         const variant=designVariant(job);
@@ -1729,6 +1737,16 @@
         const failureNote=job.status==='failed'?`<p class="my-design-failure-note">${job.provider_task_id?'The provider task can be checked again. Recover it to load the generated image.':'No image was returned. Edit the description and try again; failed generations do not use a design credit.'}</p>`:'';
         return `<article class="my-design-card" data-job-card="${esc(job.id)}"><div class="my-design-image">${image}</div><div class="my-design-copy"><h2>${esc(title)} · ${esc(shownColor)}</h2>${designPromptMarkup(job.prompt)}<p>${esc(shownPlacement)}</p><span class="my-design-state ${job.status==='failed'?'failed':''}">${esc(jobStatusLabel(job.status))}${job.error?` · ${esc(job.error)}`:''}</span>${failureNote}${variantChoices}<div class="my-design-actions">${runAction}${retryAction}<button type="button" class="btn primary" data-job-add="${esc(job.id)}" ${addDisabled?'disabled':''}>Add to bag</button><button type="button" class="my-design-delete" data-job-delete="${esc(job.id)}">Delete</button></div></div></article>`;
       }).join('');
+      if(legacyJobs.length){
+        const legacyTitle=activeLocale==='ja-JP'?'以前のデザイン（サイト情報なし）':activeLocale==='es-MX'?'Diseños anteriores (sitio sin registrar)':'Older designs · site not recorded';
+        const legacyNote=activeLocale==='ja-JP'?'サイト別の保存が始まる前のデザインです。ここでは保管用に表示します。':activeLocale==='es-MX'?'Estos diseños se guardaron antes de registrar el sitio. Se muestran aquí como referencia.':'These designs predate site tracking. They are kept here for reference.';
+        const legacyCards=legacyJobs.map(job=>{
+          const product=products.find(p=>p.id===job.product_id),title=product?.name||job.product_id||'Custom product',variant=designVariant(job);
+          const image=job.status==='completed'?`<button type="button" data-job-preview="${esc(job.id)}">${activeLocale==='ja-JP'?'画像を表示':activeLocale==='es-MX'?'Ver imagen':'Load image'}</button>`:`<div class="my-design-empty">${activeLocale==='ja-JP'?'以前のデザイン':activeLocale==='es-MX'?'Diseño anterior':'Older design'}</div>`;
+          return `<article class="my-design-card my-design-legacy-card"><div class="my-design-image">${image}</div><div class="my-design-copy"><h2>${esc(title)} · ${esc(variant.color||'')}</h2>${designPromptMarkup(job.prompt)}<span class="my-design-state">${esc(jobStatusLabel(job.status))}</span><p>${esc(activeLocale==='ja-JP'?'作成サイトが未記録のため、この画面からカートに追加できません。':activeLocale==='es-MX'?'No se puede agregar al carrito porque no se registró el sitio de creación.':'Cannot add to bag because the design site was not recorded.')}</p></div></article>`;
+        }).join('');
+        grid.insertAdjacentHTML('beforeend',`<details class="my-design-legacy"><summary>${legacyTitle} (${legacyJobs.length})</summary><p>${legacyNote}</p><div class="my-design-legacy-grid">${legacyCards}</div></details>`);
+      }
       const loadDesignImage=async preview=>{preview.disabled=true;preview.textContent='Loading image…';try{const response=await fetch(`/api/vibeya/ai/jobs/${encodeURIComponent(preview.dataset.jobPreview)}`,{credentials:'same-origin',cache:'no-store'});const data=await response.json();if(!response.ok||!data.job?.image)throw new Error();const image=document.createElement('img');image.src=data.job.image;image.alt='Generated product design';image.loading='lazy';image.addEventListener('click',()=>{generatedArtworkDataUrl=image.src;lastZoomTrigger=image;openImageZoom();});preview.replaceWith(image);}catch{preview.disabled=false;preview.textContent='Image unavailable — click to retry';}};
       grid.onclick=async event=>{
         const colorChoice=event.target.closest('[data-job-color-choice]');
@@ -1800,19 +1818,20 @@
     container.innerHTML='<div class="studio-saved-empty"><strong>Loading your designs…</strong><p>Your saved designs will appear here.</p></div>';
     $('#studioPreviewStatus').textContent='Your saved designs';
     try{
-      const response=await fetch('/api/vibeya/ai/jobs',{credentials:'same-origin',cache:'no-store'});
+      const response=await fetch(`/api/vibeya/ai/jobs?country_code=${encodeURIComponent(marketCountryCode().toLowerCase())}`,{credentials:'same-origin',cache:'no-store'});
       if(request!==studioDesignsRequest||studioViewMode!=='designs')return;
       if(response.status===401){container.innerHTML=`<div class="studio-saved-empty"><strong>Sign in to see your designs</strong><p>Designs saved to your account will appear here.</p><a class="btn primary" href="${marketPath('account')}" target="_top">Sign in</a></div>`;return;}
       const result=await response.json();if(!response.ok)throw new Error(result.error||'Could not load your designs.');
       const jobs=Array.isArray(result.jobs)?result.jobs:[];
-      if(!jobs.length){container.innerHTML='<div class="studio-saved-empty"><strong>No designs yet</strong><p>Every design you create will be collected here.</p></div>';return;}
+      const legacyJobs=Array.isArray(result.legacy_jobs)?result.legacy_jobs:[];
+      if(!jobs.length){const note=legacyJobs.length?(activeLocale==='ja-JP'?'以前のデザインは作成サイトが記録されていないため、この一覧には表示されません。':activeLocale==='es-MX'?'Los diseños anteriores no aparecen aquí porque no se guardó el sitio donde se crearon.':'Older designs are kept in My Designs because their original site was not recorded.'):(activeLocale==='ja-JP'?'このサイトのデザインはまだありません。':activeLocale==='es-MX'?'Todavía no hay diseños para este sitio.':'No designs for this site yet.');container.innerHTML=`<div class="studio-saved-empty"><strong>${activeLocale==='ja-JP'?'デザインはありません':activeLocale==='es-MX'?'No hay diseños':'No designs yet'}</strong><p>${note}</p></div>`;return;}
       const designs=await Promise.all(jobs.map(async job=>{
         if(job.status!=='completed')return {job,image:''};
         try{const detail=await fetch(`/api/vibeya/ai/jobs/${encodeURIComponent(job.id)}`,{credentials:'same-origin',cache:'no-store'});const data=await detail.json();return {job,image:detail.ok?data.job?.image||'':''};}
         catch{return {job,image:''};}
       }));
       if(request!==studioDesignsRequest||studioViewMode!=='designs')return;
-      container.innerHTML=`<div class="studio-saved-designs">${designs.map(({job,image})=>{
+      container.innerHTML=`${legacyJobs.length?`<p class="studio-saved-legacy-note">${activeLocale==='ja-JP'?'サイト情報のない以前のデザインは「My Designs」で確認できます。':activeLocale==='es-MX'?'Consulta los diseños anteriores sin sitio registrado en My Designs.':'Older designs without a recorded site are kept in My Designs.'}</p>`:''}<div class="studio-saved-designs">${designs.map(({job,image})=>{
         const product=products.find(item=>item.id===job.product_id),title=product?.name||job.product_id||'Custom product';
         const variant=designVariant(job);
         const visual=image?`<button type="button" class="studio-saved-image" data-studio-job-preview="${esc(job.id)}" aria-label="Enlarge ${esc(title)} image" title="Click to enlarge"><img src="${esc(image)}" alt="${esc(title)} generated design" loading="lazy"></button>`:`<div class="studio-saved-placeholder">${esc(jobStatusLabel(job.status))}</div>`;
@@ -2654,7 +2673,7 @@ const blanket=chosen.id==='sds-97226';
         ?await compressPreservedReference(blankProductPreviewSource(),150000,[1254,1024,896])
         :'';
       const requestPrompt=chosen.id==='sds-233939'?uniformPromptFor(p.all):p.all;
-      const response=await fetch('/api/vibeya/ai/jobs',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:requestPrompt,productId:chosen.id,color:selectedColor,size:selectedSize,printPlacement:selectedPrint,printZones:chosen.id==='sds-233939'?[...selectedUniformZones]:undefined,mode:'designed-product',preserveOriginalDesign,preserveBaseComposite,productReference,references})});
+      const response=await fetch('/api/vibeya/ai/jobs',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:requestPrompt,productId:chosen.id,marketCountryCode:marketCountryCode().toLowerCase(),color:selectedColor,size:selectedSize,printPlacement:selectedPrint,printZones:chosen.id==='sds-233939'?[...selectedUniformZones]:undefined,mode:'designed-product',preserveOriginalDesign,preserveBaseComposite,productReference,references})});
       const result=await response.json();renderDesignCreditBalance(result.credits);if(!response.ok||!result.job?.id)throw new Error(result.error||'Could not submit the design task.');
       const jobId=String(result.job.id),taskProductId=chosen.id,taskPlacement=selectedPrint,taskPrompt=p.all;
       saveDesignVariant(jobId,chosen.id,selectedColor,selectedSize);
