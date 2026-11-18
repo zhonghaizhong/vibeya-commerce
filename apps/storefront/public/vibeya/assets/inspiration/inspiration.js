@@ -1,3 +1,47 @@
+const bindHowItWorksDialog=(locale)=>{
+  const copy={
+    'en-US':{title:'How It Works',intro:'Turn your ideas into one-of-a-kind things. Just describe it, get creative, and make it yours.',steps:[['Describe your idea','Tell us what you imagine.'],['Preview & customize','See it on your favorite product.'],['Make it yours','Approve it, then we make it.']],close:'Close'},
+    'en-CA':{title:'How It Works',intro:'Turn your ideas into one-of-a-kind things. Just describe it, get creative, and make it yours.',steps:[['Describe your idea','Tell us what you imagine.'],['Preview & customize','See it on your favourite product.'],['Make it yours','Approve it, then we make it.']],close:'Close'},
+    'ja-JP':{title:'ご利用方法',intro:'アイデアを、あなただけのアイテムに。デザインを説明して、プレビューで確認しましょう。',steps:[['アイデアを伝える','作りたいデザインを入力します。'],['プレビューして調整','商品に反映されたデザインを確認します。'],['注文する','仕上がりを確認して注文します。']],close:'閉じる'},
+    'es-MX':{title:'Cómo funciona',intro:'Convierte tus ideas en algo único. Describe tu diseño, personalízalo y hazlo tuyo.',steps:[['Describe tu idea','Cuéntanos qué diseño imaginas.'],['Previsualiza y personaliza','Mira cómo queda en tu producto favorito.'],['Hazlo tuyo','Confirma el diseño y nosotros lo fabricamos.']],close:'Cerrar'}
+  }[locale]||{
+    title:'How It Works',intro:'Turn your ideas into one-of-a-kind things. Just describe it, get creative, and make it yours.',steps:[['Describe your idea','Tell us what you imagine.'],['Preview & customize','See it on your favorite product.'],['Make it yours','Approve it, then we make it.']],close:'Close'
+  };
+  const cssId='vibeya-how-it-works-style';
+  if(!document.getElementById(cssId)){
+    const style=document.createElement('style');style.id=cssId;
+    style.textContent='.vibeya-how-overlay{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:20px;background:#160d24aa;backdrop-filter:blur(5px)}.vibeya-how-overlay.open{display:flex}.vibeya-how-dialog{width:min(100%,820px);max-height:calc(100vh - 40px);overflow:auto;padding:clamp(22px,4vw,42px);border:1px solid #e8d7fa;border-radius:28px;background:#fffdfa;color:#160d24;box-shadow:0 28px 90px #160d2445;font-family:inherit}.vibeya-how-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:28px}.vibeya-how-head h2{margin:0;font-family:Outfit,"Arial Black",system-ui,sans-serif;font-size:clamp(30px,5vw,48px);font-weight:900;letter-spacing:-.055em;line-height:.98}.vibeya-how-head p{max-width:590px;margin:13px 0 0;color:#655a70;font-size:15px;line-height:1.65}.vibeya-how-close{display:grid;width:42px;height:42px;flex:0 0 auto;place-items:center;border:1px solid #e9e3ea;border-radius:50%;background:#fff;color:#160d24;font-size:25px;line-height:1;cursor:pointer}.vibeya-how-close:hover{background:#f1e5ff}.vibeya-how-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.vibeya-how-step{min-width:0;padding:20px 18px;border:1px solid #e9d9fa;border-radius:19px;background:linear-gradient(145deg,#fff,#faf5ff)}.vibeya-how-number{display:grid;width:38px;height:38px;place-items:center;margin-bottom:18px;border-radius:50%;background:#dcfc60;font-weight:900}.vibeya-how-step h3{margin:0 0 8px;font-size:17px;letter-spacing:-.02em;line-height:1.25}.vibeya-how-step p{margin:0;color:#655a70;font-size:13px;line-height:1.55}.vibeya-how-footer{display:flex;justify-content:flex-end;margin-top:23px}.vibeya-how-done{min-height:45px;padding:0 23px;border:0;border-radius:999px;background:#dcfc60;color:#160d24;font:inherit;font-size:13px;font-weight:900;cursor:pointer}@media(max-width:650px){.vibeya-how-steps{grid-template-columns:1fr;gap:10px}.vibeya-how-step{display:grid;grid-template-columns:38px 1fr;column-gap:14px;padding:15px}.vibeya-how-number{grid-row:span 2;margin:0}.vibeya-how-step h3{align-self:end;margin-bottom:4px}.vibeya-how-step p{align-self:start}}';
+    document.head.append(style);
+  }
+  let overlay=document.getElementById('vibeyaHowItWorksOverlay');
+  if(!overlay){
+    overlay=document.createElement('div');overlay.id='vibeyaHowItWorksOverlay';overlay.className='vibeya-how-overlay';overlay.setAttribute('role','presentation');
+    overlay.innerHTML=`<section class="vibeya-how-dialog" role="dialog" aria-modal="true" aria-labelledby="vibeyaHowTitle" aria-describedby="vibeyaHowIntro" tabindex="-1"><div class="vibeya-how-head"><div><h2 id="vibeyaHowTitle"></h2><p id="vibeyaHowIntro"></p></div><button class="vibeya-how-close" type="button" data-how-close aria-label="${copy.close}">×</button></div><div class="vibeya-how-steps"></div><div class="vibeya-how-footer"><button class="vibeya-how-done" type="button" data-how-close></button></div></section>`;
+    document.body.append(overlay);
+  }
+  const dialog=overlay.querySelector('.vibeya-how-dialog');
+  overlay.querySelector('#vibeyaHowTitle').textContent=copy.title;
+  overlay.querySelector('#vibeyaHowIntro').textContent=copy.intro;
+  overlay.querySelector('.vibeya-how-steps').replaceChildren(...copy.steps.map(([title,description],index)=>{const article=document.createElement('article');article.className='vibeya-how-step';article.innerHTML=`<span class="vibeya-how-number" aria-hidden="true">0${index+1}</span><h3></h3><p></p>`;article.querySelector('h3').textContent=`${index+1}. ${title}`;article.querySelector('p').textContent=description;return article;}));
+  overlay.querySelector('.vibeya-how-done').textContent=copy.close;
+  let previousFocus=null;let previousOverflow='';
+  const close=()=>{if(!overlay.classList.contains('open'))return;overlay.classList.remove('open');document.body.style.overflow=previousOverflow;if(previousFocus?.isConnected)previousFocus.focus();};
+  const open=trigger=>{previousFocus=trigger;previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';overlay.classList.add('open');overlay.querySelector('.vibeya-how-close').focus();};
+  overlay.addEventListener('click',event=>{if(event.target===overlay||event.target.closest('[data-how-close]'))close();});
+  document.addEventListener('keydown',event=>{
+    if(!overlay.classList.contains('open'))return;
+    if(event.key==='Escape'){event.preventDefault();close();return;}
+    if(event.key!=='Tab'||!dialog)return;
+    const focusable=Array.from(dialog.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled])')).filter(element=>element.offsetParent!==null);
+    if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];
+    if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+  });
+  document.addEventListener('click',event=>{
+    const trigger=event.target.closest('a[href*="#how-it-works"]');
+    if(!trigger)return;event.preventDefault();open(trigger);
+  });
+};
+
 document.addEventListener('DOMContentLoaded',async()=>{
   const safe=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const translations=window.VIBEYA_MARKET_TRANSLATIONS;
@@ -11,6 +55,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const marketLocale=(marketLocales[marketCountry]||marketLocales.us).includes(requestedLocale)?requestedLocale:marketDefaults[marketCountry]||'en-US';
   const localizedMarket=marketLocale==='ja-JP'||marketLocale==='es-MX';
   const navLabels=translations.navigation[marketLocale]||translations.navigation['en-US'];
+  bindHowItWorksDialog(marketLocale);
   const storyLabels=translations.inspirationTerms?.[marketLocale]||{};
   const marketPhrase=source=>translations.phrases?.[marketLocale]?.[source]||source;
   document.documentElement.lang=marketLocale;
@@ -168,7 +213,6 @@ document.addEventListener('DOMContentLoaded',async()=>{
   fetch('/api/vibeya/session',{credentials:'same-origin',cache:'no-store'}).then(response=>response.ok?response.json():null).then(session=>{
     const authenticated=!!session?.authenticated;
     document.body.dataset.vibeyaAuth=authenticated?'authenticated':'guest';
-    const label=authenticated?navLabels.account:navLabels.signIn;
     document.querySelectorAll('.account-link,.account-menu-link,.sign-in-link').forEach(link=>{const text=link.classList.contains('sign-in-link')&&!authenticated?navLabels.signIn:navLabels.account;link.textContent=text;link.setAttribute('aria-label',text);});
   }).catch(()=>{document.body.dataset.vibeyaAuth='guest';document.querySelectorAll('.account-link,.account-menu-link,.sign-in-link').forEach(link=>{link.textContent=link.classList.contains('sign-in-link')?navLabels.signIn:navLabels.account;link.setAttribute('aria-label',navLabels.signIn);});});
   if(moreSection&&moreCards&&current&&!isInspirationListing){

@@ -68,6 +68,15 @@
   white-space: nowrap;
 }
 
+.howTrigger {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  text-align: inherit;
+}
+
 .link:hover {
   opacity: 0.55;
 }

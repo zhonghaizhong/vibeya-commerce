@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { updateRegion } from "@lib/data/cart"
 import { updateLocale } from "@lib/data/locale-actions"
 import { getMarketDefaultLocale, getMarketLocale } from "@lib/util/market-locale"
 import marketTranslations from "@lib/util/market-translations.json"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import HowItWorksDialog from "@modules/vibeya/components/how-it-works-dialog"
 import { getVibeyaMenuHref, useVibeyaMenu } from "@modules/vibeya/data/use-vibeya-menu"
 import styles from "./nav.module.css"
 
@@ -31,6 +32,7 @@ type NavProps = { countryCode: string; currentLocale: string | null }
 
 export default function Nav({ countryCode, currentLocale }: NavProps) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [howItWorksOpen, setHowItWorksOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const navigation = useVibeyaMenu()
   const pathname = usePathname()
@@ -50,6 +52,11 @@ export default function Nav({ countryCode, currentLocale }: NavProps) {
   }
 
   const closeMenu = () => setMenuOpen(false)
+  useEffect(() => {
+    const openHowItWorks = () => setHowItWorksOpen(true)
+    window.addEventListener("vibeya:open-how-it-works", openHowItWorks)
+    return () => window.removeEventListener("vibeya:open-how-it-works", openHowItWorks)
+  }, [])
   const changeDestination = (nextCountry: string) => {
     if (nextCountry === normalizedCountry) return
     startTransition(async () => {
@@ -90,6 +97,23 @@ export default function Nav({ countryCode, currentLocale }: NavProps) {
                 : href
               const className = item.featured ? styles.featured : styles.link
               const content = <>{item.target === "create" && "✦  "}{translatedMenuLabels[item.target] ?? item.label}</>
+
+              if (item.target === "how-it-works") {
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`${className} ${styles.howTrigger}`}
+                    aria-haspopup="dialog"
+                    onClick={() => {
+                      closeMenu()
+                      setHowItWorksOpen(true)
+                    }}
+                  >
+                    {content}
+                  </button>
+                )
+              }
 
               return item.target === "inspiration" || href.startsWith("/vibeya/") ? (
                 <a key={item.id} href={destinationHref} onClick={closeMenu} className={className}>
@@ -146,6 +170,11 @@ export default function Nav({ countryCode, currentLocale }: NavProps) {
           </div>
         </nav>
       </header>
+      <HowItWorksDialog
+        locale={currentLanguage}
+        open={howItWorksOpen}
+        onClose={() => setHowItWorksOpen(false)}
+      />
     </>
   )
 }

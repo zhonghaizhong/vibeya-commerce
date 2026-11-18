@@ -1,16 +1,19 @@
-import { Metadata } from "next"
+import type { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 
-import { retrieveCustomer } from "@lib/data/customer"
+import { getMarketLocale } from "@lib/util/market-locale"
 import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
-import VibeyaHome from "../../vibeya-home"
 import {
   getProductCategoryGroup,
   isProductCategoryIndexable,
 } from "@lib/seo/categories"
+import ShopCatalog from "../../products/shop-catalog"
+import { SHOP_COPY } from "../../products/shop-copy"
+import { getShopData } from "../../products/shop-data"
 
 type Props = {
   params: Promise<{ category: string[]; countryCode: string }>
+  searchParams: Promise<{ locale?: string }>
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -19,7 +22,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   if (!group) notFound()
 
   const origin = await getSiteOrigin()
-  const canonical = `${origin}/${countryCode}/categories/${group.slug}`
+  const canonical = `${origin}/${countryCode.toLowerCase()}/categories/${group.slug}`
   const indexed = isProductCategoryIndexable(group.slug, countryCode)
 
   return {
@@ -38,26 +41,36 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 }
 
 export default async function CategoryPage(props: Props) {
-  const { category, countryCode } = await props.params
-  const handle = category.at(-1) ?? ""
-  const group = getProductCategoryGroup(handle)
+  const [{ category, countryCode }, search] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ])
+  const group = getProductCategoryGroup(category.at(-1) ?? "")
   if (!group) notFound()
 
   if (category.join("/") !== group.slug) {
-    permanentRedirect(`/${countryCode}/categories/${group.slug}`)
+    permanentRedirect(`/${countryCode.toLowerCase()}/categories/${group.slug}`)
   }
 
-  const customer = await retrieveCustomer().catch(() => null)
+  const locale = getMarketLocale(countryCode, search.locale)
+  const data = await getShopData(countryCode, locale)
+  if (!data) notFound()
+
+  const handles = new Set(group.productHandles)
+  const categoryProducts = data.products.filter((product) => handles.has(product.handle))
+  if (!categoryProducts.length) notFound()
+
+  const copy = SHOP_COPY[locale] ?? SHOP_COPY["en-US"]
+
   return (
-    <VibeyaHome
-      countryCode={countryCode}
-      isAuthenticated={Boolean(customer)}
-      listing={{
-        category: group.label,
-        title: group.label,
-        slug: group.slug,
-        handles: [...group.productHandles],
-      }}
+    <ShopCatalog
+      countryCode={countryCode.toLowerCase()}
+      locale={locale}
+      currency={data.region.currency_code.toUpperCase()}
+      products={categoryProducts}
+      allProducts={data.products}
+      copy={copy}
+      category={group}
     />
   )
 }
