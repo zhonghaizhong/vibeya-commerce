@@ -1407,6 +1407,28 @@
     {slug:'custom-hats',label:'Custom Hats',handles:['vibeya-custom-knitted-beanie','vibeya-custom-washed-denim-baseball-cap'],description:'Customize a knitted beanie or washed denim baseball cap with artwork or a design prompt.'},
     {slug:'custom-wall-decor',label:'Custom Wall Decor',handles:['vibeya-custom-metal-bottle-cap-wall-sign'],description:'Design a personalized metal wall sign, from a single piece to an interactive multi-piece set.'}
   ];
+  const localizedCategoryCopy={
+    'en-CA':{
+      'custom-clothing':{label:'Custom Clothing',description:'Explore customizable clothing and yoga wear in Canada. Personalize a coordinated women’s yoga set with your own artwork or a text prompt, preview the design, and order online.'}
+    },
+    'ja-JP':{
+      'custom-clothing':{label:'カスタムウェア',description:'オリジナルのヨガウェアセットをデザイン。画像をアップロードするか、文章でデザインを説明し、注文前に上下セットの仕上がりを確認できます。'},
+      'custom-tumblers':{label:'カスタムタンブラー',description:'画像やデザインの説明から、オリジナルのステンレスタンブラーを作成できます。'},
+      'custom-home-bath':{label:'カスタムホーム＆バス',description:'オリジナルデザインで、バスマットやシャワーカーテン、ブランケットをカスタマイズできます。'},
+      'custom-kitchen-dining':{label:'カスタムキッチン・ダイニング',description:'画像やデザインの説明を使って、オリジナルのエプロンを作成できます。'},
+      'custom-hats':{label:'カスタム帽子',description:'画像やデザインの説明を使って、ニット帽やデニムキャップをカスタマイズできます。'},
+      'custom-wall-decor':{label:'カスタム壁飾り',description:'画像やデザインの説明から、オリジナルのメタルウォールサインを作成できます。'}
+    },
+    'es-MX':{
+      'custom-clothing':{label:'Ropa personalizada',description:'Personaliza ropa y un conjunto de yoga para mujer en México con tu imagen o una descripción de texto. Previsualiza el diseño en el top y el short antes de pedirlo.'},
+      'custom-tumblers':{label:'Vasos térmicos personalizados',description:'Crea un vaso térmico de acero inoxidable con tu imagen o una descripción de diseño y revisa la impresión antes de pedirlo.'},
+      'custom-home-bath':{label:'Hogar y baño personalizados',description:'Personaliza tapetes de baño, cortinas de ducha y mantas con tu imagen o una descripción de diseño.'},
+      'custom-kitchen-dining':{label:'Cocina y comedor personalizados',description:'Crea un delantal personalizado con una imagen o una descripción de diseño y revisa cómo queda antes de pedirlo.'},
+      'custom-hats':{label:'Gorras y gorros personalizados',description:'Personaliza un gorro tejido o una gorra de mezclilla con tu imagen o una descripción de diseño.'},
+      'custom-wall-decor':{label:'Decoración de pared personalizada',description:'Diseña un letrero metálico personalizado para pared con una pieza o un conjunto de varias piezas.'}
+    }
+  };
+  marketCategoryGroups.forEach(group=>Object.assign(group,localizedCategoryCopy[activeLocale]?.[group.slug]||{}));
   const queryParams=new URLSearchParams(location.search);
   const pageListing=marketCategoryGroups.find(group=>group.slug===queryParams.get('listing'));
   const pageListingHandles=queryParams.get('handles')?.split(',').filter(Boolean);
@@ -1654,7 +1676,7 @@
     return `<article class="product-card" data-product-id="${esc(p.id)}" aria-label="${esc(p.name)}"><a class="product-card-media" data-product-link href="${href}" target="_top" aria-label="View ${esc(p.name)} in ${esc(colorName)}"><span class="card-plus" aria-hidden="true">↗</span><div class="photo"><img data-card-image src="${image}" alt="${esc(colorName)} ${esc(p.short)} — product gallery image 1" loading="lazy"></div></a><div class="card-color-options" role="group" aria-label="Preview ${esc(p.short)} colors">${swatches}</div><div class="card-color-caption" aria-live="polite">${esc(variantSummary)}</div><a class="product-card-info" data-product-link href="${href}" target="_top" aria-label="View details for ${esc(p.name)} in ${esc(colorName)}"><h3>${esc(p.name)}</h3><p>${esc(cardPrice)}</p></a></article>`;
   }
   const productHTML=renderProductCard;
-  function paintChips(id,all,selected,attr){if(id==='#productFilters'){const country=encodeURIComponent(marketCountryCode().toLowerCase());const locale=navLanguage?.value||marketDefaultLocale;const allProductsLabel=marketCatalog.phrases?.[locale]?.['All Products']||'All Products';const visibleGroups=marketCountryCode().toLowerCase()==='us'?marketCategoryGroups.filter(group=>catalogProducts.some(product=>group.handles.includes(product.handle))):[];$(id).innerHTML=[`<a class="catalog-chip ${selected==='All Products'?'active':''}" href="/${country}/products" target="_top">${esc(allProductsLabel)}</a>`,...visibleGroups.map(group=>`<a class="catalog-chip ${selected===group.label?'active':''}" href="/${country}/categories/${group.slug}" target="_top">${esc(group.label)}</a>`)].join('');return;}$(id).innerHTML=all.map(cat=>`<button type="button" class="catalog-chip ${cat===selected?'active':''}" ${attr}="${esc(cat)}" aria-pressed="${cat===selected}">${esc(cat)}</button>`).join('');}
+  function paintChips(id,all,selected,attr){if(id==='#productFilters'){const country=encodeURIComponent(marketCountryCode().toLowerCase());const locale=navLanguage?.value||marketDefaultLocale;const allProductsLabel=marketCatalog.phrases?.[locale]?.['All Products']||'All Products';const visibleGroups=marketCategoryGroups.filter(group=>catalogProducts.some(product=>group.handles.includes(product.handle)));$(id).innerHTML=[`<a class="catalog-chip ${selected==='All Products'?'active':''}" href="/${country}/products" target="_top">${esc(allProductsLabel)}</a>`,...visibleGroups.map(group=>`<a class="catalog-chip ${selected===group.label?'active':''}" href="/${country}/categories/${group.slug}" target="_top">${esc(group.label)}</a>`)].join('');return;}$(id).innerHTML=all.map(cat=>`<button type="button" class="catalog-chip ${cat===selected?'active':''}" ${attr}="${esc(cat)}" aria-pressed="${cat===selected}">${esc(cat)}</button>`).join('');}
   function paintProducts(){
     paintChips('#productFilters',productTags,productTag,'data-product-tag');
     let q=$('#productSearch').value.toLowerCase().trim();

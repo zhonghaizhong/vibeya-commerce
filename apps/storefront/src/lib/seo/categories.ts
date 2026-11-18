@@ -5,6 +5,11 @@ export type ProductCategoryGroup = {
   description: string
   productHandles: readonly string[]
   legacyHandles: readonly string[]
+  localizedCopy?: Partial<Record<"en-CA" | "ja-JP" | "es-MX", {
+    label: string
+    seoTitle: string
+    description: string
+  }>>
 }
 
 export const PRODUCT_CATEGORY_GROUPS: readonly ProductCategoryGroup[] = [
@@ -14,6 +19,26 @@ export const PRODUCT_CATEGORY_GROUPS: readonly ProductCategoryGroup[] = [
     seoTitle: "Custom Clothing & Personalized Apparel | VIBEYA",
     description:
       "Design custom clothing including long sleeve shirts, washed hoodies, tankinis, and kids' basketball uniforms. Upload artwork or describe your idea, preview, and order online.",
+    localizedCopy: {
+      "en-CA": {
+        label: "Custom Clothing",
+        seoTitle: "Custom Yoga Wear & Clothing | VIBEYA",
+        description:
+          "Explore customizable clothing and yoga wear in Canada. Personalize a coordinated women's yoga set with your own artwork or a text prompt, preview the design, and order online.",
+      },
+      "ja-JP": {
+        label: "カスタムウェア",
+        seoTitle: "ヨガウェアセットをカスタマイズ | VIBEYA",
+        description:
+          "オリジナルのヨガウェアセットをデザイン。画像をアップロードするか、文章でデザインを説明し、注文前に上下セットの仕上がりを確認できます。",
+      },
+      "es-MX": {
+        label: "Ropa personalizada",
+        seoTitle: "Conjunto de yoga personalizado para mujer | VIBEYA",
+        description:
+          "Personaliza ropa y un conjunto de yoga para mujer en México con tu imagen o una descripción de texto. Previsualiza el diseño en el top y el short antes de pedirlo.",
+      },
+    },
     productHandles: [
       "vibeya-custom-cotton-long-sleeve-tee",
       "vibeya-washed-vintage-hooded-sweatshirt",
@@ -84,6 +109,21 @@ export const getProductCategoryGroup = (handle: string) =>
       group.legacyHandles.includes(handle.toLowerCase())
   )
 
+export const getProductCategoryMarketCopy = (
+  group: ProductCategoryGroup,
+  locale: string
+) => ({
+  ...group,
+  ...(group.localizedCopy?.[locale as keyof NonNullable<ProductCategoryGroup["localizedCopy"]>] ?? {}),
+})
+
+const CATEGORY_MARKETS = ["us", "ca", "jp", "mx"] as const
+
+export const getProductCategoryIndexableMarkets = (slug: string) =>
+  CATEGORY_MARKETS.filter((countryCode) =>
+    isProductCategoryIndexable(slug, countryCode)
+  )
+
 export const getProductCategoryLabel = (
   productHandle: string,
   fallback?: string | null
@@ -100,11 +140,23 @@ export const getProductCategoryLabel = (
   )
 }
 
-// U.S. category pages are indexable. Other country versions stay out of search
-// until their product availability and localized landing copy are ready.
+// A category is indexable in a market when its localized landing copy exists.
+// International category URLs without localized copy remain noindex.
 export const isProductCategoryIndexable = (
   slug: string,
   countryCode: string
-) =>
-  countryCode.toLowerCase() === "us" &&
-  PRODUCT_CATEGORY_GROUPS.some((group) => group.slug === slug)
+) => {
+  const group = PRODUCT_CATEGORY_GROUPS.find((candidate) => candidate.slug === slug)
+  if (!group) return false
+
+  const market = countryCode.toLowerCase()
+  if (market === "us") return true
+
+  const localeByMarket: Record<string, "en-CA" | "ja-JP" | "es-MX"> = {
+    ca: "en-CA",
+    jp: "ja-JP",
+    mx: "es-MX",
+  }
+  const locale = localeByMarket[market]
+  return Boolean(locale && group.localizedCopy?.[locale])
+}

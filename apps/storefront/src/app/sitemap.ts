@@ -4,7 +4,10 @@ import { getMarketAlternateUrls } from "@lib/util/market-locale"
 import { DEFAULT_COUNTRY_CODE, getSiteOrigin, listCountryCodes } from "@lib/util/site"
 import { getVibeyaMarket } from "@lib/vibeya/region"
 import { isSupportedMarketCountry } from "@lib/vibeya/markets"
-import { PRODUCT_CATEGORY_GROUPS } from "@lib/seo/categories"
+import {
+  isProductCategoryIndexable,
+  PRODUCT_CATEGORY_GROUPS,
+} from "@lib/seo/categories"
 import type { MetadataRoute } from "next"
 
 export const dynamic = "force-dynamic"
@@ -114,9 +117,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           alternates: { languages: alternateUrls(path, countriesByProduct.get(item.id!) ?? []) },
         }
       })
+    const productCategoryEntries = PRODUCT_CATEGORY_GROUPS
+      .filter((group) =>
+        isProductCategoryIndexable(group.slug, countryCode) &&
+        group.productHandles.some((handle) =>
+          products.some((item) => item.handle === handle && item.id && availableIds.has(item.id))
+        )
+      )
+      .map((group) => {
+        const path = `/categories/${group.slug}`
+        const eligibleCountries = countryCodes.filter((marketCountry) =>
+          isProductCategoryIndexable(group.slug, marketCountry) &&
+          group.productHandles.some((handle) => {
+            const product = products.find((item) => item.handle === handle)
+            return Boolean(product?.id && productsByCountry.get(marketCountry)?.has(product.id))
+          })
+        )
+        return {
+          url: `${base}${path}`,
+          alternates: { languages: alternateUrls(path, eligibleCountries) },
+        }
+      })
     const contentEntries = (prefix: "categories" | "collections", entries: Entry[]) =>
       entries
-        .filter((entry) => entry.handle && getProductIds(entry).some((id) => availableIds.has(id)))
+        .filter((entry) =>
+          entry.handle &&
+          !(prefix === "categories" && PRODUCT_CATEGORY_GROUPS.some((group) => group.slug === entry.handle)) &&
+          getProductIds(entry).some((id) => availableIds.has(id))
+        )
         .map((entry) => {
           const path = `/${prefix}/${entry.handle}`
           const productIds = getProductIds(entry)
@@ -144,6 +172,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           }]
         : []),
       ...productEntries,
+      ...productCategoryEntries,
       ...contentEntries("categories", categories),
       ...contentEntries("collections", collections),
     ]
@@ -156,9 +185,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...(countryCodes.includes("us")
       ? [
           ...INDEXABLE_CONTENT_PATHS.map((path) => ({ url: `${origin}${path}` })),
-          ...PRODUCT_CATEGORY_GROUPS.map((group) => ({
-            url: `${origin}/us/categories/${group.slug}`,
-          })),
         ]
       : []),
     ...Object.values(YOGA_INSPIRATION_PATHS).map((path) => ({
