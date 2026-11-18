@@ -128,7 +128,17 @@ export async function POST(request: NextRequest) {
     let cartId = await getCartId()
     if (cartId) {
       try {
-        await loadCart(cartId)
+        const cart = await loadCart(cartId)
+        if (cart.region_id !== region.id) {
+          await sdk.store.cart.update(
+            cartId,
+            {
+              region_id: region.id,
+              shipping_address: { country_code: countryCode },
+            },
+            {}
+          )
+        }
       } catch {
         // A completed or stale cart cookie should not block a new purchase.
         cartId = undefined

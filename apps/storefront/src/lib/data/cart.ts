@@ -83,7 +83,15 @@ export async function getOrSetCart(countryCode: string) {
   }
 
   if (cart && cart?.region_id !== region.id) {
-    await sdk.store.cart.update(cart.id, { region_id: region.id }, {}, headers)
+    await sdk.store.cart.update(
+      cart.id,
+      {
+        region_id: region.id,
+        shipping_address: { country_code: countryCode.toLowerCase() },
+      },
+      {},
+      headers
+    )
     const cartCacheTag = await getCacheTag("carts")
     revalidateTag(cartCacheTag, { expire: 0 })
   }
@@ -417,7 +425,10 @@ export async function updateRegion(countryCode: string) {
   }
 
   if (cartId) {
-    await updateCart({ region_id: region.id })
+    await updateCart({
+      region_id: region.id,
+      shipping_address: { country_code: normalizedCountryCode },
+    })
     const cartCacheTag = await getCacheTag("carts")
     revalidateTag(cartCacheTag, { expire: 0 })
   }
