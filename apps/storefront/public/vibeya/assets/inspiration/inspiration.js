@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const hasExplicitStory=!!(new URLSearchParams(location.search).get('inspiration')||document.body.dataset.inspirationId);
   const current=catalog.find(x=>x.id===articleId)||(isGenericStory||hasExplicitStory?undefined:catalog[0]);
   const isInspirationListingPage=!!document.getElementById('inspirationFilters');
-  if(!isInspirationListingPage&&!current){location.replace(marketContext('/vibeya/inspiration/index.html'));return;}
+  if(isGenericStory&&!current){location.replace(marketContext('/vibeya/inspiration/index.html'));return;}
   const marketStoryUrl=current?.marketUrls?.[marketCountry];
   if(isGenericStory&&marketStoryUrl){location.replace(marketStoryUrl);return;}
   document.querySelectorAll('a[href]').forEach(link=>{
