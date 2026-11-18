@@ -87,11 +87,6 @@ export async function retrieveCartForCountry(countryCode: string) {
     {},
     headers
   )
-  const cartCacheTag = await getCacheTag("carts")
-  if (cartCacheTag) {
-    revalidateTag(cartCacheTag, { expire: 0 })
-  }
-
   return alignedCart
 }
 
