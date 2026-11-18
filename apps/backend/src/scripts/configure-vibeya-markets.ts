@@ -15,6 +15,8 @@ const MARKETS = [
   { countryCode: "mx", name: "Mexico", currencyCode: "mxn" },
 ] as const
 const PAYMENT_PROVIDER_IDS = ["pp_paypal_paypal"]
+const getPaymentProviderId = (provider: any) =>
+  typeof provider === "string" ? provider : provider?.id
 
 export default async function configureVibeyaMarkets({ container }: ExecArgs) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
@@ -56,7 +58,7 @@ export default async function configureVibeyaMarkets({ container }: ExecArgs) {
     if (!region) return []
 
     const currentProviderIds = (region.payment_providers ?? [])
-      .map((provider: any) => provider?.id)
+      .map(getPaymentProviderId)
       .filter((id: unknown): id is string => typeof id === "string")
     const nextProviderIds = [...new Set([...currentProviderIds, ...PAYMENT_PROVIDER_IDS])]
     if (nextProviderIds.length === currentProviderIds.length &&
@@ -99,7 +101,7 @@ export default async function configureVibeyaMarkets({ container }: ExecArgs) {
       throw new Error(`${countryCode.toUpperCase()} uses ${region.currency_code}, expected ${currencyCode}.`)
     }
     const providerIds = (region.payment_providers ?? [])
-      .map((provider: any) => provider?.id)
+      .map(getPaymentProviderId)
       .filter((id: unknown): id is string => typeof id === "string")
     if (countryCode !== "us" && !providerIds.includes("pp_paypal_paypal")) {
       throw new Error(`${countryCode.toUpperCase()} payment providers could not be verified.`)
