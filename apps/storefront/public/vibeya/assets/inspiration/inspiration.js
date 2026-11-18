@@ -46,6 +46,15 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const safe=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const translations=window.VIBEYA_MARKET_TRANSLATIONS;
   const bundledCatalog=Array.isArray(window.VIBEYA_INSPIRATION_CATALOG)?window.VIBEYA_INSPIRATION_CATALOG:[];
+  // Keep the U.S. inspiration facets on a stable three-part taxonomy:
+  // product = the actual product type, pattern = the main artwork subject,
+  // and style = the broader visual/audience direction. New catalog values
+  // remain supported through the readable fallback below.
+  const facetLabels={
+    product:{'long-sleeve':'VIBEYA Custom Cotton Long Sleeve Tee',hoodie:'VIBEYA Washed Vintage Hooded Sweatshirt',tumbler:'VIBEYA Custom 20 oz Stainless Steel Tumbler','bath-mat':'VIBEYA Custom 3D Optical Illusion Bath Mat',blanket:'VIBEYA Custom Flannel Throw Blanket',beanie:'VIBEYA Custom Knitted Beanie','shower-curtain':'VIBEYA Custom Shower Curtain',tankini:"VIBEYA Custom Women's Tankini Swimsuit Set",'basketball-uniform':"VIBEYA Custom Kids' Basketball Uniform",apron:'VIBEYA Custom Prompt-Designed Apron','metal-sign':'VIBEYA Custom Metal Bottle Cap Wall Sign','baseball-cap':'VIBEYA Custom Washed Denim Baseball Cap','yoga-set':"VIBEYA Custom Women's Yoga Set"},
+    pattern:{skeleton:'Skeleton','botanical-celestial':'Botanical & Celestial',animal:'Animal Print',penguin:'Penguin',cat:'Cats','rubber-duck':'Rubber Duck','sleepy-sheep':'Sleep & Dream','sports-typography':'Basketball Typography','tomato-chef':'Tomato Chef',raccoon:'Raccoon',flag:'American Flag',typography:'Typography'},
+    style:{'street-graffiti':'Streetwear & Graffiti','nature-streetwear':'Nature-Inspired Streetwear','retro-whimsical':'Retro Whimsical','playful-whimsy':'Playful & Whimsical','cozy-humor':'Cozy Humor','streetwear':'Streetwear','cozy-cute':'Cozy & Cute','funny':'Funny & Humorous','youth-sports':'Youth Sports','retro-bar':'Retro Bar Decor','retro-americana':'Retro Americana','playful-activewear':'Playful Activewear'}
+  };
   const marketParams=new URLSearchParams(location.search);
   const pathCountry=location.pathname.match(/^\/(ca|mx|jp)\/inspiration\//i)?.[1]?.toLowerCase();
   const marketCountry=(pathCountry||marketParams.get('country')||'us').toLowerCase();
@@ -79,7 +88,9 @@ document.addEventListener('DOMContentLoaded',async()=>{
     select.replaceChildren();if(allOption)select.append(allOption);
     const ordered=[...Array.from(originalOptions.keys()).filter(value=>available.has(value)),...Array.from(available).filter(value=>!originalOptions.has(value)).sort()];
     ordered.forEach(value=>{
-      const option=originalOptions.get(value)||new Option(value.replace(/-/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase()),value);
+      const label=facetLabels[key]?.[value]||value.replace(/-/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase());
+      const option=originalOptions.get(value)||new Option(label,value);
+      if(originalOptions.has(value))option.textContent=label;
       select.append(option);
     });
   };
@@ -171,11 +182,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
     button.setAttribute('aria-label',button.textContent.replace(/\s*→$/,''));
   });
   document.querySelectorAll('.inspiration-detail-aside .aside-caption').forEach(label=>{label.textContent=asideCaptionLabels[marketLocale]||asideCaptionLabels['en-US'];});
-  const storyLabelsEnglish={
-    product:{'long-sleeve':'Custom Long Sleeve Tee',hoodie:'Washed Vintage Hoodie',tumbler:'20 oz Stainless Steel Tumbler','bath-mat':'Custom 3D Bath Mat',beanie:'Custom Knitted Beanie','shower-curtain':'Custom Shower Curtain',tankini:"Custom Women's Tankini Swimsuit Set"},
-    pattern:{skeleton:'Humorous Skeleton','botanical-celestial':'Botanical & Celestial',animal:'Animal Print',penguin:'Deadpan Penguin Face',cat:'Cats, Bathtub & Bubbles','rubber-duck':'Duck Bubble Trouble',typography:'Sleepy Cat & Bold Typography'},
-    style:{'street-graffiti':'Street Graffiti / Chill Mood','nature-streetwear':'Nature-Inspired Streetwear','retro-whimsical':'Retro Whimsical','playful-whimsy':'Playful Bathroom Decor','cozy-cute':'Cozy, Cute & Playful',streetwear:'Retro Varsity Streetwear',funny:'Funny Graphic Swimwear'}
-  };
+  const storyLabelsEnglish={product:facetLabels.product,pattern:facetLabels.pattern,style:facetLabels.style};
   const activeStoryLabels=Object.keys(storyLabels).length?storyLabels:storyLabelsEnglish;
   const storyMeta=document.querySelector('.story-meta');
   if(isGenericStory&&current){

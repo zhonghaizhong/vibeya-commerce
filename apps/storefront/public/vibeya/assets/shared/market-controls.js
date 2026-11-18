@@ -43,24 +43,34 @@
     const genericStory = next.pathname.toLowerCase() === "/vibeya/inspiration/story.html"
       ? next.searchParams.get("inspiration")
       : null
-    const storySlug = localizedStory?.[2]?.toLowerCase() === "animal-yoga-set" || genericStory === "yoga-animals-set"
-      ? "animal-yoga-set"
-      : null
+    const isYogaStory = localizedStory?.[2]?.toLowerCase() === "animal-yoga-set"
+      || genericStory === "yoga-animals-set"
+      || document.body.dataset.inspirationId === "yoga-animals-set"
+      || /\/inspiration\/animal-yoga-set\.html$/i.test(next.pathname)
+    const isInspirationPage = /\/inspiration(?:\/|$)/i.test(next.pathname)
 
-    if (storySlug) {
+    if (isYogaStory) {
       next.pathname = nextCountry === "us"
         ? "/vibeya/inspiration/animal-yoga-set.html"
-        : `/${nextCountry}/inspiration/${storySlug}`
+        : `/${nextCountry}/inspiration/animal-yoga-set`
       next.search = ""
       next.hash = ""
-    } else {
-      if (/^\/(?:us|ca|mx|jp)\/inspiration\//i.test(next.pathname) || genericStory) {
-        next.pathname = nextCountry === "us" ? "/vibeya/inspiration/index.html" : `/${nextCountry}/inspiration/`
-        next.hash = ""
-      }
-      next.searchParams.set("country", nextCountry)
-      next.searchParams.set("locale", nextLocale)
+      if (nextLocale !== markets[nextCountry].defaultLocale) next.searchParams.set("locale", nextLocale)
+      window.location.assign(next.href)
+      return
     }
+
+    if (isInspirationPage) {
+      next.pathname = nextCountry === "us" ? "/vibeya/inspiration/index.html" : `/${nextCountry}/inspiration/`
+      next.search = ""
+      next.hash = ""
+      if (nextLocale !== markets[nextCountry].defaultLocale) next.searchParams.set("locale", nextLocale)
+      window.location.assign(next.href)
+      return
+    }
+
+    next.searchParams.set("country", nextCountry)
+    next.searchParams.set("locale", nextLocale)
     window.location.assign(next.href)
   }
 
@@ -69,9 +79,7 @@
     const nextCountry = destination.value.toLowerCase()
     const nextMarket = markets[nextCountry]
     if (!nextMarket) return
-    const home = new URL(`/${nextCountry}/`, window.location.origin)
-    home.searchParams.set("locale", nextMarket.defaultLocale)
-    window.location.assign(home.href)
+    navigateWith(nextCountry, nextMarket.defaultLocale)
   })
   language.addEventListener("change", () => {
     const nextLocale = language.value
