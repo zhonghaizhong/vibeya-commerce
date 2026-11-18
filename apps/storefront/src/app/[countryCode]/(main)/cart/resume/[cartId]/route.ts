@@ -1,5 +1,5 @@
 import { sdk } from "@lib/config"
-import { activateCart } from "@lib/util/server-cart"
+import { activateCart, resolveRegion } from "@lib/util/server-cart"
 import { getRequestOrigin } from "@lib/util/site"
 import { NextResponse } from "next/server"
 
@@ -11,12 +11,23 @@ export async function GET(
   { params }: { params: Promise<{ countryCode: string; cartId: string }> }
 ) {
   const { countryCode, cartId } = await params
+  const market = await resolveRegion(countryCode)
+  if (!market) {
+    return new NextResponse("This cart link has expired", {
+      status: 410,
+      headers: NO_STORE,
+    })
+  }
 
   try {
     const { cart } = await sdk.store.cart.retrieve(cartId, {
-      fields: "id,completed_at,metadata",
+      fields: "id,region_id,completed_at,metadata",
     })
-    if (cart.completed_at || cart.metadata?.ucp_canceled === true) {
+    if (
+      cart.region_id !== market.region.id ||
+      cart.completed_at ||
+      cart.metadata?.ucp_canceled === true
+    ) {
       throw new Error("Cart is no longer open")
     }
   } catch {
@@ -26,7 +37,7 @@ export async function GET(
     })
   }
 
-  await activateCart(cartId)
+  await activateCart(cartId, countryCode)
 
   return NextResponse.redirect(
     `${getRequestOrigin(request)}/${countryCode}/checkout`,

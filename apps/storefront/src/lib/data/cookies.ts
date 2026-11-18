@@ -117,26 +117,60 @@ export const removePendingCustomer = async () => {
   })
 }
 
-export const getCartId = async () => {
+const MARKET_COUNTRY_CODES = ["us", "ca", "jp", "mx"] as const
+type MarketCountryCode = (typeof MARKET_COUNTRY_CODES)[number]
+
+const resolveCartCountry = async (countryCode?: string): Promise<MarketCountryCode> => {
   const cookies = await nextCookies()
-  return cookies.get("_medusa_cart_id")?.value
+  const requested = countryCode?.toLowerCase()
+  if (MARKET_COUNTRY_CODES.includes(requested as MarketCountryCode)) {
+    return requested as MarketCountryCode
+  }
+  const destination = cookies.get("vibeya_destination_country")?.value?.toLowerCase()
+  return MARKET_COUNTRY_CODES.includes(destination as MarketCountryCode)
+    ? (destination as MarketCountryCode)
+    : "us"
 }
 
-// See the note on `setAuthToken`: `sameSite: "lax"` so the cart cookie survives
-// the cross-site return navigation from a redirect-based payment method.
-export const setCartId = async (cartId: string) => {
+const cartCookieName = (countryCode: MarketCountryCode) => `_medusa_cart_id_${countryCode}`
+
+export const getDestinationCountryCode = async (): Promise<MarketCountryCode> =>
+  resolveCartCountry()
+
+export const getCartId = async (countryCode?: string) => {
   const cookies = await nextCookies()
-  cookies.set("_medusa_cart_id", cartId, {
+  return cookies.get(cartCookieName(await resolveCartCountry(countryCode)))?.value
+}
+
+export const removeLegacyCartId = async () => {
+  const cookies = await nextCookies()
+  cookies.set("_medusa_cart_id", "", { maxAge: -1, path: "/" })
+}
+
+// See the note on `setAuthToken`: `sameSite: "lax"` so market carts survive
+// cross-site payment redirects while remaining isolated from one another.
+export const setCartId = async (cartId: string, countryCode?: string) => {
+  const cookies = await nextCookies()
+  cookies.set(cartCookieName(await resolveCartCountry(countryCode)), cartId, {
     maxAge: 60 * 60 * 24 * 7,
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
+    path: "/",
   })
 }
 
-export const removeCartId = async () => {
+export const removeCartId = async (countryCode?: string) => {
   const cookies = await nextCookies()
-  cookies.set("_medusa_cart_id", "", {
-    maxAge: -1,
-  })
+  if (countryCode) {
+    cookies.set(cartCookieName(await resolveCartCountry(countryCode)), "", {
+      maxAge: -1,
+      path: "/",
+    })
+    return
+  }
+  for (const market of MARKET_COUNTRY_CODES) {
+    cookies.set(cartCookieName(market), "", { maxAge: -1, path: "/" })
+  }
+  cookies.set("_medusa_cart_id", "", { maxAge: -1, path: "/" })
 }

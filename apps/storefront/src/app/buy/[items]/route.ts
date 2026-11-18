@@ -63,7 +63,7 @@ export async function GET(
     return textResponse("One or more items in this link can't be purchased", 400)
   }
 
-  await activateCart(cartId)
+  await activateCart(cartId, resolved.countryCode)
 
   return NextResponse.redirect(
     `${getRequestOrigin(request)}/${resolved.countryCode}/checkout`,

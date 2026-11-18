@@ -21,7 +21,7 @@ export default async function PageLayout(props: {
 
   if (cart) {
     try {
-      const { shipping_options } = await listCartOptions()
+      const { shipping_options } = await listCartOptions(countryCode)
       shippingOptions = shipping_options
     } catch (error) {
       // Shipping nudges are optional UI; a shipping-options failure must not

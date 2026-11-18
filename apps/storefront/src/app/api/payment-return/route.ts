@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
   const redirectResult = searchParams.get("redirectResult")
 
   if (cartId && redirectResult) {
-    await setCartId(cartId)
+    await setCartId(cartId, countryCode ?? undefined)
 
     try {
       // Redirects to the order confirmation once the payment is authorized.
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
     return rejected()
   }
 
-  await setCartId(cartId)
+  await setCartId(cartId, countryCode ?? undefined)
 
   // The customer backed out or the bank declined. Stripe puts the PaymentIntent
   // back into `requires_payment_method`, so the Payment Element can mount

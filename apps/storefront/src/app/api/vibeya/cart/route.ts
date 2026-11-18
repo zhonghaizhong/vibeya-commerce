@@ -1,5 +1,10 @@
 import { sdk } from "@lib/config"
-import { getCartId } from "@lib/data/cookies"
+import {
+  getCartId,
+  getDestinationCountryCode,
+  removeCartId,
+  removeLegacyCartId,
+} from "@lib/data/cookies"
 import { getVibeyaMarket } from "@lib/vibeya/region"
 import { activateCart, MAX_LINE_ITEM_QUANTITY } from "@lib/util/server-cart"
 import { vibeyaProducts } from "@modules/vibeya/data/products"
@@ -37,12 +42,20 @@ async function addLineItem(
   })
 }
 
-export async function GET() {
-  const cartId = await getCartId()
+export async function GET(request: NextRequest) {
+  const requestedCountryCode = request.nextUrl.searchParams.get("country_code")
+  const countryCode = (requestedCountryCode ?? await getDestinationCountryCode()).toLowerCase()
+  const cartId = await getCartId(countryCode)
+  const market = await getVibeyaMarket(countryCode)
   if (!cartId) return NextResponse.json({ cart: null })
 
   try {
-    return NextResponse.json({ cart: await loadCart(cartId) })
+    const cart = await loadCart(cartId)
+    if (cart.region_id !== market.region?.id) {
+      await removeCartId(countryCode)
+      return NextResponse.json({ cart: null })
+    }
+    return NextResponse.json({ cart })
   } catch {
     return NextResponse.json({ cart: null })
   }
@@ -52,7 +65,7 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null)
   if (!body || typeof body !== "object") return jsonError("Invalid cart item")
 
-  const countryCode = String(body.countryCode ?? "us").toLowerCase()
+  const countryCode = String(body.countryCode ?? await getDestinationCountryCode()).toLowerCase()
 
   const productConfig = vibeyaProducts.find((product) => product.id === String(body.product ?? ""))
   const handle = productConfig?.handle
@@ -125,19 +138,12 @@ export async function POST(request: NextRequest) {
       Object.assign(metadata, { vibeya_generated_artwork: artwork })
     }
 
-    let cartId = await getCartId()
+    let cartId = await getCartId(countryCode)
     if (cartId) {
       try {
         const cart = await loadCart(cartId)
         if (cart.region_id !== region.id) {
-          await sdk.store.cart.update(
-            cartId,
-            {
-              region_id: region.id,
-              shipping_address: { country_code: countryCode },
-            },
-            {}
-          )
+          cartId = undefined
         }
       } catch {
         // A completed or stale cart cookie should not block a new purchase.
@@ -149,7 +155,8 @@ export async function POST(request: NextRequest) {
       cartId = cart.id
     }
     await addLineItem(cartId, variant.id, quantity, metadata)
-    await activateCart(cartId)
+    await activateCart(cartId, countryCode)
+    await removeLegacyCartId()
 
     return NextResponse.json({ cart: await loadCart(cartId) }, { status: 201 })
   } catch (error) {

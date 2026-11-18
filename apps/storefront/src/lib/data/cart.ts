@@ -13,6 +13,7 @@ import {
   getCacheTag,
   getCartId,
   removeCartId,
+  removeLegacyCartId,
   setCartId,
 } from "./cookies"
 import { getRegion } from "./regions"
@@ -54,40 +55,19 @@ export async function retrieveCart(cartId?: string, fields?: string) {
     .catch(() => null)
 }
 
-/** Retrieves the shopper's cart and aligns its region and shipping country to the active site. */
+/** Retrieves only the shopper's cart assigned to the requested market. */
 export async function retrieveCartForCountry(countryCode: string) {
   const normalizedCountryCode = countryCode.toLowerCase()
-  const [cart, region] = await Promise.all([
-    retrieveCart(),
-    getRegion(normalizedCountryCode),
-  ])
-
-  if (!cart || !region) {
-    return cart
+  const region = await getRegion(normalizedCountryCode)
+  if (!region) {
+    return null
   }
 
-  if (
-    cart.region_id === region.id &&
-    cart.shipping_address?.country_code?.toLowerCase() === normalizedCountryCode
-  ) {
-    return cart
-  }
+  const cartId = await getCartId(normalizedCountryCode)
+  if (!cartId) return null
 
-  const headers = {
-    ...(await getAuthHeaders()),
-  }
-  const update: HttpTypes.StoreUpdateCart = {
-    shipping_address: { country_code: normalizedCountryCode },
-    ...(cart.region_id !== region.id ? { region_id: region.id } : {}),
-  }
-
-  const { cart: alignedCart } = await sdk.store.cart.update(
-    cart.id,
-    update,
-    {},
-    headers
-  )
-  return alignedCart
+  const cart = await retrieveCart(cartId)
+  return cart?.region_id === region.id ? cart : null
 }
 
 export async function getOrSetCart(countryCode: string) {
@@ -97,7 +77,12 @@ export async function getOrSetCart(countryCode: string) {
     throw new Error(`Region not found for country code: ${countryCode}`)
   }
 
-  let cart = await retrieveCart(undefined, "id,region_id")
+  const normalizedCountryCode = countryCode.toLowerCase()
+  const scopedCartId = await getCartId(normalizedCountryCode)
+  let cart = scopedCartId ? await retrieveCart(scopedCartId) : null
+  if (cart?.region_id !== region.id) {
+    cart = null
+  }
 
   const headers = {
     ...(await getAuthHeaders()),
@@ -111,23 +96,9 @@ export async function getOrSetCart(countryCode: string) {
       headers
     )
     cart = cartResp.cart
+    await setCartId(cart.id, normalizedCountryCode)
+    await removeLegacyCartId()
 
-    await setCartId(cart.id)
-
-    const cartCacheTag = await getCacheTag("carts")
-    revalidateTag(cartCacheTag, { expire: 0 })
-  }
-
-  if (cart && cart?.region_id !== region.id) {
-    await sdk.store.cart.update(
-      cart.id,
-      {
-        region_id: region.id,
-        shipping_address: { country_code: countryCode.toLowerCase() },
-      },
-      {},
-      headers
-    )
     const cartCacheTag = await getCacheTag("carts")
     revalidateTag(cartCacheTag, { expire: 0 })
   }
@@ -135,8 +106,8 @@ export async function getOrSetCart(countryCode: string) {
   return cart
 }
 
-export async function updateCart(data: HttpTypes.StoreUpdateCart) {
-  const cartId = await getCartId()
+export async function updateCart(data: HttpTypes.StoreUpdateCart, cartIdOverride?: string) {
+  const cartId = cartIdOverride || (await getCartId())
 
   if (!cartId) {
     throw new Error("No existing cart found, please create one before updating")
@@ -342,14 +313,14 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     if (!formData) {
       throw new Error("No form data found when setting addresses")
     }
-    const cartId = getCartId()
-    if (!cartId) {
-      throw new Error("No existing cart found when setting addresses")
-    }
-
     const getValue = (name: string) => {
       const value = formData.get(name)
       return typeof value === "string" ? value : null
+    }
+    const countryCode = getValue("shipping_address.country_code")?.toLowerCase()
+    const cartId = await getCartId(countryCode ?? undefined)
+    if (!cartId) {
+      throw new Error("No existing cart found when setting addresses")
     }
     const shippingPhone = getValue("shipping_address.phone")?.trim()
     if (!shippingPhone) {
@@ -388,7 +359,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         province: getValue("billing_address.province"),
         phone: getValue("billing_address.phone"),
       }
-    await updateCart(data)
+    await updateCart(data, cartId)
 
   } catch (error) {
     return error instanceof Error ? error.message : String(error)
@@ -436,7 +407,7 @@ export async function placeOrder(cartId?: string) {
     const orderCacheTag = await getCacheTag("orders")
     revalidateTag(orderCacheTag, { expire: 0 })
 
-    removeCartId()
+    await removeCartId(countryCode)
     redirect(`/${countryCode}/order/${cartRes?.order.id}/confirmed`)
   }
 
@@ -453,20 +424,10 @@ export async function updateRegion(countryCode: string) {
   if (!isSupportedMarketCountry(normalizedCountryCode)) {
     throw new Error("This shipping destination is not supported.")
   }
-  const cartId = await getCartId()
   const region = await getRegion(normalizedCountryCode)
 
   if (!region) {
     throw new Error(`Region not found for country code: ${countryCode}`)
-  }
-
-  if (cartId) {
-    await updateCart({
-      region_id: region.id,
-      shipping_address: { country_code: normalizedCountryCode },
-    })
-    const cartCacheTag = await getCacheTag("carts")
-    revalidateTag(cartCacheTag, { expire: 0 })
   }
 
   const regionCacheTag = await getCacheTag("regions")
@@ -476,6 +437,7 @@ export async function updateRegion(countryCode: string) {
   revalidateTag(productsCacheTag, { expire: 0 })
 
   const cookieStore = await cookies()
+  await removeLegacyCartId()
   cookieStore.set("vibeya_destination_country", normalizedCountryCode, {
     maxAge: 60 * 60 * 24 * 365,
     httpOnly: true,
@@ -487,8 +449,8 @@ export async function updateRegion(countryCode: string) {
   redirect(`/${normalizedCountryCode}/`)
 }
 
-export async function listCartOptions() {
-  const cartId = await getCartId()
+export async function listCartOptions(countryCode?: string) {
+  const cartId = await getCartId(countryCode)
   const headers = {
     ...(await getAuthHeaders()),
   }

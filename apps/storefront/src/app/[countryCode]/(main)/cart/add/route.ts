@@ -78,7 +78,17 @@ export async function POST(
     return new NextResponse("Select a valid product variant", { status: 400 })
   }
 
-  const existingCartId = await getCartId()
+  let existingCartId = await getCartId(countryCode)
+  if (existingCartId) {
+    try {
+      const { cart } = await sdk.store.cart.retrieve(existingCartId, {
+        fields: "id,region_id",
+      })
+      if (cart.region_id !== region.id) existingCartId = undefined
+    } catch {
+      existingCartId = undefined
+    }
+  }
   let cartId: string
   try {
     cartId = await addLineItem(existingCartId, region.id, variantId, quantity)
@@ -94,7 +104,7 @@ export async function POST(
     }
   }
 
-  await activateCart(cartId)
+  await activateCart(cartId, countryCode)
 
   return NextResponse.redirect(
     `${getRequestOrigin(request)}/${countryCode}/cart`,

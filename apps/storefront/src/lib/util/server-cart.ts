@@ -1,6 +1,6 @@
 import "server-only"
 import { sdk } from "@lib/config"
-import { getCacheTag, setCartId } from "@lib/data/cookies"
+import { getCacheTag, removeLegacyCartId, setCartId } from "@lib/data/cookies"
 import { listRegions } from "@lib/data/regions"
 import { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
@@ -9,8 +9,9 @@ import { getDefaultCountryCode } from "./site"
 export const MAX_LINE_ITEM_QUANTITY = 100
 
 /** Stores the cart in the shopper's cookie and clears cached cart reads. */
-export const activateCart = async (cartId: string) => {
-  await setCartId(cartId)
+export const activateCart = async (cartId: string, countryCode?: string) => {
+  await setCartId(cartId, countryCode)
+  await removeLegacyCartId()
   const cartCacheTag = await getCacheTag("carts")
   if (cartCacheTag) {
     revalidateTag(cartCacheTag, { expire: 0 })
