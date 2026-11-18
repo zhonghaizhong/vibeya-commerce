@@ -1,9 +1,9 @@
 import { STORE_NAME } from "@lib/util/site"
 import { getMarketLocale } from "@lib/util/market-locale"
 import { getMarketUiCopy } from "@lib/util/market-ui-copy"
+import { getVibeyaInspirationHref } from "@lib/util/market-routes"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import HowItWorksTrigger from "@modules/vibeya/components/how-it-works-trigger"
-import { getVibeyaInspirationHref } from "@modules/vibeya/data/use-vibeya-menu"
 
 export default function Footer({ countryCode }: { countryCode: string }) {
   const locale = getMarketLocale(countryCode)

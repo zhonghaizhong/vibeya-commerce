@@ -5,10 +5,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { updateRegion } from "@lib/data/cart"
 import { updateLocale } from "@lib/data/locale-actions"
 import { getMarketLocale } from "@lib/util/market-locale"
+import { getVibeyaInspirationHref } from "@lib/util/market-routes"
 import marketTranslations from "@lib/util/market-translations.json"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import HowItWorksDialog from "@modules/vibeya/components/how-it-works-dialog"
-import { getVibeyaInspirationHref, getVibeyaMenuHref, useVibeyaMenu } from "@modules/vibeya/data/use-vibeya-menu"
+import { getVibeyaMenuHref, useVibeyaMenu } from "@modules/vibeya/data/use-vibeya-menu"
 import styles from "./nav.module.css"
 
 const DESTINATIONS = Object.keys(marketTranslations.markets)

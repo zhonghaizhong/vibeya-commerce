@@ -3,13 +3,14 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { getVibeyaInspirationHref } from "@lib/util/market-routes"
 import {
   getVibeyaImage,
   type VibeyaProduct,
 } from "../data/products"
 import styles from "./product-explorer.module.css"
 import { useVibeyaProducts } from "../data/use-vibeya-products"
-import { getVibeyaInspirationHref, useVibeyaMenu } from "../data/use-vibeya-menu"
+import { useVibeyaMenu } from "../data/use-vibeya-menu"
 
 type ProductExplorerProps = {
   productId?: string
