@@ -78,9 +78,12 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const visibleJobs = jobs.filter((job) =>
     !["deleted", "deleted-failed"].includes(job.status) && job.market_country_code === countryCode
   )
-  const legacyJobs = jobs.filter((job) =>
-    !["deleted", "deleted-failed"].includes(job.status) && !job.market_country_code
-  )
+  // Jobs created before market tracking was added used the US storefront by default.
+  // Keep those legacy designs available in the US while preventing them from leaking
+  // into other markets where their original destination cannot be verified.
+  const legacyJobs = countryCode === "us"
+    ? jobs.filter((job) => !["deleted", "deleted-failed"].includes(job.status) && !job.market_country_code)
+    : []
   const stripPrivateFields = (job: any) => {
     const { references: _references, image: _image, ...publicJob } = job
     return publicJob
