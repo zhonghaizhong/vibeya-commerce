@@ -1719,6 +1719,7 @@
       renderDesignCreditBalance(result.credits);
       const jobs=Array.isArray(result.jobs)?result.jobs:[];
       const legacyJobs=Array.isArray(result.legacy_jobs)?result.legacy_jobs:[];
+      const actionableJobs=[...jobs,...legacyJobs];
       const signature=[...jobs,...legacyJobs].map(job=>`${job.id}:${job.status}:${job.updated_at||''}:${job.market_country_code||''}`).join('|');
       if(grid.dataset.loaded==='1'&&grid.dataset.signature===signature)return;
       grid.dataset.loaded='1';grid.dataset.signature=signature;
@@ -1743,7 +1744,12 @@
         const legacyCards=legacyJobs.map(job=>{
           const product=products.find(p=>p.id===job.product_id),title=product?.name||job.product_id||'Custom product',variant=designVariant(job);
           const image=job.status==='completed'?`<button type="button" data-job-preview="${esc(job.id)}">${activeLocale==='ja-JP'?'画像を表示':activeLocale==='es-MX'?'Ver imagen':'Load image'}</button>`:`<div class="my-design-empty">${activeLocale==='ja-JP'?'以前のデザイン':activeLocale==='es-MX'?'Diseño anterior':'Older design'}</div>`;
-          return `<article class="my-design-card my-design-legacy-card"><div class="my-design-image">${image}</div><div class="my-design-copy"><h2>${esc(title)} · ${esc(variant.color||'')}</h2>${designPromptMarkup(job.prompt)}<span class="my-design-state">${esc(jobStatusLabel(job.status))}</span><p>${esc(activeLocale==='ja-JP'?'作成サイトが未記録のため、この画面からカートに追加できません。':activeLocale==='es-MX'?'No se puede agregar al carrito porque no se registró el sitio de creación.':'Cannot add to bag because the design site was not recorded.')}</p></div></article>`;
+          const addDisabled=job.status!=='completed'||!product;
+          const colorChoices=product&&job.status==='completed'?designColorPicker(job,product,variant.color,'job-color-choice'):'';
+          const sizeChoices=product&&(product.sizes||[]).length>1?`<label>Size for your bag<select data-job-size="${esc(job.id)}" aria-label="Choose size">${product.sizes.map(size=>`<option value="${esc(size)}" ${size===(variant.size||product.sizes[0])?'selected':''}>${esc(sizeLabel(product,size))}</option>`).join('')}</select></label>`:'';
+          const variantChoices=colorChoices||sizeChoices?`<div class="my-design-variant-select">${colorChoices}${sizeChoices}</div>`:'';
+          const unavailableNote=!product?`<p>${esc(activeLocale==='ja-JP'?'この商品は現在のサイトで販売されていません。':activeLocale==='es-MX'?'Este producto no está disponible en el sitio actual.':'This product is not sold on the current site.')}</p>`:'';
+          return `<article class="my-design-card my-design-legacy-card" data-job-card="${esc(job.id)}"><div class="my-design-image">${image}</div><div class="my-design-copy"><h2>${esc(title)} · ${esc(variant.color||'')}</h2>${designPromptMarkup(job.prompt)}<span class="my-design-state">${esc(jobStatusLabel(job.status))}</span><p>${esc(activeLocale==='ja-JP'?'作成サイトは記録されていない以前のデザインです。':activeLocale==='es-MX'?'Este diseño anterior no tiene un sitio de creación registrado.':'Older design · original site not recorded.')}</p>${unavailableNote}${variantChoices}<div class="my-design-actions"><button type="button" class="btn primary" data-job-add="${esc(job.id)}" ${addDisabled?'disabled':''}>${activeLocale==='ja-JP'?'カートに追加':activeLocale==='es-MX'?'Agregar al carrito':'Add to bag'}</button><button type="button" class="my-design-delete" data-job-delete="${esc(job.id)}">${activeLocale==='ja-JP'?'削除':activeLocale==='es-MX'?'Eliminar':'Delete'}</button></div></div></article>`;
         }).join('');
         grid.insertAdjacentHTML('beforeend',`<details class="my-design-legacy"><summary>${legacyTitle} (${legacyJobs.length})</summary><p>${legacyNote}</p><div class="my-design-legacy-grid">${legacyCards}</div></details>`);
       }
@@ -1751,7 +1757,7 @@
       grid.onclick=async event=>{
         const colorChoice=event.target.closest('[data-job-color-choice]');
         if(colorChoice){
-          const job=jobs.find(item=>String(item.id)===colorChoice.dataset.jobColorChoice),card=colorChoice.closest('[data-job-card]'),variant=designVariant(job),color=colorChoice.dataset.color,picker=colorChoice.closest('.my-design-color-picker');
+          const job=actionableJobs.find(item=>String(item.id)===colorChoice.dataset.jobColorChoice),card=colorChoice.closest('[data-job-card]'),variant=designVariant(job),color=colorChoice.dataset.color,picker=colorChoice.closest('.my-design-color-picker');
           if(!job||!color||color===variant.color)return;
           picker.dataset.pendingColor=color;
           picker.querySelectorAll('[data-job-color-choice]').forEach(button=>button.setAttribute('aria-pressed',String(button===colorChoice)));
@@ -1760,16 +1766,16 @@
           return;
         }
         const cancelColor=event.target.closest('[data-job-color-cancel]');
-        if(cancelColor){const picker=cancelColor.closest('.my-design-color-picker'),job=jobs.find(item=>String(item.id)===cancelColor.dataset.jobColorCancel),color=designVariant(job).color;picker?.querySelectorAll('[data-job-color-choice]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.color===color)));if(picker){delete picker.dataset.pendingColor;picker.querySelector('[data-color-confirm]').hidden=true;}return;}
+        if(cancelColor){const picker=cancelColor.closest('.my-design-color-picker'),job=actionableJobs.find(item=>String(item.id)===cancelColor.dataset.jobColorCancel),color=designVariant(job).color;picker?.querySelectorAll('[data-job-color-choice]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.color===color)));if(picker){delete picker.dataset.pendingColor;picker.querySelector('[data-color-confirm]').hidden=true;}return;}
         const confirmColor=event.target.closest('[data-job-color-confirm]');
-        if(confirmColor){const job=jobs.find(item=>String(item.id)===confirmColor.dataset.jobColorConfirm),card=confirmColor.closest('[data-job-card]'),picker=confirmColor.closest('.my-design-color-picker'),product=products.find(item=>item.id===job?.product_id),color=picker?.dataset.pendingColor,size=card?.querySelector('[data-job-size]')?.value||designVariant(job).size||product?.sizes?.[0];if(!job||!color||!size)return;confirmColor.disabled=true;confirmColor.textContent='Starting…';picker.querySelectorAll('[data-job-color-choice],[data-job-color-cancel]').forEach(button=>button.disabled=true);try{await createColorVariant(job,color,size,null,async()=>{grid.dataset.signature='';await loadMyDesigns();});}catch(error){toast(error.message||'Could not create this color variation.');confirmColor.disabled=false;confirmColor.textContent='Confirm generation';picker.querySelectorAll('[data-job-color-choice],[data-job-color-cancel]').forEach(button=>button.disabled=false);}return;}
+        if(confirmColor){const job=actionableJobs.find(item=>String(item.id)===confirmColor.dataset.jobColorConfirm),card=confirmColor.closest('[data-job-card]'),picker=confirmColor.closest('.my-design-color-picker'),product=products.find(item=>item.id===job?.product_id),color=picker?.dataset.pendingColor,size=card?.querySelector('[data-job-size]')?.value||designVariant(job).size||product?.sizes?.[0];if(!job||!color||!size)return;confirmColor.disabled=true;confirmColor.textContent='Starting…';picker.querySelectorAll('[data-job-color-choice],[data-job-color-cancel]').forEach(button=>button.disabled=true);try{await createColorVariant(job,color,size,null,async()=>{grid.dataset.signature='';await loadMyDesigns();});}catch(error){toast(error.message||'Could not create this color variation.');confirmColor.disabled=false;confirmColor.textContent='Confirm generation';picker.querySelectorAll('[data-job-color-choice],[data-job-color-cancel]').forEach(button=>button.disabled=false);}return;}
         const retryButton=event.target.closest('[data-job-retry]');
         if(retryButton){const job=jobs.find(item=>String(item.id)===retryButton.dataset.jobRetry);if(job)retryFailedDesign(job);return;}
         const runButton=event.target.closest('[data-job-run]');
         if(runButton){const id=runButton.dataset.jobRun;runButton.disabled=true;runButton.textContent='Starting…';await startGenerationRun(id);grid.dataset.signature='';loadMyDesigns();return;}
         const addButton=event.target.closest('[data-job-add]');
         if(addButton){
-          const job=jobs.find(item=>String(item.id)===addButton.dataset.jobAdd),product=products.find(p=>p.id===job?.product_id),card=addButton.closest('[data-job-card]'),savedVariant=designVariant(job),color=card?.querySelector('[data-job-color]')?.value||savedVariant.color||(product?.colors?.length===1?product.colors[0]:''),size=card?.querySelector('[data-job-size]')?.value||savedVariant.size||(product?.sizes?.length===1?product.sizes[0]:'');
+          const job=actionableJobs.find(item=>String(item.id)===addButton.dataset.jobAdd),product=products.find(p=>p.id===job?.product_id),card=addButton.closest('[data-job-card]'),savedVariant=designVariant(job),color=card?.querySelector('[data-job-color]')?.value||savedVariant.color||(product?.colors?.length===1?product.colors[0]:''),size=card?.querySelector('[data-job-size]')?.value||savedVariant.size||(product?.sizes?.length===1?product.sizes[0]:'');
           if(!job||job.status!=='completed'){toast('This design is not ready yet.');return;}
           if(!color){toast('Choose a product color before adding this design to your bag.');card?.querySelector('[data-job-color]')?.focus();return;}
           if(!size){toast('Choose a product size before adding this design to your bag.');card?.querySelector('[data-job-size]')?.focus();return;}
@@ -1787,7 +1793,7 @@
         const deleteButton=event.target.closest('[data-job-delete]');
         if(deleteButton){
           const id=deleteButton.dataset.jobDelete||'';
-          const job=jobs.find(item=>String(item.id)===id);
+          const job=actionableJobs.find(item=>String(item.id)===id);
           if(!id){toast('This design is missing its task ID. Refresh My Designs and try again.');return;}
           deleteButton.disabled=true;deleteButton.textContent='Deleting…';deleteButton.setAttribute('aria-busy','true');
           try{
@@ -1824,14 +1830,14 @@
       const result=await response.json();if(!response.ok)throw new Error(result.error||'Could not load your designs.');
       const jobs=Array.isArray(result.jobs)?result.jobs:[];
       const legacyJobs=Array.isArray(result.legacy_jobs)?result.legacy_jobs:[];
-      if(!jobs.length){const note=legacyJobs.length?(activeLocale==='ja-JP'?'以前のデザインは作成サイトが記録されていないため、この一覧には表示されません。':activeLocale==='es-MX'?'Los diseños anteriores no aparecen aquí porque no se guardó el sitio donde se crearon.':'Older designs are kept in My Designs because their original site was not recorded.'):(activeLocale==='ja-JP'?'このサイトのデザインはまだありません。':activeLocale==='es-MX'?'Todavía no hay diseños para este sitio.':'No designs for this site yet.');container.innerHTML=`<div class="studio-saved-empty"><strong>${activeLocale==='ja-JP'?'デザインはありません':activeLocale==='es-MX'?'No hay diseños':'No designs yet'}</strong><p>${note}</p></div>`;return;}
-      const designs=await Promise.all(jobs.map(async job=>{
+      if(!jobs.length&&!legacyJobs.length){const note=activeLocale==='ja-JP'?'このサイトのデザインはまだありません。':activeLocale==='es-MX'?'Todavía no hay diseños para este sitio.':'No designs for this site yet.';container.innerHTML=`<div class="studio-saved-empty"><strong>${activeLocale==='ja-JP'?'デザインはありません':activeLocale==='es-MX'?'No hay diseños':'No designs yet'}</strong><p>${note}</p></div>`;return;}
+      const designs=await Promise.all([...jobs,...legacyJobs].map(async job=>{
         if(job.status!=='completed')return {job,image:''};
         try{const detail=await fetch(`/api/vibeya/ai/jobs/${encodeURIComponent(job.id)}`,{credentials:'same-origin',cache:'no-store'});const data=await detail.json();return {job,image:detail.ok?data.job?.image||'':''};}
         catch{return {job,image:''};}
       }));
       if(request!==studioDesignsRequest||studioViewMode!=='designs')return;
-      container.innerHTML=`${legacyJobs.length?`<p class="studio-saved-legacy-note">${activeLocale==='ja-JP'?'サイト情報のない以前のデザインは「My Designs」で確認できます。':activeLocale==='es-MX'?'Consulta los diseños anteriores sin sitio registrado en My Designs.':'Older designs without a recorded site are kept in My Designs.'}</p>`:''}<div class="studio-saved-designs">${designs.map(({job,image})=>{
+      container.innerHTML=`${legacyJobs.length?`<p class="studio-saved-legacy-note">${activeLocale==='ja-JP'?'作成サイトが未記録の以前のデザインも表示しています。商品が現在のサイトで販売されている場合は、カートに追加したり色を変更したりできます。':activeLocale==='es-MX'?'También se muestran diseños anteriores sin sitio registrado. Puedes agregarlos al carrito o cambiar el color si el producto está disponible en este sitio.':'Older designs without a recorded site are included. You can add them to your bag or change color when the product is available on this site.'}</p>`:''}<div class="studio-saved-designs">${designs.map(({job,image})=>{
         const product=products.find(item=>item.id===job.product_id),title=product?.name||job.product_id||'Custom product';
         const variant=designVariant(job);
         const visual=image?`<button type="button" class="studio-saved-image" data-studio-job-preview="${esc(job.id)}" aria-label="Enlarge ${esc(title)} image" title="Click to enlarge"><img src="${esc(image)}" alt="${esc(title)} generated design" loading="lazy"></button>`:`<div class="studio-saved-placeholder">${esc(jobStatusLabel(job.status))}</div>`;
