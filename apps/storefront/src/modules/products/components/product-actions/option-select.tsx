@@ -26,18 +26,29 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
 }) => {
   const filteredOptions = (option.values ?? []).map((v) => v.value)
   const marketCopy = getProductMarketCopy(countryCode)
+  const hasLongSizeLabels =
+    /size|dimension/i.test(title) && filteredOptions.some((value) => value.length >= 14)
 
   return (
     <fieldset className="flex flex-col gap-y-3" disabled={disabled}>
       <legend className="text-sm mb-3">{marketCopy ? `${marketCopy.select} ${translateProductOption(countryCode, title)}` : `Select ${title}`}</legend>
       <div
-        className="flex flex-wrap justify-between gap-2"
+        className={clx("flex flex-wrap gap-2", {
+          "justify-start": hasLongSizeLabels,
+          "justify-between": !hasLongSizeLabels,
+        })}
         data-testid={dataTestId}
       >
         {filteredOptions.map((v) => {
           const id = `${name}-${v}`.replace(/[^A-Za-z0-9_-]/g, "-")
           return (
-            <div key={v} className="flex-1">
+            <div
+              key={v}
+              className={clx({
+                "w-fit min-w-32 max-w-[10rem] flex-none": hasLongSizeLabels,
+                "flex-1": !hasLongSizeLabels,
+              })}
+            >
               <input
                 type="radio"
                 id={id}
@@ -50,7 +61,10 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               <label
                 htmlFor={id}
                 className={clx(
-                  "flex items-center justify-center cursor-pointer border-ui-border-base bg-ui-bg-subtle border text-small-regular h-10 rounded-rounded p-2 peer-focus-visible:ring-2 peer-focus-visible:ring-offset-1 peer-disabled:cursor-not-allowed",
+                  "flex items-center justify-center cursor-pointer border-ui-border-base bg-ui-bg-subtle border text-small-regular rounded-rounded p-2 peer-focus-visible:ring-2 peer-focus-visible:ring-offset-1 peer-disabled:cursor-not-allowed",
+                  hasLongSizeLabels
+                    ? "h-auto min-h-10 w-full whitespace-normal px-3 py-2 text-center leading-5"
+                    : "h-10",
                   {
                     "border-ui-border-interactive": v === current,
                     "hover:shadow-elevation-card-rest transition-shadow ease-in-out duration-150":

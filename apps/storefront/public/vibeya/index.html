@@ -1920,8 +1920,17 @@
     }
     return null;
   }
-  function routeCatalog(renderRoute=true){
+  let pendingParentHash=null;
+  function routeCatalog(renderRoute=true,relayParentRoute=false){
     const [key,routeQuery='']=location.hash.slice(1).split('?');
+    const currentStandaloneProduct=new URLSearchParams(location.search).get('standaloneProductId');
+    const routeHash=key==='ideas'?'#inspiration':`#${key}`;
+    const isExternalPageRoute=key==='shop'||key==='ideas'||key==='my-designs'||key.startsWith('product-')&&key!==`product-${currentStandaloneProduct}`||key==='top'&&new URLSearchParams(location.search).get('standalone')==='1';
+    if(relayParentRoute&&window.parent!==window&&isExternalPageRoute){
+      const product=key.startsWith('product-')?products.find(p=>p.id===key.slice(8)):undefined;
+      window.parent.postMessage({type:'vibeya:route',hash:routeHash,color:new URLSearchParams(routeQuery).get('color')||selectedColor,handle:product?.handle,locale:navLanguage?.value||marketDefaultLocale},location.origin);
+      return;
+    }
     if(key.startsWith('product-')){
       const product=products.find(p=>p.id===key.slice(8));
       if(product?.handle&&window.parent===window&&new URLSearchParams(location.search).get('standalone')!=='1'){
@@ -1957,7 +1966,7 @@
       const hash=event.data.hash;
       const [key]=hash.slice(1).split('?');
       if(/^(top|shop|create|how-it-works|inspiration|my-designs|product-[a-z0-9-]+)$/.test(key)){
-        if(location.hash!==hash)location.hash=hash;else routeCatalog();
+        if(location.hash!==hash){pendingParentHash=hash;location.hash=hash;}else routeCatalog();
       }
       return;
     }
@@ -2475,6 +2484,12 @@ const blanket=chosen.id==='sds-97226';
     syncVariants();
   }
   function openProductById(id,color){
+    const p=products.find(x=>x.id===id);
+    const standaloneProductId=new URLSearchParams(location.search).get('standaloneProductId');
+    if(window.parent!==window&&p?.handle&&standaloneProductId!==id){
+      window.parent.postMessage({type:'vibeya:route',hash:'#product-'+id,color,handle:p.handle,locale:navLanguage?.value||marketDefaultLocale},location.origin);
+      return;
+    }
     // Catalog clicks should leave the shared catalog for the canonical detail
     // page. In standalone detail mode this function is also used to initialize
     // the design studio; redirecting the top window here unloads the iframe
@@ -2483,7 +2498,7 @@ const blanket=chosen.id==='sds-97226';
       window.top.location.assign(marketPath('products/vibeya-custom-metal-bottle-cap-wall-sign'));
       return;
     }
-    const p=products.find(x=>x.id===id);if(!p)return;
+    if(!p)return;
       chosen=p;const requestedColor=id==='sds-128646'&&color==='NightGarden'?'White':color;selectedColor=p.colors?.includes(requestedColor)?requestedColor:(p.colors?.[0]||'Black');selectedColorConfirmed=p.colors?.length===1||p.colors?.includes(requestedColor);selectedSize=p.sizes?.length===1?p.sizes[0]:p.id==='sds-138708'||p.id==='vibeya-shower-curtain'||p.id==='sds-137892'||p.id==='sds-63823'||p.sizePrices?p.sizes[0]:'';selectedPrint=(id==='sds-128646'||id==='sds-138708')?'wrap':id==='sds-63823'?'both':'front';if(id==='sds-233939')selectedUniformZones=uniformPrintZones.map(([zone])=>zone);$('#preserveOriginalDesign').checked=false;
     renderProductDetails();drawStudioVariantChoices();setGallery(0);syncVariants();location.hash='#product-'+id;
     if(location.hash==='#product-'+id){routeCatalog();}
@@ -2495,7 +2510,11 @@ const blanket=chosen.id==='sds-97226';
   syncBackendCatalog();
   drawStudioVariantChoices();
   renderProductCards();renderInspo();paintProducts();paintIdeas();refreshCount();migrateLegacyBag();drawPreview();routeCatalog();
-  window.addEventListener('hashchange',routeCatalog);
+  window.addEventListener('hashchange',()=>{
+    const cameFromParent=pendingParentHash===location.hash;
+    pendingParentHash=null;
+    routeCatalog(true,!cameFromParent);
+  });
   const urlParams=new URLSearchParams(location.search);
   if(urlParams.get('addInspiration')==='hoodie-orbit-bloom'){
     const color=urlParams.get('color'),size=urlParams.get('size'),print=urlParams.get('print');

@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 import {
   getVibeyaImage,
   type VibeyaProduct,
 } from "../data/products"
 import styles from "./product-explorer.module.css"
 import { useVibeyaProducts } from "../data/use-vibeya-products"
-import { useVibeyaMenu } from "../data/use-vibeya-menu"
+import { getVibeyaInspirationHref, useVibeyaMenu } from "../data/use-vibeya-menu"
 
 type ProductExplorerProps = {
   productId?: string
@@ -247,10 +248,10 @@ function ProductDetail({
 }
 
 export default function ProductExplorer({ productId, initialColor, onNavigate, onCustomize }: ProductExplorerProps) {
+  const { countryCode = "us" } = useParams<{ countryCode?: string }>()
   const products = useVibeyaProducts()
   const navigation = useVibeyaMenu()
   const selectedProduct = products.find((product) => product.id === productId)
-  const onSelect = (product: VibeyaProduct, color: string) => onNavigate(`#product-${product.id}?color=${encodeURIComponent(color)}`)
 
   return (
     <div className={styles.shell}>
@@ -259,7 +260,7 @@ export default function ProductExplorer({ productId, initialColor, onNavigate, o
         <nav aria-label="Main navigation">
           {navigation.map((item) => {
             if (item.target === "inspiration") {
-              return <Link key={item.id} href="/vibeya/inspiration/index.html" className={item.featured ? styles.navFeatured : undefined}>{item.label}</Link>
+              return <Link key={item.id} href={getVibeyaInspirationHref(countryCode)} className={item.featured ? styles.navFeatured : undefined}>{item.label}</Link>
             }
             if (item.target === "custom") {
               return <a key={item.id} href={item.customHref || "/"} className={item.featured ? styles.navFeatured : undefined}>{item.label}</a>

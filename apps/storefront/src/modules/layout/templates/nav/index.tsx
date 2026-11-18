@@ -4,11 +4,11 @@ import { useEffect, useState, useTransition } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { updateRegion } from "@lib/data/cart"
 import { updateLocale } from "@lib/data/locale-actions"
-import { getMarketDefaultLocale, getMarketLocale } from "@lib/util/market-locale"
+import { getMarketLocale } from "@lib/util/market-locale"
 import marketTranslations from "@lib/util/market-translations.json"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import HowItWorksDialog from "@modules/vibeya/components/how-it-works-dialog"
-import { getVibeyaMenuHref, useVibeyaMenu } from "@modules/vibeya/data/use-vibeya-menu"
+import { getVibeyaInspirationHref, getVibeyaMenuHref, useVibeyaMenu } from "@modules/vibeya/data/use-vibeya-menu"
 import styles from "./nav.module.css"
 
 const DESTINATIONS = Object.keys(marketTranslations.markets)
@@ -60,10 +60,7 @@ export default function Nav({ countryCode, currentLocale }: NavProps) {
   const changeDestination = (nextCountry: string) => {
     if (nextCountry === normalizedCountry) return
     startTransition(async () => {
-      await updateLocale(getMarketDefaultLocale(nextCountry)).catch(() => undefined)
       await updateRegion(nextCountry)
-      router.push(`/${nextCountry}/`)
-      router.refresh()
     })
   }
   const changeLanguage = (locale: string) => {
@@ -93,7 +90,7 @@ export default function Nav({ countryCode, currentLocale }: NavProps) {
             {navigation.map((item) => {
               const href = getVibeyaMenuHref(item)
               const destinationHref = item.target === "inspiration"
-                ? `${href}?country=${encodeURIComponent(normalizedCountry)}&locale=${encodeURIComponent(currentLanguage)}`
+                ? getVibeyaInspirationHref(normalizedCountry, currentLanguage)
                 : href
               const className = item.featured ? styles.featured : styles.link
               const content = <>{item.target === "create" && "✦  "}{translatedMenuLabels[item.target] ?? item.label}</>

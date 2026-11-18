@@ -3,6 +3,7 @@ import { getMarketLocale } from "@lib/util/market-locale"
 import { getMarketUiCopy } from "@lib/util/market-ui-copy"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import HowItWorksTrigger from "@modules/vibeya/components/how-it-works-trigger"
+import { getVibeyaInspirationHref } from "@modules/vibeya/data/use-vibeya-menu"
 
 export default function Footer({ countryCode }: { countryCode: string }) {
   const locale = getMarketLocale(countryCode)
@@ -58,7 +59,7 @@ export default function Footer({ countryCode }: { countryCode: string }) {
             <li>
               <a
                 className="hover:text-[#8f60ed]"
-                href={`/vibeya/inspiration/index.html?country=${countryCode}&locale=${locale}`}
+                href={getVibeyaInspirationHref(countryCode, locale)}
               >
                 {text("footerInspiration", "Inspiration")}
               </a>
@@ -66,7 +67,7 @@ export default function Footer({ countryCode }: { countryCode: string }) {
             <li>
               <HowItWorksTrigger
                 className="hover:text-[#8f60ed]"
-                href="/#how-it-works"
+                href={`/${countryCode}/#how-it-works`}
               >
                 {text("footerHow", "How it works")}
               </HowItWorksTrigger>

@@ -3,7 +3,7 @@
 import AuthModal from "./auth-modal"
 import { updateRegion } from "@lib/data/cart"
 import { updateLocale } from "@lib/data/locale-actions"
-import { getMarketDefaultLocale, getMarketLocale } from "@lib/util/market-locale"
+import { getMarketLocale } from "@lib/util/market-locale"
 import { ProductCards } from "@modules/vibeya/components/product-explorer"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createPortal } from "react-dom"
@@ -22,35 +22,43 @@ function getStudioReturnUrl(countryCode: string, request: StudioRequest) {
 }
 
 export default function VibeyaHome({ countryCode, locale, isAuthenticated, standaloneProductId, standaloneColor, standaloneSize, standaloneRoute, listing }: { countryCode: string; locale?: string | null; isAuthenticated: boolean; standaloneProductId?: string; standaloneColor?: string; standaloneSize?: string; standaloneRoute?: string; listing?: ProductListing }) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const activeView = searchParams.get("view")
   const marketLocale = getMarketLocale(countryCode, locale ?? undefined)
   const isListingPage = Boolean(listing)
   const standaloneHash = standaloneProductId
     ? `#product-${standaloneProductId}?color=${encodeURIComponent(standaloneColor || "Black")}${standaloneSize ? `&size=${encodeURIComponent(standaloneSize)}` : ""}`
     : standaloneRoute || "#top"
   const initialFrameParams = new URLSearchParams({
-    v: "anchor-free-navigation-20261118-1",
+    v: "single-navigation-20261118-1",
     country: countryCode.toLowerCase(),
     locale: marketLocale,
   })
   if (standaloneProductId || standaloneRoute) initialFrameParams.set("standalone", "1")
+  if (standaloneProductId) initialFrameParams.set("standaloneProductId", standaloneProductId)
   if (listing) {
     initialFrameParams.set("listing", listing.slug)
     initialFrameParams.set("handles", listing.handles.join(","))
+  }
+  const currentParams = new URLSearchParams(searchParams.toString())
+  for (const key of ["viewCart", "openStudio", "openSearch", "view", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
+    const value = currentParams.get(key)
+    if (value && (key !== "openStudio" || isAuthenticated)) initialFrameParams.set(key, value)
   }
   const initialFrameHash = standaloneProductId || standaloneRoute
     ? standaloneHash
     : listing
       ? "#shop"
-      : ""
+      : activeView === "designs"
+        ? "#my-designs"
+        : ""
   const initialFrameSrc = `/vibeya/index.html?${initialFrameParams.toString()}${initialFrameHash}`
   const [authOpen, setAuthOpen] = useState(false)
   const [authRedirectTo, setAuthRedirectTo] = useState<string>()
   const [studioLayer, setStudioLayer] = useState(false)
   const [homeCardsTarget, setHomeCardsTarget] = useState<HTMLElement | null>(null)
   const frameRef = useRef<HTMLIFrameElement>(null)
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const activeView = searchParams.get("view")
 
   useEffect(() => {
     if (!isAuthenticated) return
@@ -114,10 +122,11 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       return
     }
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "anchor-free-navigation-20261118-1")
+    forwardedParams.set("v", "single-navigation-20261118-1")
     forwardedParams.set("country", countryCode.toLowerCase())
     forwardedParams.set("locale", marketLocale)
     if (standaloneProductId || standaloneRoute) forwardedParams.set("standalone", "1")
+    if (standaloneProductId) forwardedParams.set("standaloneProductId", standaloneProductId)
     if (listing) {
       forwardedParams.set("listing", listing.slug)
       forwardedParams.set("handles", listing.handles.join(","))
@@ -204,13 +213,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       if (event.data?.type === "vibeya:change-destination" && typeof event.data.countryCode === "string") {
         const nextCountry = event.data.countryCode.toLowerCase()
         if (!["us", "ca", "jp", "mx"].includes(nextCountry) || nextCountry === countryCode.toLowerCase()) return
-        const nextLocale = getMarketDefaultLocale(nextCountry)
-        // Changing the market must not be blocked by a stale cart's locale update.
-        void updateLocale(nextLocale)
-          .catch(() => undefined)
-          .then(() => updateRegion(nextCountry))
-          .then(() => router.push(`/${nextCountry}/`))
-          .catch(() => undefined)
+        void updateRegion(nextCountry).catch(() => undefined)
         return
       }
       if (event.data?.type === "vibeya:change-language" && typeof event.data.locale === "string") {
@@ -276,6 +279,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
           return
         }
         if (incomingHash === "#my-designs") {
+          if (activeView === "designs") return
           const target = new URL(`/${countryCode.toLowerCase()}/`, window.location.origin)
           target.searchParams.set("view", "designs")
           const locale = new URLSearchParams(window.location.search).get("locale")
@@ -381,6 +385,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
         }
       `}</style>
       <iframe
+        key={`${countryCode}-${standaloneProductId ?? standaloneRoute ?? listing?.slug ?? "home"}`}
         ref={frameRef}
         className="vibeya-theme-frame"
         src={initialFrameSrc}

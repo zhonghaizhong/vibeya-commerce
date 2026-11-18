@@ -17,7 +17,8 @@ import {
   setCartId,
 } from "./cookies"
 import { getRegion } from "./regions"
-import { getLocale } from "./locale-actions"
+import { getLocale, setLocaleCookie } from "./locale-actions"
+import { getMarketDefaultLocale } from "@lib/util/market-locale"
 
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
@@ -429,6 +430,10 @@ export async function updateRegion(countryCode: string) {
   if (!region) {
     throw new Error(`Region not found for country code: ${countryCode}`)
   }
+
+  // Save the market and its default language in one server action so the
+  // browser performs a single navigation directly to the selected homepage.
+  await setLocaleCookie(getMarketDefaultLocale(normalizedCountryCode))
 
   const regionCacheTag = await getCacheTag("regions")
   revalidateTag(regionCacheTag, { expire: 0 })
