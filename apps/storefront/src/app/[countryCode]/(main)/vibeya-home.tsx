@@ -132,24 +132,24 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       forwardedParams.delete("openStudio")
     }
 
-    const hash = activeView === "designs"
-      ? "#my-designs"
-      : standaloneHash !== "#top"
-      ? standaloneHash
-      : listing
+    const hash = listing
       ? "#shop"
-      : [
-      "#top",
-      "#shop",
-      "#create",
-      "#how-it-works",
-      "#inspiration",
-      "#my-designs",
-    ].includes(window.location.hash)
-      ? window.location.hash
-      : window.location.hash.startsWith("#product-")
-        ? window.location.hash
-      : ""
+      : activeView === "designs"
+        ? "#my-designs"
+        : standaloneHash !== "#top"
+          ? standaloneHash
+          : [
+              "#top",
+              "#shop",
+              "#create",
+              "#how-it-works",
+              "#inspiration",
+              "#my-designs",
+            ].includes(window.location.hash)
+            ? window.location.hash
+            : window.location.hash.startsWith("#product-")
+              ? window.location.hash
+              : ""
     const query = forwardedParams.toString()
     const homeUrl = `/vibeya/index.html${query ? `?${query}` : ""}${hash}`
     const frame = frameRef.current
@@ -304,7 +304,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
 
     const syncFromHistory = () => {
       frameRef.current?.contentWindow?.postMessage(
-        { type: "vibeya:set-route", hash: new URLSearchParams(window.location.search).get("view") === "designs" ? "#my-designs" : window.location.hash || standaloneHash },
+        { type: "vibeya:set-route", hash: isListingPage ? "#shop" : activeView === "designs" ? "#my-designs" : window.location.hash || standaloneHash },
         window.location.origin
       )
     }
@@ -358,13 +358,13 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       })
 
       frame.contentWindow?.postMessage(
-        { type: "vibeya:set-route", hash: new URLSearchParams(window.location.search).get("view") === "designs" ? "#my-designs" : window.location.hash || standaloneHash },
+        { type: "vibeya:set-route", hash: isListingPage ? "#shop" : activeView === "designs" ? "#my-designs" : window.location.hash || standaloneHash },
         window.location.origin
       )
 
       mountProductCards()
     },
-    [countryCode, isAuthenticated, marketLocale, mountProductCards, standaloneHash]
+    [activeView, countryCode, isAuthenticated, isListingPage, marketLocale, mountProductCards, standaloneHash]
   )
 
   return (
