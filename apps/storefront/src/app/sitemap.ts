@@ -142,7 +142,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       entries
         .filter((entry) =>
           entry.handle &&
-          !(prefix === "categories" && PRODUCT_CATEGORY_GROUPS.some((group) => group.slug === entry.handle)) &&
+          !(prefix === "categories" && PRODUCT_CATEGORY_GROUPS.some((group) =>
+            group.slug === entry.handle || group.legacyHandles.includes(entry.handle!)
+          )) &&
           getProductIds(entry).some((id) => availableIds.has(id))
         )
         .map((entry) => {

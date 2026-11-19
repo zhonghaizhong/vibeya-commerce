@@ -161,6 +161,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.rewrite(destination)
   }
 
+  const inactiveMarketPath = pathname.match(/^\/(de|dk|es|fr|gb|it|se)(?:\/|$)/i)
+  if (inactiveMarketPath) {
+    return new NextResponse("Not found", {
+      status: 404,
+      headers: { "X-Robots-Tag": "noindex, nofollow" },
+    })
+  }
+
   const marketHome = pathname.match(/^\/(us|ca|mx|jp)\/?$/i)
   if (marketHome && !pathname.endsWith("/")) {
     return redirectToPath(`/${marketHome[1].toLowerCase()}/`)

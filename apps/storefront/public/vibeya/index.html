@@ -3,8 +3,24 @@
 <head>
   <script>
     const initialPageParams=new URLSearchParams(location.search);
+    const initialMarketCountry=(initialPageParams.get('country')||'us').toLowerCase();
+    document.addEventListener('click',event=>{
+      if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+      const link=event.target?.closest?.('a[data-store-route]');
+      if(!link)return;
+      const marketSelect=document.getElementById('navDestination');
+      const languageSelect=document.getElementById('navLanguage');
+      const country=(marketSelect?.dataset.marketReady==='true'?marketSelect.value:initialMarketCountry).toLowerCase();
+      const locale=languageSelect?.dataset.marketReady==='true'?languageSelect.value:initialPageParams.get('locale');
+      const route=link.dataset.storeRoute;
+      const target=new URL(`/${country}/${route==='home'?'':route}`,location.origin);
+      if(locale)target.searchParams.set('locale',locale);
+      event.preventDefault();
+      window.top.location.assign(target.href);
+    },true);
     if(initialPageParams.has('standaloneProductId')||location.hash.startsWith('#product-'))document.documentElement.classList.add('vibeya-product-route-pending');
     if(initialPageParams.get('view')==='designs'||location.hash.split('?')[0]==='#my-designs')document.documentElement.classList.add('vibeya-designs-route-pending');
+    if(initialPageParams.has('listing')||location.hash.split('?')[0]==='#shop')document.documentElement.classList.add('vibeya-catalog-route-pending');
     if(initialPageParams.get('embeddedStudio')==='1')document.documentElement.classList.add('studio-embedded');
   </script>
   <meta charset="UTF-8" />
@@ -229,6 +245,8 @@
     .catalog-page{display:none;min-height:72vh;}
     body[data-view="shop"] #top, body[data-view="ideas"] #top{display:none;}
     body[data-view="shop"] #shop,body[data-view="ideas"] #ideas{display:block;}
+    html.vibeya-catalog-route-pending #top{display:none!important;}
+    html.vibeya-catalog-route-pending #shop{display:block!important;}
     body[data-view="designs"] #top,body[data-view="designs"] #shop,body[data-view="designs"] #ideas{display:none;}
     body[data-view="designs"] #myDesignsPage{display:block;}
     html.vibeya-designs-route-pending #top,html.vibeya-designs-route-pending #shop,html.vibeya-designs-route-pending #ideas{display:none!important;}
@@ -1170,6 +1188,7 @@
   const $=s=>document.querySelector(s);
   const marketCountryCode=()=>new URLSearchParams(location.search).get('country')||'us';
   const marketPath=path=>`/${encodeURIComponent(marketCountryCode())}/${String(path||'').replace(/^\/+/, '')}`;
+  document.querySelectorAll('[data-store-route]').forEach(link=>{const target=link.dataset.storeRoute;link.href=marketPath(target==='home'?'':target);});
   const marketCatalog=window.VIBEYA_MARKET_TRANSLATIONS;
   const navTranslations=marketCatalog.navigation;
   const applyNavigationLocale=locale=>{
@@ -1200,6 +1219,8 @@
   if(navLanguage)navLanguage.replaceChildren(...supportedLanguages.map(locale=>new Option(localeNames[locale],locale)));
   if(navDestination)navDestination.value=marketCountryCode().toLowerCase();
   if(navLanguage)navLanguage.value=activeLocale;
+  if(navDestination)navDestination.dataset.marketReady='true';
+  if(navLanguage)navLanguage.dataset.marketReady='true';
   applyNavigationLocale(navLanguage?.value||'en-US');
   const withMarketContext=href=>{const url=new URL(href,location.href);if(url.pathname.includes('/vibeya/inspiration/')){url.searchParams.set('country',marketCountryCode().toLowerCase());url.searchParams.set('locale',navLanguage?.value||marketDefaultLocale);}return url.pathname+url.search+url.hash;};
   document.querySelectorAll('a[href*="inspiration/index.html"]').forEach(link=>link.href=withMarketContext(link.href));
@@ -1980,6 +2001,7 @@
       }
     }
     document.body.dataset.view=key==='shop'?'shop':key==='ideas'?'ideas':key==='my-designs'?'designs':key.startsWith('product-')?'product':'home';
+    if(key==='shop')document.documentElement.classList.remove('vibeya-catalog-route-pending');
     if(key==='my-designs')document.documentElement.classList.remove('vibeya-designs-route-pending');
     document.querySelectorAll('#nav a[aria-current]').forEach(el=>el.removeAttribute('aria-current'));
     const sel=document.body.dataset.view==='shop'||document.body.dataset.view==='product'?'a[data-menu-target="shop"]':document.body.dataset.view==='ideas'?'a[href="inspiration/index.html"]':document.body.dataset.view==='designs'?'a[href="#my-designs"]':'a[href="#top"]';

@@ -15,6 +15,7 @@ import { getVibeyaMarket } from "@lib/vibeya/region"
 import { SUPPORTED_MARKET_COUNTRIES, SupportedMarketCountry } from "@lib/vibeya/markets"
 import { getMarketAlternateUrls, getMarketLocale, getMarketLocaleUrl } from "@lib/util/market-locale"
 import { retrieveCustomer } from "@lib/data/customer"
+import { getVibeyaImage, vibeyaProducts } from "@modules/vibeya/data/products"
 import VibeyaHome from "../../vibeya-home"
 
 const VIBEYA_DETAIL_IDS: Record<string, string> = {
@@ -210,6 +211,13 @@ export default async function ProductPage(props: Props) {
   const origin = await getSiteOrigin()
   const locale = getMarketLocale(params.countryCode, searchParams.locale)
   const localizedSeo = LOCALIZED_PRODUCT_SEO[pricedProduct.handle]?.[locale]
+  const vibeyaProductId = VIBEYA_DETAIL_IDS[pricedProduct.handle]
+  const localProduct = vibeyaProductId
+    ? vibeyaProducts.find((item) => item.id === vibeyaProductId)
+    : undefined
+  const fallbackImages = localProduct?.colors[0]
+    ? [new URL(getVibeyaImage(localProduct, localProduct.colors[0]), origin).toString()]
+    : []
   const structuredData = buildProductStructuredData({
     product: localizedSeo
       ? { ...pricedProduct, title: localizedSeo.title, description: localizedSeo.description }
@@ -217,9 +225,9 @@ export default async function ProductPage(props: Props) {
     region,
     countryCode: params.countryCode,
     productUrl: `${origin}/${params.countryCode}/products/${pricedProduct.handle}`,
+    fallbackImages,
   })
 
-  const vibeyaProductId = VIBEYA_DETAIL_IDS[pricedProduct.handle]
   if (!vibeyaProductId) {
     return (
       <>

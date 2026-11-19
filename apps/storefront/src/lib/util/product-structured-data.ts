@@ -20,11 +20,13 @@ export const buildProductStructuredData = ({
   region,
   countryCode,
   productUrl,
+  fallbackImages = [],
 }: {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   countryCode: string
   productUrl: string
+  fallbackImages?: string[]
 }) => {
   const currency = region.currency_code.toUpperCase()
   const images = (product.images ?? [])
@@ -32,6 +34,9 @@ export const buildProductStructuredData = ({
     .filter(Boolean)
   if (!images.length && product.thumbnail) {
     images.push(product.thumbnail)
+  }
+  if (!images.length) {
+    images.push(...fallbackImages.filter(Boolean))
   }
   const description = product.description || product.title
   const brand = { "@type": "Brand", name: STORE_NAME }
@@ -49,14 +54,12 @@ export const buildProductStructuredData = ({
       }))
       .filter((attribute) => attribute.name && attribute.value)
 
-    const getAttribute = (name: string) =>
-      attributes.find(
-        (attribute) => attribute.name?.trim().toLowerCase() === name
-      )?.value
+    const getAttribute = (pattern: RegExp) =>
+      attributes.find((attribute) => pattern.test(attribute.name?.trim() ?? ""))?.value
 
     return {
-      color: getAttribute("color") || getAttribute("colour"),
-      size: getAttribute("size"),
+      color: getAttribute(/\bcolou?r\b/i),
+      size: getAttribute(/\bsizes?\b/i),
       additionalProperty: attributes.map((attribute) => ({
         "@type": "PropertyValue",
         name: attribute.name,
@@ -64,13 +67,13 @@ export const buildProductStructuredData = ({
       })),
     }
   }
-  const schemaPropertyByOption = new Map([
-    ["color", "https://schema.org/color"],
-    ["colour", "https://schema.org/color"],
-    ["size", "https://schema.org/size"],
-    ["pattern", "https://schema.org/pattern"],
-    ["material", "https://schema.org/material"],
-  ])
+  const getSchemaProperty = (title: string): string | undefined => {
+    if (/\bcolou?r\b/i.test(title)) return "https://schema.org/color"
+    if (/\bsizes?\b/i.test(title)) return "https://schema.org/size"
+    if (/\bpattern\b/i.test(title)) return "https://schema.org/pattern"
+    if (/\bmaterial\b/i.test(title)) return "https://schema.org/material"
+    return undefined
+  }
 
   const buildOffer = (variant: HttpTypes.StoreProductVariant, url: string) => ({
     "@type": "Offer",
@@ -111,7 +114,7 @@ export const buildProductStructuredData = ({
       "@type": "Product",
       name: product.title,
       description,
-      image: variantImages.length ? variantImages : undefined,
+      image: variantImages.length ? variantImages : images.length ? images : undefined,
       brand,
       sku: variant?.sku || undefined,
       color: attributes?.color,
@@ -134,9 +137,7 @@ export const buildProductStructuredData = ({
     variesBy: Array.from(
       new Set(
         (product.options ?? [])
-          .map((option) =>
-            schemaPropertyByOption.get(option.title.trim().toLowerCase())
-          )
+          .map((option) => getSchemaProperty(option.title.trim()))
           .filter((property): property is string => Boolean(property))
       )
     ),
