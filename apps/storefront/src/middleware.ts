@@ -6,6 +6,21 @@ const BACKEND_URL =
   process.env.MEDUSA_INTERNAL_BACKEND_URL || process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
 const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
 const DEFAULT_REGION = process.env.NEXT_PUBLIC_DEFAULT_REGION || "us"
+const LEGACY_US_INSPIRATION_SLUGS = new Set([
+  "midnight-cat-cafe-custom-tumbler",
+  "hoodie-orbit-bloom",
+  "funny-skeleton-lazy-mood",
+  "duck-bubble-trouble-custom-bath-mat",
+  "no-nightmares-jesus-blanket",
+  "low-battery-club-custom-beanie",
+  "cat-bubble-cats-custom-shower-curtain",
+  "deadpan-penguin-custom-tankini",
+  "custom-kids-basketball-jersey-set",
+  "sauce-boss-custom-cooking-apron",
+  "stars-stripes-custom-denim-baseball-cap",
+  "raccoon-bar-crew-custom-metal-wall-sign",
+  "animal-yoga-set",
+])
 const AUTH_COOKIE_NAME = "_medusa_jwt"
 const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
 const AUTH_REFRESH_WINDOW_SECONDS = 60 * 60 * 24 * 7
@@ -121,7 +136,7 @@ async function getCountryCode(
   regionMap: Map<string, HttpTypes.StoreRegion | number>
 ) {
   const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
-  if (isSupportedMarketCountry(urlCountryCode) && regionMap.has(urlCountryCode)) {
+  if (isSupportedMarketCountry(urlCountryCode)) {
     return urlCountryCode
   }
 
@@ -190,10 +205,14 @@ export async function middleware(request: NextRequest) {
 
   const legacyUsInspiration = normalizedPath.match(/^\/us\/inspiration(?:\/([^/]+))?$/i)
   if (legacyUsInspiration) {
-    const destination = legacyUsInspiration[1]
-      ? `/vibeya/inspiration/${legacyUsInspiration[1]}`
-      : "/vibeya/inspiration/index.html"
-    return redirectToPath(destination)
+    const legacySlug = legacyUsInspiration[1]?.replace(/\.html$/i, "")
+    if (!legacySlug || legacySlug.toLowerCase() === "index") {
+      return redirectToPath("/vibeya/inspiration/index.html")
+    }
+    if (LEGACY_US_INSPIRATION_SLUGS.has(legacySlug.toLowerCase())) {
+      return redirectToPath(`/vibeya/inspiration/${legacySlug.toLowerCase()}.html`)
+    }
+    return NextResponse.next()
   }
 
   const legacyLocalizedYogaStory = normalizedPath.match(/^\/(ca|mx|jp)\/inspiration\/animal-yoga-set\.html$/i)
@@ -207,17 +226,18 @@ export async function middleware(request: NextRequest) {
     return rewriteToPath(`/${countryCode}/inspiration/animal-yoga-set.html`)
   }
 
-  if (pathname !== "/" && pathname.endsWith("/") && !marketHome) {
-    return redirectToPath(pathname.replace(/\/+$/, ""))
-  }
-
-  const cleanInspirationPath = /^\/(?:[a-z]{2}\/)?vibeya\/inspiration$/i.test(normalizedPath)
-  const localizedIndexPath = /^\/[a-z]{2}\/vibeya\/inspiration\/index\.html$/i.test(normalizedPath)
-  if (cleanInspirationPath || localizedIndexPath) {
+  const cleanInspirationPath = normalizedPath === "/vibeya/inspiration"
+  const legacyUsInspirationIndex = /^\/us\/vibeya\/inspiration(?:\/index\.html)?$/i.test(normalizedPath)
+  if (cleanInspirationPath || legacyUsInspirationIndex) {
     return redirectToPath("/vibeya/inspiration/index.html")
   }
 
   if (request.nextUrl.pathname.includes(".")) {
+    return NextResponse.next()
+  }
+
+  const firstPathSegment = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
+  if (request.nextUrl.pathname !== "/" && !isSupportedMarketCountry(firstPathSegment)) {
     return NextResponse.next()
   }
 
@@ -229,7 +249,6 @@ export async function middleware(request: NextRequest) {
 
   // if the country code is available, use it, otherwise use the default region
   const country = countryCode || DEFAULT_REGION
-  const firstPathSegment = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
   const urlHasCountry = firstPathSegment === country.toLowerCase()
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set("x-vibeya-country-code", country)
@@ -249,15 +268,7 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // if the url doesn't have the country, redirect to it
-  const redirectPath =
-    request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname
-  const queryString = request.nextUrl.search || ""
-  const redirectUrl = `${request.nextUrl.origin}/${country}${redirectPath}${queryString}`
-
-  const response = NextResponse.redirect(redirectUrl, 307)
-  await refreshAuthCookie(request, response)
-  return response
+  return NextResponse.next()
 }
 
 export const config = {

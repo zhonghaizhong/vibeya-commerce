@@ -1,12 +1,25 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { updateStoresWorkflow } from "@medusajs/medusa/core-flows"
+import { getVibeyaProductContent, VIBEYA_PRODUCT_CONTENT_METADATA_KEY } from "../../../../lib/vibeya-product-content"
 
 const PRODUCT_IDS_METADATA_KEY = "vibeya_fulfillment_product_ids"
 const MEDIA_METADATA_KEY = "vibeya_product_market_media"
+const VIBEYA_SITE_COUNTRIES = ["us", "ca", "mx", "jp"]
 
-type Market = { country_code: string; currency_code: string }
-type Product = { id: string; title: string; handle: string; status: string }
+type Market = { country_code: string; currency_code: string; region_id?: string; region_name?: string }
+type Price = { id: string; amount: number; currency_code: string; rules?: { attribute?: string; value?: string }[] }
+type Product = {
+  id: string
+  title: string
+  handle: string
+  status: string
+  thumbnail?: string | null
+  images?: { url?: string | null }[]
+  metadata?: Record<string, unknown> | null
+  variants?: { id: string; price_set?: { prices?: Price[] } | null }[]
+  markets?: string[]
+}
 type Location = {
   metadata?: Record<string, unknown> | null
   fulfillment_sets?: { service_zones?: { geo_zones?: { country_code?: string | null }[] }[] }[]
@@ -49,25 +62,87 @@ function resolveProductMarkets(products: Product[], locations: Location[], marke
   })
 }
 
+const marketLocales: Record<string, string> = { us: "en-US", ca: "en-CA", jp: "ja-JP", mx: "es-MX" }
+const requiredContentFields = ["name", "detailTitle", "intro", "productDetails", "productionDetails", "seoTitle", "seoDescription"] as const
+
+function buildReadiness(products: Product[], markets: Market[], localizedMedia: Record<string, Record<string, string[]>>) {
+  return products.flatMap((product) => markets.map((market) => {
+    const locale = marketLocales[market.country_code]
+    const content = locale
+      ? getVibeyaProductContent(product.handle, product.metadata?.[VIBEYA_PRODUCT_CONTENT_METADATA_KEY])[locale as keyof ReturnType<typeof getVibeyaProductContent>]
+      : undefined
+    const missingContent = content
+      ? requiredContentFields.filter((field) => !String(content[field] ?? "").trim())
+      : [...requiredContentFields]
+    const variants = product.variants ?? []
+    const pricedAmounts = variants.flatMap((variant) => {
+      const matching = (variant.price_set?.prices ?? []).filter((price) => {
+        if (price.currency_code?.toLowerCase() !== market.currency_code.toLowerCase()) return false
+        const regionRules = (price.rules ?? []).filter((rule) => rule.attribute === "region_id")
+        return !regionRules.length || regionRules.some((rule) => rule.value === market.region_id)
+      })
+      return matching.map((price) => Number(price.amount)).filter(Number.isFinite)
+    })
+    const marketImages = localizedMedia[product.id]?.[market.country_code] ?? []
+    const hasBaseImage = Boolean(product.thumbnail || product.images?.some((image) => image.url))
+    const availableMarkets = product.markets ?? []
+    const storedContent = product.metadata?.[VIBEYA_PRODUCT_CONTENT_METADATA_KEY]
+    const contentManaged = Boolean(
+      locale
+      && storedContent
+      && typeof storedContent === "object"
+      && !Array.isArray(storedContent)
+      && (storedContent as Record<string, unknown>)[locale]
+    )
+    return {
+      product_id: product.id,
+      title: product.title,
+      handle: product.handle,
+      country_code: market.country_code,
+      currency_code: market.currency_code,
+      available: availableMarkets.includes(market.country_code),
+      variant_count: variants.length,
+      priced_variant_count: new Set(variants.flatMap((variant) => {
+        const matching = (variant.price_set?.prices ?? []).some((price) => {
+          if (price.currency_code?.toLowerCase() !== market.currency_code.toLowerCase()) return false
+          const regionRules = (price.rules ?? []).filter((rule) => rule.attribute === "region_id")
+          return !regionRules.length || regionRules.some((rule) => rule.value === market.region_id)
+        })
+        return matching ? [variant.id] : []
+      })).size,
+      minimum_price: pricedAmounts.length ? Math.min(...pricedAmounts) : null,
+      locale: locale ?? "",
+      missing_content: missingContent,
+      content_managed: contentManaged,
+      market_image_count: marketImages.length,
+      has_base_image: hasBaseImage,
+    }
+  }))
+}
+
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
     const [{ data: stores }, { data: products }, { data: locations }, { data: regions }] = await Promise.all([
       query.graph({ entity: "store", fields: ["id", "metadata"] }),
-      query.graph({ entity: "product", fields: ["id", "title", "handle", "status"], pagination: { take: 1000, order: { title: "ASC" } } }),
+      query.graph({ entity: "product", fields: ["id", "title", "handle", "status", "thumbnail", "images.url", "metadata", "variants.id", "variants.price_set.prices.amount", "variants.price_set.prices.currency_code", "variants.price_set.prices.rules.attribute", "variants.price_set.prices.rules.value"], pagination: { take: 1000, order: { title: "ASC" } } }),
       query.graph({ entity: "stock_location", fields: ["metadata", "fulfillment_sets.service_zones.geo_zones.country_code"], pagination: { take: 1000 } }),
       query.graph({ entity: "region", fields: ["id", "name", "currency_code", "countries.iso_2"], pagination: { take: 1000 } }),
     ])
 
     const store = stores[0] as { id: string; metadata?: Record<string, unknown> | null } | undefined
     const markets: Market[] = (regions as any[]).flatMap((region) =>
-      (region.countries ?? []).map((country: any) => ({ country_code: country.iso_2?.toLowerCase() ?? "", currency_code: region.currency_code ?? "" }))
-    )
+      (region.countries ?? [])
+        .map((country: any) => ({ country_code: country.iso_2?.toLowerCase() ?? "", currency_code: region.currency_code ?? "", region_id: region.id, region_name: region.name }))
+        .filter((market) => VIBEYA_SITE_COUNTRIES.includes(market.country_code))
+    ).sort((left, right) => VIBEYA_SITE_COUNTRIES.indexOf(left.country_code) - VIBEYA_SITE_COUNTRIES.indexOf(right.country_code))
     const productsWithMarkets = resolveProductMarkets(products as Product[], locations as Location[], markets)
+    const localizedMedia = store?.metadata?.[MEDIA_METADATA_KEY] ?? {}
     return res.json({
       markets,
       products: productsWithMarkets,
-      localized_media: store?.metadata?.[MEDIA_METADATA_KEY] ?? {},
+      localized_media: localizedMedia,
+      readiness: buildReadiness(productsWithMarkets, markets, localizedMedia as Record<string, Record<string, string[]>>),
     })
   } catch (error) {
     console.error("Unable to load market management data", error)
@@ -100,7 +175,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     const store = stores[0] as { id: string; metadata?: Record<string, unknown> | null } | undefined
     const product = (products as Product[]).find((entry) => entry.id === productId && entry.status === "published")
     const markets: Market[] = (regions as any[]).flatMap((region) =>
-      (region.countries ?? []).map((country: any) => ({ country_code: country.iso_2?.toLowerCase() ?? "", currency_code: region.currency_code ?? "" }))
+      (region.countries ?? [])
+        .map((country: any) => ({ country_code: country.iso_2?.toLowerCase() ?? "", currency_code: region.currency_code ?? "", region_id: region.id, region_name: region.name }))
+        .filter((market) => VIBEYA_SITE_COUNTRIES.includes(market.country_code))
     )
     const productMarket = resolveProductMarkets(product ? [product] : [], locations as Location[], markets)[0]
     if (!store || !productMarket) return res.status(404).json({ error: "找不到已上架商品或店铺配置。" })

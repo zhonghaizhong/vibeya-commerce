@@ -26,6 +26,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       region: { id: region.id, currency_code: region.currency_code },
+      category_content: request.nextUrl.searchParams.get("listing")
+        ? market.category_content?.[request.nextUrl.searchParams.get("listing")!]?.locales?.[locale] ?? null
+        : null,
       products: products.filter((product) => market.product_ids.includes(product.id)).map((product) => {
         const localProduct = vibeyaProducts.find((entry) => entry.handle === product.handle)
         const yogaGalleryFiles = [
@@ -75,6 +78,7 @@ export async function GET(request: NextRequest) {
           colors: Array.from(colors),
           sizes: Array.from(sizes),
           size_prices: sizePrices,
+          storefront_content: market.product_content?.[product.id]?.[locale] ?? {},
           price: price?.calculated_amount ?? null,
           currency_code: price?.currency_code ?? region.currency_code,
         }

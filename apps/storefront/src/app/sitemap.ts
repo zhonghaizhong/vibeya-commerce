@@ -1,6 +1,6 @@
 import { sdk } from "@lib/config"
 import { listRegions } from "@lib/data/regions"
-import { getMarketAlternateUrls } from "@lib/util/market-locale"
+import { getMarketAlternateUrls, getMarketDefaultLocale } from "@lib/util/market-locale"
 import { DEFAULT_COUNTRY_CODE, getSiteOrigin, listCountryCodes } from "@lib/util/site"
 import { getVibeyaMarket } from "@lib/vibeya/region"
 import { isSupportedMarketCountry } from "@lib/vibeya/markets"
@@ -72,16 +72,11 @@ const getProductIds = (entry: Entry) =>
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const query = { fields: "id,handle,updated_at", limit: PAGE_SIZE }
-  const [origin, regions, products, categories, collections] = await Promise.all([
+  const [origin, regions, products, collections] = await Promise.all([
     getSiteOrigin(),
     listRegions().catch(() => []),
     safelyListAll<Entry>((offset) =>
       sdk.store.product.list({ ...query, offset }).then((res) => ({ items: res.products, count: res.count }))
-    ),
-    safelyListAll<Entry>((offset) =>
-      sdk.store.category
-        .list({ ...query, fields: "id,handle,updated_at,*products", offset })
-        .then((res) => ({ items: res.product_categories, count: res.count }))
     ),
     safelyListAll<Entry>((offset) =>
       sdk.store.collection
@@ -94,9 +89,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const countryCodes = configured.length ? configured : [DEFAULT_COUNTRY_CODE].filter(isSupportedMarketCountry)
   const marketResults = await Promise.all(countryCodes.map(async (countryCode) => {
     const market = await getVibeyaMarket(countryCode).catch(() => null)
-    return [countryCode, new Set(market?.product_ids ?? [])] as const
+    return [countryCode, {
+      productIds: new Set(market?.product_ids ?? []),
+      handles: new Set(market?.handles ?? []),
+      categories: market?.category_content ?? {},
+    }] as const
   }))
-  const productsByCountry = new Map(marketResults)
+  const marketsByCountry = new Map<string, (typeof marketResults)[number][1]>(marketResults)
+  const productsByCountry = new Map<string, Set<string>>(marketResults.map(([countryCode, market]) => [countryCode, market.productIds]))
   const countriesByProduct = new Map<string, string[]>()
   productsByCountry.forEach((ids, countryCode) => {
     ids.forEach((id) => countriesByProduct.set(id, [...(countriesByProduct.get(id) ?? []), countryCode]))
@@ -105,6 +105,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const localizedEntries = countryCodes.flatMap((countryCode) => {
     const base = `${origin}/${countryCode}`
     const availableIds = productsByCountry.get(countryCode) ?? new Set<string>()
+    const isManagedCategoryIndexable = (slug: string, targetCountry: string) => {
+      const category = marketsByCountry.get(targetCountry)?.categories?.[slug]
+      if (!category) return isProductCategoryIndexable(slug, targetCountry)
+      const copy = category.locales?.[getMarketDefaultLocale(targetCountry)]
+      const hasCopy = Boolean(copy?.seoTitle?.trim() && copy.description?.trim())
+      const handles = category.productHandles?.length ? category.productHandles : []
+      const hasProduct = handles.some((handle) => marketsByCountry.get(targetCountry)?.handles.has(handle))
+      return hasCopy && hasProduct
+    }
     const alternateUrls = (path: string, eligibleCountries: string[]) =>
       getMarketAlternateUrls(origin, path, eligibleCountries)
     const productEntries = products
@@ -118,20 +127,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }
       })
     const productCategoryEntries = PRODUCT_CATEGORY_GROUPS
-      .filter((group) =>
-        isProductCategoryIndexable(group.slug, countryCode) &&
-        group.productHandles.some((handle) =>
-          products.some((item) => item.handle === handle && item.id && availableIds.has(item.id))
-        )
-      )
+      .filter((group) => isManagedCategoryIndexable(group.slug, countryCode))
       .map((group) => {
         const path = `/categories/${group.slug}`
         const eligibleCountries = countryCodes.filter((marketCountry) =>
-          isProductCategoryIndexable(group.slug, marketCountry) &&
-          group.productHandles.some((handle) => {
-            const product = products.find((item) => item.handle === handle)
-            return Boolean(product?.id && productsByCountry.get(marketCountry)?.has(product.id))
-          })
+          isManagedCategoryIndexable(group.slug, marketCountry)
         )
         return {
           url: `${base}${path}`,
@@ -175,7 +175,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         : []),
       ...productEntries,
       ...productCategoryEntries,
-      ...contentEntries("categories", categories),
       ...contentEntries("collections", collections),
     ]
   })

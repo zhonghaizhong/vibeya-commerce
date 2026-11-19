@@ -24,7 +24,7 @@ const text = (value: unknown, max = 255) => typeof value === "string" ? value.tr
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
   try {
-    const [{ data: locations }, { data: products }] = await Promise.all([
+    const [{ data: locations }, { data: products }, { data: regions }] = await Promise.all([
       query.graph({
         entity: "stock_location",
         fields: ["id", "name", "address.id", "address.address_1", "address.address_2", "address.city", "address.province", "address.postal_code", "address.country_code", "metadata"],
@@ -34,6 +34,11 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         entity: "product",
         fields: ["id", "title", "handle", "status"],
         pagination: { take: 1000, order: { title: "ASC" } },
+      }),
+      query.graph({
+        entity: "region",
+        fields: ["countries.iso_2"],
+        pagination: { take: 1000 },
       }),
     ])
 
@@ -45,6 +50,9 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
           : [],
       })),
       products,
+      country_codes: [...new Set(regions.flatMap((region: any) =>
+        (region.countries ?? []).map((country: any) => country.iso_2?.toLowerCase()).filter(Boolean)
+      ))].sort(),
     })
   } catch (error) {
     console.error("Unable to load fulfillment locations", error)
@@ -80,12 +88,15 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     if (id) {
       const { data: currentLocations } = await query.graph({
         entity: "stock_location",
-        fields: ["id", "metadata"],
+        fields: ["id", "metadata", "address.country_code"],
         filters: { id },
         pagination: { take: 1 },
       })
-      const current = currentLocations[0] as { id: string; metadata?: Record<string, unknown> | null } | undefined
+      const current = currentLocations[0] as { id: string; metadata?: Record<string, unknown> | null; address?: { country_code?: string | null } | null } | undefined
       if (!current) return res.status(404).json({ error: "找不到要修改的发货地址。" })
+      if (current.address?.country_code?.toUpperCase() !== address.country_code) {
+        return res.status(400).json({ error: "仓库创建后不能直接更改国家/地区。请为新国家新建仓库，并重新关联商品。" })
+      }
 
       const { result } = await updateStockLocationsWorkflow(req.scope).run({
         input: {

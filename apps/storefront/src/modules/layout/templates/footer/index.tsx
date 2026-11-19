@@ -67,7 +67,6 @@ export default function Footer({ countryCode }: { countryCode: string }) {
             <li>
               <HowItWorksTrigger
                 className="hover:text-[#8f60ed]"
-                href={`/${countryCode}/#how-it-works`}
               >
                 {text("footerHow", "How it works")}
               </HowItWorksTrigger>

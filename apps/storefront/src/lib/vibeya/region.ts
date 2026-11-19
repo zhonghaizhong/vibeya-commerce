@@ -17,7 +17,7 @@ export async function getVibeyaUsRegion() {
 }
 
 export async function getVibeyaMarket(countryCode: string) {
-  return sdk.client.fetch<{ country_code: string; region: { id: string; currency_code: string } | null; product_ids: string[]; handles: string[]; localized_media?: Record<string, Record<string, string[]>> }>(
+  return sdk.client.fetch<{ country_code: string; region: { id: string; currency_code: string } | null; product_ids: string[]; handles: string[]; localized_media?: Record<string, Record<string, string[]>>; product_content?: Record<string, Record<string, Record<string, unknown>>>; category_content?: Record<string, { label: string; productHandles: string[]; legacyHandles: string[]; locales: Record<string, { label: string; seoTitle: string; description: string }> }> }>(
     `/store/vibeya/market?country_code=${encodeURIComponent(countryCode.toLowerCase())}`,
     { cache: "no-store" }
   )

@@ -4,6 +4,8 @@ import Nav from "@modules/layout/templates/nav"
 import { Metadata } from "next"
 import { getLocale } from "@lib/data/locale-actions"
 import { getMarketUiCopy } from "@lib/util/market-ui-copy"
+import { isSupportedMarketCountry } from "@lib/vibeya/markets"
+import { notFound } from "next/navigation"
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -16,7 +18,10 @@ export default async function CheckoutLayout({
   children: React.ReactNode
   params: Promise<{ countryCode: string }>
 }) {
-  const [{ countryCode }, currentLocale] = await Promise.all([params, getLocale()])
+  const { countryCode } = await params
+  if (!isSupportedMarketCountry(countryCode)) notFound()
+
+  const currentLocale = await getLocale()
   const marketCopy = getMarketUiCopy(countryCode)
   return (
     <div className="relative min-h-screen w-full bg-[#fffdfa]">

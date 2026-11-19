@@ -17,6 +17,7 @@ type CatalogProduct = {
   colors?: string[]
   sizes?: string[]
   size_prices?: Record<string, number>
+  storefront_content?: Partial<VibeyaProduct>
 }
 
 const catalogColorHex: Record<string, string> = {
@@ -72,8 +73,12 @@ export function useVibeyaProducts(countryCode = "us", locale = "") {
         const updated = vibeyaProducts.filter((product) => marketHandles.has(product.handle)).map((product) => {
             const remote = data.products?.find((entry) => entry.handle === product.handle)
             if (!remote) return product
+            const content = Object.fromEntries(Object.entries(remote.storefront_content ?? {}).filter(([, value]) =>
+              typeof value === "string" ? Boolean(value.trim()) : Array.isArray(value) ? value.length > 0 : value !== undefined
+            )) as Partial<VibeyaProduct>
             return {
               ...product,
+              ...content,
               marketGallery: remote.market_images?.length ? remote.market_images : product.marketGallery,
               price: typeof remote.price === "number" && Number.isFinite(remote.price) ? remote.price : product.price,
               sizePrices: remote.size_prices && Object.keys(remote.size_prices).length ? remote.size_prices : product.sizePrices,
@@ -85,31 +90,42 @@ export function useVibeyaProducts(countryCode = "us", locale = "") {
         const knownHandles = new Set(updated.map((product) => product.handle))
         const added: VibeyaProduct[] = data.products
           .filter((product) => product.handle && !knownHandles.has(product.handle))
-          .map((product) => ({
+          .map((product) => {
+            const content = Object.fromEntries(Object.entries(product.storefront_content ?? {}).filter(([, value]) =>
+              typeof value === "string" ? Boolean(value.trim()) : Array.isArray(value) ? value.length > 0 : value !== undefined
+            )) as Partial<VibeyaProduct>
+            return ({
               id: product.id || product.handle!,
               handle: product.handle!,
               catalogOnly: true,
               catalogImage: product.image,
               category: product.category || "New arrivals",
               priceUnavailable: typeof product.price !== "number",
-              name: product.title || product.handle!,
-              short: product.subtitle || product.title || product.handle!,
+              name: content.name || product.title || product.handle!,
+              short: content.short || product.subtitle || product.title || product.handle!,
               price: product.price ?? 0,
               currency: product.currency_code?.toUpperCase() || "USD",
               colors: (product.colors ?? []).map(toCatalogColor),
               sizes: product.sizes ?? [],
               gallery: [],
-              variantSummary: product.colors?.length
+              eyebrow: content.eyebrow || "VIBEYA / NEW ARRIVAL",
+              intro: content.intro || product.description || product.title || product.handle!,
+              highlights: content.highlights ?? [],
+              sizeGuide: content.sizeGuide ?? "",
+              sizeRows: content.sizeRows ?? [],
+              sizeNote: content.sizeNote ?? "",
+              services: content.services ?? [],
+              variantSummary: content.variantSummary || (product.colors?.length
                 ? `${product.colors.length === 1 ? product.colors[0] : `${product.colors.length} colors`}${product.sizes?.length ? ` · ${product.sizes.length} options` : ""}`
-                : product.category || "New arrivals",
-              eyebrow: "VIBEYA / NEW ARRIVAL",
-              intro: product.description || product.title || product.handle!,
-              highlights: [],
-              sizeGuide: "",
-              sizeRows: [],
-              sizeNote: "",
-              services: [],
-          }))
+                : product.category || "New arrivals"),
+              seoTitle: content.seoTitle,
+              seoDescription: content.seoDescription,
+              colorOptionLabel: content.colorOptionLabel,
+              sizeOptionLabel: content.sizeOptionLabel,
+              measurementRows: content.measurementRows,
+              ...content,
+            })
+          })
         setMarketData({ countryCode, products: [...updated, ...added] })
       })
       .catch(() => {

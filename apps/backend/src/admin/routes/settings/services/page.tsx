@@ -28,12 +28,14 @@ async function readError(response: Response) {
 
 const IntegrationsPage = () => {
   const [config, setConfig] = useState<Config>(initialConfig)
+  const [savedConfig, setSavedConfig] = useState<Config>(initialConfig)
   const [secrets, setSecrets] = useState({ brevoKey: "", turnstileSecret: "", paypalSecret: "", googleSecret: "", trackingApiKey: "" })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
   const [trackingWebhookUrl, setTrackingWebhookUrl] = useState("")
+  const isDirty = JSON.stringify(config) !== JSON.stringify(savedConfig) || Object.values(secrets).some(Boolean)
 
   const copyCallbackUrl = async () => {
     try {
@@ -61,7 +63,9 @@ const IntegrationsPage = () => {
       const response = await fetch("/admin/vibeya/integrations", { credentials: "same-origin" })
       if (!response.ok) throw new Error(await readError(response))
       const data = await response.json()
-      setConfig({ ...initialConfig, ...data.config })
+      const nextConfig = { ...initialConfig, ...data.config }
+      setConfig(nextConfig)
+      setSavedConfig(nextConfig)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "读取配置失败。")
     } finally {
@@ -70,6 +74,13 @@ const IntegrationsPage = () => {
   }, [])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    if (!isDirty) return
+    const warnBeforeLeaving = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = "" }
+    window.addEventListener("beforeunload", warnBeforeLeaving)
+    return () => window.removeEventListener("beforeunload", warnBeforeLeaving)
+  }, [isDirty])
 
   useEffect(() => {
     setTrackingWebhookUrl(`${window.location.origin}/webhooks/17track`)
@@ -104,7 +115,9 @@ const IntegrationsPage = () => {
       })
       if (!response.ok) throw new Error(await readError(response))
       const data = await response.json()
-      setConfig({ ...initialConfig, ...data.config })
+      const nextConfig = { ...initialConfig, ...data.config }
+      setConfig(nextConfig)
+      setSavedConfig(nextConfig)
       setSecrets({ brevoKey: "", turnstileSecret: "", paypalSecret: "", googleSecret: "", trackingApiKey: "" })
       setMessage("配置已加密保存。密钥不会在页面中再次显示。")
     } catch (caught) {
@@ -245,7 +258,7 @@ const IntegrationsPage = () => {
         </Container>
 
         <Container className="p-4"><Text size="small" className="text-ui-fg-subtle">安全提示：这里不会显示或导出完整密钥。请只在可信的管理后台录入服务商密钥。</Text></Container>
-        <div><button type="button" disabled={saving} onClick={save} className="rounded-md bg-ui-button-inverted px-4 py-2 text-sm font-medium text-ui-fg-on-color disabled:opacity-50">{saving ? "保存中…" : "保存服务配置"}</button></div>
+        <div className="flex flex-wrap items-center gap-3"><Text size="small" className={isDirty ? "text-ui-fg-warning" : "text-ui-fg-subtle"}>{isDirty ? "有尚未保存的配置或密钥" : "配置已保存"}</Text><button type="button" disabled={saving || !isDirty} onClick={save} className="rounded-md bg-ui-button-inverted px-4 py-2 text-sm font-medium text-ui-fg-on-color disabled:opacity-50">{saving ? "保存中…" : "保存服务配置"}</button></div>
       </>}
     </div>
   )

@@ -1,5 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { getVibeyaProductContent, VIBEYA_PRODUCT_CONTENT_METADATA_KEY } from "../../../../lib/vibeya-product-content"
+import { getVibeyaCategoryContent, VIBEYA_CATEGORY_CONTENT_METADATA_KEY } from "../../../../lib/vibeya-category-content"
 
 const PRODUCT_IDS_METADATA_KEY = "vibeya_fulfillment_product_ids"
 const MEDIA_METADATA_KEY = "vibeya_product_market_media"
@@ -19,7 +21,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         fields: ["metadata", "fulfillment_sets.service_zones.geo_zones.country_code"],
         pagination: { take: 1000 },
       }),
-      query.graph({ entity: "product", fields: ["id", "handle", "status"], pagination: { take: 1000 } }),
+      query.graph({ entity: "product", fields: ["id", "handle", "status", "metadata"], pagination: { take: 1000 } }),
       query.graph({ entity: "region", fields: ["id", "currency_code", "countries.iso_2"], pagination: { take: 1000 } }),
       query.graph({ entity: "store", fields: ["metadata"] }),
     ])
@@ -49,7 +51,12 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       region: region ? { id: region.id, currency_code: region.currency_code } : null,
       product_ids: availableProducts.map((product) => product.id),
       handles: availableProducts.map((product) => product.handle),
+      product_content: Object.fromEntries(availableProducts.map((product) => [
+        product.id,
+        getVibeyaProductContent(product.handle, product.metadata?.[VIBEYA_PRODUCT_CONTENT_METADATA_KEY]),
+      ])),
       localized_media: (stores[0] as any)?.metadata?.[MEDIA_METADATA_KEY] ?? {},
+      category_content: getVibeyaCategoryContent((stores[0] as any)?.metadata?.[VIBEYA_CATEGORY_CONTENT_METADATA_KEY]),
     })
   } catch (error) {
     console.error("Unable to resolve VIBEYA market availability", error)

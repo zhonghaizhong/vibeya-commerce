@@ -256,7 +256,7 @@ const OrderCenterPage = () => {
       setFulfillmentItems(data.remaining_items ?? [])
       setFulfillmentLocationId(data.locations?.length === 1 ? data.locations[0].id : "")
       if (data.already_fulfilled) setDetailsError("这个订单已全部发货。")
-      else if (!data.locations?.length) setDetailsError("没有找到可用于本订单商品的发货仓库，请先在发货地址设置中关联商品。")
+      else if (!data.locations?.length) setDetailsError("没有找到可用于本订单商品的发货仓库，请先在「仓库与配送」中关联商品。")
     } catch (caught) {
       setDetailsError(caught instanceof Error ? caught.message : "发货信息读取失败。")
     } finally {

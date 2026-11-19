@@ -6,13 +6,17 @@ import Footer from "@modules/layout/templates/footer"
 import Nav from "@modules/layout/templates/nav"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
 import { getLocale } from "@lib/data/locale-actions"
+import { isSupportedMarketCountry } from "@lib/vibeya/markets"
+import { notFound } from "next/navigation"
 
 export default async function PageLayout(props: {
   children: React.ReactNode
   params: Promise<{ countryCode: string }>
 }) {
-  const [{ countryCode }, customer, currentLocale] = await Promise.all([
-    props.params,
+  const { countryCode } = await props.params
+  if (!isSupportedMarketCountry(countryCode)) notFound()
+
+  const [customer, currentLocale] = await Promise.all([
     retrieveCustomer(),
     getLocale(),
   ])

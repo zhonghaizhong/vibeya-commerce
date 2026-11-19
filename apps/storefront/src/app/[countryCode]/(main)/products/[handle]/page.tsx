@@ -118,10 +118,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     },
   }
   const productSeo = seoContent[product.handle]
+  const content = market?.product_content?.[product.id]?.[locale] as { seoTitle?: string; seoDescription?: string } | undefined
   const localizedSeo = LOCALIZED_PRODUCT_SEO[product.handle]?.[locale]
-  const title = localizedSeo?.title ?? productSeo?.title ?? `${product.title} | ${STORE_NAME}`
-  const description = localizedSeo?.description ??
-    productSeo?.description ??
+  const title = content?.seoTitle || localizedSeo?.title || productSeo?.title || `${product.title} | ${STORE_NAME}`
+  const description = content?.seoDescription || localizedSeo?.description ||
+    productSeo?.description ||
     `${product.subtitle || product.description || product.title}`
       .replace(/\s+/g, " ")
       .slice(0, 160)
@@ -210,6 +211,7 @@ export default async function ProductPage(props: Props) {
 
   const origin = await getSiteOrigin()
   const locale = getMarketLocale(params.countryCode, searchParams.locale)
+  const marketContent = market?.product_content?.[pricedProduct.id]?.[locale] as { seoTitle?: string; seoDescription?: string } | undefined
   const localizedSeo = LOCALIZED_PRODUCT_SEO[pricedProduct.handle]?.[locale]
   const vibeyaProductId = VIBEYA_DETAIL_IDS[pricedProduct.handle]
   const localProduct = vibeyaProductId
@@ -219,8 +221,10 @@ export default async function ProductPage(props: Props) {
     ? [new URL(getVibeyaImage(localProduct, localProduct.colors[0]), origin).toString()]
     : []
   const structuredData = buildProductStructuredData({
-    product: localizedSeo
-      ? { ...pricedProduct, title: localizedSeo.title, description: localizedSeo.description }
+    product: marketContent?.seoTitle || marketContent?.seoDescription
+      ? { ...pricedProduct, title: marketContent.seoTitle || pricedProduct.title, description: marketContent.seoDescription || pricedProduct.description }
+      : localizedSeo
+        ? { ...pricedProduct, title: localizedSeo.title, description: localizedSeo.description }
       : pricedProduct,
     region,
     countryCode: params.countryCode,

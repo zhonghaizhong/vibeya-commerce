@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import { notFound, permanentRedirect } from "next/navigation"
+import { notFound } from "next/navigation"
 
 import { retrieveCustomer } from "@lib/data/customer"
 import {
@@ -8,9 +8,9 @@ import {
 } from "@lib/util/market-locale"
 import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
 import VibeyaHome from "../../vibeya-home"
+import { getVibeyaMarket } from "@lib/vibeya/region"
 import {
   getProductCategoryGroup,
-  getProductCategoryIndexableMarkets,
   getProductCategoryMarketCopy,
   isProductCategoryIndexable,
 } from "@lib/seo/categories"
@@ -24,14 +24,36 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const group = getProductCategoryGroup(category.at(-1) ?? "")
   if (!group) notFound()
 
-  const localizedGroup = getProductCategoryMarketCopy(
+  const fallbackGroup = getProductCategoryMarketCopy(
     group,
     getMarketDefaultLocale(countryCode)
   )
+  const market = await getVibeyaMarket(countryCode).catch(() => null)
+  const managed = market?.category_content?.[group.slug]
+  const localeCopy = managed?.locales?.[getMarketDefaultLocale(countryCode)]
+  const localizedGroup = {
+    ...fallbackGroup,
+    label: localeCopy?.label || managed?.label || fallbackGroup.label,
+    seoTitle: localeCopy?.seoTitle || fallbackGroup.seoTitle,
+    description: localeCopy?.description || fallbackGroup.description,
+  }
   const origin = await getSiteOrigin()
   const categoryPath = `/categories/${group.slug}`
   const canonical = `${origin}/${countryCode}${categoryPath}`
-  const indexed = isProductCategoryIndexable(group.slug, countryCode)
+  const hasMarketProduct = (managed?.productHandles ?? group.productHandles).some((productHandle) => market?.handles.includes(productHandle))
+  const hasLocalizedCopy = Boolean(localeCopy?.seoTitle?.trim() && localeCopy.description?.trim())
+  const indexed = hasMarketProduct && (hasLocalizedCopy || isProductCategoryIndexable(group.slug, countryCode))
+  const categoryMarkets = await Promise.all(["us", "ca", "jp", "mx"].map(async (marketCountry) => {
+    const marketData = marketCountry === countryCode ? market : await getVibeyaMarket(marketCountry).catch(() => null)
+    const marketCategory = marketData?.category_content?.[group.slug]
+    const copy = marketCategory?.locales?.[getMarketDefaultLocale(marketCountry)]
+    const hasCopy = marketCategory
+      ? Boolean(copy?.seoTitle?.trim() && copy.description?.trim())
+      : isProductCategoryIndexable(group.slug, marketCountry)
+    const hasProduct = (marketCategory?.productHandles ?? group.productHandles).some((handle) => marketData?.handles.includes(handle))
+    return hasCopy && hasProduct ? marketCountry : null
+  }))
+  const eligibleMarkets = categoryMarkets.filter((marketCountry): marketCountry is string => Boolean(marketCountry))
 
   return {
     title: localizedGroup.seoTitle,
@@ -42,7 +64,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       languages: getMarketAlternateUrls(
         origin,
         categoryPath,
-        getProductCategoryIndexableMarkets(group.slug)
+        eligibleMarkets
       ),
     },
     openGraph: {
@@ -61,14 +83,19 @@ export default async function CategoryPage(props: Props) {
   const group = getProductCategoryGroup(handle)
   if (!group) notFound()
 
-  if (category.join("/") !== group.slug) {
-    permanentRedirect(`/${countryCode}/categories/${group.slug}`)
-  }
+  if (category.join("/") !== group.slug) notFound()
 
-  const localizedGroup = getProductCategoryMarketCopy(
+  const fallbackGroup = getProductCategoryMarketCopy(
     group,
     getMarketDefaultLocale(countryCode)
   )
+  const market = await getVibeyaMarket(countryCode).catch(() => null)
+  const managed = market?.category_content?.[group.slug]
+  const localeCopy = managed?.locales?.[getMarketDefaultLocale(countryCode)]
+  const localizedGroup = {
+    ...fallbackGroup,
+    label: localeCopy?.label || managed?.label || fallbackGroup.label,
+  }
   const customer = await retrieveCustomer().catch(() => null)
   return (
     <VibeyaHome
@@ -78,7 +105,7 @@ export default async function CategoryPage(props: Props) {
         category: localizedGroup.label,
         title: localizedGroup.label,
         slug: group.slug,
-        handles: [...group.productHandles],
+        handles: [...(managed?.productHandles ?? group.productHandles)],
       }}
     />
   )

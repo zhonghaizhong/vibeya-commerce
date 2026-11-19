@@ -1,0 +1,128 @@
+{
+  "custom-clothing": {
+    "label": "Custom Clothing",
+    "productHandles": [
+      "vibeya-custom-cotton-long-sleeve-tee",
+      "vibeya-washed-vintage-hooded-sweatshirt",
+      "vibeya-custom-womens-tankini-swimsuit-set",
+      "vibeya-custom-kids-basketball-uniform",
+      "vibeya-custom-womens-yoga-set"
+    ],
+    "legacyHandles": [
+      "shirts",
+      "apparel"
+    ],
+    "locales": {
+      "en-US": {
+        "label": "Custom Clothing",
+        "seoTitle": "Custom Clothing & Personalized Apparel | VIBEYA",
+        "description": "Design custom clothing including long sleeve shirts, washed hoodies, tankinis, and kids' basketball uniforms. Upload artwork or describe your idea, preview, and order online."
+      },
+      "en-CA": {
+        "label": "Custom Clothing",
+        "seoTitle": "Custom Yoga Wear & Clothing | VIBEYA",
+        "description": "Explore customizable clothing and yoga wear in Canada. Personalize a coordinated women's yoga set with your own artwork or a text prompt, preview the design, and order online."
+      },
+      "ja-JP": {
+        "label": "カスタムウェア",
+        "seoTitle": "ヨガウェアセットをカスタマイズ | VIBEYA",
+        "description": "オリジナルのヨガウェアセットをデザイン。画像をアップロードするか、文章でデザインを説明し、注文前に上下セットの仕上がりを確認できます。"
+      },
+      "es-MX": {
+        "label": "Ropa personalizada",
+        "seoTitle": "Conjunto de yoga personalizado para mujer | VIBEYA",
+        "description": "Personaliza ropa y un conjunto de yoga para mujer en México con tu imagen o una descripción de texto. Previsualiza el diseño en el top y el short antes de pedirlo."
+      }
+    }
+  },
+  "custom-tumblers": {
+    "label": "Custom Tumblers",
+    "productHandles": [
+      "vibeya-custom-20oz-stainless-steel-tumbler"
+    ],
+    "legacyHandles": [
+      "drinkware",
+      "tumblers"
+    ],
+    "locales": {
+      "en-US": {
+        "label": "Custom Tumblers",
+        "seoTitle": "Custom Tumblers & Personalized Cups | VIBEYA",
+        "description": "Design a custom stainless steel tumbler with a photo, artwork, or text prompt. Preview the full-wrap print on a 20 oz tumbler before ordering."
+      }
+    }
+  },
+  "custom-home-bath": {
+    "label": "Custom Home & Bath",
+    "productHandles": [
+      "vibeya-custom-3d-bath-mat",
+      "vibeya-custom-flannel-throw-blanket",
+      "vibeya-custom-shower-curtain"
+    ],
+    "legacyHandles": [
+      "home-bath",
+      "home-and-bath",
+      "bathroom"
+    ],
+    "locales": {
+      "en-US": {
+        "label": "Custom Home & Bath",
+        "seoTitle": "Custom Home & Bath | Mats, Blankets & Curtains | VIBEYA",
+        "description": "Create custom bath mats, shower curtains, and throw blankets with a photo, artwork, or design prompt. Preview your personalized home design before ordering."
+      }
+    }
+  },
+  "custom-kitchen-dining": {
+    "label": "Custom Kitchen & Dining",
+    "productHandles": [
+      "vibeya-custom-prompt-design-apron"
+    ],
+    "legacyHandles": [
+      "kitchen-dining",
+      "kitchen-and-dining"
+    ],
+    "locales": {
+      "en-US": {
+        "label": "Custom Kitchen & Dining",
+        "seoTitle": "Custom Aprons & Personalized Cooking Aprons | VIBEYA",
+        "description": "Make a custom apron with a photo, artwork, or design prompt. Preview your personalized cooking apron before ordering."
+      }
+    }
+  },
+  "custom-hats": {
+    "label": "Custom Hats",
+    "productHandles": [
+      "vibeya-custom-knitted-beanie",
+      "vibeya-custom-washed-denim-baseball-cap"
+    ],
+    "legacyHandles": [
+      "accessories",
+      "hats",
+      "headwear"
+    ],
+    "locales": {
+      "en-US": {
+        "label": "Custom Hats",
+        "seoTitle": "Custom Hats, Beanies & Baseball Caps | VIBEYA",
+        "description": "Create a custom knitted beanie or washed denim baseball cap with your artwork or design prompt. Preview your personalized hat before ordering."
+      }
+    }
+  },
+  "custom-wall-decor": {
+    "label": "Custom Wall Decor",
+    "productHandles": [
+      "vibeya-custom-metal-bottle-cap-wall-sign"
+    ],
+    "legacyHandles": [
+      "wall-decor",
+      "wall-decorations"
+    ],
+    "locales": {
+      "en-US": {
+        "label": "Custom Wall Decor",
+        "seoTitle": "Custom Metal Wall Signs & Personalized Decor | VIBEYA",
+        "description": "Design personalized metal wall decor as a custom bottle cap sign. Upload artwork or a photo, preview a one-, two-, or three-piece set, and order online."
+      }
+    }
+  }
+}

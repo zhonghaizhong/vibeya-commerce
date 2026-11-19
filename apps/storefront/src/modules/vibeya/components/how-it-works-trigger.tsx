@@ -3,24 +3,23 @@
 import type { ReactNode } from "react"
 
 export default function HowItWorksTrigger({
-  href,
   className,
   children,
 }: {
-  href: string
   className?: string
   children: ReactNode
 }) {
   return (
-    <a
+    <button
+      type="button"
       className={className}
-      href={href}
+      aria-haspopup="dialog"
       onClick={(event) => {
-        event.preventDefault()
+        event.stopPropagation()
         window.dispatchEvent(new Event("vibeya:open-how-it-works"))
       }}
     >
       {children}
-    </a>
+    </button>
   )
 }

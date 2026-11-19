@@ -14,6 +14,7 @@ export type VibeyaProduct = {
   category?: string
   priceUnavailable?: boolean
   name: string
+  detailTitle?: string
   short: string
   price: number
   currency: string
@@ -31,8 +32,14 @@ export type VibeyaProduct = {
   sizeNote: string
   services: [string, string][]
   variantSummary?: string
+  seoTitle?: string
+  seoDescription?: string
   colorOptionLabel?: string
   sizeOptionLabel?: string
+  productDetails?: string
+  productionDetails?: string
+  salesNotice?: string
+  galleryNote?: string
   measurementRows?: [string, string][]
 }
 

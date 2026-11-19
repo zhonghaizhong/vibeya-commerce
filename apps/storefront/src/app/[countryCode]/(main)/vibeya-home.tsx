@@ -339,7 +339,9 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       const localeKey = marketLocale
       const authLabels = labelsByLocale[localeKey]
       document.querySelectorAll<HTMLAnchorElement>(".account-link, .account-menu-link, .sign-in-link").forEach((link) => {
-        link.href = `/${countryCode}/account`
+        const accountUrl = new URL(`/${countryCode}/account`, window.location.origin)
+        accountUrl.searchParams.set("locale", marketLocale)
+        link.href = `${accountUrl.pathname}${accountUrl.search}`
         link.target = "_top"
         const label = link.classList.contains("sign-in-link") && !isAuthenticated ? authLabels.signIn : authLabels.account
         link.textContent = label
@@ -358,7 +360,9 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
 
       document!.querySelectorAll<HTMLAnchorElement>("[data-store-route]").forEach((policyLink) => {
         const target = policyLink.dataset.storeRoute
-        policyLink.href = target === "home" ? `/${countryCode}/` : `/${countryCode}/${target}`
+        const routeUrl = new URL(target === "home" ? `/${countryCode}/` : `/${countryCode}/${target}`, window.location.origin)
+        routeUrl.searchParams.set("locale", marketLocale)
+        policyLink.href = `${routeUrl.pathname}${routeUrl.search}`
       })
 
       frame.contentWindow?.postMessage(

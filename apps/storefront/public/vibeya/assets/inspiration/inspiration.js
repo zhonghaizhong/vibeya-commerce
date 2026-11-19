@@ -67,6 +67,11 @@ document.addEventListener('DOMContentLoaded',async()=>{
   bindHowItWorksDialog(marketLocale);
   const storyLabels=translations.inspirationTerms?.[marketLocale]||{};
   const marketPhrase=source=>translations.phrases?.[marketLocale]?.[source]||source;
+  const filterFieldLabels={product:'Product',pattern:'Pattern',style:'Style'};
+  Object.entries(filterFieldLabels).forEach(([key,label])=>{
+    const fieldLabel=document.querySelector(`#${key}Filter`)?.closest('.filter')?.querySelector('label');
+    if(fieldLabel)fieldLabel.textContent=marketPhrase(label);
+  });
   document.documentElement.lang=marketLocale;
   document.querySelectorAll('header nav a[data-menu-target]').forEach(link=>{
     const key=link.dataset.menuTarget==='how-it-works'?'how':link.dataset.menuTarget;
@@ -86,13 +91,14 @@ document.addEventListener('DOMContentLoaded',async()=>{
     const select=document.getElementById(fieldId);if(!select)return;
     const originalOptions=new Map(Array.from(select.options).map(option=>[option.value,option.cloneNode(true)]));
     const allOption=originalOptions.get('all');
+    if(allOption)allOption.textContent=marketPhrase(({product:'All Products',pattern:'All Patterns',style:'All Styles'})[key]);
     const available=new Set(catalog.map(entry=>entry[key]).filter(value=>typeof value==='string'&&value));
     select.replaceChildren();if(allOption)select.append(allOption);
     const ordered=[...Array.from(originalOptions.keys()).filter(value=>available.has(value)),...Array.from(available).filter(value=>!originalOptions.has(value)).sort()];
     ordered.forEach(value=>{
-      const label=facetLabels[key]?.[value]||value.replace(/-/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase());
+      const label=storyLabels[key]?.[value]||facetLabels[key]?.[value]||value.replace(/-/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase());
       const option=originalOptions.get(value)||new Option(label,value);
-      if(originalOptions.has(value))option.textContent=label;
+      option.textContent=label;
       select.append(option);
     });
   };
@@ -119,7 +125,6 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const articleId=new URLSearchParams(location.search).get('inspiration')||document.body.dataset.inspirationId||'funny-skeleton';
   const hasExplicitStory=!!(new URLSearchParams(location.search).get('inspiration')||document.body.dataset.inspirationId);
   const current=catalog.find(x=>x.id===articleId)||(isGenericStory||hasExplicitStory?undefined:catalog[0]);
-  const isInspirationListingPage=!!document.getElementById('inspirationFilters');
   if(isGenericStory&&!current){location.replace(marketContext('/vibeya/inspiration/index.html'));return;}
   const marketStoryUrl=current?.marketUrls?.[marketCountry];
   if(isGenericStory&&marketStoryUrl){location.replace(marketStoryUrl);return;}
@@ -239,11 +244,12 @@ document.addEventListener('DOMContentLoaded',async()=>{
           const slug=href.pathname.split('/').pop()||'';
           const entry=findInspirationBySlug(slug);
           if(!entry||entry.published===false||entry.id===current.id)return [];
-          href.searchParams.set('country',marketCountry);
-          href.searchParams.set('locale',marketLocale);
-          if(localizedMarket)href.pathname='/vibeya/inspiration/story.html';
-          if(localizedMarket)href.searchParams.set('inspiration',entry.id);
-          return [{id:entry.id,title:entry.title||section.querySelector('.featured-text h2')?.textContent?.replace(/\s+/g,' ').trim()||'VIBEYA inspiration',product:entry.product,pattern:entry.pattern,style:entry.style,slug:href.href,image:new URL(image.getAttribute('src')||'',inspirationUrl).href,alt:image.getAttribute('alt')||entry.title||'VIBEYA inspiration'}];
+          const marketStoryUrl=entry.marketUrls?.[marketCountry];
+          const targetUrl=marketStoryUrl?new URL(marketStoryUrl,location.origin):href;
+          targetUrl.searchParams.set('country',marketCountry);
+          targetUrl.searchParams.set('locale',marketLocale);
+          if(!marketStoryUrl&&localizedMarket)targetUrl.searchParams.set('inspiration',entry.id);
+          return [{id:entry.id,title:entry.title||section.querySelector('.featured-text h2')?.textContent?.replace(/\s+/g,' ').trim()||'VIBEYA inspiration',product:entry.product,pattern:entry.pattern,style:entry.style,slug:targetUrl.href,image:new URL(image.getAttribute('src')||'',inspirationUrl).href,alt:image.getAttribute('alt')||entry.title||'VIBEYA inspiration'}];
         });
       }
     }catch(error){console.warn('Could not load inspiration-list feature cards',error);}
