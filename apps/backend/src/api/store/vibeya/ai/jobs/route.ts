@@ -1,10 +1,12 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { VIBEYA_AI_JOBS_MODULE } from "../../../../../modules/vibeya-ai-jobs"
 import { getVibeyaProductPrintAreaReference, getVibeyaProductReference } from "../../../../../lib/vibeya-product-references"
 import {
   getVibeyaDesignCredits,
   reconcileVibeyaDesignReservations,
 } from "../../../../../lib/vibeya-design-credits"
+import { normalizeVibeyaProductDesigner, VIBEYA_PRODUCT_DESIGNER_METADATA_KEY } from "../../../../../lib/vibeya-product-designer"
 
 type JobService = {
   createVibeyaAiJobs(data: Record<string, unknown>): Promise<any>
@@ -113,7 +115,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (!productId || !color || !size) {
     return res.status(400).json({ error: "Choose a product, color, and size before creating your design. These choices will be saved with it." })
   }
-  if (!DESIGN_GENERATION_PRODUCT_IDS.has(productId)) {
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY) as { graph: (input: Record<string, unknown>) => Promise<{ data: Array<{ id: string; status?: string; metadata?: Record<string, unknown> | null }> }> }
+  const { data: matchingProducts } = await query.graph({ entity: "product", fields: ["id", "status", "metadata"], filters: { id: productId }, pagination: { take: 1 } })
+  const designerConfig = normalizeVibeyaProductDesigner(matchingProducts[0]?.metadata?.[VIBEYA_PRODUCT_DESIGNER_METADATA_KEY])
+  const isConfiguredProduct = designerConfig.enabled && !designerConfig.legacyProfile && !DESIGN_GENERATION_PRODUCT_IDS.has(productId)
+  if (!DESIGN_GENERATION_PRODUCT_IDS.has(productId) && !isConfiguredProduct) {
     return res.status(400).json({ error: "AI design generation is not available for this product yet. Please choose another product." })
   }
   if (!prompt && body?.productId !== "sds-128646") {
@@ -131,7 +137,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isShowerCurtain && !["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"].includes(size)) {
     return res.status(400).json({ error: "Choose one of the available shower curtain sizes before creating your design." })
   }
-  if (isTankini || isYogaSet || isApron || isDenimCap || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference)) {
+  if (!isConfiguredProduct && (isTankini || isYogaSet || isApron || isDenimCap || ((isBlanket || isBathMat || isBeanie || isShowerCurtain) && !productReference))) {
     try {
       productReference = await getVibeyaProductReference(productId, color, size)
     } catch (error) {
@@ -139,7 +145,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(503).json({ error: isDenimCap ? "The cap print-area reference is not available right now. Please try again later." : isBeanie ? "The beanie print-area reference is not available right now. Please try again later." : "The product print reference is not available right now. Please try again later." })
     }
   }
-  if (isTankini || isApron) {
+  if (!isConfiguredProduct && (isTankini || isApron)) {
     try {
       productPrintAreaReference = await getVibeyaProductPrintAreaReference(productId, color)
     } catch (error) {
@@ -175,9 +181,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isBasketballUniform && Array.isArray(body?.printZones) && !body.printZones.some((zone) => BASKETBALL_PRINT_ZONES.includes(zone as typeof BASKETBALL_PRINT_ZONES[number]))) {
     return res.status(400).json({ error: "Choose at least one valid basketball uniform print area." })
   }
-  const placement = isYogaSet ? "both" : isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement
-  const placementGuideCount = isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isApron ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
-  const maximumReferences = isTumbler || isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isApron ? 6 : 2 + placementGuideCount + 6
+  const placement = isConfiguredProduct && designerConfig.mode === "full-surface" ? "wrap" : isYogaSet ? "both" : isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement
+  const placementGuideCount = isConfiguredProduct ? designerConfig.mode === "full-surface" ? 0 : placement === "both" ? 2 : 1 : isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isApron ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
+  const maximumReferences = isConfiguredProduct && designerConfig.mode === "full-surface" || isTumbler || isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isApron ? 6 : 2 + placementGuideCount + 6
+  if (isConfiguredProduct && designerConfig.mode === "full-surface" && !productReference) return res.status(400).json({ error: "The configured blank product reference is missing." })
+  if (isConfiguredProduct && designerConfig.mode === "front-back" && references.length < 2 + placementGuideCount) return res.status(400).json({ error: "The configured front/back product images or print-area guides are missing." })
   if (references.length > maximumReferences || references.some((item) => typeof item !== "string") || JSON.stringify(references).length > 300_000 || preserveBaseComposite.length > 150_000 || (preserveBaseComposite && !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(preserveBaseComposite))) {
     return res.status(400).json({ error: "The reference image is too large. Please compress it and try again." })
   }

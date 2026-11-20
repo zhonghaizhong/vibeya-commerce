@@ -10,6 +10,14 @@ export type VibeyaProduct = {
   handle: string
   catalogOnly?: boolean
   catalogImage?: string | null
+  designerConfig?: {
+    enabled: boolean
+    legacyProfile?: string
+    mode: "front-back" | "full-surface"
+    placements: Array<"front" | "back" | "both" | "wrap">
+    galleryUrls: string[]
+    references: Array<{ color: string; size: string; baseImageUrl: string; printAreaImageUrl: string }>
+  }
   marketGallery?: string[]
   category?: string
   priceUnavailable?: boolean

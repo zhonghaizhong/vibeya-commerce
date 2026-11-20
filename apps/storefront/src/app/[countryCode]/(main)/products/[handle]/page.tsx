@@ -213,7 +213,8 @@ export default async function ProductPage(props: Props) {
   const locale = getMarketLocale(params.countryCode, searchParams.locale)
   const marketContent = market?.product_content?.[pricedProduct.id]?.[locale] as { seoTitle?: string; seoDescription?: string } | undefined
   const localizedSeo = LOCALIZED_PRODUCT_SEO[pricedProduct.handle]?.[locale]
-  const vibeyaProductId = VIBEYA_DETAIL_IDS[pricedProduct.handle]
+  const designerConfig = market?.product_designer?.[pricedProduct.id]
+  const vibeyaProductId = VIBEYA_DETAIL_IDS[pricedProduct.handle] || (designerConfig?.enabled && !designerConfig.legacyProfile ? pricedProduct.id : undefined)
   const localProduct = vibeyaProductId
     ? vibeyaProducts.find((item) => item.id === vibeyaProductId)
     : undefined

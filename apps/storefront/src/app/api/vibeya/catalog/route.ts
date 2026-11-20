@@ -79,6 +79,7 @@ export async function GET(request: NextRequest) {
           sizes: Array.from(sizes),
           size_prices: sizePrices,
           storefront_content: market.product_content?.[product.id]?.[locale] ?? {},
+          designer_config: market.product_designer?.[product.id] ?? null,
           price: price?.calculated_amount ?? null,
           currency_code: price?.currency_code ?? region.currency_code,
         }
