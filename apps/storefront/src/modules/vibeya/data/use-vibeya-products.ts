@@ -18,6 +18,7 @@ type CatalogProduct = {
   sizes?: string[]
   size_prices?: Record<string, number>
   storefront_content?: Partial<VibeyaProduct>
+  designer_config?: VibeyaProduct["designerConfig"]
 }
 
 const catalogColorHex: Record<string, string> = {
@@ -80,6 +81,7 @@ export function useVibeyaProducts(countryCode = "us", locale = "") {
               ...product,
               ...content,
               marketGallery: remote.market_images?.length ? remote.market_images : product.marketGallery,
+              designerConfig: remote.designer_config?.enabled && !remote.designer_config.legacyProfile ? remote.designer_config : product.designerConfig,
               price: typeof remote.price === "number" && Number.isFinite(remote.price) ? remote.price : product.price,
               sizePrices: remote.size_prices && Object.keys(remote.size_prices).length ? remote.size_prices : product.sizePrices,
               currency: remote.currency_code?.toUpperCase() ?? product.currency,
@@ -99,6 +101,7 @@ export function useVibeyaProducts(countryCode = "us", locale = "") {
               handle: product.handle!,
               catalogOnly: true,
               catalogImage: product.image,
+              designerConfig: product.designer_config?.enabled && !product.designer_config.legacyProfile ? product.designer_config : undefined,
               category: product.category || "New arrivals",
               priceUnavailable: typeof product.price !== "number",
               name: content.name || product.title || product.handle!,

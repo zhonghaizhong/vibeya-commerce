@@ -3,6 +3,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import sharp from "sharp"
 import { decryptAISecret, isVibeyaAIConfig, modelUsesPixelSizes, validateAIBaseUrl, VIBEYA_AI_METADATA_KEY } from "../../../../../lib/vibeya-ai"
 import { getVibeyaProductPrintAreaReference, getVibeyaProductReference } from "../../../../../lib/vibeya-product-references"
+import { normalizeVibeyaProductDesigner, VIBEYA_PRODUCT_DESIGNER_METADATA_KEY } from "../../../../../lib/vibeya-product-designer"
 
 type GenerateBody = {
   prompt?: unknown
@@ -305,6 +306,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   }
   const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : ""
   const productId = typeof body?.productId === "string" ? body.productId : ""
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY) as { graph: (input: Record<string, unknown>) => Promise<{ data: Array<{ id: string; title?: string; metadata?: Record<string, unknown> | null }> }> }
+  const { data: configuredProducts } = await query.graph({ entity: "product", fields: ["id", "title", "metadata"], filters: { id: productId }, pagination: { take: 1 } })
+  const configuredProduct = configuredProducts[0]
+  const designerConfig = normalizeVibeyaProductDesigner(configuredProduct?.metadata?.[VIBEYA_PRODUCT_DESIGNER_METADATA_KEY])
+  const isConfiguredProduct = designerConfig.enabled && !designerConfig.legacyProfile
   const isBlanket = productId === "sds-97226"
   const isBathMat = productId === "sds-138708"
   const isBeanie = productId === "sds-172647"
@@ -327,7 +333,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         basketballZoneIds.includes(zone as typeof basketballZoneIds[number])))]
     : [...basketballZoneIds]
   const basketballUnselectedZones = basketballZoneIds.filter((zone) => !basketballSelectedZones.includes(zone))
-  const isFullSurfaceProduct = isBlanket || isBathMat || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isMetalWallSign
+  const isFullSurfaceProduct = isBlanket || isBathMat || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isMetalWallSign || (isConfiguredProduct && designerConfig.mode === "full-surface")
   const size = typeof body?.size === "string" ? body.size : ""
   if (isMetalWallSign && !["1 Piece", "2 Pieces", "3 Pieces"].includes(size)) {
     return res.status(400).json({ error: "请选择有效的金属画件数后重新生成。" })
@@ -335,7 +341,8 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isShowerCurtain && !["36x70.8in", "60x70.8in", "70.8x70.8in", "70.8x84in"].includes(size)) {
     return res.status(400).json({ error: "请选择有效的浴帘尺寸后重新生成。" })
   }
-  const printPlacement = isYogaSet ? "both" : isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
+  const requestedPlacement = body?.printPlacement
+  const printPlacement = isConfiguredProduct ? designerConfig.mode === "full-surface" ? "wrap" : designerConfig.placements.includes(requestedPlacement as typeof designerConfig.placements[number]) ? requestedPlacement as string : "none" : isYogaSet ? "both" : isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement === "front" || body?.printPlacement === "back" || body?.printPlacement === "both" || body?.printPlacement === "wrap" || body?.printPlacement === "none"
     ? body.printPlacement
     : "none"
   const isTumbler = productId === "sds-128646"
@@ -406,8 +413,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       colorAliases: { Black: "Black" },
     },
   }
-  const productConfig = products[productId]
   const colorKey = typeof body?.color === "string" ? body.color : ""
+  const genericColors = [...new Set(designerConfig.references.map((reference) => reference.color).filter(Boolean))]
+  const productConfig = products[productId] ?? (isConfiguredProduct ? {
+    name: configuredProduct?.title || "Custom product",
+    colorAliases: Object.fromEntries((genericColors.length ? genericColors : [colorKey || "Black"]).map((color) => [color, color])),
+  } : undefined)
   if (!productConfig || !productConfig.colorAliases[colorKey]) {
     return res.status(400).json({ error: "请选择有效的 VIBEYA 商品和颜色。" })
   }
@@ -488,7 +499,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (isApron && (!productReference || !productPrintAreaReference)) {
     return res.status(400).json({ error: "围裙白底底图或胸前印刷区域参考图缺失，请刷新页面后重新提交。" })
   }
-  if (productReference && (productReference.length > (isTankini || isYogaSet || isBasketballUniform || isApron || isMetalWallSign ? 2500000 : isDenimCap ? 120000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
+  if (productReference && (productReference.length > (isTankini || isYogaSet || isBasketballUniform || isApron || isMetalWallSign || isConfiguredProduct ? 2500000 : isDenimCap ? 120000 : isBeanie || isShowerCurtain ? 32000 : 14000) || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productReference))) {
     return res.status(400).json({ error: isApron ? "围裙白底底图无效，请刷新页面后重新提交。" : isBasketballUniform ? "篮球服正面印刷区域参考图无效，请刷新页面后重新提交。" : isBlanket ? "毛毯印刷底板无效，请刷新页面后重新提交。" : isBathMat ? "地毯满印底板无效，请刷新页面后重新提交。" : isShowerCurtain ? "浴帘底图无效，请重新选择尺寸后提交。" : "杯子印刷区域参考图无效，请刷新页面后重新提交。" })
   }
   if (productPrintAreaReference && (productPrintAreaReference.length > 2500000 || !/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(productPrintAreaReference))) {
@@ -533,7 +544,23 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     : metalSignCount === 2
     ? "LEFT = Left / Piece 1; RIGHT = Right / Piece 2."
     : "CENTER = the only sign."
-  const safePrompt = isYogaSet
+  const safePrompt = isConfiguredProduct
+    ? designerConfig.mode === "full-surface"
+      ? [
+          `Create one polished, photorealistic custom product preview for ${productConfig.name}. Use image ${references.length + 1} as the exact blank product base; preserve the product's shape, construction, color, material, proportions, and clean photo style.`,
+          productPrintAreaReference ? `Image ${references.length + 2} is a print-area guide only. Apply the design only inside the marked printable area; do not reproduce the guide.` : "Apply artwork only to the product's printable surface and preserve all other product parts.",
+          artworkHandlingInstruction,
+          `CUSTOMER DESIGN BRIEF: ${prompt}`,
+          "Keep the product complete and centered. Do not add extra products, labels, captions, watermarks, or presentation graphics. Output one image.",
+        ].join("\n")
+      : [
+          `Create one photorealistic custom product preview for ${productConfig.name}, preserving the exact product shown in the supplied blank front and back references. Images 1 and 2 are the blank front and back product views.`,
+          printPlacement === "both" ? "Images 3 and 4 are the front and back print-area guides. Print both matching areas, keeping each complete design inside its own guide." : `Image 3 is the ${printPlacement} print-area guide. Apply artwork only to the selected side; keep the other side blank.`,
+          artworkHandlingInstruction,
+          `CUSTOMER DESIGN BRIEF: ${prompt}`,
+          "Preserve product seams, material texture, color, lighting, and proportions. Do not add products, labels, captions, watermarks, or extra graphics. Output one image.",
+        ].join("\n")
+    : isYogaSet
     ? [
         `Create exactly ONE square photorealistic product image on a seamless pure white (#FFFFFF) background, matching the supplied reference's four-view layout: crop-top FRONT at upper left, crop-top BACK at upper right, shorts FRONT at lower left, and shorts BACK at lower right. Show all four complete views, centered, aligned, and at the same relative scale as the reference, with clean white spacing.`,
         `Image ${references.length + 1} is the sole authoritative blank-product construction AND fabric-surface reference. Preserve the exact separate crop top and mid-thigh shorts, their proportions, fit, panel shapes, front/back positions, and all visible fabric character. Material finish is MATTE fine-gauge polyester-spandex athletic jersey knit: retain the reference's subtle knit grain, soft diffuse highlights, gentle tonal shading, natural shallow folds, and small gathered wrinkles. Preserve their visible locations and scale instead of smoothing, airbrushing, or flattening them. Use broad, soft, low-contrast studio lighting and a dry, powder-matte surface with no visible specular highlight; keep highlights diffuse and subdued so the fabric reads as flexible sportswear knit, never shiny. Never render leather, faux leather, patent leather, vinyl, PVC, PU, latex, satin, coated fabric, a wet look, oily sheen, plastic reflections, or hard glossy specular highlights. Keep the top hem length and the small natural gap above the shorts waistband; the shorts waistband is wider than the top's lower band. Keep the narrow black binding ONLY around the top's neckline and armholes, black and unprinted. Preserve the top's single hem seam and the shorts' original waistband and leg-hem stitching. SHORTS SEAM LOCK: on both shorts views, the front and back center fabric is one continuous panel. There is NO vertical center-front or center-back stitch line, rise seam, panel join, piping, or seam-like printed mark running from the waistband toward the crotch. Keep the print continuous across that area; show only natural fabric folds there. This prohibition applies only to the shorts' vertical center line; retain the real waistband join, leg hems, and the top's actual seam lines exactly as shown in the reference. Do not add extra hem lines, straps, pockets, pads, logos, or garment parts. This reference is blank and contains no sample artwork to copy.`,
@@ -748,7 +775,6 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         "Keep the garment centered and fully visible. Show garment only: no model, mannequin, hanger, props, badges, captions, borders, or extra garments. Output exactly one image.",
       ].filter(Boolean).join("\n")
 
-  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
   const { data } = await query.graph({ entity: "store", fields: ["metadata"] })
   const stored = data[0]?.metadata?.[VIBEYA_AI_METADATA_KEY]
   if (!isVibeyaAIConfig(stored) || !stored.encryptedApiKey) {
