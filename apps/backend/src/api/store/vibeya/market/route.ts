@@ -1,7 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { getVibeyaProductContent, VIBEYA_PRODUCT_CONTENT_METADATA_KEY } from "../../../../lib/vibeya-product-content"
-import { getVibeyaCategoryContent, VIBEYA_CATEGORY_CONTENT_METADATA_KEY } from "../../../../lib/vibeya-category-content"
+import { getVibeyaCategoryContent, normalizeVibeyaCategoryGroups, VIBEYA_CATEGORY_CONTENT_METADATA_KEY } from "../../../../lib/vibeya-category-content"
 import { getPublicVibeyaProductDesigner, VIBEYA_PRODUCT_DESIGNER_METADATA_KEY } from "../../../../lib/vibeya-product-designer"
 
 const PRODUCT_IDS_METADATA_KEY = "vibeya_fulfillment_product_ids"
@@ -47,15 +47,16 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       // Legacy VIBEYA catalog items without an explicit warehouse mapping are U.S.-only.
       && (allowedIds.has(product.id) || (countryCode === "us" && !assignedIds.has(product.id)))
     )
-    const categorySources = new Map<string, { handle: string; name: string; productHandles: string[] }>()
+    const rawCategorySources = new Map<string, { handle: string; name: string; productHandles: string[] }>()
     for (const product of availableProducts) {
       for (const category of product.categories ?? []) {
         if (!category.handle) continue
-        const current: { handle: string; name: string; productHandles: string[] } = categorySources.get(category.handle) ?? { handle: category.handle, name: category.name, productHandles: [] }
+        const current: { handle: string; name: string; productHandles: string[] } = rawCategorySources.get(category.handle) ?? { handle: category.handle, name: category.name, productHandles: [] }
         if (product.handle && !current.productHandles.includes(product.handle)) current.productHandles.push(product.handle)
-        categorySources.set(category.handle, current)
+        rawCategorySources.set(category.handle, current)
       }
     }
+    const categorySources = normalizeVibeyaCategoryGroups(Array.from(rawCategorySources.values()))
     return res.json({
       country_code: countryCode,
       region: region ? { id: region.id, currency_code: region.currency_code } : null,

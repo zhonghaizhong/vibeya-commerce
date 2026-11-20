@@ -21,6 +21,21 @@ export function isVibeyaCategoryLocale(value: unknown): value is VibeyaCategoryL
   return typeof value === "string" && (VIBEYA_CATEGORY_CONTENT_LOCALES as readonly string[]).includes(value)
 }
 
+export function normalizeVibeyaCategoryGroups(nativeCategories: VibeyaNativeCategory[]) {
+  const groups = new Map<string, VibeyaNativeCategory>()
+  for (const category of nativeCategories) {
+    const canonical = Object.entries(defaults).find(([slug, content]) =>
+      slug === category.handle || content.legacyHandles.includes(category.handle)
+    )
+    const handle = canonical?.[0] ?? category.handle
+    const name = canonical?.[1].label ?? category.name
+    const existing = groups.get(handle) ?? { handle, name, productHandles: [] }
+    existing.productHandles = [...new Set([...existing.productHandles, ...category.productHandles])]
+    groups.set(handle, existing)
+  }
+  return Array.from(groups.values())
+}
+
 export function getVibeyaCategoryContent(storedValue: unknown, nativeCategories: VibeyaNativeCategory[] = []) {
   const stored = storedValue && typeof storedValue === "object" && !Array.isArray(storedValue)
     ? storedValue as Record<string, unknown>
@@ -47,7 +62,9 @@ export function getVibeyaCategoryContent(storedValue: unknown, nativeCategories:
     const configuredHandles = Array.isArray(entry.productHandles)
       ? [...new Set(entry.productHandles.filter((handle): handle is string => typeof handle === "string" && base.productHandles.includes(handle)))]
       : [...base.productHandles]
-    const nativeHandles = nativeCategories.find((category) => category.handle === slug)?.productHandles ?? []
+    const nativeHandles = nativeCategories
+      .filter((category) => category.handle === slug || base.legacyHandles.includes(category.handle))
+      .flatMap((category) => category.productHandles)
     const productHandles = [...new Set([...configuredHandles, ...nativeHandles])]
     return [slug, {
       label: cleanText(entry.label) || base.label,
@@ -58,7 +75,9 @@ export function getVibeyaCategoryContent(storedValue: unknown, nativeCategories:
   })) as Record<string, VibeyaCategoryContent>
 
   const validNativeCategories = nativeCategories.filter((category) =>
-    /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(category.handle) && !entries[category.handle]
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(category.handle)
+      && !entries[category.handle]
+      && !Object.values(defaults).some((entry) => entry.legacyHandles.includes(category.handle))
   )
   for (const category of validNativeCategories) {
     const raw = stored[category.handle] && typeof stored[category.handle] === "object" && !Array.isArray(stored[category.handle])

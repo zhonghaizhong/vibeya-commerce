@@ -5,6 +5,7 @@ import {
   getVibeyaCategoryContent,
   isKnownVibeyaCategorySlug,
   isVibeyaCategoryLocale,
+  normalizeVibeyaCategoryGroups,
   VIBEYA_CATEGORY_CONTENT_METADATA_KEY,
 } from "../../../../lib/vibeya-category-content"
 
@@ -28,11 +29,11 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
     const { store, products, nativeCategories } = await loadData(req)
     const publishedHandles = new Set(products.filter((product) => product.handle?.startsWith("vibeya-") && product.status === "published").map((product) => product.handle))
-    const categorySources = nativeCategories.map((category) => ({
+    const categorySources = normalizeVibeyaCategoryGroups(nativeCategories.map((category) => ({
       handle: category.handle,
       name: category.name,
       productHandles: (category.products ?? []).map((product) => product.handle).filter((handle) => publishedHandles.has(handle)),
-    }))
+    })))
     return res.json({
       categories: getVibeyaCategoryContent(store?.metadata?.[VIBEYA_CATEGORY_CONTENT_METADATA_KEY], categorySources),
       products: products.filter((product) => product.handle?.startsWith("vibeya-") && product.status === "published"),
@@ -61,11 +62,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     const { store, products, nativeCategories } = await loadData(req)
     if (!store) return res.status(404).json({ error: "没有找到店铺配置。" })
     const publishedHandles = new Set(products.filter((product) => product.handle?.startsWith("vibeya-") && product.status === "published").map((product) => product.handle))
-    const categorySources = nativeCategories.map((category) => ({
+    const categorySources = normalizeVibeyaCategoryGroups(nativeCategories.map((category) => ({
       handle: category.handle,
       name: category.name,
       productHandles: (category.products ?? []).map((product) => product.handle).filter((handle) => publishedHandles.has(handle)),
-    }))
+    })))
     const content = getVibeyaCategoryContent(store.metadata?.[VIBEYA_CATEGORY_CONTENT_METADATA_KEY], categorySources)
     if (initializeDefaults) {
       await updateStoresWorkflow(req.scope).run({
