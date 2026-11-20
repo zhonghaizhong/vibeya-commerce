@@ -2,7 +2,7 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { getVibeyaProductContent, VIBEYA_PRODUCT_CONTENT_METADATA_KEY } from "../../../../lib/vibeya-product-content"
 import { getVibeyaCategoryContent, VIBEYA_CATEGORY_CONTENT_METADATA_KEY } from "../../../../lib/vibeya-category-content"
-import { normalizeVibeyaProductDesigner, VIBEYA_PRODUCT_DESIGNER_METADATA_KEY } from "../../../../lib/vibeya-product-designer"
+import { getPublicVibeyaProductDesigner, VIBEYA_PRODUCT_DESIGNER_METADATA_KEY } from "../../../../lib/vibeya-product-designer"
 
 const PRODUCT_IDS_METADATA_KEY = "vibeya_fulfillment_product_ids"
 const MEDIA_METADATA_KEY = "vibeya_product_market_media"
@@ -58,7 +58,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       ])),
       product_designer: Object.fromEntries(availableProducts.map((product) => [
         product.id,
-        normalizeVibeyaProductDesigner(product.metadata?.[VIBEYA_PRODUCT_DESIGNER_METADATA_KEY]),
+        getPublicVibeyaProductDesigner(product.metadata?.[VIBEYA_PRODUCT_DESIGNER_METADATA_KEY]),
       ])),
       localized_media: (stores[0] as any)?.metadata?.[MEDIA_METADATA_KEY] ?? {},
       category_content: getVibeyaCategoryContent((stores[0] as any)?.metadata?.[VIBEYA_CATEGORY_CONTENT_METADATA_KEY]),

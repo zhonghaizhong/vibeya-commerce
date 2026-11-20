@@ -40,14 +40,25 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     try {
       const products = await loadProducts(req)
       let designerImported = 0
+      let promptTemplatesImported = 0
       let contentImported = 0
       const updates = products.flatMap((product) => {
         const metadata = { ...(product.metadata ?? {}) }
         let changed = false
-        const designer = getLegacyVibeyaProductDesigner(product.handle)
-        if (designer && !Object.prototype.hasOwnProperty.call(metadata, VIBEYA_PRODUCT_DESIGNER_METADATA_KEY)) {
-          metadata[VIBEYA_PRODUCT_DESIGNER_METADATA_KEY] = designer
+        const legacyDesigner = getLegacyVibeyaProductDesigner(product.handle)
+        const currentDesignerValue = metadata[VIBEYA_PRODUCT_DESIGNER_METADATA_KEY]
+        const currentDesigner = normalizeVibeyaProductDesigner(currentDesignerValue)
+        if (legacyDesigner && !Object.prototype.hasOwnProperty.call(metadata, VIBEYA_PRODUCT_DESIGNER_METADATA_KEY)) {
+          metadata[VIBEYA_PRODUCT_DESIGNER_METADATA_KEY] = legacyDesigner
           designerImported += 1
+          if (legacyDesigner.generationPromptTemplate) promptTemplatesImported += 1
+          changed = true
+        } else if (legacyDesigner?.generationPromptTemplate && !currentDesigner.generationPromptTemplate) {
+          metadata[VIBEYA_PRODUCT_DESIGNER_METADATA_KEY] = {
+            ...currentDesigner,
+            generationPromptTemplate: legacyDesigner.generationPromptTemplate,
+          }
+          promptTemplatesImported += 1
           changed = true
         }
         if (product.handle?.startsWith("vibeya-")) {
@@ -62,7 +73,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         return changed ? [{ id: product.id, metadata }] : []
       })
       if (updates.length) await updateProductsWorkflow(req.scope).run({ input: { products: updates } })
-      return res.json({ imported: designerImported, contentImported, updated: updates.length })
+      return res.json({ imported: designerImported, promptTemplatesImported, contentImported, updated: updates.length })
     } catch (error) {
       console.error("Unable to import current frontend product designer settings", error)
       return res.status(500).json({ error: "导入现有商品设计配置失败，请稍后重试。" })

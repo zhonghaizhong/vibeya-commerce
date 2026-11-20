@@ -775,6 +775,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         "Keep the garment centered and fully visible. Show garment only: no model, mannequin, hanger, props, badges, captions, borders, or extra garments. Output exactly one image.",
       ].filter(Boolean).join("\n")
 
+  const templateValues: Record<string, string> = {
+    product_name: productConfig.name,
+    color: productConfig.colorAliases[colorKey],
+    size: typeof body?.size === "string" ? body.size : "",
+    placement: String(printPlacement),
+  }
+  const generationPromptTemplate = designerConfig.generationPromptTemplate.replace(/\{\{\s*(product_name|color|size|placement)\s*\}\}/g, (_match, key: string) => templateValues[key] ?? "")
+  const promptForGeneration = generationPromptTemplate
+    ? `${safePrompt}\n\nPRODUCT-SPECIFIC FIXED GENERATION TEMPLATE (follow consistently while preserving the product and print-area constraints above):\n${generationPromptTemplate}`
+    : safePrompt
+
   const { data } = await query.graph({ entity: "store", fields: ["metadata"] })
   const stored = data[0]?.metadata?.[VIBEYA_AI_METADATA_KEY]
   if (!isVibeyaAIConfig(stored) || !stored.encryptedApiKey) {
@@ -805,7 +816,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           model: stored.model,
-          prompt: safePrompt,
+          prompt: promptForGeneration,
           ...((references.length || productReference || productPrintAreaReference || (preserveArtworkAfterGeneration && preserveBaseComposite))
             ? { images: [...references, ...(productReference ? [productReference] : []), ...(productPrintAreaReference ? [productPrintAreaReference] : []), ...(preserveArtworkAfterGeneration && preserveBaseComposite ? [preserveBaseComposite] : [])] }
             : {}),
