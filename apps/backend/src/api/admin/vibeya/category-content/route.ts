@@ -32,7 +32,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       handle: category.handle,
       name: category.name,
       productHandles: (category.products ?? []).map((product) => product.handle).filter((handle) => publishedHandles.has(handle)),
-    })).filter((category) => category.productHandles.length)
+    }))
     return res.json({
       categories: getVibeyaCategoryContent(store?.metadata?.[VIBEYA_CATEGORY_CONTENT_METADATA_KEY], categorySources),
       products: products.filter((product) => product.handle?.startsWith("vibeya-") && product.status === "published"),
@@ -65,7 +65,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       handle: category.handle,
       name: category.name,
       productHandles: (category.products ?? []).map((product) => product.handle).filter((handle) => publishedHandles.has(handle)),
-    })).filter((category) => category.productHandles.length)
+    }))
     const content = getVibeyaCategoryContent(store.metadata?.[VIBEYA_CATEGORY_CONTENT_METADATA_KEY], categorySources)
     if (initializeDefaults) {
       await updateStoresWorkflow(req.scope).run({

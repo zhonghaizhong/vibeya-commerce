@@ -70,6 +70,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         getPublicVibeyaProductDesigner(product.metadata?.[VIBEYA_PRODUCT_DESIGNER_METADATA_KEY]),
       ])),
       localized_media: (stores[0] as any)?.metadata?.[MEDIA_METADATA_KEY] ?? {},
+      category_groups: Array.from(categorySources.values()),
       category_content: getVibeyaCategoryContent(
         (stores[0] as any)?.metadata?.[VIBEYA_CATEGORY_CONTENT_METADATA_KEY],
         Array.from(categorySources.values())

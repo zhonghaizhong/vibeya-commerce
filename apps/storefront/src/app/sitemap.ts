@@ -140,10 +140,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
     const fixedCategoryHandles = new Set(PRODUCT_CATEGORY_GROUPS.flatMap((group) => [group.slug, ...group.legacyHandles]))
     const dynamicCategorySlugs = new Set(
-      [...marketsByCountry.values()].flatMap((market) => Object.keys(market.categories ?? {}))
+      Array.from(marketsByCountry.values()).flatMap((market) => Object.keys(market.categories ?? {}))
         .filter((slug) => !fixedCategoryHandles.has(slug))
     )
-    const dynamicCategoryEntries = [...dynamicCategorySlugs]
+    const dynamicCategoryEntries = Array.from(dynamicCategorySlugs)
       .filter((slug) => isManagedCategoryIndexable(slug, countryCode))
       .map((slug) => {
         const path = `/categories/${slug}`

@@ -7,6 +7,22 @@ import { NextRequest, NextResponse } from "next/server"
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
+function isPublicImageUrl(value: string | null | undefined) {
+  if (!value) return false
+  try {
+    const url = new URL(value, "https://storefront.invalid")
+    const hostname = url.hostname.toLowerCase()
+    const isPrivateIpv4 = /^(10\.|127\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.)/.test(hostname)
+    return hostname !== "localhost"
+      && hostname !== "0.0.0.0"
+      && !hostname.endsWith(".localhost")
+      && !hostname.endsWith(".local")
+      && !isPrivateIpv4
+  } catch {
+    return false
+  }
+}
+
 export async function GET(request: NextRequest) {
   const countryCode = (request.nextUrl.searchParams.get("country_code") || "us").toLowerCase()
   const locale = getMarketLocale(countryCode, request.nextUrl.searchParams.get("locale") || undefined)
@@ -79,6 +95,8 @@ export async function GET(request: NextRequest) {
         const localImage = localProduct?.colors[0]
           ? getVibeyaImage(localProduct, localProduct.colors[0])
           : null
+        const productImage = [marketImages[0], product.thumbnail, product.images?.[0]?.url, localImage]
+          .find((image): image is string => isPublicImageUrl(image)) ?? null
         const colors = new Set<string>()
         const sizes = new Set<string>()
         const sizePrices: Record<string, number> = {}
@@ -105,8 +123,8 @@ export async function GET(request: NextRequest) {
           title: product.title,
           subtitle: product.subtitle,
           description: product.description,
-          image: marketImages[0] ?? product.thumbnail ?? product.images?.[0]?.url ?? localImage,
-          market_images: marketImages,
+          image: productImage,
+          market_images: marketImages.filter(isPublicImageUrl),
           category: product.categories?.[0]?.name ?? product.type?.value ?? "New arrivals",
           colors: Array.from(colors),
           sizes: Array.from(sizes),

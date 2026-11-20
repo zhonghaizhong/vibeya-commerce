@@ -23,7 +23,7 @@ type Props = {
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const { category, countryCode } = await props.params
+  const [{ category, countryCode }, searchParams] = await Promise.all([props.params, props.searchParams])
   const handle = category.at(-1) ?? ""
   const group = getProductCategoryGroup(handle)
   if (!group) {
@@ -33,9 +33,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     const managed = market?.category_content?.[handle]
     const locale = getMarketDefaultLocale(countryCode)
     const localeCopy = managed?.locales?.[locale]
-    const categoryHandles = (managed
-      ? managed.productHandles
-      : (nativeCategory?.products ?? []).map((product) => product.handle))
+    const categoryHandles = Array.from(new Set([
+      ...(managed?.productHandles ?? []),
+      ...(market?.category_groups?.find((item) => item.handle === handle)?.productHandles ?? []),
+      ...(nativeCategory?.products ?? []).map((product) => product.handle),
+    ]))
       .filter((productHandle): productHandle is string => Boolean(productHandle && market?.handles.includes(productHandle)))
     if (!nativeCategory || !categoryHandles.length) notFound()
     const origin = await getSiteOrigin()
@@ -45,7 +47,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     const categoryMarkets = await Promise.all(["us", "ca", "jp", "mx"].map(async (marketCountry) => {
       const marketData = marketCountry === countryCode ? market : await getVibeyaMarket(marketCountry).catch(() => null)
       const copy = marketData?.category_content?.[handle]?.locales?.[getMarketDefaultLocale(marketCountry)]
-      const configuredHandles = marketData?.category_content?.[handle]?.productHandles ?? []
+      const configuredHandles = [
+        ...(marketData?.category_content?.[handle]?.productHandles ?? []),
+        ...(marketData?.category_groups?.find((category) => category.handle === handle)?.productHandles ?? []),
+      ]
       const hasProduct = configuredHandles.some((productHandle) => marketData?.handles.includes(productHandle))
       return copy?.seoTitle?.trim() && copy.description?.trim() && hasProduct ? marketCountry : null
     }))
@@ -66,6 +71,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const fallbackGroup = getProductCategoryMarketCopy(group, currentLocale)
   const market = await getVibeyaMarket(countryCode).catch(() => null)
   const managed = market?.category_content?.[group.slug]
+  const nativeHandles = market?.category_groups?.find((category) => category.handle === group.slug)?.productHandles ?? []
+  const categoryHandles = Array.from(new Set([...group.productHandles, ...(managed?.productHandles ?? []), ...nativeHandles]))
+    .filter((productHandle) => market?.handles.includes(productHandle))
   const localeCopy = managed?.locales?.[currentLocale]
   const localizedGroup = {
     ...fallbackGroup,
@@ -76,7 +84,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const origin = await getSiteOrigin()
   const categoryPath = `/categories/${group.slug}`
   const canonical = `${origin}/${countryCode}${categoryPath}`
-  const hasMarketProduct = (managed?.productHandles ?? group.productHandles).some((productHandle) => market?.handles.includes(productHandle))
+  const hasMarketProduct = categoryHandles.length > 0
   const hasLocalizedCopy = Boolean(localeCopy?.seoTitle?.trim() && localeCopy.description?.trim())
   const indexed = hasMarketProduct && (hasLocalizedCopy || isProductCategoryIndexable(group.slug, countryCode))
   const categoryMarkets = await Promise.all(["us", "ca", "jp", "mx"].map(async (marketCountry) => {
@@ -86,7 +94,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     const hasCopy = marketCategory
       ? Boolean(copy?.seoTitle?.trim() && copy.description?.trim())
       : isProductCategoryIndexable(group.slug, marketCountry)
-    const hasProduct = (marketCategory?.productHandles ?? group.productHandles).some((handle) => marketData?.handles.includes(handle))
+    const nativeHandles = marketData?.category_groups?.find((category) => category.handle === group.slug)?.productHandles ?? []
+    const configuredHandles = Array.from(new Set([...group.productHandles, ...(marketCategory?.productHandles ?? []), ...nativeHandles]))
+    const hasProduct = configuredHandles.some((handle) => marketData?.handles.includes(handle))
     return hasCopy && hasProduct ? marketCountry : null
   }))
   const eligibleMarkets = categoryMarkets.filter((marketCountry): marketCountry is string => Boolean(marketCountry))
@@ -123,9 +133,12 @@ export default async function CategoryPage(props: Props) {
     const market = await getVibeyaMarket(countryCode).catch(() => null)
     const managed = market?.category_content?.[handle]
     const localeCopy = managed?.locales?.[getMarketLocale(countryCode, searchParams.locale)]
-    const handles = (managed
-      ? managed.productHandles
-      : (nativeCategory?.products ?? []).map((product) => product.handle))
+    const nativeHandles = market?.category_groups?.find((category) => category.handle === handle)?.productHandles ?? []
+    const handles = Array.from(new Set([
+      ...(managed?.productHandles ?? []),
+      ...nativeHandles,
+      ...(nativeCategory?.products ?? []).map((product) => product.handle),
+    ]))
       .filter((productHandle): productHandle is string => Boolean(productHandle && market?.handles.includes(productHandle)))
     if (!nativeCategory || !handles.length) notFound()
     const customer = await retrieveCustomer().catch(() => null)
@@ -151,6 +164,9 @@ export default async function CategoryPage(props: Props) {
   const fallbackGroup = getProductCategoryMarketCopy(group, currentLocale)
   const market = await getVibeyaMarket(countryCode).catch(() => null)
   const managed = market?.category_content?.[group.slug]
+  const nativeHandles = market?.category_groups?.find((category) => category.handle === group.slug)?.productHandles ?? []
+  const handles = Array.from(new Set([...group.productHandles, ...(managed?.productHandles ?? []), ...nativeHandles]))
+    .filter((productHandle) => market?.handles.includes(productHandle))
   const localeCopy = managed?.locales?.[currentLocale]
   const localizedGroup = {
     ...fallbackGroup,
@@ -166,7 +182,7 @@ export default async function CategoryPage(props: Props) {
         category: localizedGroup.label,
         title: localizedGroup.label,
         slug: group.slug,
-        handles: [...(managed?.productHandles ?? group.productHandles)],
+        handles,
         description: localizedGroup.description,
       }}
     />

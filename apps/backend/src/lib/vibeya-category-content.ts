@@ -44,9 +44,11 @@ export function getVibeyaCategoryContent(storedValue: unknown, nativeCategories:
         description: cleanText(raw.description, 1000) || baseCopy?.description || "",
       }]]
     })) as Partial<Record<VibeyaCategoryLocale, VibeyaCategoryCopy>>
-    const productHandles = Array.isArray(entry.productHandles)
+    const configuredHandles = Array.isArray(entry.productHandles)
       ? [...new Set(entry.productHandles.filter((handle): handle is string => typeof handle === "string" && base.productHandles.includes(handle)))]
       : [...base.productHandles]
+    const nativeHandles = nativeCategories.find((category) => category.handle === slug)?.productHandles ?? []
+    const productHandles = [...new Set([...configuredHandles, ...nativeHandles])]
     return [slug, {
       label: cleanText(entry.label) || base.label,
       productHandles,
