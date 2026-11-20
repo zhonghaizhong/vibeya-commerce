@@ -3,6 +3,9 @@ import { Badge, Container, Heading, Text } from "@medusajs/ui"
 import { useCallback, useEffect, useState } from "react"
 
 type LocalizedInspiration = { title: string; summary: string; articleBody: string; tags: string[]; image: string; cardImage: string }
+type Facet = "product" | "pattern" | "style"
+type TaxonomyOption = { value: string; labels: Partial<Record<"en-US" | "en-CA" | "es-MX" | "ja-JP", string>> }
+type Taxonomy = Record<Facet, TaxonomyOption[]>
 
 type Inspiration = {
   id: string
@@ -35,6 +38,8 @@ const emptyEntry = (items: Inspiration[]): Inspiration => {
 const StoreContentPage = () => {
   const [items, setItems] = useState<Inspiration[]>([])
   const [savedItems, setSavedItems] = useState<Inspiration[]>([])
+  const [taxonomy, setTaxonomy] = useState<Taxonomy>({ product: [], pattern: [], style: [] })
+  const [savedTaxonomy, setSavedTaxonomy] = useState<Taxonomy>({ product: [], pattern: [], style: [] })
   const [loading, setLoading] = useState(true)
   const [hasLoaded, setHasLoaded] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -44,7 +49,7 @@ const StoreContentPage = () => {
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft" | "home">("all")
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
-  const isDirty = hasLoaded && JSON.stringify(items) !== JSON.stringify(savedItems)
+  const isDirty = hasLoaded && (JSON.stringify(items) !== JSON.stringify(savedItems) || JSON.stringify(taxonomy) !== JSON.stringify(savedTaxonomy))
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -52,11 +57,14 @@ const StoreContentPage = () => {
     setError("")
     try {
       const response = await fetch("/admin/vibeya/inspirations", { credentials: "same-origin", cache: "no-store" })
-      const data = await response.json()
+      const data = await response.json() as { inspirations?: Inspiration[]; taxonomy?: Taxonomy; error?: string }
       if (!response.ok) throw new Error(data.error || "读取灵感内容失败。")
       const inspirations = data.inspirations ?? []
+      const managedTaxonomy = data.taxonomy ?? { product: [], pattern: [], style: [] }
       setItems(inspirations)
       setSavedItems(inspirations)
+      setTaxonomy(managedTaxonomy)
+      setSavedTaxonomy(managedTaxonomy)
       setHasLoaded(true)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "读取灵感内容失败。")
@@ -74,6 +82,17 @@ const StoreContentPage = () => {
   }, [isDirty])
 
   const update = (index: number, patch: Partial<Inspiration>) => { if (!saving) setItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item)) }
+  const updateTaxonomyOption = (facet: Facet, index: number, patch: Partial<TaxonomyOption>) => {
+    if (saving) return
+    setTaxonomy((current) => ({ ...current, [facet]: current[facet].map((option, optionIndex) => optionIndex === index ? { ...option, ...patch, labels: { ...option.labels, ...patch.labels } } : option) }))
+  }
+  const addTaxonomyOption = (facet: Facet) => {
+    if (saving) return
+    let suffix = taxonomy[facet].length + 1
+    let value = `new-${facet}-${suffix}`
+    while (taxonomy[facet].some((option) => option.value === value)) value = `new-${facet}-${++suffix}`
+    setTaxonomy((current) => ({ ...current, [facet]: [...current[facet], { value, labels: { "en-US": "" } }] }))
+  }
   const updateTranslation = (index: number, locale: "ja-JP" | "es-MX", patch: Partial<LocalizedInspiration>) => {
     const item = items[index]
     const current = item?.translations?.[locale] ?? { title: "", summary: "", articleBody: "", tags: [], image: "", cardImage: "" }
@@ -105,7 +124,7 @@ const StoreContentPage = () => {
       const form = new FormData()
       form.append("files", file)
       const response = await fetch("/admin/uploads", { method: "POST", credentials: "same-origin", body: form })
-      const data = await response.json()
+      const data = await response.json() as { inspirations: Inspiration[]; taxonomy: Taxonomy; error?: string }
       const url = data.files?.[0]?.url
       if (!response.ok || typeof url !== "string") throw new Error(data.message || data.error || "图片上传失败。")
       update(index, { [field]: url })
@@ -160,12 +179,14 @@ const StoreContentPage = () => {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ inspirations: items }),
+        body: JSON.stringify({ inspirations: items, taxonomy }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || "保存灵感内容失败。")
       setItems(data.inspirations)
       setSavedItems(data.inspirations)
+      setTaxonomy(data.taxonomy)
+      setSavedTaxonomy(data.taxonomy)
       setMessage("灵感内容已保存，已发布的条目会同步到首页和灵感页。")
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "保存灵感内容失败。")
@@ -195,6 +216,31 @@ const StoreContentPage = () => {
 
       {message && <Container className="border border-ui-border-positive p-4"><Text className="text-ui-fg-positive">{message}</Text></Container>}
       {error && <Container className="border border-ui-border-error p-4"><Text className="text-ui-fg-error">{error}</Text></Container>}
+
+      {!loading && hasLoaded && <Container className="flex flex-col gap-5 p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div><Heading level="h2">灵感分类选项</Heading><Text size="small" className="mt-1 text-ui-fg-subtle">这里统一维护筛选器和灵感条目使用的商品、图案、风格分类。删除已被灵感使用的分类时，保存会提示先调整关联内容。</Text></div>
+        </div>
+        <div className="grid gap-5 xl:grid-cols-3">
+          {([
+            ["product", "商品分类"], ["pattern", "图案分类"], ["style", "设计风格"],
+          ] as Array<[Facet, string]>).map(([facet, title]) => <section key={facet} className="min-w-0 rounded-lg border border-ui-border-base p-4">
+            <details>
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2"><span className="font-semibold text-ui-fg-base">{title} <span className="font-normal text-ui-fg-subtle">· {taxonomy[facet].length} 个选项</span></span><span aria-hidden="true" className="text-ui-fg-subtle">⌄</span></summary>
+              <div className="mt-4 flex flex-col gap-3">
+                <div className="flex justify-end"><button type="button" disabled={saving} onClick={() => addTaxonomyOption(facet)} className="rounded-md border border-ui-border-base px-2.5 py-1.5 text-xs font-medium text-ui-fg-base disabled:opacity-50">+ 添加分类</button></div>
+                {taxonomy[facet].map((option, index) => <div key={`${facet}-${index}`} className="rounded-md bg-ui-bg-subtle p-3">
+                  <label className={labelClass}>内部值（英文小写和连字符）<input className={inputClass} value={option.value} onChange={(event) => updateTaxonomyOption(facet, index, { value: event.target.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-") })} /></label>
+                  <label className={`${labelClass} mt-2 block`}>英语显示名称<input className={inputClass} value={option.labels["en-US"] ?? ""} onChange={(event) => updateTaxonomyOption(facet, index, { labels: { "en-US": event.target.value, "en-CA": event.target.value } })} /></label>
+                  <label className={`${labelClass} mt-2 block`}>日语显示名称（可选）<input className={inputClass} value={option.labels["ja-JP"] ?? ""} onChange={(event) => updateTaxonomyOption(facet, index, { labels: { "ja-JP": event.target.value } })} /></label>
+                  <label className={`${labelClass} mt-2 block`}>墨西哥西班牙语显示名称（可选）<input className={inputClass} value={option.labels["es-MX"] ?? ""} onChange={(event) => updateTaxonomyOption(facet, index, { labels: { "es-MX": event.target.value } })} /></label>
+                  <button type="button" disabled={saving} onClick={() => setTaxonomy((current) => ({ ...current, [facet]: current[facet].filter((_, optionIndex) => optionIndex !== index) }))} className="mt-2 rounded-md border border-ui-border-base px-2 py-1 text-xs text-ui-fg-error disabled:opacity-50">删除分类</button>
+                </div>)}
+              </div>
+            </details>
+          </section>)}
+        </div>
+      </Container>}
 
       {!loading && hasLoaded && <Container className="flex flex-wrap items-end gap-3 p-4">
         <label className="min-w-[240px] flex-1 text-sm font-medium text-ui-fg-base">搜索<input className={inputClass} value={search} onChange={(event) => setSearch(event.target.value)} placeholder="输入标题、商品或标签" /></label>
@@ -263,9 +309,7 @@ const StoreContentPage = () => {
             <section className="flex flex-col gap-3 border-t border-ui-border-base pt-5">
               <div><Heading level="h3">分类与展示</Heading><Text size="small" className="mt-1 text-ui-fg-subtle">分类用于灵感筛选；首页只会从已发布且选为首页候选的内容中随机展示。</Text></div>
               <div className="grid gap-4 md:grid-cols-3">
-                <label className={labelClass}>关联商品<input className={inputClass} value={item.product} onChange={(event) => update(index, { product: event.target.value })} placeholder="例如 hoodie" /></label>
-                <label className={labelClass}>图案分类<input className={inputClass} value={item.pattern} onChange={(event) => update(index, { pattern: event.target.value })} placeholder="例如 botanical" /></label>
-                <label className={labelClass}>设计风格<input className={inputClass} value={item.style} onChange={(event) => update(index, { style: event.target.value })} placeholder="例如 streetwear" /></label>
+                {([ ["product", "关联商品"], ["pattern", "图案分类"], ["style", "设计风格"] ] as Array<[Facet, string]>).map(([facet, label]) => <label key={facet} className={labelClass}>{label}<select className={inputClass} value={item[facet]} onChange={(event) => update(index, { [facet]: event.target.value })}><option value="">未设置</option>{taxonomy[facet].map((option) => <option key={option.value} value={option.value}>{option.labels["en-US"] || option.value}</option>)}</select></label>)}
               </div>
               <label className={labelClass}>标签（英文逗号分隔）<input className={inputClass} value={item.tags.join(", ")} onChange={(event) => update(index, { tags: event.target.value.split(",").map((tag) => tag.trim()).filter(Boolean) })} placeholder="funny, cozy, gift" /></label>
               <label className={labelClass}>可配送国家（ISO 两位代码，逗号分隔；* 表示所有国家）<input className={inputClass} value={(item.countryCodes?.length ? item.countryCodes : ["us"]).join(", ")} onChange={(event) => update(index, { countryCodes: event.target.value.split(",").map((code) => code.trim().toLowerCase()).filter(Boolean) })} placeholder="us, jp" /></label>

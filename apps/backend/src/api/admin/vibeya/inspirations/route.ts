@@ -2,6 +2,7 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { updateStoresWorkflow } from "@medusajs/medusa/core-flows"
 import { DEFAULT_VIBEYA_INSPIRATIONS, includeReleasedDefaultInspirations, normalizeVibeyaInspirations, VIBEYA_INSPIRATIONS_METADATA_KEY } from "../../../../lib/vibeya-inspirations"
+import { DEFAULT_VIBEYA_INSPIRATION_TAXONOMY, isValidVibeyaInspirationTaxonomy, normalizeVibeyaInspirationTaxonomy, VIBEYA_INSPIRATION_TAXONOMY_METADATA_KEY } from "../../../../lib/vibeya-inspiration-taxonomy"
 
 async function getStore(req: MedusaRequest) {
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
@@ -12,12 +13,13 @@ async function getStore(req: MedusaRequest) {
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const store = await getStore(req)
   const saved = store?.metadata?.[VIBEYA_INSPIRATIONS_METADATA_KEY]
+  const taxonomy = normalizeVibeyaInspirationTaxonomy(store?.metadata?.[VIBEYA_INSPIRATION_TAXONOMY_METADATA_KEY] ?? DEFAULT_VIBEYA_INSPIRATION_TAXONOMY)
   const inspirations = includeReleasedDefaultInspirations(saved ?? DEFAULT_VIBEYA_INSPIRATIONS)
-  return res.json({ inspirations })
+  return res.json({ inspirations, taxonomy })
 }
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
-  const body = req.body as { inspirations?: unknown } | undefined
+  const body = req.body as { inspirations?: unknown; taxonomy?: unknown } | undefined
   if (!Array.isArray(body?.inspirations) || body.inspirations.length > 100) {
     return res.status(400).json({ error: "灵感条目数量无效（最多 100 条）。" })
   }
@@ -27,6 +29,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   }
   if (new Set(inspirations.map((entry) => entry.id)).size !== inspirations.length) {
     return res.status(400).json({ error: "灵感编号不能重复。" })
+  }
+  const store = await getStore(req)
+  if (!store) return res.status(404).json({ error: "没有找到店铺配置。" })
+  const taxonomySource = body.taxonomy ?? store.metadata?.[VIBEYA_INSPIRATION_TAXONOMY_METADATA_KEY] ?? DEFAULT_VIBEYA_INSPIRATION_TAXONOMY
+  if (!isValidVibeyaInspirationTaxonomy(taxonomySource)) {
+    return res.status(400).json({ error: "灵感分类格式无效，请检查分类编号和英文显示名称是否重复或为空。" })
+  }
+  const taxonomy = normalizeVibeyaInspirationTaxonomy(taxonomySource)
+  const missingCategory = inspirations.find((entry) => (["product", "pattern", "style"] as const).some((facet) => entry[facet] && !taxonomy[facet].some((option) => option.value === entry[facet])))
+  if (missingCategory) {
+    return res.status(400).json({ error: `“${missingCategory.title || "新灵感"}”引用了分类清单中不存在的商品、图案或风格。请先恢复该分类，或调整这条灵感的分类。` })
   }
   const incompletePublished = inspirations.find((entry) => entry.published && (
     !entry.title.trim()
@@ -63,19 +76,16 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (mismatchedStory) {
     return res.status(400).json({ error: `“${mismatchedStory.title || "新灵感"}”的文章地址需要与内部编号保持一致。` })
   }
-  const store = await getStore(req)
-  if (!store) return res.status(404).json({ error: "没有找到店铺配置。" })
-
   try {
     await updateStoresWorkflow(req.scope).run({
       input: {
         selector: { id: store.id },
-        update: { metadata: { ...(store.metadata ?? {}), [VIBEYA_INSPIRATIONS_METADATA_KEY]: inspirations } },
+        update: { metadata: { ...(store.metadata ?? {}), [VIBEYA_INSPIRATIONS_METADATA_KEY]: inspirations, [VIBEYA_INSPIRATION_TAXONOMY_METADATA_KEY]: taxonomy } },
       },
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : "后台保存流程未完成。"
     return res.status(500).json({ error: `保存灵感内容失败：${message}` })
   }
-  return res.json({ inspirations })
+  return res.json({ inspirations, taxonomy })
 }
