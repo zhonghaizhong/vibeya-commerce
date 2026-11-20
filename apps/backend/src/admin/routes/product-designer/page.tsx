@@ -3,10 +3,10 @@ import { Container, Heading, Text } from "@medusajs/ui"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 type Reference = { color: string; size: string; side: "front" | "back" | "surface"; baseImageUrl: string; printAreaImageUrl: string }
-type Designer = { enabled: boolean; legacyProfile?: string; mode: "front-back" | "full-surface"; placements: Array<"front" | "back" | "both" | "wrap">; galleryUrls: string[]; references: Reference[] }
+type Designer = { enabled: boolean; legacyProfile?: string; generationPromptTemplate: string; mode: "front-back" | "full-surface"; placements: Array<"front" | "back" | "both" | "wrap">; galleryUrls: string[]; references: Reference[] }
 type Product = { id: string; title: string; handle: string; status: string; colors: string[]; sizes: string[]; designer: Designer }
 
-const emptyDesigner: Designer = { enabled: false, mode: "front-back", placements: ["front"], galleryUrls: [], references: [] }
+const emptyDesigner: Designer = { enabled: false, generationPromptTemplate: "", mode: "front-back", placements: ["front"], galleryUrls: [], references: [] }
 const uploadFiles = async (files: FileList | null) => {
   if (!files?.length) return []
   if (Array.from(files).some((file) => !file.type.startsWith("image/") || file.size > 10 * 1024 * 1024)) throw new Error("请选择不超过 10 MB 的图片文件。")
@@ -77,14 +77,14 @@ const ProductDesignerPage = () => {
   }
 
   const importCurrentConfigs = async () => {
-    if (!window.confirm("将把当前网站已有商品的详情文案、底图和印花区域配置导入后台。已有后台配置会保留，商品、价格、库存和订单不会变更。继续吗？")) return
+    if (!window.confirm("将把当前网站已有商品的详情文案、底图、印花区域和固定生图指令模板导入后台。已有后台配置会保留，商品、价格、库存和订单不会变更。继续吗？")) return
     setImporting(true); setError(""); setMessage("")
     try {
       const response = await fetch("/admin/vibeya/product-designer", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ importCurrentConfigs: true }) })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || "导入失败。")
       await load()
-      setMessage(`已同步 ${data.contentImported ?? 0} 款商品详情文案和 ${data.imported ?? 0} 款商品的底图/设计配置。已有后台配置及商品、价格、库存、订单均未改动。`)
+      setMessage(`已同步 ${data.contentImported ?? 0} 款商品详情文案、${data.imported ?? 0} 款商品底图/设计配置和 ${data.promptTemplatesImported ?? 0} 款固定生图指令模板。已有后台配置及商品、价格、库存、订单均未改动。`)
     } catch (caught) { setError(caught instanceof Error ? caught.message : "导入失败。") }
     finally { setImporting(false) }
   }
@@ -110,6 +110,7 @@ const ProductDesignerPage = () => {
     <Container className="p-5"><label className="text-sm font-medium">选择商品<select className={textClass} value={productId} onChange={(event) => { if (window.confirm("切换商品会放弃尚未保存的修改，确定继续吗？")) setProductId(event.target.value) }} disabled={loading || saving}><option value="">请选择</option>{products.map((item) => <option key={item.id} value={item.id}>{item.title} · {item.status}</option>)}</select></label>
       {loading ? <Text className="mt-4">正在读取商品…</Text> : product ? <div className="mt-5 flex flex-col gap-5">
         {draft.legacyProfile && <Container className="border border-ui-border-base p-4"><Text className="font-medium">此商品使用现有专用设计流程</Text><Text size="small" className="mt-1 text-ui-fg-subtle">当前前端底图和印花区域已同步到后台作为配置记录。为保留已验证的生成效果，网站继续使用原有专用流程；新商品才使用下面的通用配置。</Text></Container>}
+        <div className="rounded-lg border border-ui-border-base p-4"><Heading level="h2">固定生图指令模板</Heading><Text size="small" className="mt-1 text-ui-fg-subtle">每次为这款商品生图都会附加此模板。系统内置的商品结构和印花区域限制仍会保留。支持变量：{{product_name}}、{{color}}、{{size}}、{{placement}}。</Text><textarea className={`${textClass} min-h-36 font-mono`} value={draft.generationPromptTemplate} maxLength={8000} onChange={(event) => setDraft((current) => ({ ...current, generationPromptTemplate: event.target.value }))} placeholder="例如：保持商品版型和材质不变，只在标记的印花区域内生成图案。"/><Text size="small" className="mt-1 text-ui-fg-subtle">{draft.generationPromptTemplate.length}/8000 字符</Text></div>
         <div className="rounded-lg border border-ui-border-base p-4"><label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" checked={draft.enabled} disabled={Boolean(draft.legacyProfile)} onChange={(event) => setDraft((current) => ({ ...current, enabled: event.target.checked }))} />在前台开放自定义设计</label><Text size="small" className="mt-2 text-ui-fg-subtle">发布状态、站点可售国家和价格仍由商品及站点配置控制。设计器配置不会自动发布商品。</Text></div>
         <label className="text-sm font-medium">印花方式<select className={textClass} value={draft.mode} onChange={(event) => setDraft((current) => ({ ...current, mode: event.target.value as Designer["mode"], placements: event.target.value === "full-surface" ? ["wrap"] : ["front"] }))}><option value="front-back">服装/单面区域（正面、背面）</option><option value="full-surface">整面满印（杯子、毯子等）</option></select></label>
         {draft.mode === "front-back" && <fieldset className="flex flex-wrap gap-4 text-sm"><legend className="mb-2 font-medium">允许顾客选择的印花位置</legend>{(["front", "back", "both"] as const).map((placement) => <label key={placement} className="flex items-center gap-2"><input type="checkbox" checked={draft.placements.includes(placement)} onChange={() => togglePlacement(placement)} />{{ front: "正面", back: "背面", both: "正反面" }[placement]}</label>)}</fieldset>}
