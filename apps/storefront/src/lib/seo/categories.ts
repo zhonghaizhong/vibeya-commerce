@@ -100,6 +100,35 @@ export const PRODUCT_CATEGORY_GROUPS: readonly ProductCategoryGroup[] = [
     productHandles: ["vibeya-custom-metal-bottle-cap-wall-sign"],
     legacyHandles: ["wall-decor", "wall-decorations"],
   },
+  {
+    slug: "custom-bags",
+    label: "Custom Bags",
+    seoTitle: "Custom Bags & Personalized Bags | VIBEYA",
+    description:
+      "Explore custom bags, starting with a personalized PU wallet. Add your artwork or describe a design, choose single-sided or different front-and-back prints, then preview before ordering.",
+    localizedCopy: {
+      "en-CA": {
+        label: "Custom Bags",
+        seoTitle: "Custom Bags & Personalized Bags | VIBEYA",
+        description:
+          "Explore custom bags, starting with a personalized PU wallet. Add your artwork or describe a design, choose single-sided or different front-and-back prints, then preview before ordering.",
+      },
+      "ja-JP": {
+        label: "カスタムバッグ",
+        seoTitle: "カスタムバッグ・オリジナル財布 | VIBEYA",
+        description:
+          "オリジナルのカスタムバッグをデザイン。画像をアップロードするか文章で指定し、PU財布の片面印刷または表裏別デザインを選んで、注文前にプレビューできます。",
+      },
+      "es-MX": {
+        label: "Bolsos personalizados",
+        seoTitle: "Bolsos personalizados y carteras | VIBEYA",
+        description:
+          "Explora bolsos personalizados, empezando por una cartera de PU. Sube tu imagen o describe un diseño, elige impresión por un lado o diseños distintos por ambos lados y previsualiza antes de comprar.",
+      },
+    },
+    productHandles: ["vibeya-custom-pu-wallet"],
+    legacyHandles: ["custom-wallets", "wallets", "custom-wallet"],
+  },
 ] as const
 
 export const getProductCategoryGroup = (handle: string) =>
