@@ -138,6 +138,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           alternates: { languages: alternateUrls(path, eligibleCountries) },
         }
       })
+    const fixedCategoryHandles = new Set(PRODUCT_CATEGORY_GROUPS.flatMap((group) => [group.slug, ...group.legacyHandles]))
+    const dynamicCategorySlugs = new Set(
+      [...marketsByCountry.values()].flatMap((market) => Object.keys(market.categories ?? {}))
+        .filter((slug) => !fixedCategoryHandles.has(slug))
+    )
+    const dynamicCategoryEntries = [...dynamicCategorySlugs]
+      .filter((slug) => isManagedCategoryIndexable(slug, countryCode))
+      .map((slug) => {
+        const path = `/categories/${slug}`
+        const eligibleCountries = countryCodes.filter((marketCountry) =>
+          isManagedCategoryIndexable(slug, marketCountry)
+        )
+        return {
+          url: `${base}${path}`,
+          alternates: { languages: alternateUrls(path, eligibleCountries) },
+        }
+      })
     const contentEntries = (prefix: "categories" | "collections", entries: Entry[]) =>
       entries
         .filter((entry) =>
@@ -175,6 +192,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         : []),
       ...productEntries,
       ...productCategoryEntries,
+      ...dynamicCategoryEntries,
       ...contentEntries("collections", collections),
     ]
   })

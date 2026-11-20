@@ -24,12 +24,45 @@ export async function GET(request: NextRequest) {
         "id,handle,title,subtitle,description,thumbnail,*images,*categories,*type,*options,*variants,*variants.options,*variants.calculated_price",
     })
 
+    const availableProducts = products.filter((product) => market.product_ids.includes(product.id))
+    const fixedCategorySlugs = new Set([
+      "custom-clothing", "custom-tumblers", "custom-home-bath",
+      "custom-kitchen-dining", "custom-hats", "custom-wall-decor",
+      "shirts", "apparel", "drinkware", "tumblers", "home-bath",
+      "home-and-bath", "bathroom", "kitchen-dining", "kitchen-and-dining",
+      "accessories", "hats", "headwear", "wall-decor", "wall-decorations",
+    ])
+    const dynamicCategories = new Map<string, { slug: string; label: string; description: string; seoTitle: string; handles: Set<string> }>()
+    for (const product of availableProducts) {
+      for (const category of product.categories ?? []) {
+        if (!category.handle || fixedCategorySlugs.has(category.handle)) continue
+        const managed = market.category_content?.[category.handle]
+        const copy = managed?.locales?.[locale]
+        const productHandles = managed?.productHandles?.length
+          ? managed.productHandles.filter((handle) => market.handles.includes(handle))
+          : []
+        const group = dynamicCategories.get(category.handle) ?? {
+          slug: category.handle,
+          label: copy?.label || managed?.label || category.name,
+          description: copy?.description || category.description || "",
+          seoTitle: copy?.seoTitle || "",
+          handles: new Set<string>(),
+        }
+        if (!managed || productHandles.includes(product.handle)) group.handles.add(product.handle)
+        dynamicCategories.set(category.handle, group)
+      }
+    }
+
     return NextResponse.json({
       region: { id: region.id, currency_code: region.currency_code },
       category_content: request.nextUrl.searchParams.get("listing")
         ? market.category_content?.[request.nextUrl.searchParams.get("listing")!]?.locales?.[locale] ?? null
         : null,
-      products: products.filter((product) => market.product_ids.includes(product.id)).map((product) => {
+      category_groups: Array.from(dynamicCategories.values()).map((group) => ({
+        ...group,
+        handles: Array.from(group.handles),
+      })),
+      products: availableProducts.map((product) => {
         const localProduct = vibeyaProducts.find((entry) => entry.handle === product.handle)
         const yogaGalleryFiles = [
           "01-carousel.webp",

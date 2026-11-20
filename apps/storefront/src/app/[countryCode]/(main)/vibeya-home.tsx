@@ -10,7 +10,7 @@ import { createPortal } from "react-dom"
 import { useCallback, useEffect, useRef, useState, type SyntheticEvent } from "react"
 
 type StudioRequest = { product?: string; color?: string; size?: string; print?: string; areas?: string; prompt?: string }
-type ProductListing = { category: string; title: string; slug: string; handles: string[] }
+type ProductListing = { category: string; title: string; slug: string; handles: string[]; description?: string }
 
 function getStudioReturnUrl(countryCode: string, request: StudioRequest) {
   const params = new URLSearchParams({ openStudio: "1" })
@@ -40,6 +40,8 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
   if (listing) {
     initialFrameParams.set("listing", listing.slug)
     initialFrameParams.set("handles", listing.handles.join(","))
+    initialFrameParams.set("listingLabel", listing.title)
+    if (listing.description) initialFrameParams.set("listingDescription", listing.description)
   }
   const currentParams = new URLSearchParams(searchParams.toString())
   for (const key of ["viewCart", "openStudio", "openSearch", "view", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
@@ -130,6 +132,8 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
     if (listing) {
       forwardedParams.set("listing", listing.slug)
       forwardedParams.set("handles", listing.handles.join(","))
+      forwardedParams.set("listingLabel", listing.title)
+      if (listing.description) forwardedParams.set("listingDescription", listing.description)
     }
     for (const key of ["viewCart", "openStudio", "openSearch", "view", "product", "color", "size", "print", "areas", "prompt", "inspiration"]) {
       const value = currentParams.get(key)

@@ -11,6 +11,7 @@ export type VibeyaCategoryContent = {
   legacyHandles: string[]
   locales: Partial<Record<VibeyaCategoryLocale, VibeyaCategoryCopy>>
 }
+export type VibeyaNativeCategory = { handle: string; name: string; productHandles: string[] }
 
 const defaults = categoryContentDefaults as Record<string, VibeyaCategoryContent>
 const cleanText = (value: unknown, maxLength = 500) =>
@@ -20,11 +21,11 @@ export function isVibeyaCategoryLocale(value: unknown): value is VibeyaCategoryL
   return typeof value === "string" && (VIBEYA_CATEGORY_CONTENT_LOCALES as readonly string[]).includes(value)
 }
 
-export function getVibeyaCategoryContent(storedValue: unknown) {
+export function getVibeyaCategoryContent(storedValue: unknown, nativeCategories: VibeyaNativeCategory[] = []) {
   const stored = storedValue && typeof storedValue === "object" && !Array.isArray(storedValue)
     ? storedValue as Record<string, unknown>
     : {}
-  return Object.fromEntries(Object.entries(defaults).map(([slug, base]) => {
+  const entries = Object.fromEntries(Object.entries(defaults).map(([slug, base]) => {
     const entry = stored[slug] && typeof stored[slug] === "object" && !Array.isArray(stored[slug])
       ? stored[slug] as Record<string, unknown>
       : {}
@@ -53,6 +54,39 @@ export function getVibeyaCategoryContent(storedValue: unknown) {
       locales,
     } satisfies VibeyaCategoryContent]
   })) as Record<string, VibeyaCategoryContent>
+
+  const validNativeCategories = nativeCategories.filter((category) =>
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(category.handle) && !entries[category.handle]
+  )
+  for (const category of validNativeCategories) {
+    const raw = stored[category.handle] && typeof stored[category.handle] === "object" && !Array.isArray(stored[category.handle])
+      ? stored[category.handle] as Record<string, unknown>
+      : {}
+    const rawLocales = raw.locales && typeof raw.locales === "object" && !Array.isArray(raw.locales)
+      ? raw.locales as Record<string, unknown>
+      : {}
+    const locales = Object.fromEntries(VIBEYA_CATEGORY_CONTENT_LOCALES.flatMap((locale) => {
+      const value = rawLocales[locale] && typeof rawLocales[locale] === "object" && !Array.isArray(rawLocales[locale])
+        ? rawLocales[locale] as Record<string, unknown>
+        : {}
+      const copy = {
+        label: cleanText(value.label, 200),
+        seoTitle: cleanText(value.seoTitle, 300),
+        description: cleanText(value.description, 1000),
+      }
+      return Object.values(copy).some(Boolean) ? [[locale, copy]] : []
+    })) as Partial<Record<VibeyaCategoryLocale, VibeyaCategoryCopy>>
+    const savedHandles = Array.isArray(raw.productHandles)
+      ? raw.productHandles.filter((handle): handle is string => typeof handle === "string" && category.productHandles.includes(handle))
+      : category.productHandles
+    entries[category.handle] = {
+      label: cleanText(raw.label, 200) || locales["en-US"]?.label || category.name,
+      productHandles: [...new Set(savedHandles)],
+      legacyHandles: [],
+      locales,
+    }
+  }
+  return entries
 }
 
 export function isKnownVibeyaCategorySlug(slug: string) {

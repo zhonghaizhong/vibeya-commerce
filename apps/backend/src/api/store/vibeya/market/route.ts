@@ -22,7 +22,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         fields: ["metadata", "fulfillment_sets.service_zones.geo_zones.country_code"],
         pagination: { take: 1000 },
       }),
-      query.graph({ entity: "product", fields: ["id", "handle", "status", "metadata"], pagination: { take: 1000 } }),
+      query.graph({ entity: "product", fields: ["id", "handle", "status", "metadata", "categories.id", "categories.name", "categories.handle", "categories.description"], pagination: { take: 1000 } }),
       query.graph({ entity: "region", fields: ["id", "currency_code", "countries.iso_2"], pagination: { take: 1000 } }),
       query.graph({ entity: "store", fields: ["metadata"] }),
     ])
@@ -47,6 +47,15 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       // Legacy VIBEYA catalog items without an explicit warehouse mapping are U.S.-only.
       && (allowedIds.has(product.id) || (countryCode === "us" && !assignedIds.has(product.id)))
     )
+    const categorySources = new Map<string, { handle: string; name: string; productHandles: string[] }>()
+    for (const product of availableProducts) {
+      for (const category of product.categories ?? []) {
+        if (!category.handle) continue
+        const current: { handle: string; name: string; productHandles: string[] } = categorySources.get(category.handle) ?? { handle: category.handle, name: category.name, productHandles: [] }
+        if (product.handle && !current.productHandles.includes(product.handle)) current.productHandles.push(product.handle)
+        categorySources.set(category.handle, current)
+      }
+    }
     return res.json({
       country_code: countryCode,
       region: region ? { id: region.id, currency_code: region.currency_code } : null,
@@ -61,7 +70,10 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         getPublicVibeyaProductDesigner(product.metadata?.[VIBEYA_PRODUCT_DESIGNER_METADATA_KEY]),
       ])),
       localized_media: (stores[0] as any)?.metadata?.[MEDIA_METADATA_KEY] ?? {},
-      category_content: getVibeyaCategoryContent((stores[0] as any)?.metadata?.[VIBEYA_CATEGORY_CONTENT_METADATA_KEY]),
+      category_content: getVibeyaCategoryContent(
+        (stores[0] as any)?.metadata?.[VIBEYA_CATEGORY_CONTENT_METADATA_KEY],
+        Array.from(categorySources.values())
+      ),
     })
   } catch (error) {
     console.error("Unable to resolve VIBEYA market availability", error)

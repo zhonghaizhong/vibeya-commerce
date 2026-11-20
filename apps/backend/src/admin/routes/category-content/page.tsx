@@ -121,7 +121,7 @@ const CategoryContentPage = () => {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Heading level="h1">分类与 SEO 内容</Heading>
-          <Text className="mt-1 text-ui-fg-subtle">维护各分类页的当地文案和商品归属。分类网址按已配置的 SEO 分类生成，站点只展示本地可配送的关联商品。</Text>
+          <Text className="mt-1 text-ui-fg-subtle">维护既定分类和 Medusa 后台新增分类的各站 SEO 文案。新分类完成当地标题、描述并关联可配送商品后，会进入该站点 sitemap。</Text>
         </div>
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => void initializeDefaults()} disabled={loading || saving || initializing || dirty} title={dirty ? "请先保存或放弃当前修改" : undefined} className="rounded-md border border-ui-border-base px-3 py-2 text-sm font-medium text-ui-fg-base disabled:opacity-50">{initializing ? "导入中…" : "导入当前网站文案"}</button>

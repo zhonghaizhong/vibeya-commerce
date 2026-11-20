@@ -214,7 +214,9 @@ export default async function ProductPage(props: Props) {
   const marketContent = market?.product_content?.[pricedProduct.id]?.[locale] as { seoTitle?: string; seoDescription?: string } | undefined
   const localizedSeo = LOCALIZED_PRODUCT_SEO[pricedProduct.handle]?.[locale]
   const designerConfig = market?.product_designer?.[pricedProduct.id]
-  const vibeyaProductId = VIBEYA_DETAIL_IDS[pricedProduct.handle] || (designerConfig?.enabled && !designerConfig.legacyProfile ? pricedProduct.id : undefined)
+  // Every VIBEYA item uses the same branded detail shell. Product-specific
+  // designer setup only controls whether the customization flow is available.
+  const vibeyaProductId = VIBEYA_DETAIL_IDS[pricedProduct.handle] || pricedProduct.id
   const localProduct = vibeyaProductId
     ? vibeyaProducts.find((item) => item.id === vibeyaProductId)
     : undefined
