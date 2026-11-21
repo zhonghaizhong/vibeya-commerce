@@ -1475,7 +1475,7 @@
   let productTag=pageListing?.label||'All Products',ideaTag='All Inspiration',productVisible=8,ideaVisible=9;
   if(pageListing){const crumb=document.querySelector('.catalog-crumb');const title=document.querySelector('.catalog-hero h1');const description=document.querySelector('.catalog-hero p');if(crumb)crumb.innerHTML=`<a href="/${marketCountryCode()}" target="_top">HOME</a> / ${pageListing.label.toUpperCase()}`;if(title)title.textContent=pageListing.label.toUpperCase();if(description)description.textContent=pageListing.description;}
   const itemPrice=p=>{const v=(p.price.match(/[\d.]+/)||[])[0];return v===undefined?null:Number(v);};
-  const sizeLabel=(product,size)=>product?.sizeLabels?.[size]||(product?.handle==='vibeya-custom-pu-wallet'&&size==='One Size'?({ 'ja-JP':'ワンサイズ','es-MX':'Talla única'}[activeLocale]||'One Size'))||size||'Select a size';
+   const sizeLabel=(product,size)=>product?.sizeLabels?.[size]||(product?.handle==='vibeya-custom-pu-wallet'&&size==='One Size'?({ 'ja-JP':'ワンサイズ','es-MX':'Talla única'}[activeLocale]||'One Size'):'')||size||'Select a size';
   const selectedProductPrice=(product,size)=>product?.marketPrice??product?.sizePrices?.[size]??itemPrice(product);
   const usdPrice=value=>value===null||value===undefined?'':new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(value)+' USD';
   const selectedMarketPrice=product=>{const value=selectedProductPrice(product,selectedSize);if(value===null||value===undefined)return '';const currency=product?.marketCurrency||'USD';return new Intl.NumberFormat('en-US',{style:'currency',currency}).format(value)+' '+currency;};
