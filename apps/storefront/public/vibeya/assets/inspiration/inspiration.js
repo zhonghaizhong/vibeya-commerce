@@ -219,6 +219,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   studioUrl.searchParams.set('locale',marketLocale);
   studioUrl.searchParams.set('openStudio','1');
   studioUrl.searchParams.set('embeddedStudio','1');
+  if(current?.product==='wallet')studioUrl.searchParams.set('walletStudio','catalog-ready-20261121-1');
   if(current?.id)studioUrl.searchParams.set('inspiration',current.id);
   window.VIBEYA_CUSTOMIZE_URL=studioUrl.href;
   const customizeLabels={'en-US':'Customize This Product →','en-CA':'Customize This Product →','ja-JP':'この商品をカスタマイズ →','es-MX':'Personaliza este producto →','fr-CA':'Personnaliser ce produit →'};

@@ -2634,7 +2634,8 @@ const blanket=chosen.id==='sds-97226';
   products[0].asset=gallerySrc(0);
   if(initialStandaloneProductId){document.body.dataset.view='product';}
   else{routeCatalog(false);renderProductDetails();setGallery(0);}
-  syncBackendCatalog().then(loaded=>{
+  const catalogReady=syncBackendCatalog();
+  catalogReady.then(loaded=>{
     if(!initialStandaloneProductId)return;
     if(loaded){routeCatalog();return;}
     if(productRouteLoadingText)productRouteLoadingText.textContent=activeLocale==='ja-JP'?'商品を読み込めませんでした。再読み込みしてください。':activeLocale==='es-MX'?'No se pudo cargar el producto. Vuelve a cargar la página.':activeLocale==='fr-CA'?'Impossible de charger le produit. Rechargez la page.':'Could not load this product. Please reload the page.';
@@ -2684,13 +2685,18 @@ const blanket=chosen.id==='sds-97226';
   }else if(urlParams.get('openSearch')==='1'){
     setTimeout(showSearch,70);history.replaceState(null,'',location.pathname+'#top');
   }else if(urlParams.get('openStudio')==='1'){
-     const target=products.find(p=>p.id===urlParams.get('product'))||products[0];
-     if(target.colors?.includes(urlParams.get('color'))){selectedColor=urlParams.get('color');selectedColorConfirmed=true;}else selectedColorConfirmed=target.colors?.length===1;
-     if(target.sizes?.includes(urlParams.get('size')))selectedSize=urlParams.get('size');
-     if(['front','back','both','wrap'].includes(urlParams.get('print')))selectedPrint=urlParams.get('print');
-     if(target.id==='sds-233939'){const zones=(urlParams.get('areas')||'').split(',').filter(id=>uniformPrintZones.some(([zone])=>zone===id));if(zones.length)selectedUniformZones=zones;}
+     const requestedProductId=urlParams.get('product');
      const resumePrompt=urlParams.get('prompt')||(urlParams.get('inspiration')==='funny-skeleton'?inspirations[0].prompt:undefined);
-     setTimeout(()=>requestStudio(target,resumePrompt),70);history.replaceState(null,'',location.pathname+'#top');
+     void catalogReady.then(()=>{
+       const target=products.find(p=>p.id===requestedProductId)||(requestedProductId?null:products[0]);
+       if(!target){toast(activeLocale==='ja-JP'?'商品を読み込めませんでした。もう一度お試しください。':activeLocale==='es-MX'?'No se pudo cargar el producto. Inténtalo de nuevo.':'Could not load the selected product. Please try again.');return;}
+       if(target.colors?.includes(urlParams.get('color'))){selectedColor=urlParams.get('color');selectedColorConfirmed=true;}else selectedColorConfirmed=target.colors?.length===1;
+       if(target.sizes?.includes(urlParams.get('size')))selectedSize=urlParams.get('size');
+       if(['front','back','both','wrap'].includes(urlParams.get('print')))selectedPrint=urlParams.get('print');
+       if(target.id==='sds-233939'){const zones=(urlParams.get('areas')||'').split(',').filter(id=>uniformPrintZones.some(([zone])=>zone===id));if(zones.length)selectedUniformZones=zones;}
+       requestStudio(target,resumePrompt);
+     });
+     history.replaceState(null,'',location.pathname+'#top');
    }
   if(new URLSearchParams(location.search).get('inspiration')==='funny-skeleton'&&!urlParams.get('openStudio')){
     setTimeout(()=>requestStudio(products[0],inspirations[0].prompt),60);
