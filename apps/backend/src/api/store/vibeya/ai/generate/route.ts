@@ -613,6 +613,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         hasUploadedArtwork
           ? `${artworkReferenceLabel} Use the uploaded artwork as the design source on the bib. Follow the customer's written instructions closely and keep the artwork recognizable.`
           : "Create original artwork for the bib by following the customer's written instructions closely.",
+        "DEFAULT ARTWORK BACKGROUND: unless the customer explicitly asks for a background, create borderless artwork with a transparent visual background so the black apron fabric shows naturally around and between the design elements. Never add a white or colored rectangular backing, canvas, panel, label, sticker, badge, or frame behind the artwork. White may appear only as an intentional part of the subject itself (for example, a cow's coat, lettering, or highlights), not as a broad fill behind the composition. The pure-white studio background belongs only outside the apron and must never be printed onto the bib. If the customer explicitly requests a background, include that background only within the bib print area.",
         artworkHandlingInstruction,
         `CUSTOMER DESIGN BRIEF: ${prompt}`,
         "Render the artwork as realistic ink integrated into the apron fabric, following its texture, lighting, and gentle folds. Do not make it look like a sticker, decal, separate patch, or hard-edged overlay. Do not add VIBEYA branding, logos, watermarks, or extra text. Return one complete front-facing apron product photo on pure white.",
