@@ -19,7 +19,7 @@ const galleryUrls = [
   `${imageBase}/wallet-gallery-05.jpg`,
   `${imageBase}/wallet-gallery-06.jpg`,
 ]
-const walletGenerationPrompt = "Custom black PU bifold wallet. Image 1 is one open wallet showing BOTH inner panels in a single spread view, not separate front/back product photos. LEFT inner panel = Front Only printable side; RIGHT inner panel = Back Only printable side. Image 2 is the location guide for this same wallet image. Front Only: print only inside the marked left panel and keep the right panel plain black. Back Only: print only inside the marked right panel and keep the left panel plain black. Front + Back: print both panels; follow explicit left/right instructions, or use the same design on both when no distinction is specified. Preserve black matte PU texture, natural folds, exact wallet proportions, center hinge, edge piping, stitching, and white background. Never print on hinge, borders, stitching, piping, outer edge, or background. Do not reproduce the guide color. Make ink look absorbed into matte textured PU, never like a sticker or glossy overlay. Output exactly one open-wallet view; no duplicate products or separate front/back views."
+const walletGenerationPrompt = "Custom black PU bifold wallet. Image 1 is one open wallet showing BOTH inner panels in a single spread view. Image 2 is the placement guide for this same wallet. Offer only two print placements: Front Only and Front + Back. Front Only: print only inside the marked LEFT inner panel; keep the RIGHT inner panel plain black. Front + Back: print inside BOTH marked inner panels; follow the customer's left/front and right/back instructions exactly when they specify different artwork. If they describe one unified design, apply it to both panels. Never make a back-only option or leave either panel unprinted when Front + Back is selected. Preserve the wallet's black matte PU texture, natural folds, exact proportions, center hinge, edge piping, stitching, and white background. Never print on hinge, borders, stitching, piping, outer edge, or background. Do not reproduce the guide color. Make ink look absorbed into matte textured PU, never like a sticker or glossy overlay. Output exactly one open-wallet view; no duplicate products or separate front/back views."
 const marketPrices = [
   { country: "us", currency: "usd", amount: 15.99 },
   { country: "ca", currency: "cad", amount: 22.99 },
@@ -91,7 +91,7 @@ export default async function seedVibeyaCustomPuWallet({ container }: ExecArgs) 
     ...designer,
     mode: "front-back",
     enabled: true,
-    placements: ["front", "back", "both"],
+    placements: ["front", "both"],
     references: [
       { side: "front", size: "One Size", color: "Black", baseImageUrl, printAreaImageUrl: printGuideUrl },
       { side: "back", size: "One Size", color: "Black", baseImageUrl, printAreaImageUrl: printGuideUrl },
