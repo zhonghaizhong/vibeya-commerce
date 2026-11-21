@@ -1,10 +1,12 @@
 import {
   batchProductVariantsWorkflow,
+  updateStoresWorkflow,
   updateProductsWorkflow,
   updateStockLocationsWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import type { ExecArgs } from "@medusajs/framework/types"
+import { getVibeyaProductContent, VIBEYA_PRODUCT_CONTENT_METADATA_KEY } from "../lib/vibeya-product-content"
 
 const handle = "vibeya-custom-pu-wallet"
 const productId = "prod_01M7VVPR5E2K827AHXDNXKQR1W"
@@ -19,7 +21,11 @@ const galleryUrls = [
   `${imageBase}/wallet-gallery-05.jpg`,
   `${imageBase}/wallet-gallery-06.jpg`,
 ]
-const walletGenerationPrompt = "Custom black PU bifold wallet. Image 1 is one open wallet showing BOTH inner panels in a single spread view. Image 2 is the placement guide for this same wallet. Offer only two print placements: Front Only and Front + Back. Front Only: print only inside the marked LEFT inner panel; keep the RIGHT inner panel plain black. Front + Back: print inside BOTH marked inner panels; follow the customer's left/front and right/back instructions exactly when they specify different artwork. If they describe one unified design, apply it to both panels. Never make a back-only option or leave either panel unprinted when Front + Back is selected. Preserve the wallet's black matte PU texture, natural folds, exact proportions, center hinge, edge piping, stitching, and white background. Never print on hinge, borders, stitching, piping, outer edge, or background. Do not reproduce the guide color. Make ink look absorbed into matte textured PU, never like a sticker or glossy overlay. Output exactly one open-wallet view; no duplicate products or separate front/back views."
+const walletGalleryForLocale = (locale: "en-US" | "ja-JP" | "es-MX") => Array.from(
+  { length: 6 },
+  (_, index) => `${imageBase}/localized/${locale}/wallet-gallery-${String(index + 1).padStart(2, "0")}.svg`
+)
+const walletGenerationPrompt = "Custom black PU bifold wallet. Image 1 is one open wallet showing BOTH inner panels in a single spread view. Image 2 is the placement guide for this same wallet. Offer only two print placements: Front Only and Front + Back. Orientation is fixed: the product FRONT is the RIGHT inner panel in the open-wallet guide; the product BACK is the LEFT inner panel. Front Only: print only inside the marked RIGHT inner panel; keep the LEFT inner panel plain black. Front + Back: print inside BOTH marked inner panels; follow the customer's right/front and left/back instructions exactly when they specify different artwork. If they describe one unified design, apply it to both panels. Never make a back-only option or leave either panel unprinted when Front + Back is selected. Preserve the wallet's black matte PU texture, natural folds, exact proportions, center hinge, edge piping, stitching, and white background. Never print on hinge, borders, stitching, piping, outer edge, or background. Do not reproduce the guide color. Make ink look absorbed into matte textured PU, never like a sticker or glossy overlay. Output exactly one open-wallet view; no duplicate products or separate front/back views."
 const marketPrices = [
   { country: "us", currency: "usd", amount: 15.99 },
   { country: "ca", currency: "cad", amount: 22.99 },
@@ -31,6 +37,7 @@ const chinaLocationName = "China · Yoga Set Dispatch (address pending)"
 
 const DESIGNER_KEY = "vibeya_product_designer"
 const FULFILLMENT_PRODUCTS_KEY = "vibeya_fulfillment_product_ids"
+const MARKET_MEDIA_KEY = "vibeya_product_market_media"
 
 export default async function seedVibeyaCustomPuWallet({ container }: ExecArgs) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
@@ -40,6 +47,7 @@ export default async function seedVibeyaCustomPuWallet({ container }: ExecArgs) 
     { data: regions },
     { data: locations },
     { data: categories },
+    { data: stores },
   ] = await Promise.all([
     query.graph({
       entity: "product",
@@ -69,6 +77,7 @@ export default async function seedVibeyaCustomPuWallet({ container }: ExecArgs) 
       pagination: { take: 1 },
     }),
     query.graph({ entity: "product_category", fields: ["id", "name", "handle"] }),
+    query.graph({ entity: "store", fields: ["id", "metadata"] }),
   ])
 
   const product = (products as any[]).find((item) => item.id === productId || item.handle === handle)
@@ -99,6 +108,7 @@ export default async function seedVibeyaCustomPuWallet({ container }: ExecArgs) 
     galleryUrls,
     generationPromptTemplate: walletGenerationPrompt,
   }
+  const content = getVibeyaProductContent(handle, product.metadata?.[VIBEYA_PRODUCT_CONTENT_METADATA_KEY])
 
   const bagsCategory = (categories as any[]).find((category) =>
     category.handle === "custom-bags" || category.name?.trim().toLowerCase() === "custom bags"
@@ -112,6 +122,7 @@ export default async function seedVibeyaCustomPuWallet({ container }: ExecArgs) 
     ...(product.metadata ?? {}),
     vibeya_available_countries: marketCountries,
     [DESIGNER_KEY]: nextDesigner,
+    [VIBEYA_PRODUCT_CONTENT_METADATA_KEY]: content,
   }
   await updateProductsWorkflow(container).run({
     input: {
@@ -123,6 +134,23 @@ export default async function seedVibeyaCustomPuWallet({ container }: ExecArgs) 
         metadata,
         ...(categoryIds.size ? { category_ids: [...categoryIds] } : {}),
       }],
+    },
+  })
+
+  const store = (stores as any[])[0]
+  if (!store) throw new MedusaError(MedusaError.Types.NOT_FOUND, "Store configuration not found for wallet localization.")
+  const currentMedia = store.metadata?.[MARKET_MEDIA_KEY] && typeof store.metadata[MARKET_MEDIA_KEY] === "object"
+    ? store.metadata[MARKET_MEDIA_KEY] as Record<string, Record<string, string[]>>
+    : {}
+  const productMedia = { ...(currentMedia[product.id] ?? {}) }
+  productMedia.us = walletGalleryForLocale("en-US")
+  productMedia.ca = walletGalleryForLocale("en-US")
+  productMedia.jp = walletGalleryForLocale("ja-JP")
+  productMedia.mx = walletGalleryForLocale("es-MX")
+  await updateStoresWorkflow(container).run({
+    input: {
+      selector: { id: store.id },
+      update: { metadata: { ...(store.metadata ?? {}), [MARKET_MEDIA_KEY]: { ...currentMedia, [product.id]: productMedia } } },
     },
   })
 

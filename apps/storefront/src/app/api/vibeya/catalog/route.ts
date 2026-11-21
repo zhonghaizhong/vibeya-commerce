@@ -73,6 +73,10 @@ export async function GET(request: NextRequest) {
         const marketImages = localProduct?.id === "sds-63823"
           ? yogaGalleryFiles.map((file) => `/vibeya/assets/products/sds-63823/${yogaMediaCountry}/${file}`)
           : market.localized_media?.[product.id]?.[mediaCountryCode] ?? []
+        const baseDesignerConfig = market.product_designer?.[product.id] ?? null
+        const designerConfig = product.handle === "vibeya-custom-pu-wallet" && marketImages.length && baseDesignerConfig
+          ? { ...baseDesignerConfig, galleryUrls: marketImages }
+          : baseDesignerConfig
         const localImage = localProduct?.colors[0]
           ? getVibeyaImage(localProduct, localProduct.colors[0])
           : null
@@ -111,7 +115,7 @@ export async function GET(request: NextRequest) {
           sizes: Array.from(sizes),
           size_prices: sizePrices,
           storefront_content: market.product_content?.[product.id]?.[locale] ?? {},
-          designer_config: market.product_designer?.[product.id] ?? null,
+          designer_config: designerConfig,
           price: price?.calculated_amount ?? null,
           currency_code: price?.currency_code ?? region.currency_code,
         }
