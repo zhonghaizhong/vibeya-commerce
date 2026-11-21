@@ -12,6 +12,7 @@ const imageBase = "/vibeya/assets/products/vibeya-custom-pu-wallet"
 const baseImageUrl = `${imageBase}/wallet-print-base.jpg`
 const printGuideUrl = `${imageBase}/wallet-print-guide.png`
 const galleryUrls = [baseImageUrl]
+const walletGenerationPrompt = "Custom black PU bifold wallet. Image 1 is one open wallet showing BOTH inner panels in a single spread view, not separate front/back product photos. LEFT inner panel = Front Only printable side; RIGHT inner panel = Back Only printable side. Image 2 is the location guide for this same wallet image. Front Only: print only inside the marked left panel and keep the right panel plain black. Back Only: print only inside the marked right panel and keep the left panel plain black. Front + Back: print both panels; follow explicit left/right instructions, or use the same design on both when no distinction is specified. Preserve black matte PU texture, natural folds, exact wallet proportions, center hinge, edge piping, stitching, and white background. Never print on hinge, borders, stitching, piping, outer edge, or background. Do not reproduce the guide color. Make ink look absorbed into matte textured PU, never like a sticker or glossy overlay. Output exactly one open-wallet view; no duplicate products or separate front/back views."
 const marketPrices = [
   { country: "us", currency: "usd", amount: 15.99 },
   { country: "ca", currency: "cad", amount: 22.99 },
@@ -89,9 +90,7 @@ export default async function seedVibeyaCustomPuWallet({ container }: ExecArgs) 
       { side: "back", size: "One Size", color: "Black", baseImageUrl, printAreaImageUrl: printGuideUrl },
     ],
     galleryUrls,
-    generationPromptTemplate: typeof designer.generationPromptTemplate === "string" && designer.generationPromptTemplate.trim()
-      ? designer.generationPromptTemplate
-      : "Custom black PU bifold wallet. Image 1 is one open wallet showing BOTH inner panels in a single spread view, not separate front/back product photos. LEFT inner panel = Front Only printable side; RIGHT inner panel = Back Only printable side. Image 2 is the location guide for this same wallet image. Front Only: print only inside the marked left panel and keep the right panel plain black. Back Only: print only inside the marked right panel and keep the left panel plain black. Front + Back: print both panels; follow explicit left/right instructions, or use the same design on both when no distinction is specified. Preserve black matte PU texture, natural folds, exact wallet proportions, center hinge, edge piping, stitching, and white background. Never print on hinge, borders, stitching, piping, outer edge, or background. Do not reproduce the guide color. Make ink look absorbed into matte textured PU, never like a sticker or glossy overlay. Output exactly one open-wallet view; no duplicate products or separate front/back views.",
+    generationPromptTemplate: walletGenerationPrompt,
   }
 
   const bagsCategory = (categories as any[]).find((category) =>
