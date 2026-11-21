@@ -176,6 +176,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.rewrite(destination)
   }
 
+  const managedWalletStory = pathname === "/vibeya/inspiration/story.html"
+    && request.nextUrl.searchParams.get("inspiration") === "mushroom-night-garden-wallet"
+  if (managedWalletStory) {
+    const requestedCountry = request.nextUrl.searchParams.get("country")?.toLowerCase()
+    const countryCode = isSupportedMarketCountry(requestedCountry) ? requestedCountry : "us"
+    return NextResponse.redirect(
+      new URL(`/${countryCode}/inspiration/mushroom-night-garden-wallet`, request.url),
+      308
+    )
+  }
+
   const inactiveMarketPath = pathname.match(/^\/(de|dk|es|fr|gb|it|se)(?:\/|$)/i)
   if (inactiveMarketPath) {
     return new NextResponse("Not found", {

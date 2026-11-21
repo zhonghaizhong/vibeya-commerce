@@ -29,27 +29,6 @@ const nextConfig = {
       },
     ]
   },
-  async redirects() {
-    const markets = ["ca", "jp", "mx", "us"]
-    return [
-      ...markets.map((countryCode) => ({
-        source: "/vibeya/inspiration/story.html",
-        has: [
-          { type: "query", key: "inspiration", value: "mushroom-night-garden-wallet" },
-          { type: "query", key: "country", value: countryCode },
-        ],
-        destination: `/${countryCode}/inspiration/mushroom-night-garden-wallet`,
-        permanent: true,
-      })),
-      {
-        source: "/vibeya/inspiration/story.html",
-        has: [{ type: "query", key: "inspiration", value: "mushroom-night-garden-wallet" }],
-        missing: [{ type: "query", key: "country" }],
-        destination: "/us/inspiration/mushroom-night-garden-wallet",
-        permanent: true,
-      },
-    ]
-  },
   async rewrites() {
     return {
       beforeFiles: [
