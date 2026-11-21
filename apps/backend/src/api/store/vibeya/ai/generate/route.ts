@@ -306,11 +306,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   }
   const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : ""
   const productId = typeof body?.productId === "string" ? body.productId : ""
-  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY) as { graph: (input: Record<string, unknown>) => Promise<{ data: Array<{ id: string; title?: string; metadata?: Record<string, unknown> | null }> }> }
-  const { data: configuredProducts } = await query.graph({ entity: "product", fields: ["id", "title", "metadata"], filters: { id: productId }, pagination: { take: 1 } })
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY) as { graph: (input: Record<string, unknown>) => Promise<{ data: Array<{ id: string; title?: string; handle?: string; metadata?: Record<string, unknown> | null }> }> }
+  const { data: configuredProducts } = await query.graph({ entity: "product", fields: ["id", "title", "handle", "metadata"], filters: { id: productId }, pagination: { take: 1 } })
   const configuredProduct = configuredProducts[0]
   const designerConfig = normalizeVibeyaProductDesigner(configuredProduct?.metadata?.[VIBEYA_PRODUCT_DESIGNER_METADATA_KEY])
   const isConfiguredProduct = designerConfig.enabled && !designerConfig.legacyProfile
+  const isOpenWallet = isConfiguredProduct && configuredProduct?.handle === "vibeya-custom-pu-wallet"
   const isBlanket = productId === "sds-97226"
   const isBathMat = productId === "sds-138708"
   const isBeanie = productId === "sds-172647"
@@ -446,7 +447,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const preserveOriginalDesign = body?.preserveOriginalDesign === true
   const isWashedHoodie = productId === "vibeya-washed-hoodie"
   const isLongSleeveTee = productId === "sds-167256"
-  const placementGuideCount = isFullSurfaceProduct || isBeanie || isDenimCap || isApron || printPlacement === "none" ? 0 : printPlacement === "both" ? 2 : 1
+  const placementGuideCount = isFullSurfaceProduct || isBeanie || isDenimCap || isApron || isOpenWallet || printPlacement === "none" ? 0 : printPlacement === "both" ? 2 : 1
   const artworkReferenceStart = isTumbler || isFullSurfaceProduct || isBeanie || isDenimCap || isApron ? 0 : 2 + placementGuideCount
   const artworkReferenceNumbers = references.slice(artworkReferenceStart).map((_, index) => artworkReferenceStart + index + 1)
   const artworkReferenceLabel = artworkReferenceNumbers.length
@@ -545,7 +546,16 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     ? "LEFT = Left / Piece 1; RIGHT = Right / Piece 2."
     : "CENTER = the only sign."
   const safePrompt = isConfiguredProduct
-    ? designerConfig.mode === "full-surface"
+    ? isOpenWallet
+      ? [
+          `Create exactly ONE photorealistic product preview of ${productConfig.name}. Image 1 is one open, unfolded black bifold wallet showing BOTH inner panels in a single continuous product view; it is not a separate front-view image and back-view image. Preserve this exact open-wallet composition, panel proportions, center hinge, black matte PU texture, stitching, piping, folds, and white background.`,
+          "Image 2 is the print-area guide for that same open wallet. The LEFT inner panel is the product's Front Only print area. The RIGHT inner panel is the product's Back Only print area. The center hinge, edge piping, border stitching, and outside edge are never printable.",
+          printPlacement === "front" ? "FRONT ONLY: apply the design only inside the LEFT inner panel. Keep the RIGHT inner panel completely plain black." : printPlacement === "back" ? "BACK ONLY: apply the design only inside the RIGHT inner panel. Keep the LEFT inner panel completely plain black." : "FRONT + BACK: apply artwork to BOTH inner panels in the same open-wallet view. Follow any explicit front/left and back/right instructions in the customer brief; if the brief gives one undivided concept, use a coordinated version of that concept on both panels. Never swap the left and right assignments.",
+          artworkHandlingInstruction,
+          `CUSTOMER DESIGN BRIEF: ${prompt}`,
+          "The print must look integrated into matte PU leather and follow natural grain, folds, and lighting; never look like a sticker or glossy layer. Do not create a second wallet, duplicate product views, add a closed-wallet view, or add labels, text, watermarks, or presentation graphics unless the customer explicitly asks for printed artwork containing text. Output one image.",
+        ].join("\n")
+      : designerConfig.mode === "full-surface"
       ? [
           `Create one polished, photorealistic custom product preview for ${productConfig.name}. Use image ${references.length + 1} as the exact blank product base; preserve the product's shape, construction, color, material, proportions, and clean photo style.`,
           productPrintAreaReference ? `Image ${references.length + 2} is a print-area guide only. Apply the design only inside the marked printable area; do not reproduce the guide.` : "Apply artwork only to the product's printable surface and preserve all other product parts.",

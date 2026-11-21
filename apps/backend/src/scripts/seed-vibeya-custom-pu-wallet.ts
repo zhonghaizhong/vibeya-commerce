@@ -11,7 +11,7 @@ const productId = "prod_01M7VVPR5E2K827AHXDNXKQR1W"
 const imageBase = "/vibeya/assets/products/vibeya-custom-pu-wallet"
 const baseImageUrl = `${imageBase}/wallet-print-base.jpg`
 const printGuideUrl = `${imageBase}/wallet-print-guide.png`
-const galleryUrls = [baseImageUrl, printGuideUrl]
+const galleryUrls = [baseImageUrl]
 const marketPrices = [
   { country: "us", currency: "usd", amount: 15.99 },
   { country: "ca", currency: "cad", amount: 22.99 },
@@ -91,7 +91,7 @@ export default async function seedVibeyaCustomPuWallet({ container }: ExecArgs) 
     galleryUrls,
     generationPromptTemplate: typeof designer.generationPromptTemplate === "string" && designer.generationPromptTemplate.trim()
       ? designer.generationPromptTemplate
-      : "Custom black PU bifold wallet. Preserve the real open-wallet shape, matte PU leather grain, natural folds, perimeter stitching, edge piping, and center hinge. The LEFT inner panel is the front; the RIGHT inner panel is the back. Print only on the selected panel(s), inside their borders. Keep stitching, piping, edges, and center hinge unprinted. For front-only, print left and leave right solid black. For back-only, print right and leave left solid black. For front + back, follow each side's instruction independently. Make the design look printed into matte textured PU, never like a sticker or glossy overlay.",
+      : "Custom black PU bifold wallet. Image 1 is one open wallet showing BOTH inner panels in a single spread view, not separate front/back product photos. LEFT inner panel = Front Only printable side; RIGHT inner panel = Back Only printable side. Image 2 is the location guide for this same wallet image. Front Only: print only inside the marked left panel and keep the right panel plain black. Back Only: print only inside the marked right panel and keep the left panel plain black. Front + Back: print both panels; follow explicit left/right instructions, or use the same design on both when no distinction is specified. Preserve black matte PU texture, natural folds, exact wallet proportions, center hinge, edge piping, stitching, and white background. Never print on hinge, borders, stitching, piping, outer edge, or background. Do not reproduce the guide color. Make ink look absorbed into matte textured PU, never like a sticker or glossy overlay. Output exactly one open-wallet view; no duplicate products or separate front/back views.",
   }
 
   const bagsCategory = (categories as any[]).find((category) =>
@@ -154,5 +154,5 @@ export default async function seedVibeyaCustomPuWallet({ container }: ExecArgs) 
     },
   })
 
-  logger.info(`Synchronized published PU wallet: persistent gallery and print guides, four market prices, Custom Bags category, and China-dispatch market association. Current China street address remains marked pending in the existing location.`)
+  logger.info(`Synchronized published PU wallet: persistent base image and print guide, single-spread front/back mapping, four market prices, Custom Bags category, and China-dispatch market association. Current China street address remains marked pending in the existing location.`)
 }

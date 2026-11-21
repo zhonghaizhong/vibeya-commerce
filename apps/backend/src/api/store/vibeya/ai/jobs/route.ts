@@ -115,10 +115,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (!productId || !color || !size) {
     return res.status(400).json({ error: "Choose a product, color, and size before creating your design. These choices will be saved with it." })
   }
-  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY) as { graph: (input: Record<string, unknown>) => Promise<{ data: Array<{ id: string; status?: string; metadata?: Record<string, unknown> | null }> }> }
-  const { data: matchingProducts } = await query.graph({ entity: "product", fields: ["id", "status", "metadata"], filters: { id: productId }, pagination: { take: 1 } })
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY) as { graph: (input: Record<string, unknown>) => Promise<{ data: Array<{ id: string; handle?: string; status?: string; metadata?: Record<string, unknown> | null }> }> }
+  const { data: matchingProducts } = await query.graph({ entity: "product", fields: ["id", "handle", "status", "metadata"], filters: { id: productId }, pagination: { take: 1 } })
   const designerConfig = normalizeVibeyaProductDesigner(matchingProducts[0]?.metadata?.[VIBEYA_PRODUCT_DESIGNER_METADATA_KEY])
   const isConfiguredProduct = designerConfig.enabled && !designerConfig.legacyProfile && !DESIGN_GENERATION_PRODUCT_IDS.has(productId)
+  const isOpenWallet = isConfiguredProduct && matchingProducts[0]?.handle === "vibeya-custom-pu-wallet"
   if (!DESIGN_GENERATION_PRODUCT_IDS.has(productId) && !isConfiguredProduct) {
     return res.status(400).json({ error: "AI design generation is not available for this product yet. Please choose another product." })
   }
@@ -182,7 +183,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     return res.status(400).json({ error: "Choose at least one valid basketball uniform print area." })
   }
   const placement = isConfiguredProduct && designerConfig.mode === "full-surface" ? "wrap" : isYogaSet ? "both" : isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isBasketballUniform || isApron ? "front" : body?.printPlacement
-  const placementGuideCount = isConfiguredProduct ? designerConfig.mode === "full-surface" ? 0 : placement === "both" ? 2 : 1 : isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isApron ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
+  const placementGuideCount = isConfiguredProduct ? designerConfig.mode === "full-surface" || isOpenWallet ? 0 : placement === "both" ? 2 : 1 : isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isApron ? 0 : placement === "both" ? 2 : ["front", "back", "wrap"].includes(String(placement)) ? 1 : 0
   const maximumReferences = isConfiguredProduct && designerConfig.mode === "full-surface" || isTumbler || isBlanket || isBathMat || isBeanie || isDenimCap || isShowerCurtain || isTankini || isYogaSet || isBasketballUniform || isApron ? 6 : 2 + placementGuideCount + 6
   if (isConfiguredProduct && designerConfig.mode === "full-surface" && !productReference) return res.status(400).json({ error: "The configured blank product reference is missing." })
   if (isConfiguredProduct && designerConfig.mode === "front-back" && references.length < 2 + placementGuideCount) return res.status(400).json({ error: "The configured front/back product images or print-area guides are missing." })
