@@ -1770,10 +1770,19 @@
   function retryFailedDesign(job){
     const product=products.find(item=>item.id===job?.product_id);
     if(!product){toast('This product is no longer available for design.');return;}
-    openProductById(product.id,job.color);
-    if(product.id==='sds-233939')restoreUniformZonesFromPrompt(job.prompt);
+    // Retry from My Designs should keep the current page in place. Calling
+    // openProductById here relays a product-route message to the parent page;
+    // the resulting navigation reloads this iframe and closes the studio.
+    chosen=product;
+    const requestedColor=product.id==='sds-128646'&&job.color==='NightGarden'?'White':job.color;
+    selectedColor=product.colors?.includes(requestedColor)?requestedColor:(product.colors?.[0]||'Black');
+    selectedColorConfirmed=product.colors?.length===1||product.colors?.includes(requestedColor);
     selectedSize=product.sizes?.includes(job.size)?job.size:(product.sizes?.[0]||'');
     selectedPrint=productPrintPlacement(job.product_id)==='both'?'both':job.product_id==='sds-172647'?'front':['front','back','both','wrap'].includes(job.print_placement)?job.print_placement:'front';
+    $('#preserveOriginalDesign').checked=false;
+    if(product.id==='sds-233939')restoreUniformZonesFromPrompt(job.prompt);
+    syncVariants();
+    drawStudioVariantChoices();
     $('#studioPrompt').value=job.prompt||'';
     hasPreview=false;generatedArtworkDataUrl=null;currentDesignJobId=null;
     showStudio(product,job.prompt||'');studioViewMode='product';drawPreview();
