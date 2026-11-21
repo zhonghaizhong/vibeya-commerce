@@ -44,6 +44,31 @@ const bindHowItWorksDialog=(locale)=>{
 
 document.addEventListener('DOMContentLoaded',async()=>{
   const safe=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const renderStoryBody=(container,content,locale)=>{
+    const renderInline=(text,parent)=>{
+      String(text||'').split(/(\*\*[^*]+\*\*)/g).filter(Boolean).forEach(part=>{
+        if(part.startsWith('**')&&part.endsWith('**')){const strong=document.createElement('strong');strong.textContent=part.slice(2,-2);parent.append(strong);}
+        else parent.append(document.createTextNode(part));
+      });
+    };
+    const blocks=String(content||'').trim().split(/\n\s*\n/).map(block=>block.trim()).filter(Boolean);
+    const nodes=[];
+    for(let index=0;index<blocks.length;index++){
+      const block=blocks[index];
+      const heading=block.match(/^(#{2,3})\s+(.+)$/);
+      if(heading){const element=document.createElement(heading[1].length===2?'h2':'h3');renderInline(heading[2],element);nodes.push(element);continue;}
+      const highlight=block.match(/^\[highlight\]\s*([\s\S]*?)\s*\[\/highlight\]$/);
+      if(highlight){const element=document.createElement('div');element.className='highlight-strip';renderInline(highlight[1].replace(/\n/g,' '),element);nodes.push(element);continue;}
+      const prompt=block.match(/^\[prompt\]\s*([\s\S]*?)\s*\[\/prompt\]$/);
+      if(prompt){const element=document.createElement('div');element.className='prompt-box';const label=document.createElement('span');label.className='concept-label';label.textContent=({ 'ja-JP':'デザインプロンプト例','es-MX':'Ejemplo de prompt de diseño' }[locale]||'Example design prompt');const paragraph=document.createElement('p');paragraph.textContent=prompt[1].trim();element.append(label,paragraph);nodes.push(element);continue;}
+      const lines=block.split('\n');
+      const ordered=lines.every(line=>/^\d+\.\s+/.test(line));
+      const unordered=lines.every(line=>/^[-*]\s+/.test(line));
+      if(ordered||unordered){const list=document.createElement(ordered?'ol':'ul');lines.forEach(line=>{const item=document.createElement('li');renderInline(line.replace(ordered?/^\d+\.\s+/:/^[-*]\s+/,''),item);list.append(item);});nodes.push(list);continue;}
+      const paragraph=document.createElement('p');renderInline(block.replace(/\n/g,' '),paragraph);nodes.push(paragraph);
+    }
+    container.replaceChildren(...nodes);
+  };
   const translations=window.VIBEYA_MARKET_TRANSLATIONS;
   const bundledCatalog=Array.isArray(window.VIBEYA_INSPIRATION_CATALOG)?window.VIBEYA_INSPIRATION_CATALOG:[];
   // Keep the U.S. inspiration facets on a stable three-part taxonomy:
@@ -245,7 +270,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
     if(glance){glance.textContent=marketLocale==='ja-JP'?'商品に使われている印刷デザイン。色や配置をカスタマイズできます。':marketLocale==='es-MX'?'Diseño de impresión usado en el producto. Personaliza los colores y la ubicación.':'The print artwork used on this product. Customize the colors and placement to make it yours.';}
     const tags=document.getElementById('storyTags');if(tags)tags.innerHTML=(current.tags||[]).map(tag=>`<span class="chip">${safe(tag)}</span>`).join('');
     for(const [key,id] of [['product','storyProduct'],['pattern','storyPattern'],['style','storyStyle']]){const node=document.getElementById(id);if(node)node.textContent=facetLabel(key,current[key])||activeStoryLabels[key]?.[current[key]]||current[key]||'';}
-    const body=document.getElementById('storyBody');if(body){body.replaceChildren(...String(current.articleBody||'').split(/\n\s*\n/).map(text=>text.trim()).filter(Boolean).map(text=>{const p=document.createElement('p');p.textContent=text;return p;}));body.hidden=!current.articleBody;}
+    const body=document.getElementById('storyBody');if(body){renderStoryBody(body,current.articleBody,marketLocale);body.hidden=!current.articleBody;}
     window.VIBEYA_CUSTOMIZE_URL=studioUrl.href;
   }else if(isGenericStory&&!managedStoryRoute){
     document.title='Design story unavailable | VIBEYA';
