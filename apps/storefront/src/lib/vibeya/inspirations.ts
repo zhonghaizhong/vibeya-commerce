@@ -16,6 +16,7 @@ export type ManagedInspiration = {
   image: string
   cardImage: string
   printImage?: string
+  galleryImages?: string[]
   summary: string
   articleBody: string
   product: string

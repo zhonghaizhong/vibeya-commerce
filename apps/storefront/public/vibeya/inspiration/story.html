@@ -39,7 +39,10 @@
   <main class="site-wrap market-main">
     <nav class="article-breadcrumb" aria-label="Breadcrumb"><a id="storyHomeLink" href="/us/">Home</a> / <a id="storyInspirationLink" href="/vibeya/inspiration/index.html">Inspiration Market</a> / <span id="storyBreadcrumbTitle">Design Story</span></nav>
     <section class="article-hero">
-      <div class="article-photo managed-story-photo"><img id="storyHeroImage" src="../assets/inspiration/skeleton-model-banner-v2.png" alt="VIBEYA design inspiration" fetchpriority="high"></div>
+      <div class="article-photo article-gallery managed-story-gallery" id="articleGallery" tabindex="0" aria-label="Product image gallery">
+        <div class="gallery-stage"><img id="galleryMainImage" src="../assets/inspiration/skeleton-model-banner-v2.png" width="1448" height="1086" alt="VIBEYA design inspiration" fetchpriority="high"><button class="gallery-arrow gallery-prev" type="button" data-gallery-dir="prev" aria-label="Previous image">‹</button><button class="gallery-arrow gallery-next" type="button" data-gallery-dir="next" aria-label="Next image">›</button><span class="gallery-counter" id="galleryCounter" aria-live="polite">01 / 04</span></div>
+        <div class="gallery-thumbnails" id="galleryThumbnails" role="group" aria-label="Choose a product image"></div>
+      </div>
       <article class="article-hero-copy">
         <span class="pill-label" id="storyEyebrow">DESIGN JOURNAL · VIBEYA INSPIRATION</span>
         <h1 id="storyTitle">Design Story</h1>
@@ -50,6 +53,7 @@
           <div class="detail-row"><strong>Pattern</strong><span id="storyPattern"></span></div>
           <div class="detail-row"><strong>Style</strong><span id="storyStyle"></span></div>
         </div>
+        <p class="price-note" id="storyPriceNote"></p>
         <div class="actions"><button class="btn btn-lime" type="button" data-open-customize>Customize This Product →</button></div>
       </article>
     </section>
@@ -66,6 +70,8 @@
   <div class="customize-overlay" id="customizeOverlay" hidden><div class="customize-dialog" role="dialog" aria-modal="true" aria-label="Create your design"><button class="purchase-close" type="button" data-close-customize aria-label="Close">×</button><div class="studio-frame-loading">Opening AI Studio…</div><iframe id="customizeFrame" title="VIBEYA AI Design Studio"></iframe></div></div>
   <footer class="site-wrap site-footer"><span id="storyFooterCopyright">© 2026 VIBEYA · Inspiration Market</span><a id="storyFooterInspiration" href="/vibeya/inspiration/index.html">Inspiration Market</a><a id="storyFooterShop" href="/us/">Return to Shop</a></footer>
   <script defer src="../assets/inspiration/catalog.js?v=inspiration-unified-20261117-2"></script>
+  <script>window.VIBEYA_GALLERY_ROOT='';window.VIBEYA_GALLERY_IMAGES=[];</script>
+  <script defer src="../assets/inspiration/gallery.js?v=gallery-4x3-1"></script>
   <script defer src="../assets/inspiration/inspiration.js?v=inspiration-wallet-dedup-20261121-1"></script>
 <script src="../assets/shared/market-translations.generated.js?v=market-copy-4"></script><script src="../assets/shared/market-controls.js?v=market-switch-5"></script><script src="../assets/shared/market-locale.js?v=site-locale-copy-30" defer></script></body>
 </html>

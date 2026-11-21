@@ -129,11 +129,15 @@ export async function GET(_request: Request, context: RouteContext) {
   const canonical = new URL(`/${countryCode}/inspiration/${encodeURIComponent(entry.id)}`, origin).href
   const title = copy.title!.trim()
   const summary = copy.summary!.trim()
-  const heroImage = getAssetUrl(copy.image!, origin)
   const printImage = getAssetUrl(entry.printImage || copy.image!, origin)
+  const galleryImages = (entry.galleryImages ?? []).filter(Boolean).slice(0, 12)
+  const gallery = (galleryImages.length ? galleryImages : [copy.image!]).map((image, index) => ({
+    src: getAssetUrl(image, origin),
+    alt: `${title} product scene ${index + 1}`,
+  }))
   const articleBody = copy.articleBody!.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean)
   const tags = (copy.tags ?? []).map((tag) => `<span class="chip">${escapeHtml(tag)}</span>`).join("")
-  const schema = getSchema(entry, title, summary, heroImage, canonical, locale)
+  const schema = getSchema(entry, title, summary, gallery[0].src, canonical, locale)
   const eligibleCountries = (entry.countryCodes ?? [countryCode]).filter((country) =>
     isSupportedMarketCountry(country) && (country === "us" || country === "ca" || hasIndexableInspirationCopy(getInspirationCopy(entry, marketLocale[country])))
   )
@@ -158,6 +162,13 @@ export async function GET(_request: Request, context: RouteContext) {
     : locale === "es-MX"
       ? "Diseño de impresión usado en el producto. Personaliza los colores y la ubicación."
       : "The print artwork used on this product. Customize the colors and placement to make it yours."
+  const priceNote = countryCode === "jp"
+    ? "¥2,549 JPY · 在庫あり"
+    : countryCode === "mx"
+      ? "$304.99 MXN · En existencia"
+      : countryCode === "ca"
+        ? "CA$22.99 CAD · In stock"
+        : "$15.99 USD · In stock"
   const documentPath = path.join(process.cwd(), "public", "vibeya", "inspiration", "story.html")
   let html = await readFile(documentPath, "utf8")
 
@@ -174,15 +185,20 @@ export async function GET(_request: Request, context: RouteContext) {
   html = html.replace('<span id="storyFooterCopyright">© 2026 VIBEYA · Inspiration Market</span>', `<span id="storyFooterCopyright">© 2026 VIBEYA · ${navCopy.footerInspiration}</span>`)
   html = html.replace('<a id="storyFooterInspiration" href="/vibeya/inspiration/index.html">Inspiration Market</a>', `<a id="storyFooterInspiration" href="/vibeya/inspiration/index.html?country=${countryCode}&locale=${locale}">${navCopy.footerInspiration}</a>`)
   html = html.replace('<a id="storyFooterShop" href="/us/">Return to Shop</a>', `<a id="storyFooterShop" href="/${countryCode}/">${navCopy.shop}</a>`)
-  html = html.replace(/<\/head>/, `<link rel="canonical" href="${canonical}">${alternates}${xDefault}<meta property="og:type" content="article"><meta property="og:title" content="${escapeHtml(title)} | VIBEYA Design Story"><meta property="og:description" content="${escapeHtml(summary)}"><meta property="og:url" content="${canonical}"><meta property="og:image" content="${heroImage}"><meta property="og:locale" content="${locale}"><script type="application/ld+json">${schema}</script></head>`)
-  html = html.replace(/<img id="storyHeroImage" src="[^"]*" alt="[^"]*"/, `<img id="storyHeroImage" src="${heroImage}" alt="${escapeHtml(`${title} design inspiration`)}"`)
-  html = html.replace(/<img id="storyPrintImage" src="[^"]*"/, `<img id="storyPrintImage" src="${printImage}"`)
+  html = html.replace(/<\/head>/, `<link rel="canonical" href="${canonical}">${alternates}${xDefault}<meta property="og:type" content="article"><meta property="og:title" content="${escapeHtml(title)} | VIBEYA Design Story"><meta property="og:description" content="${escapeHtml(summary)}"><meta property="og:url" content="${canonical}"><meta property="og:image" content="${gallery[0].src}"><meta property="og:locale" content="${locale}"><script type="application/ld+json">${schema}</script></head>`)
+  const thumbnails = gallery.map((image, index) => `<button class="gallery-thumb${index === 0 ? " is-active" : ""}" type="button" data-gallery-index="${index}" aria-label="View product scene ${index + 1}" aria-pressed="${index === 0 ? "true" : "false"}"><img src="${escapeHtml(image.src)}" width="1448" height="1086" loading="lazy" alt=""></button>`).join("")
+  const galleryMarkup = `<div class="article-photo article-gallery managed-story-gallery" id="articleGallery" tabindex="0" aria-label="${escapeHtml(`${title} product image gallery`)}"><div class="gallery-stage"><img id="galleryMainImage" src="${escapeHtml(gallery[0].src)}" width="1448" height="1086" alt="${escapeHtml(gallery[0].alt)}" fetchpriority="high"><button class="gallery-arrow gallery-prev" type="button" data-gallery-dir="prev" aria-label="Previous image">‹</button><button class="gallery-arrow gallery-next" type="button" data-gallery-dir="next" aria-label="Next image">›</button><span class="gallery-counter" id="galleryCounter" aria-live="polite">01 / ${String(gallery.length).padStart(2, "0")}</span></div><div class="gallery-thumbnails" id="galleryThumbnails" role="group" aria-label="Choose a product image">${thumbnails}</div></div>`
+  html = html.replace(/<div class="article-photo article-gallery managed-story-gallery"[\s\S]*?<\/div>\s*<\/div>/, galleryMarkup)
+  html = html.replace("window.VIBEYA_GALLERY_ROOT='';window.VIBEYA_GALLERY_IMAGES=[];", `window.VIBEYA_GALLERY_ROOT='';window.VIBEYA_GALLERY_IMAGES=${JSON.stringify(gallery).replace(/</g, "\\u003c")};`)
+  html = html.replace(/<img id="storyPrintImage" src="[^"]*"/, `<img id="storyPrintImage" src="${escapeHtml(printImage)}"`)
+  html = html.replace('alt="Custom product print artwork"', `alt="${escapeHtml(`${title} print artwork`)}"`)
   html = html.replace(/<h1 id="storyTitle">[^<]*<\/h1>/, `<h1 id="storyTitle">${escapeHtml(title)}</h1>`)
   html = html.replace(/<p id="storySummary"><\/p>/, `<p id="storySummary">${escapeHtml(summary)}</p>`)
   html = html.replace(/<div class="chips" id="storyTags"><\/div>/, `<div class="chips" id="storyTags">${tags}</div>`)
   html = html.replace(/<strong>Product<\/strong><span id="storyProduct"><\/span>/, `<strong>${labels.product}</strong><span id="storyProduct">${escapeHtml(productName)}</span>`)
   html = html.replace(/<strong>Pattern<\/strong><span id="storyPattern"><\/span>/, `<strong>${labels.pattern}</strong><span id="storyPattern">${escapeHtml(patternName)}</span>`)
   html = html.replace(/<strong>Style<\/strong><span id="storyStyle"><\/span>/, `<strong>${labels.style}</strong><span id="storyStyle">${escapeHtml(styleName)}</span>`)
+  html = html.replace(/<p class="price-note" id="storyPriceNote"><\/p>/, `<p class="price-note" id="storyPriceNote">${priceNote}</p>`)
   html = html.replace(/<section class="story-copy article-prose" id="storyBody"[^>]*><\/section>/, `<section class="story-copy article-prose" id="storyBody" aria-label="Design story">${articleBody.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}</section>`)
   html = html.replace(/<p id="storyGlanceText"><\/p>/, `<p id="storyGlanceText">${escapeHtml(glimpse)}</p>`)
   html = html.replace(/href="\/us\//g, `href="/${countryCode}/`)

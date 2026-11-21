@@ -78,6 +78,7 @@ body.customize-open{overflow:hidden;}
 .story-meta>div{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:10px 13px;border:1px solid #e7d8f4;border-radius:13px;background:#faf5ff;font-size:13px;line-height:1.35}
 .story-meta dt{font-weight:800;color:#301449}
 .story-meta dd{margin:0;text-align:right;color:#3d2756}
+.article-hero-copy .price-note{margin:0;color:#25133a;font-size:15px;font-weight:800;line-height:1.4}
 .article-hero-copy .actions .btn{min-width:175px}
 .article-hero-copy .actions .btn-lime{background:var(--bright);border-color:var(--bright);color:var(--ink)}
 .article-hero-copy .actions .btn,.prompt-box .btn{min-height:48px;border-radius:16px;font:800 14px/1.25 var(--font);}

@@ -13,6 +13,8 @@ type Inspiration = {
   slug: string
   image: string
   cardImage: string
+  printImage?: string
+  galleryImages?: string[]
   summary: string
   articleBody: string
   useManagedImage: boolean
@@ -128,6 +130,30 @@ const StoreContentPage = () => {
       const url = data.files?.[0]?.url
       if (!response.ok || typeof url !== "string") throw new Error(data.message || data.error || "图片上传失败。")
       update(index, { [field]: url })
+      setMessage("图片上传成功，保存灵感内容后生效。")
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "图片上传失败。")
+    } finally {
+      setUploading("")
+    }
+  }
+  const uploadInspirationAsset = async (index: number, field: "printImage" | "galleryImages", file: File | undefined, galleryIndex?: number) => {
+    if (!file) return
+    if (!file.type.startsWith("image/")) { setError("请选择图片文件。"); return }
+    if (file.size > 10 * 1024 * 1024) { setError("图片不能超过 10 MB。"); return }
+    const key = `${index}-${field}-${galleryIndex ?? "print"}`
+    setUploading(key)
+    setError("")
+    setMessage("")
+    try {
+      const form = new FormData()
+      form.append("files", file)
+      const response = await fetch("/admin/uploads", { method: "POST", credentials: "same-origin", body: form })
+      const data = await response.json() as { files?: Array<{ url?: string }>; message?: string; error?: string }
+      const url = data.files?.[0]?.url
+      if (!response.ok || typeof url !== "string") throw new Error(data.message || data.error || "图片上传失败。")
+      if (field === "printImage") update(index, { printImage: url })
+      else update(index, { galleryImages: Array.from({ length: 4 }, (_, slot) => slot === galleryIndex ? url : items[index]?.galleryImages?.[slot] ?? "") })
       setMessage("图片上传成功，保存灵感内容后生效。")
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "图片上传失败。")
@@ -274,6 +300,30 @@ const StoreContentPage = () => {
               <div className="grid gap-5 md:grid-cols-2">
                 <div><label className={labelClass}>卡片图片<input className={inputClass} value={item.cardImage} onChange={(event) => update(index, { cardImage: event.target.value })} placeholder="上传图片或粘贴图片地址" /></label><input className="mt-2 block w-full text-sm text-ui-fg-subtle" type="file" accept="image/*" aria-label="上传灵感卡片图片" disabled={saving || uploading === `${index}-cardImage`} onChange={(event) => { void uploadImage(index, "cardImage", event.target.files?.[0]); event.currentTarget.value = "" }} />{uploading === `${index}-cardImage` && <Text size="small">正在上传…</Text>}{item.cardImage && <img className="mt-3 max-h-48 max-w-full rounded-lg border border-ui-border-base object-contain" src={item.cardImage} alt={`${item.title || "灵感"}卡片预览`} />}{item.image && item.cardImage !== item.image && <button type="button" disabled={saving} onClick={() => update(index, { cardImage: item.image })} className="mt-2 rounded-md border border-ui-border-base px-2.5 py-1.5 text-xs text-ui-fg-base disabled:opacity-50">使用专题主图</button>}</div>
                 <div><label className={labelClass}>文章专题主图<input className={inputClass} value={item.image} onChange={(event) => update(index, { image: event.target.value })} placeholder="上传图片或粘贴图片地址" /></label><input className="mt-2 block w-full text-sm text-ui-fg-subtle" type="file" accept="image/*" aria-label="上传专题主图" disabled={saving || uploading === `${index}-image`} onChange={(event) => { void uploadImage(index, "image", event.target.files?.[0]); event.currentTarget.value = "" }} />{uploading === `${index}-image` && <Text size="small">正在上传…</Text>}{item.image && <img className="mt-3 max-h-48 max-w-full rounded-lg border border-ui-border-base object-contain" src={item.image} alt={`${item.title || "灵感"}专题主图预览`} />}</div>
+              </div>
+              <div className="grid gap-5 border-t border-ui-border-base pt-5 md:grid-cols-2">
+                <div>
+                  <label className={labelClass}>独立印花图<input className={inputClass} value={item.printImage ?? ""} onChange={(event) => update(index, { printImage: event.target.value })} placeholder="上传纯印花图，或粘贴图片地址" /></label>
+                  <Text size="small" className="mt-1 text-ui-fg-subtle">详情页侧栏展示印花本身，不放产品效果图或宣传文字。</Text>
+                  <input className="mt-2 block w-full text-sm text-ui-fg-subtle" type="file" accept="image/*" aria-label="上传独立印花图" disabled={saving || uploading === `${index}-printImage-print`} onChange={(event) => { void uploadInspirationAsset(index, "printImage", event.target.files?.[0]); event.currentTarget.value = "" }} />
+                  {item.printImage && <img className="mt-3 max-h-48 max-w-full rounded-lg border border-ui-border-base object-contain" src={item.printImage} alt={`${item.title || "灵感"}独立印花预览`} />}
+                </div>
+                <div>
+                  <Text className={labelClass}>详情页轮播图（4 张）</Text>
+                  <Text size="small" className="mt-1 text-ui-fg-subtle">按轮播顺序上传产品场景图；无文字的场景图可以供各站点共用。</Text>
+                  <div className="mt-2 grid grid-cols-2 gap-3">
+                    {[0, 1, 2, 3].map((slot) => {
+                      const key = `${index}-galleryImages-${slot}`
+                      const image = item.galleryImages?.[slot] ?? ""
+                      return <div key={slot} className="rounded-md border border-ui-border-base p-2">
+                        <Text size="small">第 {slot + 1} 张</Text>
+                        <input className={inputClass} aria-label={`第 ${slot + 1} 张轮播图地址`} value={image} onChange={(event) => update(index, { galleryImages: Array.from({ length: 4 }, (_, imageIndex) => imageIndex === slot ? event.target.value : item.galleryImages?.[imageIndex] ?? "") })} placeholder="图片地址" />
+                        <input className="mt-2 block w-full text-xs text-ui-fg-subtle" type="file" accept="image/*" aria-label={`上传第 ${slot + 1} 张轮播图`} disabled={saving || uploading === key} onChange={(event) => { void uploadInspirationAsset(index, "galleryImages", event.target.files?.[0], slot); event.currentTarget.value = "" }} />
+                        {image && <img className="mt-2 aspect-[4/3] w-full rounded border border-ui-border-base object-contain" src={image} alt={`${item.title || "灵感"}轮播图 ${slot + 1} 预览`} />}
+                      </div>
+                    })}
+                  </div>
+                </div>
               </div>
             </section>
 

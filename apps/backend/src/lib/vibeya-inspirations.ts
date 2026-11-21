@@ -15,6 +15,8 @@ export type VibeyaInspiration = {
   slug: string
   image: string
   cardImage: string
+  printImage?: string
+  galleryImages?: string[]
   summary: string
   articleBody: string
   useManagedImage: boolean
@@ -119,6 +121,10 @@ export function normalizeVibeyaInspirations(value: unknown): VibeyaInspiration[]
     }
     return {
       ...entry,
+      printImage: typeof entry.printImage === "string" ? entry.printImage.trim().slice(0, 2000) : "",
+      galleryImages: Array.isArray(entry.galleryImages)
+        ? entry.galleryImages.filter((image): image is string => typeof image === "string").map((image) => image.trim().slice(0, 2000)).filter(Boolean).slice(0, 12)
+        : [],
       summary: typeof entry.summary === "string" ? entry.summary.trim().slice(0, 3000) : "",
       articleBody: typeof entry.articleBody === "string" ? entry.articleBody.trim().slice(0, 12000) : "",
       useManagedImage: entry.useManagedImage === true,
