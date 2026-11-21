@@ -50,6 +50,10 @@
     a {text-decoration:none; color:inherit;}
     img {display:block; max-width:100%;}
     .vibeya-product-route-pending #detailHeroImage {visibility:hidden;}
+    .product-route-loading{display:none;}
+    .vibeya-product-route-pending .product-route-loading{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;gap:14px;align-content:center;background:var(--cream);color:var(--ink);font-size:14px;font-weight:700;}
+    .product-route-loading-spinner{width:30px;height:30px;border:3px solid #e7dded;border-top-color:#8f60ed;border-radius:50%;animation:product-route-spin .8s linear infinite;}
+    @keyframes product-route-spin{to{transform:rotate(360deg)}}
     :focus-visible {outline:3px solid #9f63ff;outline-offset:3px;}
     .container{width:min(100% - 88px,1440px);margin-inline:auto;}
     .announcement{background:var(--ink); color:#fff; text-align:center; font-size:12px; padding:8px 18px; letter-spacing:.03em;}
@@ -857,6 +861,7 @@
 
   
 <!-- One new detail view, leaving the original homepage and two catalogs unchanged. -->
+<div id="productRouteLoading" class="product-route-loading" role="status" aria-live="polite"><span class="product-route-loading-spinner" aria-hidden="true"></span><span id="productRouteLoadingText">Loading product…</span></div>
 <main id="productDetailPage" class="product-detail-page" aria-label="Product detail">
   <div class="container detail-container">
     <nav class="detail-breadcrumb" aria-label="Breadcrumb"><a href="/us/" data-store-route="home" target="_top">Home</a><span>/</span><a href="/us/products" data-store-route="products" target="_top">Shop All</a><span>/</span><strong id="detailBreadcrumbTitle">Custom Cotton Long Sleeve</strong></nav>
@@ -1217,6 +1222,8 @@
   const currentLocale=new URLSearchParams(location.search).get('locale');
   const marketDefaultLocale=defaultLocales[marketCode]||'en-US';
   const activeLocale=supportedLanguages.includes(currentLocale)?currentLocale:marketDefaultLocale;
+  const productRouteLoadingText=$('#productRouteLoadingText');
+  if(productRouteLoadingText)productRouteLoadingText.textContent=activeLocale==='ja-JP'?'商品を読み込み中…':activeLocale==='es-MX'?'Cargando producto…':activeLocale==='fr-CA'?'Chargement du produit…':'Loading product…';
   if(navLanguage)navLanguage.replaceChildren(...supportedLanguages.map(locale=>new Option(localeNames[locale],locale)));
   if(navDestination)navDestination.value=marketCountryCode().toLowerCase();
   if(navLanguage)navLanguage.value=activeLocale;
@@ -2084,7 +2091,7 @@
       const marketLocale=new URLSearchParams(location.search).get('locale');
       const catalogParams=new URLSearchParams({country_code:marketCountry});if(marketLocale)catalogParams.set('locale',marketLocale);if(pageListing)catalogParams.set('listing',pageListing.slug);
       const response=await fetch('/api/vibeya/catalog?'+catalogParams.toString(),{credentials:'same-origin',cache:'no-store'});
-      if(!response.ok){products.splice(0);catalogProducts.splice(0);drawProductChoices();drawStudioVariantChoices();renderProductCards();paintProducts();return;}
+      if(!response.ok){products.splice(0);catalogProducts.splice(0);drawProductChoices();drawStudioVariantChoices();renderProductCards();paintProducts();return false;}
       const data=await response.json();
       for(const group of data.category_groups||[]){
         const existingGroup=marketCategoryGroups.find(item=>item.slug===group.slug);
@@ -2127,12 +2134,14 @@
         if(remote.sizes?.length)local.sizes=local.sizes.filter(size=>remote.sizes.includes(size));
       }
       const standaloneProduct=standaloneId?products.find(product=>product.id===standaloneId):null;
+      if(standaloneId&&!standaloneProduct)throw new Error('Requested storefront product is missing from the market catalog.');
       if(standaloneProduct){const [hashKey,hashQuery='']=location.hash.slice(1).split('?'),hashParams=new URLSearchParams(hashQuery);chosen=standaloneProduct;selectedColor=standaloneProduct.colors?.includes(hashParams.get('color'))?hashParams.get('color'):standaloneProduct.colors?.[0]||'Black';selectedSize=standaloneProduct.sizes?.includes(hashParams.get('size'))?hashParams.get('size'):standaloneProduct.sizes?.[0]||'';selectedPrint=standaloneProduct.designerConfig?.mode==='full-surface'?'wrap':'front';}
       productTags=['All Products',...new Set(catalogProducts.map(p=>p.category||'New arrivals'))];
       if(!pageListing&&!productTags.includes(productTag))productTag='All Products';
       renderProductDetails();setGallery(galleryIndex);syncVariants();
       drawProductChoices();drawStudioVariantChoices();renderProductCards();paintProducts();
-    }catch(error){console.warn('VIBEYA catalog sync unavailable',error);}
+      return true;
+    }catch(error){console.warn('VIBEYA catalog sync unavailable',error);return false;}
   }
   async function addBackendCartItem(item){
     const response=await fetch('/api/vibeya/cart',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({...item,countryCode:marketCountryCode()})});
@@ -2610,13 +2619,17 @@ const blanket=chosen.id==='sds-97226';
     if(location.hash==='#product-'+id){routeCatalog();}
   }
 
+  const initialStandaloneProductId=queryParams.get('standaloneProductId');
   products[0].asset=gallerySrc(0);
-  routeCatalog(false);
-  renderProductDetails();
-  setGallery(0);
-  syncBackendCatalog();
+  if(initialStandaloneProductId){document.body.dataset.view='product';}
+  else{routeCatalog(false);renderProductDetails();setGallery(0);}
+  syncBackendCatalog().then(loaded=>{
+    if(!initialStandaloneProductId)return;
+    if(loaded){routeCatalog();return;}
+    if(productRouteLoadingText)productRouteLoadingText.textContent=activeLocale==='ja-JP'?'商品を読み込めませんでした。再読み込みしてください。':activeLocale==='es-MX'?'No se pudo cargar el producto. Vuelve a cargar la página.':activeLocale==='fr-CA'?'Impossible de charger le produit. Rechargez la page.':'Could not load this product. Please reload the page.';
+  });
   drawStudioVariantChoices();
-  renderProductCards();renderInspo();paintProducts();paintIdeas();refreshCount();migrateLegacyBag();drawPreview();routeCatalog();
+  renderProductCards();renderInspo();paintProducts();paintIdeas();refreshCount();migrateLegacyBag();drawPreview();if(!initialStandaloneProductId)routeCatalog();
   window.addEventListener('hashchange',()=>{
     const cameFromParent=pendingParentHash===location.hash;
     pendingParentHash=null;
