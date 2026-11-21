@@ -59,6 +59,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    volumes:
+      - medusa_static_data:/workspace/apps/backend/.medusa/server/static
     expose:
       - "9000"
     healthcheck:
@@ -137,6 +139,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  medusa_static_data:
   caddy_data:
   caddy_config:
 
