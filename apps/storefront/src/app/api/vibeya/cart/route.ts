@@ -67,9 +67,11 @@ export async function POST(request: NextRequest) {
 
   const countryCode = String(body.countryCode ?? await getDestinationCountryCode()).toLowerCase()
 
-  const productConfig = vibeyaProducts.find((product) => product.id === String(body.product ?? ""))
-  const handle = productConfig?.handle
-  if (!handle) return jsonError("This product is not available for purchase", 404)
+  const requestedProduct = String(body.product ?? "").trim()
+  if (!requestedProduct) return jsonError("This product is not available for purchase", 404)
+  const productConfig = vibeyaProducts.find((product) =>
+    product.id === requestedProduct || product.handle === requestedProduct
+  )
 
   const color = String(body.color ?? "")
   const size = String(body.size ?? "")
@@ -88,7 +90,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const { products } = await sdk.store.product.list({
-      handle: [handle],
+      ...(productConfig
+        ? { handle: [productConfig.handle] }
+        : requestedProduct.startsWith("prod_")
+          ? { id: [requestedProduct] }
+          : { handle: [requestedProduct] }),
       region_id: region.id,
       limit: 1,
       fields: "id,handle,*variants,*variants.options",
@@ -96,6 +102,7 @@ export async function POST(request: NextRequest) {
     const product = products[0]
     if (!product) return jsonError("Product is not published", 404)
     if (!market.product_ids.includes(product.id)) return jsonError("This product cannot be delivered to the selected destination.", 400)
+    const handle = product.handle
 
     const normalizedColor = normalizeColorValue(color, handle)
     const normalizedSize = normalizeOptionValue(size)
@@ -115,7 +122,8 @@ export async function POST(request: NextRequest) {
     })
     if (!variant) return jsonError("That color and size combination is unavailable", 400)
 
-    const print = productConfig.id === "sds-63823"
+    const isYogaSet = handle === "vibeya-custom-womens-yoga-set"
+    const print = isYogaSet
       ? "both"
       : ["none", "front", "back", "both", "wrap"].includes(String(body.print))
         ? String(body.print)
@@ -124,7 +132,7 @@ export async function POST(request: NextRequest) {
       vibeya_design_name: String(body.designName ?? "Custom design").slice(0, 120),
       vibeya_design_prompt: String(body.prompt ?? "").slice(0, 4000),
       vibeya_print_placement: print,
-      ...(productConfig.id === "sds-63823"
+      ...(isYogaSet
         ? { vibeya_customization_scope: "matching_top_and_shorts_complete_set" }
         : {}),
       vibeya_reference_images_not_attached: Number(body.referenceCount ?? 0) > 0,
