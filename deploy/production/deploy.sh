@@ -30,6 +30,7 @@ fi
 COMPOSE_PARALLEL_LIMIT=1 "${compose[@]}" build backend storefront
 "${compose[@]}" run --rm backend pnpm exec medusa db:migrate
 "${compose[@]}" run --rm backend pnpm exec medusa exec ./src/scripts/configure-vibeya-markets.ts
+"${compose[@]}" run --rm backend pnpm exec medusa exec ./src/scripts/feature-wallet-inspiration-on-market-homepages.ts
 "${compose[@]}" run --rm backend pnpm exec medusa exec ./src/scripts/seed-vibeya-custom-yoga-set.ts
 "${compose[@]}" run --rm backend pnpm exec medusa exec ./src/scripts/seed-vibeya-custom-pu-wallet.ts
 "${compose[@]}" run --rm backend pnpm exec medusa exec ./src/scripts/seed-vibeya-custom-apron.ts
