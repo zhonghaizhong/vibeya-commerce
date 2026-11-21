@@ -2191,6 +2191,16 @@
     }catch(error){console.warn('Could not load inspiration-list feature cards',error);}
 
     if(cards.length<6)console.warn(`Only ${cards.length} published inspirations have matching campaign images for ${country}.`);
+    const featuredIds=new Set(cards.map(card=>card.id));
+    for(const entry of catalog){
+      if(entry.published===false||entry.homeFeatured!==true||!entry.cardImage||featuredIds.has(entry.id))continue;
+      const storyUrl=entry.marketUrls?.[country]
+        ?new URL(entry.marketUrls[country],location.origin)
+        :new URL('/vibeya/inspiration/story.html',location.origin);
+      if(!entry.marketUrls?.[country])storyUrl.searchParams.set('inspiration',entry.id);
+      cards.push({id:entry.id,title:entry.title||'VIBEYA inspiration',alt:`${entry.title||'VIBEYA inspiration'} inspiration card`,image:entry.cardImage,href:withMarketContext(storyUrl.href)});
+      featuredIds.add(entry.id);
+    }
     for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
     const selectedCards=cards.slice(0,6);
     $('#inspoCards').innerHTML=selectedCards.map(card=>{
