@@ -9,10 +9,15 @@ document.addEventListener('DOMContentLoaded',()=>{
  const galleryRoot=window.VIBEYA_GALLERY_ROOT||'../assets/inspiration/';
  const thumbs=[...document.querySelectorAll('[data-gallery-index]')];
  let active=0;
+ function resolveGalleryImage(value){
+  if(/^(https?:)?\/\//i.test(value)||value.startsWith('/'))return new URL(value,location.origin).href;
+  if(value.startsWith('../'))return value;
+  return galleryRoot+encodeURIComponent(value);
+ }
  function select(index){
   if(!files.length)return;
   active=(index+files.length)%files.length;
-  if(stage){stage.src=galleryRoot+files[active].src;stage.alt=files[active].alt;}
+  if(stage){stage.src=resolveGalleryImage(files[active].src);stage.alt=files[active].alt;}
   const count=document.getElementById('galleryCounter');
   if(count)count.textContent=String(active+1).padStart(2,'0')+' / '+String(files.length).padStart(2,'0');
   thumbs.forEach((b,i)=>{b.classList.toggle('is-active',i===active);b.setAttribute('aria-pressed',i===active?'true':'false')});
