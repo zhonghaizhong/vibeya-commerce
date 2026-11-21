@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const normalizeInspirationSlug=value=>String(value||'').split('/').pop().replace(/\.html?$/i,'').toLowerCase();
   const findInspirationBySlug=slug=>catalog.find(item=>normalizeInspirationSlug(item.slug)===normalizeInspirationSlug(slug)||item.id===normalizeInspirationSlug(slug));
   const facetLabel=(key,value)=>managedTaxonomy[key]?.find(option=>option.value===value)?.labels?.[marketLocale]||storyLabels[key]?.[value]||fallbackFacetLabels[key]?.[value]||value;
-  try{const response=await fetch(`/api/vibeya/inspirations?country_code=${encodeURIComponent(marketCountry)}`,{credentials:'same-origin',cache:'no-store'});if(!response.ok)throw new Error('Destination inspiration catalog unavailable');const data=await response.json();if(Array.isArray(data.inspirations)){const managed=data.inspirations;managedTaxonomy=data.taxonomy&&typeof data.taxonomy==='object'?data.taxonomy:{};excludedIds=new Set(Array.isArray(data.excluded_ids)?data.excluded_ids:[]);catalog=[...managed.map(entry=>({...(bundledCatalog.find(item=>item.id===entry.id)||{}),...entry})),...managed.filter(entry=>!bundledCatalog.some(item=>item.id===entry.id))];if(marketLocale==='ja-JP'||marketLocale==='es-MX')catalog=catalog.filter(entry=>{const localized=entry.translations?.[marketLocale];return localized?.title&&localized?.summary&&localized?.articleBody&&localized?.tags?.length&&localized?.image&&localized?.cardImage;}).map(entry=>({...entry,...entry.translations[marketLocale]}));marketCatalogLoaded=true;}}catch(error){console.warn('Could not load destination inspirations',error);}
+  try{const response=await fetch(`/api/vibeya/inspirations?country_code=${encodeURIComponent(marketCountry)}`,{credentials:'same-origin',cache:'no-store'});if(!response.ok)throw new Error('Destination inspiration catalog unavailable');const data=await response.json();if(Array.isArray(data.inspirations)){const managed=data.inspirations;managedTaxonomy=data.taxonomy&&typeof data.taxonomy==='object'?data.taxonomy:{};excludedIds=new Set(Array.isArray(data.excluded_ids)?data.excluded_ids:[]);catalog=managed.map(entry=>({...(bundledCatalog.find(item=>item.id===entry.id)||{}),...entry}));if(marketLocale==='ja-JP'||marketLocale==='es-MX')catalog=catalog.filter(entry=>{const localized=entry.translations?.[marketLocale];return localized?.title&&localized?.summary&&localized?.articleBody&&localized?.tags?.length&&localized?.image&&localized?.cardImage;}).map(entry=>({...entry,...entry.translations[marketLocale]}));marketCatalogLoaded=true;}}catch(error){console.warn('Could not load destination inspirations',error);}
   const restrictMarketFilter=(fieldId,key)=>{
     const select=document.getElementById(fieldId);if(!select)return;
     const originalOptions=new Map(Array.from(select.options).map(option=>[option.value,option.cloneNode(true)]));
@@ -123,11 +123,13 @@ document.addEventListener('DOMContentLoaded',async()=>{
     if(grid){
       const renderedIds=new Set(Array.from(grid.querySelectorAll('[data-inspiration-feature]')).map(section=>{
         const link=section.querySelector('.actions a[href]');
-        const target=link?findInspirationBySlug(new URL(link.href,location.href).pathname.split('/').pop()):null;
+        const url=link?new URL(link.href,location.href):null;
+        const queryId=url?.pathname.endsWith('/story.html')?url.searchParams.get('inspiration'):null;
+        const target=queryId?catalog.find(entry=>entry.id===queryId):url?findInspirationBySlug(url.pathname.split('/').pop()):null;
         return target?.id||'';
       }));
       catalog.filter(entry=>entry.published!==false&&!renderedIds.has(entry.id)&&entry.slug?.startsWith('story.html?inspiration=')).forEach(entry=>{
-        const section=document.createElement('section');section.className='featured-layout story-spotlight';section.dataset.inspirationFeature='';section.dataset.inspirationId=entry.id;section.dataset.product=entry.product||'';section.dataset.pattern=entry.pattern||'';section.dataset.style=entry.style||'';
+        const section=document.createElement('section');section.className='featured-layout story-spotlight managed-inspiration-feature';section.dataset.inspirationFeature='';section.dataset.inspirationId=entry.id;section.dataset.product=entry.product||'';section.dataset.pattern=entry.pattern||'';section.dataset.style=entry.style||'';
         const imageSource=entry.cardImage||entry.image||'';
         const imageUrl=/^(https?:)?\//.test(imageSource)?new URL(imageSource,location.origin).href:`../assets/inspiration/${encodeURIComponent(imageSource)}`;
         const storyUrl=`/${marketCountry}/inspiration/${encodeURIComponent(entry.id)}`;
@@ -234,7 +236,8 @@ document.addEventListener('DOMContentLoaded',async()=>{
     const title=document.getElementById('storyTitle');if(title)title.textContent=current.title;
     const summary=document.getElementById('storySummary');if(summary)summary.textContent=current.summary||'Explore the idea behind this design, then make a version that feels like you.';
     const image=document.getElementById('storyHeroImage');
-    if(image){const source=current.image||current.cardImage||'';image.src=/^(https?:)?\//.test(source)?new URL(source,location.origin).href:`../assets/inspiration/${encodeURIComponent(source)}`;image.alt=`${current.title} design inspiration`;}
+    if(image){const source=current.image||current.cardImage||'';image.src=/^(https?:)?\//.test(source)?new URL(source,location.origin).href:`../assets/inspiration/${encodeURIComponent(source)}`;image.alt=`${current.title} design inspiration`;const frame=image.closest('.managed-story-photo');if(frame){const setStoryImageBackground=()=>frame.style.setProperty('--story-image-extension',`url("${(image.currentSrc||image.src).replace(/"/g,'%22')}")`);if(image.complete)setStoryImageBackground();else image.addEventListener('load',setStoryImageBackground,{once:true});}}
+    const breadcrumbTitle=document.getElementById('storyBreadcrumbTitle');if(breadcrumbTitle)breadcrumbTitle.textContent=current.title;
     const printImage=document.getElementById('storyPrintImage');
     if(printImage){const source=current.printImage||current.image||current.cardImage||'';printImage.src=/^(https?:)?\//.test(source)?new URL(source,location.origin).href:`../assets/inspiration/${encodeURIComponent(source)}`;printImage.alt=`${current.title} print artwork`}
     const glance=document.getElementById('storyGlanceText');

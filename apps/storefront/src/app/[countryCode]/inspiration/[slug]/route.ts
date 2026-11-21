@@ -144,6 +144,11 @@ export async function GET(_request: Request, context: RouteContext) {
     ? `<link rel="alternate" hreflang="x-default" href="${new URL(`/us/inspiration/${encodeURIComponent(entry.id)}`, origin).href}">`
     : ""
   const localeKey = locale.startsWith("ja") ? "ja" : locale.startsWith("es") ? "es" : "en"
+  const navCopy = localeKey === "ja"
+    ? { home: "ホーム", inspiration: "インスピレーション", journal: "デザインストーリー", back: "← すべてのインスピレーションへ", shop: "ショップへ戻る", footerInspiration: "インスピレーション" }
+    : localeKey === "es"
+      ? { home: "Inicio", inspiration: "Inspiración", journal: "DIARIO DE DISEÑO", back: "← Volver a todas las ideas", shop: "Volver a la tienda", footerInspiration: "Inspiración" }
+      : { home: "Home", inspiration: "Inspiration Market", journal: "DESIGN JOURNAL", back: "← Back to all inspiration", shop: "Return to Shop", footerInspiration: "Inspiration Market" }
   const labels = fieldNames[localeKey]
   const productName = getProductName(entry, locale)
   const patternName = typeNames[entry.pattern]?.[locale] ?? entry.pattern.replace(/-/g, " ")
@@ -161,6 +166,14 @@ export async function GET(_request: Request, context: RouteContext) {
   html = html.replace(/<meta name="robots" content="[^"]*">/, '<meta name="robots" content="index,follow,max-image-preview:large">')
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)} | VIBEYA Design Story</title>`)
   html = html.replace("<body data-inspiration-template=\"true\">", `<body data-inspiration-template="true" data-inspiration-id="${escapeHtml(entry.id)}" data-inspiration-route="true">`)
+  html = html.replace('<a id="storyHomeLink" href="/us/">Home</a>', `<a id="storyHomeLink" href="/${countryCode}/">${navCopy.home}</a>`)
+  html = html.replace('<a id="storyInspirationLink" href="/vibeya/inspiration/index.html">Inspiration Market</a>', `<a id="storyInspirationLink" href="/vibeya/inspiration/index.html?country=${countryCode}&locale=${locale}">${navCopy.inspiration}</a>`)
+  html = html.replace('<span id="storyBreadcrumbTitle">Design Story</span>', `<span id="storyBreadcrumbTitle">${escapeHtml(title)}</span>`)
+  html = html.replace('<span class="pill-label" id="storyEyebrow">DESIGN JOURNAL · VIBEYA INSPIRATION</span>', `<span class="pill-label" id="storyEyebrow">${navCopy.journal} · ${escapeHtml(productName)}</span>`)
+  html = html.replace('<a id="storyBackLink" href="/vibeya/inspiration/index.html">← Back to all inspiration</a>', `<a id="storyBackLink" href="/vibeya/inspiration/index.html?country=${countryCode}&locale=${locale}">${navCopy.back}</a>`)
+  html = html.replace('<span id="storyFooterCopyright">© 2026 VIBEYA · Inspiration Market</span>', `<span id="storyFooterCopyright">© 2026 VIBEYA · ${navCopy.footerInspiration}</span>`)
+  html = html.replace('<a id="storyFooterInspiration" href="/vibeya/inspiration/index.html">Inspiration Market</a>', `<a id="storyFooterInspiration" href="/vibeya/inspiration/index.html?country=${countryCode}&locale=${locale}">${navCopy.footerInspiration}</a>`)
+  html = html.replace('<a id="storyFooterShop" href="/us/">Return to Shop</a>', `<a id="storyFooterShop" href="/${countryCode}/">${navCopy.shop}</a>`)
   html = html.replace(/<\/head>/, `<link rel="canonical" href="${canonical}">${alternates}${xDefault}<meta property="og:type" content="article"><meta property="og:title" content="${escapeHtml(title)} | VIBEYA Design Story"><meta property="og:description" content="${escapeHtml(summary)}"><meta property="og:url" content="${canonical}"><meta property="og:image" content="${heroImage}"><meta property="og:locale" content="${locale}"><script type="application/ld+json">${schema}</script></head>`)
   html = html.replace(/<img id="storyHeroImage" src="[^"]*" alt="[^"]*"/, `<img id="storyHeroImage" src="${heroImage}" alt="${escapeHtml(`${title} design inspiration`)}"`)
   html = html.replace(/<img id="storyPrintImage" src="[^"]*"/, `<img id="storyPrintImage" src="${printImage}"`)
