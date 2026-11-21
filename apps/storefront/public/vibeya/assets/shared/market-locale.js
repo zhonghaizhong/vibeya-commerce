@@ -29,6 +29,10 @@
         if (url.pathname.startsWith("/vibeya/")) {
           url.searchParams.set("country", country)
           url.searchParams.set("locale", locale)
+        } else if (/^\/(us|ca|jp|mx)\/inspiration\/[^/]+\/?$/i.test(url.pathname)) {
+          url.pathname = url.pathname.replace(/^\/(us|ca|jp|mx)(?=\/|$)/i, `/${country}`)
+          url.searchParams.delete("locale")
+          url.searchParams.delete("country")
         } else if (/^\/(us|ca|jp|mx)(?=\/|$)/i.test(url.pathname)) {
           url.pathname = url.pathname.replace(/^\/(us|ca|jp|mx)(?=\/|$)/i, `/${country}`)
           url.searchParams.set("locale", locale)

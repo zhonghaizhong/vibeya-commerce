@@ -60,6 +60,15 @@
       return
     }
 
+    if (localizedStory) {
+      next.pathname = `/${nextCountry}/inspiration/${localizedStory[2]}`
+      next.search = ""
+      next.hash = ""
+      if (nextLocale !== markets[nextCountry].defaultLocale) next.searchParams.set("locale", nextLocale)
+      window.location.assign(next.href)
+      return
+    }
+
     if (isInspirationPage) {
       next.pathname = nextCountry === "us" ? "/vibeya/inspiration/index.html" : `/${nextCountry}/inspiration/`
       next.search = ""

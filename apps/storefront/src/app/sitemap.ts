@@ -5,6 +5,12 @@ import { DEFAULT_COUNTRY_CODE, getSiteOrigin, listCountryCodes } from "@lib/util
 import { getVibeyaMarket } from "@lib/vibeya/region"
 import { isSupportedMarketCountry } from "@lib/vibeya/markets"
 import {
+  getInspirationCopy,
+  getPublishedInspirations,
+  hasIndexableInspirationCopy,
+  type ManagedInspiration,
+} from "@lib/vibeya/inspirations"
+import {
   isProductCategoryIndexable,
   PRODUCT_CATEGORY_GROUPS,
 } from "@lib/seo/categories"
@@ -100,6 +106,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const countriesByProduct = new Map<string, string[]>()
   productsByCountry.forEach((ids, countryCode) => {
     ids.forEach((id) => countriesByProduct.set(id, [...(countriesByProduct.get(id) ?? []), countryCode]))
+  })
+
+  const managedStoryCountries = new Map<string, { entry: ManagedInspiration; countries: string[] }>()
+  await Promise.all(countryCodes.map(async (countryCode) => {
+    try {
+      const entries = await getPublishedInspirations(countryCode)
+      for (const entry of entries) {
+        if (!entry.published || !entry.slug.startsWith("story.html?inspiration=")) continue
+        const locale = getMarketDefaultLocale(countryCode)
+        if (!hasIndexableInspirationCopy(getInspirationCopy(entry, locale))) continue
+        const existing = managedStoryCountries.get(entry.id) ?? { entry, countries: [] }
+        existing.countries.push(countryCode)
+        managedStoryCountries.set(entry.id, existing)
+      }
+    } catch {
+      // An unavailable content API should not prevent product URLs from being listed.
+    }
+  }))
+
+  const managedStoryEntries = Array.from(managedStoryCountries.values()).flatMap(({ entry, countries }) => {
+    const path = `/inspiration/${encodeURIComponent(entry.id)}`
+    const languages = getMarketAlternateUrls(origin, path, countries)
+    return countries.map((countryCode) => ({
+      url: `${origin}/${countryCode}${path}`,
+      alternates: { languages },
+    }))
   })
 
   const localizedEntries = countryCodes.flatMap((countryCode) => {
@@ -201,6 +233,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // has separate localized story pages and is listed with its market URLs below.
   return [
     ...localizedEntries,
+    ...managedStoryEntries,
     ...(countryCodes.includes("us")
       ? [
           ...INDEXABLE_CONTENT_PATHS.map((path) => ({ url: `${origin}${path}` })),
