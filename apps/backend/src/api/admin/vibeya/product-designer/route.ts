@@ -85,11 +85,13 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   if (designer.enabled && !designer.references.length) return res.status(400).json({ error: "启用设计器前，请至少添加一张商品底图。" })
   if (designer.enabled && designer.mode === "front-back") {
     const sides = new Set(designer.references.map((reference) => reference.side))
-    if (!sides.has("front") || !sides.has("back")) {
-      return res.status(400).json({ error: "正反面设计需要同时配置正面和背面底图。" })
+    const needsFront = designer.placements.some((placement) => ["front", "both"].includes(placement))
+    const needsBack = designer.placements.some((placement) => ["back", "both"].includes(placement))
+    if ((needsFront && !sides.has("front")) || (needsBack && !sides.has("back"))) {
+      return res.status(400).json({ error: "请为启用的每个印刷面配置对应商品底图。" })
     }
-    if (designer.references.some((reference) => (reference.side === "front" || designer.placements.some((placement) => ["back", "both"].includes(placement))) && !reference.printAreaImageUrl)) {
-      return res.status(400).json({ error: "开放正反面设计的每一面都需要印花区域参考图。" })
+    if (designer.references.some((reference) => ((reference.side === "front" && needsFront) || (reference.side === "back" && needsBack)) && !reference.printAreaImageUrl)) {
+      return res.status(400).json({ error: "启用的每个印刷面都需要印花区域参考图。" })
     }
   }
   if (designer.enabled && designer.mode === "full-surface" && !designer.references.some((reference) => reference.side === "surface")) {
