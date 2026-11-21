@@ -143,8 +143,8 @@ export default async function seedVibeyaCustomPuWallet({ container }: ExecArgs) 
     ? store.metadata[MARKET_MEDIA_KEY] as Record<string, Record<string, string[]>>
     : {}
   const productMedia = { ...(currentMedia[product.id] ?? {}) }
-  productMedia.us = walletGalleryForLocale("en-US")
-  productMedia.ca = walletGalleryForLocale("en-US")
+  productMedia.us = galleryUrls
+  productMedia.ca = galleryUrls
   productMedia.jp = walletGalleryForLocale("ja-JP")
   productMedia.mx = walletGalleryForLocale("es-MX")
   await updateStoresWorkflow(container).run({
