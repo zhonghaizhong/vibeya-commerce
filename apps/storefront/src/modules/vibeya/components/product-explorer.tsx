@@ -22,6 +22,7 @@ type ProductExplorerProps = {
 type ProductCardProps = {
   product: VibeyaProduct
   countryCode?: string
+  locale?: string
 }
 
 function formatPrice(price: number, currency: string) {
@@ -31,9 +32,22 @@ function formatPrice(price: number, currency: string) {
   }).format(price)
 }
 
-function ProductCard({ product, countryCode = "us" }: ProductCardProps) {
+function ProductCard({ product, countryCode = "us", locale = "" }: ProductCardProps) {
   const [colorId, setColorId] = useState(product.colors[0]?.id ?? "")
   const href = `/${countryCode}/products/${encodeURIComponent(product.handle)}`
+  const activeLocale = locale || (countryCode === "jp" ? "ja-JP" : countryCode === "mx" ? "es-MX" : countryCode === "ca" ? "en-CA" : "en-US")
+
+  const formatCatalogSummary = (colorName: string, colorCount: number, sizeCount: number) => {
+    const localizedColor = activeLocale === "ja-JP"
+      ? ({ Black: "ブラック", White: "ホワイト", Red: "レッド", Gray: "グレー", Grey: "グレー", Blue: "ブルー" }[colorName] ?? colorName)
+      : activeLocale === "es-MX"
+        ? ({ Black: "Negro", White: "Blanco", Red: "Rojo", Gray: "Gris", Grey: "Gris", Blue: "Azul" }[colorName] ?? colorName)
+        : colorName
+
+    if (activeLocale === "ja-JP") return `${localizedColor} · ${colorCount}色${sizeCount ? ` · ${sizeCount}サイズ` : ""}`
+    if (activeLocale === "es-MX") return `${localizedColor} · ${colorCount} ${colorCount === 1 ? "color" : "colores"}${sizeCount ? ` · ${sizeCount} ${sizeCount === 1 ? "talla" : "tallas"}` : ""}`
+    return `${localizedColor} · ${colorCount} ${colorCount === 1 ? "color" : "colors"}${sizeCount ? ` · ${sizeCount} ${sizeCount === 1 ? "size" : "sizes"}` : ""}`
+  }
 
   if (product.catalogOnly || product.id === "mg8014061") {
     const selectedCatalogColor = product.colors.find((option) => option.id === colorId) ?? product.colors[0]
@@ -76,7 +90,7 @@ function ProductCard({ product, countryCode = "us" }: ProductCardProps) {
           </div>
         ) : <div className={`${styles.swatches} card-color-options`} aria-hidden="true" />}
         <p className={`${styles.cardVariant} card-color-caption`}>
-          {product.colors.length ? `${selectedCatalogColor?.name ?? product.colors[0].name} · ${product.colors.length} ${product.colors.length === 1 ? "color" : "colors"}${product.sizes.length ? ` · ${product.sizes.length} options` : ""}` : product.category || "New arrival"}
+          {product.colors.length ? formatCatalogSummary(selectedCatalogColor?.name ?? product.colors[0].name, product.colors.length, product.sizes.length) : product.category || "New arrival"}
         </p>
         <a className={`${styles.cardInfo} product-card-info`} href={href} target="_top" aria-label={`View details for ${product.name}`}>
           <h3>{product.name}</h3>
@@ -124,7 +138,7 @@ export function ProductCards({ countryCode = "us", locale = "", handles }: { cou
     .map((id) => ordered.find((product) => product.id === id))
     .filter((product): product is VibeyaProduct => Boolean(product))
   const featured = [...pinned, ...ordered.filter((product) => !pinned.includes(product))].slice(0, 6)
-  return <>{featured.map((product) => <ProductCard key={product.id} product={product} countryCode={countryCode} />)}</>
+  return <>{featured.map((product) => <ProductCard key={product.id} product={product} countryCode={countryCode} locale={locale} />)}</>
 }
 
 function ProductGrid() {
