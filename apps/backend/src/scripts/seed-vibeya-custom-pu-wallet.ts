@@ -12,7 +12,7 @@ const handle = "vibeya-custom-pu-wallet"
 const productId = "prod_01M7VVPR5E2K827AHXDNXKQR1W"
 const imageBase = "/vibeya/assets/products/vibeya-custom-pu-wallet"
 const baseImageUrl = `${imageBase}/wallet-print-base.jpg`
-const printGuideUrl = `${imageBase}/wallet-print-guide.png`
+const printGuideUrl = `${imageBase}/wallet-print-guide-full-panel.png`
 const galleryUrls = [
   `${imageBase}/wallet-gallery-01.jpg`,
   `${imageBase}/wallet-gallery-02.jpg`,
@@ -25,7 +25,7 @@ const walletGalleryForLocale = (locale: "en-US" | "ja-JP" | "es-MX") => Array.fr
   { length: 6 },
   (_, index) => `${imageBase}/localized/${locale}/wallet-gallery-${String(index + 1).padStart(2, "0")}.jpg`
 )
-const walletGenerationPrompt = "Custom black PU bifold wallet. Image 1 is one open wallet showing BOTH inner panels in a single spread view. Image 2 is the placement guide for this same wallet. Offer only two print placements: Front Only and Front + Back. Orientation is fixed: the product FRONT is the RIGHT inner panel in the open-wallet guide; the product BACK is the LEFT inner panel. Front Only: print only inside the marked RIGHT inner panel; keep the LEFT inner panel plain black. Front + Back: print inside BOTH marked inner panels; follow the customer's right/front and left/back instructions exactly when they specify different artwork. If they describe one unified design, apply it to both panels. Never make a back-only option or leave either panel unprinted when Front + Back is selected. Preserve the wallet's black matte PU texture, natural folds, exact proportions, center hinge, edge piping, stitching, and white background. Never print on hinge, borders, stitching, piping, outer edge, or background. Do not reproduce the guide color. Make ink look absorbed into matte textured PU, never like a sticker or glossy overlay. Output exactly one open-wallet view; no duplicate products or separate front/back views."
+const walletGenerationPrompt = "Custom black PU bifold wallet. Image 1 is one open wallet showing BOTH inner panels in a single spread view. Image 2 is the print-area guide for this same wallet: teal marks the complete printable face of each panel, including the light panel surface, black outer binding/piping, and perimeter stitching; the center fold/hinge is black and non-printable, and the white area outside the wallet is background. Offer only two print placements: Front Only and Front + Back. Orientation is fixed: the product FRONT is the RIGHT inner panel in the open-wallet guide; the product BACK is the LEFT inner panel. Front Only: print across the complete marked RIGHT panel, including its black binding and stitches; keep the LEFT panel plain black. Front + Back: print across BOTH complete marked panels, including their black binding and stitches; follow explicit right/front and left/back instructions exactly when artwork differs. If one unified design is described, use a coordinated version on both panels. Never make a back-only option. Keep the center fold/hinge strip black and unprinted. Do not leave any part of a selected marked panel blank. Preserve the wallet's matte PU texture, natural folds, exact proportions, white background, and black center hinge. Do not reproduce the guide color. Make ink look integrated into matte textured PU, never like a sticker or glossy overlay. Output exactly one open-wallet view; no duplicate products or separate front/back views."
 const marketPrices = [
   { country: "us", currency: "usd", amount: 15.99 },
   { country: "ca", currency: "cad", amount: 22.99 },
