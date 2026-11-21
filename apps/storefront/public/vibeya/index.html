@@ -2042,11 +2042,13 @@
       return;
     }
     if(event.data?.type==='vibeya:open-studio'){
-      openProductById(String(event.data.product||chosen.id),String(event.data.color||''));
-      const size=String(event.data.size||'');selectedSize=chosen.sizes?.includes(size)?size:chosen.id==='vibeya-shower-curtain'?chosen.sizes[0]:'';
+      const requestedId=String(event.data.product||chosen.id);const product=products.find(item=>item.id===requestedId);
+      if(!product)return;
+      chosen=product;const requestedColor=product.id==='sds-128646'&&event.data.color==='NightGarden'?'White':String(event.data.color||'');selectedColor=product.colors?.includes(requestedColor)?requestedColor:(product.colors?.[0]||'Black');selectedColorConfirmed=product.colors?.length===1||product.colors?.includes(requestedColor);
+      const size=String(event.data.size||'');selectedSize=product.sizes?.includes(size)?size:product.sizes?.length===1?product.sizes[0]:'';
       const print=String(event.data.print||'');if(['front','back','both','wrap'].includes(print))selectedPrint=print;
-      if(chosen.id==='sds-233939'&&typeof event.data.areas==='string'){const zones=event.data.areas.split(',').filter(id=>uniformPrintZones.some(([zone])=>zone===id));if(zones.length)selectedUniformZones=zones;}
-      syncVariants();showStudio(chosen,typeof event.data.prompt==='string'?event.data.prompt:undefined);
+      if(product.id==='sds-233939'&&typeof event.data.areas==='string'){const zones=event.data.areas.split(',').filter(id=>uniformPrintZones.some(([zone])=>zone===id));if(zones.length)selectedUniformZones=zones;}
+      syncVariants();showStudio(product,typeof event.data.prompt==='string'?event.data.prompt:undefined);
     }
   });
   function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(window._vt);window._vt=setTimeout(()=>t.classList.remove('show'),2900);}
@@ -2698,7 +2700,7 @@ const blanket=chosen.id==='sds-97226';
        if(target.sizes?.includes(urlParams.get('size')))selectedSize=urlParams.get('size');
        if(['front','back','both','wrap'].includes(urlParams.get('print')))selectedPrint=urlParams.get('print');
        if(target.id==='sds-233939'){const zones=(urlParams.get('areas')||'').split(',').filter(id=>uniformPrintZones.some(([zone])=>zone===id));if(zones.length)selectedUniformZones=zones;}
-       requestStudio(target,resumePrompt);
+       if(urlParams.get('embeddedStudio')==='1'&&window.parent!==window)showStudio(target,resumePrompt);else requestStudio(target,resumePrompt);
      });
      history.replaceState(null,'',location.pathname+'#top');
    }
