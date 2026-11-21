@@ -31,7 +31,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
     ? `#product-${standaloneProductId}?color=${encodeURIComponent(standaloneColor || "Black")}${standaloneSize ? `&size=${encodeURIComponent(standaloneSize)}` : ""}`
     : standaloneRoute || "#top"
   const initialFrameParams = new URLSearchParams({
-    v: "wallet-localization-20261121-2",
+    v: "wallet-localization-20261121-3",
     country: countryCode.toLowerCase(),
     locale: marketLocale,
   })
@@ -124,7 +124,7 @@ export default function VibeyaHome({ countryCode, locale, isAuthenticated, stand
       return
     }
     const forwardedParams = new URLSearchParams()
-    forwardedParams.set("v", "wallet-localization-20261121-2")
+    forwardedParams.set("v", "wallet-localization-20261121-3")
     forwardedParams.set("country", countryCode.toLowerCase())
     forwardedParams.set("locale", marketLocale)
     if (standaloneProductId || standaloneRoute) forwardedParams.set("standalone", "1")

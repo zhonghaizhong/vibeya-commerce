@@ -23,7 +23,7 @@ const galleryUrls = [
 ]
 const walletGalleryForLocale = (locale: "en-US" | "ja-JP" | "es-MX") => Array.from(
   { length: 6 },
-  (_, index) => `${imageBase}/localized/${locale}/wallet-gallery-${String(index + 1).padStart(2, "0")}.svg`
+  (_, index) => `${imageBase}/localized/${locale}/wallet-gallery-${String(index + 1).padStart(2, "0")}.jpg`
 )
 const walletGenerationPrompt = "Custom black PU bifold wallet. Image 1 is one open wallet showing BOTH inner panels in a single spread view. Image 2 is the placement guide for this same wallet. Offer only two print placements: Front Only and Front + Back. Orientation is fixed: the product FRONT is the RIGHT inner panel in the open-wallet guide; the product BACK is the LEFT inner panel. Front Only: print only inside the marked RIGHT inner panel; keep the LEFT inner panel plain black. Front + Back: print inside BOTH marked inner panels; follow the customer's right/front and left/back instructions exactly when they specify different artwork. If they describe one unified design, apply it to both panels. Never make a back-only option or leave either panel unprinted when Front + Back is selected. Preserve the wallet's black matte PU texture, natural folds, exact proportions, center hinge, edge piping, stitching, and white background. Never print on hinge, borders, stitching, piping, outer edge, or background. Do not reproduce the guide color. Make ink look absorbed into matte textured PU, never like a sticker or glossy overlay. Output exactly one open-wallet view; no duplicate products or separate front/back views."
 const marketPrices = [
@@ -109,6 +109,12 @@ export default async function seedVibeyaCustomPuWallet({ container }: ExecArgs) 
     generationPromptTemplate: walletGenerationPrompt,
   }
   const content = getVibeyaProductContent(handle, product.metadata?.[VIBEYA_PRODUCT_CONTENT_METADATA_KEY])
+  const defaultContent = getVibeyaProductContent(handle, undefined)
+  // Keep the wallet's Japanese and Mexican Spanish detail copy aligned with
+  // the reviewed locale source so stale English metadata cannot leak through.
+  for (const locale of ["ja-JP", "es-MX"] as const) {
+    if (defaultContent[locale]) content[locale] = defaultContent[locale]
+  }
 
   const bagsCategory = (categories as any[]).find((category) =>
     category.handle === "custom-bags" || category.name?.trim().toLowerCase() === "custom bags"
