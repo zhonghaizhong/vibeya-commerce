@@ -271,6 +271,10 @@
     .my-design-prompt summary>span:first-child{display:-webkit-box;min-width:0;flex:1;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow-wrap:anywhere;}
     .my-design-prompt summary::after{content:'Show';flex:none;color:#684c8a;font-size:11px;font-weight:800;}
     .my-design-prompt[open] summary::after{content:'Hide';}
+    :lang(ja-JP) .my-design-prompt summary::after{content:'表示';}
+    :lang(ja-JP) .my-design-prompt[open] summary::after{content:'閉じる';}
+    :lang(es-MX) .my-design-prompt summary::after{content:'Mostrar';}
+    :lang(es-MX) .my-design-prompt[open] summary::after{content:'Ocultar';}
     .my-design-prompt>p{margin:7px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;}
     .my-design-state{font-size:11px;font-weight:800;color:#60458a;}.my-design-state.failed{color:#bd3147;}
     .my-design-failure-note{margin:7px 0 0;color:#7c7182;font-size:12px;line-height:1.5;}
@@ -1000,7 +1004,7 @@
   <div class="overlay" id="searchOverlay" role="presentation"><div class="dialog search-dialog" role="dialog" aria-modal="true" aria-labelledby="searchTitle"><div class="dialog-head"><div><h2 id="searchTitle">What would you like to make?</h2><p>Search products and design inspiration in one place.</p></div><button class="close-btn" id="closeSearch" aria-label="Close">×</button></div><div class="inner"><input class="search-input" id="siteSearch" type="search" placeholder="Try 'hoodie', 'retro', 'cute cat'..." aria-label="Search products"/><div class="search-results" id="searchResults"></div></div></div></div>
   <div class="drawer-overlay" id="drawerOverlay"></div><aside class="drawer" id="cartDrawer" aria-labelledby="drawerTitle"><div class="drawer-head"><h2 id="drawerTitle">Your Bag <span id="drawerCount">(0)</span></h2><button class="close-btn" id="closeCart" aria-label="Close">×</button></div><div id="cartContent"></div><div class="drawer-note">Demo only. Items are stored in this browser; delivery, payment and order submission have not been connected.</div></aside>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script src="assets/shared/market-translations.generated.js?v=market-copy-4"></script>
+<script src="assets/shared/market-translations.generated.js?v=market-copy-5"></script>
 <script>
 (function(){
   // ===============================================================

@@ -72,6 +72,65 @@ for (const [index, locale] of phraseLocales.entries()) {
   if (untranslated.length) errors.push(`${locale} has untranslated phrases: ${untranslated.map(([source]) => JSON.stringify(source)).join(", ")}.`)
 }
 
+// Runtime design and saved-design states are inserted by the iframe after the
+// initial HTML scan. Keep these critical dynamic messages behind the same
+// build gate, and derive the job-state labels from their source map.
+const requiredStudioPhrases = [
+  "Your saved designs",
+  "Your saved designs will appear here.",
+  "Your request is saved in My Designs and is still processing. Please wait 1–2 minutes; you can leave this page and come back later.",
+  "Your submitted designs are saved to your account.",
+  "Designs saved to your account will appear here.",
+  "Sign in to see your designs",
+  "Could not load your designs.",
+  "Unable to load designs",
+  "Please refresh and try again.",
+  "Load image",
+  "Your image will appear here when it is ready",
+  "Size for your bag",
+  "Choose size",
+  "Start generation",
+  "Recover image",
+  "Click to enlarge",
+  "This design is not ready yet.",
+  "Choose a product color before adding this design to your bag.",
+  "Choose a product size before adding this design to your bag.",
+  "Please choose a valid color.",
+  "Please choose a valid size.",
+  "This design is missing its task ID. Refresh My Designs and try again.",
+  "Design deleted.",
+  "Adding…",
+  "Deleting…",
+  "Could not add this design to your bag.",
+  "Could not load this design image.",
+  "This product is no longer available for design.",
+  "This design already uses that color.",
+  "This design could not be deleted.",
+  "The provider task can be checked again. Recover it to load the generated image.",
+  "No image was returned. Failed generations do not use a design credit.",
+  "No image was returned. Edit the description and try again; failed generations do not use a design credit.",
+]
+const studioMarkup = await readFile(resolve(appDirectory, "public/vibeya/index.html"), "utf8")
+const statusMap = studioMarkup.match(/function jobStatusLabel\(status\)\s*\{\s*return\s*\(\{([\s\S]*?)\}\)\[status\]\|\|'([^']+)'\s*;?\s*\}/)
+if (!statusMap) {
+  errors.push("Could not read the design-job status labels from the studio source.")
+} else {
+  const statusLabels = [...statusMap[1].matchAll(/:\s*'([^']+)'/g)].map((match) => match[1])
+  requiredStudioPhrases.push(...statusLabels, statusMap[2])
+}
+for (const phrase of new Set(requiredStudioPhrases)) {
+  for (const locale of phraseLocales) {
+    if (!catalog.phrases?.[locale]?.[phrase]?.trim()) {
+      errors.push(`${locale} is missing a translation for dynamic design UI text: ${JSON.stringify(phrase)}.`)
+    }
+  }
+}
+for (const [locale, labels] of Object.entries({ "ja-JP": ["表示", "閉じる"], "es-MX": ["Mostrar", "Ocultar"] })) {
+  for (const label of labels) {
+    if (!studioMarkup.includes(`content:'${label}'`)) errors.push(`${locale} is missing its localized saved-design prompt toggle label ${JSON.stringify(label)}.`)
+  }
+}
+
 const navigationLocales = Object.keys(catalog.navigation ?? {})
 const navigationKeys = new Set(Object.keys(catalog.navigation?.[navigationLocales[0]] ?? {}))
 for (const locale of navigationLocales) {
