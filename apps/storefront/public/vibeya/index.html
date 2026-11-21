@@ -2425,10 +2425,10 @@
      'es-MX':{front:'Una cara · Panel derecho',both:'Frente + reverso · Ambos paneles'},
    };
    const walletPlacementCopy={
-     'en-US':{label:'Print placement',helper:'Front Only prints on the RIGHT inner panel. Front + Back prints on both. For different artwork, specify the RIGHT panel for the front and the LEFT panel for the back. Keep the hinge, seams, and edges unprinted.'},
-     'en-CA':{label:'Print placement',helper:'Front Only prints on the RIGHT inner panel. Front + Back prints on both. For different artwork, specify the RIGHT panel for the front and the LEFT panel for the back. Keep the hinge, seams, and edges unprinted.'},
-     'ja-JP':{label:'印刷面',helper:'「片面」は開いた状態の右側に印刷します。「両面」は左右両方に印刷します。異なるデザインを指定する場合は、表面を右側、裏面を左側と指定してください。中央の折り目、縫い目、縁には印刷しません。'},
-     'es-MX':{label:'Área de impresión',helper:'Una cara imprime en el panel interior DERECHO. Frente + reverso imprime en ambos lados. Si quieres diseños distintos, indica el frente en el panel derecho y el reverso en el izquierdo. No se imprime sobre el pliegue, las costuras ni los bordes.'},
+     'en-US':{label:'Print placement',helper:'Front Only prints on the RIGHT inner panel. Front + Back prints on both panels. For different artwork, specify the RIGHT panel for the front and the LEFT panel for the back. Print the full panel, including its black binding and stitching; leave only the center hinge unprinted.'},
+     'en-CA':{label:'Print placement',helper:'Front Only prints on the RIGHT inner panel. Front + Back prints on both panels. For different artwork, specify the RIGHT panel for the front and the LEFT panel for the back. Print the full panel, including its black binding and stitching; leave only the center hinge unprinted.'},
+     'ja-JP':{label:'印刷面',helper:'「片面」は開いた状態の右側、「両面」は左右両方のパネルに印刷します。異なるデザインを指定する場合は、表面を右側、裏面を左側と指定してください。黒い縁取りと縫い目を含むパネル全体が印刷可能です。中央の折り目部分のみ印刷しません。'},
+     'es-MX':{label:'Área de impresión',helper:'Una cara imprime en el panel interior DERECHO; Frente + reverso imprime en ambos paneles. Si quieres diseños distintos, indica el frente en el panel derecho y el reverso en el izquierdo. Se imprime todo el panel, incluido el ribete negro y las costuras; solo se deja sin imprimir el pliegue central.'},
    };
    const printPlacementLabel=(product,key)=>product?.handle==='vibeya-custom-pu-wallet'?(walletPrintNames[activeLocale]?.[key]||key):(printNames[key]||key);
    const productPrintPlacement=productId=>productId==='sds-63823'?'both':productId==='sds-128646'||productId==='sds-138708'?'wrap':'front';
