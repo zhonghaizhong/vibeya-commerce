@@ -244,6 +244,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   studioUrl.searchParams.set('locale',marketLocale);
   studioUrl.searchParams.set('openStudio','1');
   studioUrl.searchParams.set('embeddedStudio','1');
+  if(studioUrl.searchParams.has('product'))studioUrl.searchParams.set('standaloneProductId',studioUrl.searchParams.get('product'));
   if(current?.product==='wallet')studioUrl.searchParams.set('walletStudio','catalog-ready-20261121-1');
   if(current?.id)studioUrl.searchParams.set('inspiration',current.id);
   window.VIBEYA_CUSTOMIZE_URL=studioUrl.href;
