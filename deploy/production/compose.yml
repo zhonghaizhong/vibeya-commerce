@@ -45,6 +45,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 9000
+      MEDUSA_FILE_PUBLIC_URL: ${MEDUSA_FILE_PUBLIC_URL:-https://api.vibeyastudio.com/static}
       MEDUSA_WORKER_MODE: ${MEDUSA_WORKER_MODE:-shared}
       DATABASE_URL: postgres://${POSTGRES_USER:-medusa}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-medusa_backend}?sslmode=disable
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379

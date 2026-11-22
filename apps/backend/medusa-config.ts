@@ -71,6 +71,24 @@ const notificationModules = [{
       },
     }]
 
+const fileModule = {
+  resolve: "@medusajs/medusa/file",
+  options: {
+    providers: [
+      {
+        resolve: "@medusajs/medusa/file-local",
+        id: "local",
+        options: {
+          upload_dir: "static",
+          backend_url: process.env.MEDUSA_FILE_PUBLIC_URL || (process.env.NODE_ENV === "production"
+            ? "https://api.vibeyastudio.com/static"
+            : "http://localhost:9000/static"),
+        },
+      },
+    ],
+  },
+}
+
 const emailVerificationConfig = {
   customer: [{ entity_type: "email", auth_provider: "emailpass" }],
 }
@@ -108,6 +126,7 @@ const modules = [
   ...paymentModules,
   ...googleAuthModules,
   ...notificationModules,
+  fileModule,
   { resolve: "./src/modules/vibeya-ai-jobs" },
 ]
 
