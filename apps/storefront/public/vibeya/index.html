@@ -2573,7 +2573,9 @@ const blanket=chosen.id==='sds-97226';
     }
     hero.src=gallerySrc(galleryIndex);
     if(hero.complete&&hero.naturalWidth>0)document.documentElement.classList.remove('vibeya-product-route-pending');
-    hero.style.objectFit='cover';
+    const keepFullCarouselFrame=chosen.handle==='vibeya-custom-drawstring-gym-bag-with-shoe-compartment';
+    hero.style.objectFit=keepFullCarouselFrame?'contain':'cover';
+    hero.parentElement.style.backgroundColor=keepFullCarouselFrame?'#32106f':'';
     const garment=chosen.handle==='vibeya-custom-pu-wallet'?'custom black bifold wallet':chosen.id==='sds-128646'?'20 oz tumbler':chosen.id==='sds-138708'?'custom bath mat':chosen.id==='sds-97226'?'custom flannel throw blanket':chosen.id==='vibeya-shower-curtain'?'custom shower curtain':chosen.id==='sds-137892'?"custom women's tankini swimsuit set":chosen.id==='sds-63823'?"custom women's yoga set":chosen.id==='sds-233939'?"custom kids' basketball jersey and shorts set":chosen.id==='sds-275844'?'custom apron':chosen.id==='mg8014061'?'custom metal wall sign':chosen.id==='sds-172647'?'custom knitted beanie':chosen.id==='vibeya-washed-hoodie'?'washed hoodie':'custom cotton long sleeve';
     $('#detailHeroImage').alt=`${galleryTitleAt(galleryIndex)} — ${colorLabel(selectedColor)} VIBEYA ${garment}, example artwork`;
     $('#detailImageCount').textContent=String(galleryIndex+1).padStart(2,'0')+' / '+String(galleryCount()).padStart(2,'0');
@@ -2584,7 +2586,7 @@ const blanket=chosen.id==='sds-97226';
         b.setAttribute('aria-pressed',String(index===galleryIndex));
         b.setAttribute('aria-label',`View ${colorLabel(selectedColor).toLowerCase()} image ${index+1}: ${galleryTitleAt(index)}`);
         const image=b.querySelector('img');
-        if(image){image.src=gallerySrc(index);image.alt=`${colorLabel(selectedColor)} · ${galleryTitleAt(index)}`;}
+        if(image){image.src=gallerySrc(index);image.alt=`${colorLabel(selectedColor)} · ${galleryTitleAt(index)}`;image.style.objectFit=keepFullCarouselFrame?'contain':'cover';image.style.backgroundColor=keepFullCarouselFrame?'#32106f':'';}
       });
     };
     if(deferThumbnails&&!hero.complete){
