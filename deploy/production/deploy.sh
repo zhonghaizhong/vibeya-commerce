@@ -40,6 +40,7 @@ COMPOSE_PARALLEL_LIMIT=1 "${compose[@]}" build backend storefront
 "${compose[@]}" run --rm backend pnpm exec medusa exec ./src/scripts/seed-vibeya-custom-metal-wall-sign.ts
 "${compose[@]}" run --rm backend pnpm exec medusa exec ./src/scripts/seed-vibeya-custom-denim-cap.ts
 "${compose[@]}" run --rm backend pnpm exec medusa exec ./src/scripts/seed-vibeya-fulfillment-locations.ts
+"${compose[@]}" run --rm backend pnpm exec medusa exec ./src/scripts/fix-localhost-media-urls.ts
 "${compose[@]}" up -d --remove-orphans
 
 for attempt in $(seq 1 60); do
