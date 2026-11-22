@@ -41,6 +41,7 @@ const MarketManagementPage = () => {
   const [readinessIssuesOnly, setReadinessIssuesOnly] = useState(false)
   const [productId, setProductId] = useState("")
   const [countryCode, setCountryCode] = useState("")
+  const [imageUrlDraft, setImageUrlDraft] = useState("")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -130,6 +131,24 @@ const MarketManagementPage = () => {
     } finally {
       setUploading(false)
     }
+  }
+
+  const addImageUrls = () => {
+    const urls = imageUrlDraft.split(/\r?\n/).map((url) => url.trim()).filter(Boolean)
+    if (!urls.length) return
+    if (urls.some((url) => (!url.startsWith("/") || url.startsWith("//")) && !/^https:\/\//i.test(url))) {
+      setError("图片网址必须是本站公开路径（/ 开头）或 HTTPS 链接。")
+      return
+    }
+    const nextUrls = [...new Set([...imageUrls, ...urls])]
+    if (nextUrls.length > 8) {
+      setError("每个商品和国家最多保存 8 张图片。")
+      return
+    }
+    setError("")
+    setMessage("")
+    setMedia((current) => ({ ...current, [productId]: { ...(current[productId] ?? {}), [countryCode]: nextUrls } }))
+    setImageUrlDraft("")
   }
 
   const save = async () => {
@@ -239,7 +258,7 @@ const MarketManagementPage = () => {
 
       <Container className="p-5">
         <Heading level="h2">跨国家商品图片</Heading>
-        <Text size="small" className="mt-1 text-ui-fg-subtle">这里只列出配送到两个及以上国家的商品。选择目的国家后上传该市场的商品图片；顾客切换配送国家时会看到对应版本，语言选择保持独立。</Text>
+        <Text size="small" className="mt-1 text-ui-fg-subtle">这里只列出配送到两个及以上国家的商品。选择目的国家后上传或添加该市场的公开图片；顾客切换配送国家时会看到对应版本，语言选择保持独立。</Text>
         {loading ? <Text className="mt-4">正在读取商品…</Text> : eligibleProducts.length ? <>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <label className="text-sm font-medium text-ui-fg-base">商品
@@ -256,11 +275,17 @@ const MarketManagementPage = () => {
 
           <div className="mt-5 rounded-lg border border-dashed border-ui-border-base p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div><Text className="font-medium text-ui-fg-base">{countryCode.toUpperCase()} 商品图片</Text><Text size="small" className="mt-1 text-ui-fg-subtle">可上传 1–8 张，单张不超过 10 MB。{hasImageChanges ? " 有未保存修改。" : ""}</Text></div>
+              <div><Text className="font-medium text-ui-fg-base">{countryCode.toUpperCase()} 商品图片</Text><Text size="small" className="mt-1 text-ui-fg-subtle">可上传或添加 1–8 张公开图片，上传图片单张不超过 10 MB。{hasImageChanges ? " 有未保存修改。" : ""}</Text></div>
               <label className="cursor-pointer rounded-md border border-ui-border-base px-3 py-2 text-sm font-medium text-ui-fg-base">
                 {uploading ? "上传中…" : "上传图片"}
                 <input className="sr-only" type="file" accept="image/*" multiple disabled={uploading || saving || imageUrls.length >= 8} onChange={(event) => { void uploadImages(event.target.files); event.currentTarget.value = "" }} />
               </label>
+            </div>
+            <div className="mt-4 rounded-md border border-ui-border-base p-3">
+              <Text className="font-medium text-ui-fg-base">或添加已托管的图片网址</Text>
+              <Text size="small" className="mt-1 block text-ui-fg-subtle">每行一个本站公开图片路径或 HTTPS 图片链接。添加后仍需保存国家图片。</Text>
+              <textarea className={`${inputClass} min-h-24`} value={imageUrlDraft} onChange={(event) => setImageUrlDraft(event.target.value)} placeholder="/vibeya/assets/products/.../01-carousel.jpg\nhttps://example.com/product-image.jpg" aria-label="添加已托管的图片网址" />
+              <button type="button" disabled={saving || uploading || !imageUrlDraft.trim() || imageUrls.length >= 8} onClick={addImageUrls} className="mt-2 rounded-md border border-ui-border-base px-3 py-2 text-sm font-medium text-ui-fg-base disabled:cursor-not-allowed disabled:opacity-50">添加图片网址</button>
             </div>
             {imageUrls.length ? <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {imageUrls.map((url, index) => <div key={`${url}-${index}`} className="relative rounded-lg border border-ui-border-base p-2">
