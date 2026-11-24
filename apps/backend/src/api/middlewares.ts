@@ -5,6 +5,11 @@ import { authenticate, configureStoreSearch, defineMiddlewares } from '@medusajs
 export default defineMiddlewares({
   routes: [
     {
+      method: ["POST"],
+      matcher: "/admin/vibeya/products/import",
+      bodyParser: { sizeLimit: "2mb" },
+    },
+    {
       method: ['POST'],
       matcher: '/store/search',
       middlewares: [
