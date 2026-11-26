@@ -247,7 +247,7 @@ export default async function ProductPage(props: Props) {
 
   const selectedVariant = pricedProduct.variants?.find((variant) => variant.id === searchParams.v_id)
   const variantOption = (pattern: RegExp) => selectedVariant?.options?.find((option) => pattern.test(option.option?.title ?? ""))?.value
-  const initialColor = searchParams.color || variantOption(/color|colour|base color/i)
+  const initialColor = searchParams.color || variantOption(/color|colour|base color/i) || (params.handle === "vibeya-custom-clear-pvc-backpack" ? "Clear" : undefined)
   const initialSize = searchParams.size || variantOption(/size|quantity|pack/i) || (params.handle === "vibeya-custom-womens-yoga-set" ? "M" : undefined)
   const customer = await retrieveCustomer().catch(() => null)
   return (
