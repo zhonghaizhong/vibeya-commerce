@@ -1,0 +1,432 @@
+{
+  "dryRun": true,
+  "publish": false,
+  "products": [
+    {
+      "title": "VIBEYA Custom Clear PVC Backpack",
+      "handle": "vibeya-custom-clear-pvc-backpack",
+      "subtitle": "A transparent backpack with a customizable front panel",
+      "description": "Create a clear PVC backpack that feels like yours. Upload your own artwork or describe an original design, preview the front print, and confirm before ordering. The back stays clear. Size: 43 × 32 × 13 cm (16.9 × 12.6 × 5.1 in).",
+      "images": [
+        {
+          "url": "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/01.jpg",
+          "alt": "Custom clear PVC backpack with personalized animal artwork, worn by a model"
+        },
+        {
+          "url": "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/02.jpg",
+          "alt": "Personalized clear backpack with custom front-panel artwork"
+        },
+        {
+          "url": "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/03.jpg",
+          "alt": "Clear backpack shown in an everyday outdoor setting"
+        },
+        {
+          "url": "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/04.jpg",
+          "alt": "Close-up of the custom front print on a clear backpack"
+        },
+        {
+          "url": "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/05.jpg",
+          "alt": "Upload artwork or describe a design for a custom clear backpack"
+        },
+        {
+          "url": "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/06.jpg",
+          "alt": "Personalized clear backpack for school, travel, and everyday use"
+        }
+      ],
+      "options": [
+        {
+          "title": "Color",
+          "values": [
+            "Clear"
+          ]
+        },
+        {
+          "title": "Size",
+          "values": [
+            "One Size"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "title": "Clear / One Size",
+          "sku": "VIBEYA-CLEAR-PVC-BACKPACK-OS",
+          "manage_inventory": false,
+          "options": {
+            "Color": "Clear",
+            "Size": "One Size"
+          },
+          "prices": [
+            {
+              "amount": 24.99,
+              "currency_code": "usd"
+            },
+            {
+              "amount": 28.99,
+              "currency_code": "cad"
+            },
+            {
+              "amount": 369.99,
+              "currency_code": "mxn"
+            },
+            {
+              "amount": 3199.99,
+              "currency_code": "jpy"
+            }
+          ]
+        }
+      ],
+      "category": {
+        "handle": "custom-bags",
+        "name": "Custom Bags",
+        "locales": {
+          "en-US": {
+            "label": "Custom Bags",
+            "seoTitle": "Custom Bags & Personalized Bags | VIBEYA",
+            "description": "Design custom bags with your own artwork or a written prompt. Explore personalized wallets, gym bags, backpacks, and more, then preview your design before ordering."
+          },
+          "en-CA": {
+            "label": "Custom Bags",
+            "seoTitle": "Custom Bags & Personalized Bags | VIBEYA Canada",
+            "description": "Design custom bags with your own artwork or a written prompt. Explore personalized wallets, gym bags, backpacks, and more, then preview your design before ordering."
+          },
+          "es-MX": {
+            "label": "Bolsos personalizados",
+            "seoTitle": "Bolsos y mochilas personalizados | VIBEYA México",
+            "description": "Diseña bolsos personalizados con tu propia imagen o una descripción escrita. Explora carteras, mochilas transparentes y más; previsualiza cada diseño antes de comprar."
+          },
+          "ja-JP": {
+            "label": "カスタムバッグ",
+            "seoTitle": "オリジナルバッグ・リュック | VIBEYA 日本",
+            "description": "画像をアップロードするか文章でデザインを指定して、オリジナルバッグを作成。財布やクリアリュックなどのデザインを注文前にプレビューできます。"
+          }
+        }
+      },
+      "countries": [
+        "us",
+        "ca",
+        "mx",
+        "jp"
+      ],
+      "marketMedia": {
+        "us": [
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/01.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/02.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/03.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/04.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/05.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/06.jpg"
+        ],
+        "ca": [
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/01.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/02.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/03.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/04.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/05.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/06.jpg"
+        ],
+        "mx": [
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/es/01.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/es/02.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/es/03.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/es/04.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/es/05.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/es/06.jpg"
+        ],
+        "jp": [
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/ja/01.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/ja/02.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/ja/03.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/ja/04.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/ja/05.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/ja/06.jpg"
+        ]
+      },
+      "customizable": true,
+      "customizationType": "prompt_and_upload",
+      "printAreas": [
+        "front_panel"
+      ],
+      "designer": {
+        "enabled": true,
+        "mode": "front-back",
+        "placements": [
+          "front"
+        ],
+        "generationPromptTemplate": "Use the blank clear-PVC backpack base and front print-area guide as strict construction and placement references. The translucent teal marking is only a print-area guide and must never appear in the result. Apply requested artwork only on the front clear-PVC panel inside the outlined printable area. Keep the back clear and unprinted. Preserve the transparent PVC body, realistic clear material and reflections, original silhouette and proportions, black zipper and binding, zipper pulls, shoulder straps, top handle, black mesh side pockets, stitching, and white studio background. Do not add a white printed rectangle or background unless the customer explicitly requests one. Do not print on black trim, zipper, straps, handle, or mesh pockets. Show a realistic product view.",
+        "galleryUrls": [
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/01.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/02.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/03.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/04.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/05.jpg",
+          "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/en/06.jpg"
+        ],
+        "references": [
+          {
+            "color": "Clear",
+            "size": "One Size",
+            "side": "front",
+            "baseImageUrl": "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/references/blank-front-base.png",
+            "printAreaImageUrl": "https://vibeyastudio.com/vibeya/assets/products/clear-pvc-backpack-77571/references/print-area-guide.png"
+          }
+        ]
+      },
+      "seoKeywords": [
+        "custom clear backpack",
+        "personalized clear backpack",
+        "clear backpack",
+        "custom PVC backpack",
+        "clear school backpack"
+      ],
+      "content": {
+        "en-US": {
+          "name": "VIBEYA Custom Clear PVC Backpack",
+          "detailTitle": "Custom Clear Backpack",
+          "short": "Create a transparent backpack with original artwork on the front panel.",
+          "eyebrow": "CUSTOM BAGS",
+          "intro": "Upload your own artwork or describe a design prompt, preview it on the front panel, and confirm before ordering. The back remains clear.",
+          "seoTitle": "Custom Clear Backpack with Front Print | VIBEYA",
+          "seoDescription": "Design a custom clear PVC backpack with your own artwork or a prompt. Preview the front print before ordering. One size, with free shipping from China to the United States.",
+          "sizeGuide": "cm / in",
+          "sizeNote": "One size. Measurements are approximate.",
+          "variantSummary": "Clear · One Size",
+          "colorOptionLabel": "Color",
+          "sizeOptionLabel": "Size",
+          "productDetails": "Transparent PVC backpack with a customizable front panel. The back stays clear. Approximate dimensions: 43 × 32 × 13 cm (16.9 × 12.6 × 5.1 in).",
+          "productionDetails": "Made to order in China. The design is printed on the front panel only; the back remains clear.",
+          "salesNotice": "Free shipping to the United States.",
+          "galleryNote": "The artwork shown is an example. Upload your own image or describe your design, then preview it before ordering.",
+          "highlights": [
+            "Custom front-panel print",
+            "Upload artwork or design from a prompt",
+            "Transparent back",
+            "One size: 43 × 32 × 13 cm"
+          ],
+          "services": [
+            [
+              "Custom design",
+              "Upload your own artwork or describe an original design prompt."
+            ],
+            [
+              "Preview before ordering",
+              "Review the generated design before confirming your order."
+            ],
+            [
+              "Shipping",
+              "Free shipping from China to the United States."
+            ]
+          ],
+          "sizeRows": [],
+          "measurementRows": [
+            [
+              "Width",
+              "32 cm / 12.6 in"
+            ],
+            [
+              "Height",
+              "43 cm / 16.9 in"
+            ],
+            [
+              "Depth",
+              "13 cm / 5.1 in"
+            ]
+          ]
+        },
+        "en-CA": {
+          "name": "VIBEYA Custom Clear PVC Backpack",
+          "detailTitle": "Custom Clear Backpack",
+          "short": "Create a transparent backpack with original artwork on the front panel.",
+          "eyebrow": "CUSTOM BAGS",
+          "intro": "Upload your own artwork or describe a design prompt, preview it on the front panel, and confirm before ordering. The back remains clear.",
+          "seoTitle": "Custom Clear Backpack with Front Print | VIBEYA",
+          "seoDescription": "Design a custom clear PVC backpack with your own artwork or a prompt. Preview the front print before ordering. One size, with free shipping from China to Canada.",
+          "sizeGuide": "cm / in",
+          "sizeNote": "One size. Measurements are approximate.",
+          "variantSummary": "Clear · One Size",
+          "colorOptionLabel": "Color",
+          "sizeOptionLabel": "Size",
+          "productDetails": "Transparent PVC backpack with a customizable front panel. The back stays clear. Approximate dimensions: 43 × 32 × 13 cm (16.9 × 12.6 × 5.1 in).",
+          "productionDetails": "Made to order in China. The design is printed on the front panel only; the back remains clear.",
+          "salesNotice": "Free shipping to Canada.",
+          "galleryNote": "The artwork shown is an example. Upload your own image or describe your design, then preview it before ordering.",
+          "highlights": [
+            "Custom front-panel print",
+            "Upload artwork or design from a prompt",
+            "Transparent back",
+            "One size: 43 × 32 × 13 cm"
+          ],
+          "services": [
+            [
+              "Custom design",
+              "Upload your own artwork or describe an original design prompt."
+            ],
+            [
+              "Preview before ordering",
+              "Review the generated design before confirming your order."
+            ],
+            [
+              "Shipping",
+              "Free shipping from China to Canada."
+            ]
+          ],
+          "sizeRows": [],
+          "measurementRows": [
+            [
+              "Width",
+              "32 cm / 12.6 in"
+            ],
+            [
+              "Height",
+              "43 cm / 16.9 in"
+            ],
+            [
+              "Depth",
+              "13 cm / 5.1 in"
+            ]
+          ]
+        },
+        "es-MX": {
+          "name": "VIBEYA Mochila transparente personalizada de PVC",
+          "detailTitle": "Mochila transparente personalizada",
+          "short": "Personaliza el panel frontal de una mochila transparente con tu propio diseño.",
+          "eyebrow": "BOLSOS PERSONALIZADOS",
+          "intro": "Sube tu imagen o describe una idea por escrito. Previsualiza el diseño en el panel frontal y confírmalo antes de hacer tu pedido. La parte trasera permanece transparente.",
+          "seoTitle": "Mochila transparente personalizada | VIBEYA México",
+          "seoDescription": "Diseña una mochila transparente de PVC con tu imagen o una idea escrita. Previsualiza la impresión frontal antes de pedir. Talla única y envío gratis desde China.",
+          "sizeGuide": "cm / in",
+          "sizeNote": "Talla única. Las medidas son aproximadas.",
+          "variantSummary": "Transparente · Talla única",
+          "colorOptionLabel": "Color",
+          "sizeOptionLabel": "Talla",
+          "productDetails": "Mochila transparente de PVC con panel frontal personalizable. La parte trasera queda transparente. Medidas aproximadas: 43 × 32 × 13 cm (16.9 × 12.6 × 5.1 in).",
+          "productionDetails": "Se fabrica bajo pedido en China. El diseño se imprime únicamente en el panel frontal; la parte trasera permanece transparente.",
+          "salesNotice": "Envío gratis a México.",
+          "galleryNote": "El diseño mostrado es un ejemplo. Sube tu imagen o describe tu idea y previsualízala antes de comprar.",
+          "highlights": [
+            "Impresión personalizada en el panel frontal",
+            "Sube una imagen o diseña con una descripción",
+            "Parte trasera transparente",
+            "Talla única: 43 × 32 × 13 cm"
+          ],
+          "services": [
+            [
+              "Diseño personalizado",
+              "Sube tu imagen o describe un diseño original."
+            ],
+            [
+              "Previsualiza antes de pedir",
+              "Revisa el resultado antes de confirmar tu pedido."
+            ],
+            [
+              "Envío",
+              "Envío gratis desde China a México."
+            ]
+          ],
+          "sizeRows": [],
+          "measurementRows": [
+            [
+              "Ancho",
+              "32 cm / 12.6 in"
+            ],
+            [
+              "Alto",
+              "43 cm / 16.9 in"
+            ],
+            [
+              "Fondo",
+              "13 cm / 5.1 in"
+            ]
+          ]
+        },
+        "ja-JP": {
+          "name": "VIBEYA オリジナルPVCクリアバックパック",
+          "detailTitle": "カスタムクリアバックパック",
+          "short": "透明なバックパックの前面に、お好みのデザインをプリントできます。",
+          "eyebrow": "カスタムバッグ",
+          "intro": "画像をアップロードするか、文章でデザインを指定してください。前面の仕上がりをプレビューしてから注文できます。背面は透明のままです。",
+          "seoTitle": "オリジナルクリアバックパック｜前面プリント | VIBEYA",
+          "seoDescription": "画像や文章でデザインできるPVCクリアバックパック。前面プリントを注文前にプレビューできます。ワンサイズ、中国から送料無料でお届けします。",
+          "sizeGuide": "cm / in",
+          "sizeNote": "ワンサイズです。寸法は目安です。",
+          "variantSummary": "クリア · ワンサイズ",
+          "colorOptionLabel": "カラー",
+          "sizeOptionLabel": "サイズ",
+          "productDetails": "前面をカスタマイズできる透明PVCバックパックです。背面は透明のままです。サイズの目安：43 × 32 × 13 cm（16.9 × 12.6 × 5.1 in）。",
+          "productionDetails": "中国で受注生産します。プリントは前面パネルのみで、背面は透明のままです。",
+          "salesNotice": "日本への送料は無料です。",
+          "galleryNote": "掲載デザインは見本です。画像をアップロードするか文章でデザインを指定し、注文前にプレビューしてください。",
+          "highlights": [
+            "前面パネルにオリジナルプリント",
+            "画像アップロードまたは文章でデザイン",
+            "透明な背面",
+            "ワンサイズ：43 × 32 × 13 cm"
+          ],
+          "services": [
+            [
+              "カスタムデザイン",
+              "画像をアップロードするか、デザインを文章で指定できます。"
+            ],
+            [
+              "注文前にプレビュー",
+              "注文確定前にデザインの仕上がりを確認できます。"
+            ],
+            [
+              "配送",
+              "中国から日本へ送料無料でお届けします。"
+            ]
+          ],
+          "sizeRows": [],
+          "measurementRows": [
+            [
+              "幅",
+              "32 cm / 12.6 in"
+            ],
+            [
+              "高さ",
+              "43 cm / 16.9 in"
+            ],
+            [
+              "奥行",
+              "13 cm / 5.1 in"
+            ]
+          ]
+        }
+      },
+      "metadata": {
+        "source_product_id": "77571",
+        "shipping_origin": "China",
+        "free_shipping": true,
+        "seo_keywords_by_locale": {
+          "en-US": [
+            "custom clear backpack",
+            "clear backpack",
+            "personalized clear backpack",
+            "custom PVC backpack",
+            "clear school backpack"
+          ],
+          "en-CA": [
+            "custom clear backpack",
+            "clear backpack",
+            "personalized clear backpack",
+            "custom PVC backpack",
+            "transparent backpack"
+          ],
+          "es-MX": [
+            "mochila transparente personalizada",
+            "mochila de PVC personalizada",
+            "mochila transparente con impresión",
+            "mochila personalizada"
+          ],
+          "ja-JP": [
+            "クリアバックパック",
+            "オリジナルクリアリュック",
+            "PVC 透明リュック",
+            "カスタムプリント リュック"
+          ]
+        }
+      },
+      "freeShipping": true
+    }
+  ]
+}
